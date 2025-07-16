@@ -64,6 +64,7 @@ Execute the following steps to conduct systematic TDD testing:
 ## Error Handling
 
 ### Tool Result Validation
+
 - **Test Execution**: Validate all `Bash` test execution commands for success and meaningful output
 - **File Operations**: Check all `Read`, `Write`, and `Edit` operations for access and permission issues
 - **Memory Operations**: Verify all `mcp__memory__*` tool results for errors, corruption, and timeout issues
@@ -72,7 +73,8 @@ Execute the following steps to conduct systematic TDD testing:
 - **TDD Cycle Validation**: Ensure red-green-refactor cycle integrity
 
 ### Standard Error Response Format
-```
+
+``` markdown
 ERROR: [Category] - [Specific Issue]
 Context: [Operation being attempted]
 Cause: [Root cause if identifiable]
@@ -80,6 +82,7 @@ Recovery: [Specific recovery steps]
 ```
 
 ### Recovery Procedures
+
 1. **Test Execution Failures**:
    - Validate test framework installation and configuration
    - Use alternative test execution methods
@@ -101,6 +104,7 @@ Recovery: [Specific recovery steps]
    - Implement incremental file changes
 
 ### Context Preservation
+
 - Save testing progress to memory before error recovery attempts
 - Maintain TDD cycle context through error conditions
 - Document error context and recovery attempts for learning
@@ -133,7 +137,8 @@ The command should produce:
 ### Error Response Examples
 
 **Test Execution Error**:
-```
+
+``` markdown
 ERROR: Test Execution - Test framework failure
 Context: Running tests to validate TDD cycle
 Cause: Test framework not installed or misconfigured
@@ -144,7 +149,8 @@ Recovery:
 ```
 
 **TDD Cycle Validation Error**:
-```
+
+``` markdown
 ERROR: TDD Cycle - Red-green-refactor integrity compromised
 Context: Validating TDD cycle progression
 Cause: Tests not failing properly in red phase or behavior changed during refactor
@@ -155,7 +161,8 @@ Recovery:
 ```
 
 **Memory Integration Failure**:
-```
+
+``` markdown
 ERROR: Memory Operation - Testing intelligence update failed
 Context: Storing testing patterns and strategies in memory
 Cause: Memory server connectivity issues or storage corruption

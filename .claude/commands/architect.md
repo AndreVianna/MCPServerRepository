@@ -61,6 +61,7 @@ Execute the following steps to analyze the project architecture systematically:
 ## Error Handling
 
 ### Tool Result Validation
+
 - **Architecture Analysis**: Validate all `Read`, `Grep`, `LS`, and `Glob` operations for project access and analysis completeness
 - **Memory Operations**: Verify all `mcp__memory__*` tool results for errors, corruption, and timeout issues
 - **Thinking Operations**: Handle sequential thinking timeouts or reasoning failures
@@ -69,7 +70,8 @@ Execute the following steps to analyze the project architecture systematically:
 - **Dependency Analysis**: Verify dependency mapping and boundary identification completeness
 
 ### Standard Error Response Format
-```
+
+``` markdown
 ERROR: [Category] - [Specific Issue]
 Context: [Operation being attempted]
 Cause: [Root cause if identifiable]
@@ -77,6 +79,7 @@ Recovery: [Specific recovery steps]
 ```
 
 ### Recovery Procedures
+
 1. **Architecture Analysis Failures**:
    - Validate file paths and project accessibility
    - Use alternative analysis methods
@@ -98,6 +101,7 @@ Recovery: [Specific recovery steps]
    - Focus on obvious architectural patterns
 
 ### Context Preservation
+
 - Save architectural analysis progress to memory before error recovery attempts
 - Maintain architectural context through error conditions
 - Document error context and recovery attempts for learning
@@ -130,7 +134,8 @@ The command should produce:
 ### Error Response Examples
 
 **Architecture Analysis Error**:
-```
+
+``` markdown
 ERROR: Architecture Analysis - Project structure mapping failed
 Context: Mapping project structure, directories, and key files
 Cause: File system access permissions or project structure complexity
@@ -141,7 +146,8 @@ Recovery:
 ```
 
 **Complexity Assessment Failure**:
-```
+
+``` markdown
 ERROR: Complexity Assessment - Metrics calculation failed
 Context: Calculating complexity metrics and technical debt assessment
 Cause: Code complexity or analysis tool limitations
@@ -152,7 +158,8 @@ Recovery:
 ```
 
 **Memory Integration Failure**:
-```
+
+``` markdown
 ERROR: Memory Operation - Architectural intelligence update failed
 Context: Storing architectural findings and patterns in memory
 Cause: Memory server connectivity issues or storage corruption

@@ -60,6 +60,7 @@ Execute the following steps to create comprehensive documentation:
 ## Error Handling
 
 ### Tool Result Validation
+
 - **File Operations**: Verify all `Read`, `Write`, and `Edit` operations for file access and permission issues
 - **Memory Operations**: Verify all `mcp__memory__*` tool results for errors, corruption, and timeout issues
 - **Thinking Operations**: Handle sequential thinking timeouts or reasoning failures
@@ -68,7 +69,8 @@ Execute the following steps to create comprehensive documentation:
 - **Format Handling**: Verify documentation format conversion and delivery
 
 ### Standard Error Response Format
-```
+
+``` markdown
 ERROR: [Category] - [Specific Issue]
 Context: [Operation being attempted]
 Cause: [Root cause if identifiable]
@@ -76,6 +78,7 @@ Recovery: [Specific recovery steps]
 ```
 
 ### Recovery Procedures
+
 1. **File Operation Failures**:
    - Check file permissions and accessibility
    - Use alternative file operations or locations
@@ -107,6 +110,7 @@ Recovery: [Specific recovery steps]
    - Document format limitations clearly
 
 ### Context Preservation
+
 - Save documentation progress before error recovery attempts
 - Maintain documentation structure and content through error conditions
 - Document error context and recovery attempts for learning
@@ -139,7 +143,8 @@ The command should produce:
 ### Error Response Examples
 
 **File Operation Failure**:
-```
+
+``` markdown
 ERROR: File Operation - Documentation creation failed
 Context: Creating documentation using Write tool
 Cause: File permissions or disk space issues
@@ -150,7 +155,8 @@ Recovery:
 ```
 
 **Content Organization Error**:
-```
+
+``` markdown
 ERROR: Content Organization - Structure design failed
 Context: Creating information architecture based on project patterns
 Cause: Project complexity exceeded organization capabilities
@@ -161,7 +167,8 @@ Recovery:
 ```
 
 **Memory Integration Failure**:
-```
+
+``` markdown
 ERROR: Memory Operation - Documentation storage failed
 Context: Storing documentation patterns and structures in memory
 Cause: Memory server connectivity issues or storage limitations

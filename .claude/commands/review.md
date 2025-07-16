@@ -49,6 +49,7 @@ Execute the following steps to conduct systematic code review:
 ## Error Handling
 
 ### Tool Result Validation
+
 - **Code Analysis**: Validate all `Read` and `Grep` operations for file access and analysis completeness
 - **Memory Operations**: Verify all `mcp__memory__*` tool results for errors, corruption, and timeout issues
 - **Thinking Operations**: Handle sequential thinking timeouts or reasoning failures
@@ -56,7 +57,8 @@ Execute the following steps to conduct systematic code review:
 - **Quality Assessment**: Check code quality analysis completeness and accuracy
 
 ### Standard Error Response Format
-```
+
+``` markdown
 ERROR: [Category] - [Specific Issue]
 Context: [Operation being attempted]
 Cause: [Root cause if identifiable]
@@ -64,6 +66,7 @@ Recovery: [Specific recovery steps]
 ```
 
 ### Recovery Procedures
+
 1. **Code Analysis Failures**:
    - Validate file paths and accessibility
    - Use alternative analysis methods
@@ -85,6 +88,7 @@ Recovery: [Specific recovery steps]
    - Provide basic implementation guidance
 
 ### Context Preservation
+
 - Save review progress to memory before error recovery attempts
 - Maintain review context through error conditions
 - Document error context and recovery attempts for learning
@@ -117,7 +121,8 @@ The command should produce:
 ### Error Response Examples
 
 **Code Analysis Error**:
-```
+
+``` markdown
 ERROR: Code Analysis - File analysis failed
 Context: Analyzing code quality, security, and performance patterns
 Cause: File access permissions or corrupted file content
@@ -128,7 +133,8 @@ Recovery:
 ```
 
 **Quality Assessment Failure**:
-```
+
+``` markdown
 ERROR: Quality Assessment - Pattern recognition failed
 Context: Applying accumulated review intelligence to identify issues
 Cause: Review pattern database corruption or analysis complexity
@@ -139,7 +145,8 @@ Recovery:
 ```
 
 **Memory Integration Failure**:
-```
+
+``` markdown
 ERROR: Memory Operation - Review intelligence update failed
 Context: Updating review memory with findings and patterns
 Cause: Memory server connectivity issues or storage corruption

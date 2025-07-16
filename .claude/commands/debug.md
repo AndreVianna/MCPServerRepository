@@ -62,6 +62,7 @@ Execute the following steps to debug systematically:
 ## Error Handling
 
 ### Tool Result Validation
+
 - **Problem Analysis**: Validate all `Read` and `Grep` operations for log access and analysis completeness
 - **Investigation Commands**: Check all `Bash` debugging commands for execution success and meaningful output
 - **Memory Operations**: Verify all `mcp__memory__*` tool results for errors, corruption, and timeout issues
@@ -70,7 +71,8 @@ Execute the following steps to debug systematically:
 - **Evidence Collection**: Validate evidence gathering and documentation accuracy
 
 ### Standard Error Response Format
-```
+
+``` markdown
 ERROR: [Category] - [Specific Issue]
 Context: [Operation being attempted]
 Cause: [Root cause if identifiable]
@@ -78,6 +80,7 @@ Recovery: [Specific recovery steps]
 ```
 
 ### Recovery Procedures
+
 1. **Problem Analysis Failures**:
    - Validate file paths and log accessibility
    - Use alternative analysis methods
@@ -99,6 +102,7 @@ Recovery: [Specific recovery steps]
    - Focus on critical solution components
 
 ### Context Preservation
+
 - Save debugging progress to memory before error recovery attempts
 - Maintain investigation context through error conditions
 - Document error context and recovery attempts for learning
@@ -131,7 +135,8 @@ The command should produce:
 ### Error Response Examples
 
 **Problem Analysis Error**:
-```
+
+``` markdown
 ERROR: Problem Analysis - Log access failed
 Context: Analyzing error messages, logs, and context systematically
 Cause: Log files not accessible or corrupted
@@ -142,7 +147,8 @@ Recovery:
 ```
 
 **Investigation Command Failure**:
-```
+
+``` markdown
 ERROR: Investigation - Debugging command execution failed
 Context: Running debugging commands to gather evidence
 Cause: Debugging tool not available or permission issues
@@ -153,7 +159,8 @@ Recovery:
 ```
 
 **Memory Integration Failure**:
-```
+
+``` markdown
 ERROR: Memory Operation - Debugging intelligence update failed
 Context: Storing debugging patterns and solutions in memory
 Cause: Memory server connectivity issues or storage corruption

@@ -47,6 +47,7 @@ Execute the following steps to retrieve memory systematically:
 ## Error Handling
 
 ### Tool Result Validation
+
 - **Memory Operations**: Verify all `mcp__memory__*` tool results for errors, corruption, and timeout issues
 - **Thinking Operations**: Handle sequential thinking timeouts or reasoning failures
 - **Search Operations**: Validate search query processing and result accuracy
@@ -54,7 +55,8 @@ Execute the following steps to retrieve memory systematically:
 - **Information Organization**: Verify content structuring and presentation quality
 
 ### Standard Error Response Format
-```
+
+``` markdown
 ERROR: [Category] - [Specific Issue]
 Context: [Operation being attempted]
 Cause: [Root cause if identifiable]
@@ -62,6 +64,7 @@ Recovery: [Specific recovery steps]
 ```
 
 ### Recovery Procedures
+
 1. **Memory Retrieval Failures**:
    - Check memory server connectivity and permissions
    - Use alternative memory access methods
@@ -93,6 +96,7 @@ Recovery: [Specific recovery steps]
    - Document presentation limitations
 
 ### Context Preservation
+
 - Save retrieval progress before error recovery attempts
 - Maintain search context and filtering criteria through error conditions
 - Document error context and recovery attempts for learning
@@ -126,7 +130,8 @@ The command should produce:
 ### Error Response Examples
 
 **Memory Retrieval Failure**:
-```
+
+``` markdown
 ERROR: Memory Operation - Memory server connectivity failed
 Context: Accessing memory graph for content retrieval
 Cause: Memory server unavailable or connection timeout
@@ -137,7 +142,8 @@ Recovery:
 ```
 
 **Search Query Processing Error**:
-```
+
+``` markdown
 ERROR: Query Processing - Search terms validation failed
 Context: Parsing search parameters and determining retrieval scope
 Cause: Query format invalid or ambiguous search terms
@@ -148,7 +154,8 @@ Recovery:
 ```
 
 **Content Organization Failure**:
-```
+
+``` markdown
 ERROR: Content Organization - Information structuring failed
 Context: Organizing retrieved content logically and coherently
 Cause: Content complexity exceeded organization capabilities

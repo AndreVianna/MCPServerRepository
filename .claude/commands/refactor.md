@@ -56,13 +56,15 @@ Execute the following steps to refactor code systematically with comprehensive e
 ## Error Handling
 
 ### Tool Result Validation
+
 - **File Operations**: Validate all `Read`, `Edit`, and `MultiEdit` operations for success and handle permission issues
 - **Search Operations**: Check all `Grep` and `Glob` operations for proper pattern matching and file access
 - **Memory Operations**: Verify all `mcp__memory__*` tool results for errors and corruption
 - **Thinking Operations**: Handle sequential thinking timeouts or reasoning failures
 
 ### Standard Error Response Format
-```
+
+``` markdown
 ERROR: [Category] - [Specific Issue]
 Context: [Operation being attempted]
 Cause: [Root cause if identifiable]
@@ -70,6 +72,7 @@ Recovery: [Specific recovery steps]
 ```
 
 ### Recovery Procedures
+
 1. **File Operation Issues**:
    - Check file permissions and accessibility
    - Create backup copies before refactoring
@@ -91,6 +94,7 @@ Recovery: [Specific recovery steps]
    - Retry with alternative memory operations
 
 ### Context Preservation
+
 - Create file backups before refactoring operations
 - Save refactoring progress to memory before error recovery attempts
 - Maintain code state and transformation history through error conditions
@@ -125,7 +129,8 @@ The command should produce:
 ### Error Response Examples
 
 **File Modification Error**:
-```
+
+``` markdown
 ERROR: File Operation - Permission denied
 Context: Attempting to apply refactoring transformation to source file
 Cause: Insufficient permissions to modify target file
@@ -136,7 +141,8 @@ Recovery:
 ```
 
 **Code Analysis Failure**:
-```
+
+``` markdown
 ERROR: Code Analysis - Syntax parsing failed
 Context: Analyzing code structure for refactoring opportunities
 Cause: Invalid syntax or unsupported language features
@@ -147,7 +153,8 @@ Recovery:
 ```
 
 **Refactoring Validation Error**:
-```
+
+``` markdown
 ERROR: Refactoring Validation - Functionality regression detected
 Context: Validating refactored code functionality
 Cause: Refactoring transformation introduced functional changes

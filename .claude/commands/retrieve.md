@@ -51,6 +51,7 @@ Execute the following steps to retrieve and display memory entity content:
 ## Error Handling
 
 ### Tool Result Validation
+
 - **UUID Validation**: Validate UUID format (36 characters with dashes) and argument parsing
 - **Memory Operations**: Verify all `mcp__memory__*` tool results for errors, corruption, and timeout issues
 - **Thinking Operations**: Handle sequential thinking timeouts or reasoning failures
@@ -58,7 +59,8 @@ Execute the following steps to retrieve and display memory entity content:
 - **Deletion Operations**: Validate deletion operations and confirmation handling
 
 ### Standard Error Response Format
-```
+
+``` markdown
 ERROR: [Category] - [Specific Issue]
 Context: [Operation being attempted]
 Cause: [Root cause if identifiable]
@@ -66,6 +68,7 @@ Recovery: [Specific recovery steps]
 ```
 
 ### Recovery Procedures
+
 1. **UUID Validation Failures**:
    - Provide UUID format examples and requirements
    - Request user to provide valid UUID
@@ -97,6 +100,7 @@ Recovery: [Specific recovery steps]
    - Confirm deletion status to user
 
 ### Context Preservation
+
 - Save retrieval progress before error recovery attempts
 - Maintain entity content and context through error conditions
 - Document error context and recovery attempts for learning
@@ -131,7 +135,8 @@ The command should produce:
 ### Error Response Examples
 
 **UUID Validation Error**:
-```
+
+``` markdown
 ERROR: UUID Validation - Invalid UUID format
 Context: Validating UUID argument for memory entity retrieval
 Cause: UUID format does not match required 36-character pattern with dashes
@@ -142,7 +147,8 @@ Recovery:
 ```
 
 **Memory Entity Access Error**:
-```
+
+``` markdown
 ERROR: Memory Operation - Entity not found
 Context: Retrieving memory entity agent-{uuid} from memory server
 Cause: Memory entity does not exist or was previously deleted
@@ -153,7 +159,8 @@ Recovery:
 ```
 
 **Content Processing Failure**:
-```
+
+``` markdown
 ERROR: Content Processing - Analysis timeout
 Context: Analyzing memory entity structure for optimal presentation
 Cause: Content complexity exceeded processing limits

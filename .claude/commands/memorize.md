@@ -53,13 +53,15 @@ Execute the following steps to memorize work systematically with comprehensive e
 ## Error Handling
 
 ### Tool Result Validation
+
 - **File Operations**: Validate all `Read` and `Grep` operations for success and handle access issues
 - **Memory Operations**: Verify all `mcp__memory__*` tool results for errors, corruption, and timeout issues
 - **Thinking Operations**: Handle sequential thinking timeouts or reasoning failures
 - **Context Analysis**: Verify context capture completeness and accuracy
 
 ### Standard Error Response Format
-```
+
+``` markdown
 ERROR: [Category] - [Specific Issue]
 Context: [Operation being attempted]
 Cause: [Root cause if identifiable]
@@ -67,6 +69,7 @@ Recovery: [Specific recovery steps]
 ```
 
 ### Recovery Procedures
+
 1. **File Access Issues**:
    - Check file permissions and accessibility
    - Use alternative file access methods
@@ -88,6 +91,7 @@ Recovery: [Specific recovery steps]
    - Focus on essential context elements only
 
 ### Context Preservation
+
 - Save work analysis progress before memory operations
 - Maintain memorization context through error conditions
 - Document error context and recovery attempts for learning
@@ -122,7 +126,8 @@ The command should produce:
 ### Error Response Examples
 
 **File Access Error**:
-```
+
+``` markdown
 ERROR: File Operation - File not accessible
 Context: Attempting to analyze recent work for memorization
 Cause: File permissions or path issues preventing access
@@ -133,7 +138,8 @@ Recovery:
 ```
 
 **Memory Entity Creation Failure**:
-```
+
+``` markdown
 ERROR: Memory Operation - Entity creation failed
 Context: Attempting to create memory entity for captured work
 Cause: Memory server issues or entity format problems
@@ -144,7 +150,8 @@ Recovery:
 ```
 
 **Conflict Resolution Error**:
-```
+
+``` markdown
 ERROR: Conflict Resolution - Unable to resolve naming conflict
 Context: Resolving naming conflicts for memory entities
 Cause: Complex conflicts requiring user guidance

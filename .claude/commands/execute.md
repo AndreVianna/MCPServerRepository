@@ -76,6 +76,7 @@ Execute the following steps to perform systematic task execution with comprehens
 ## Error Handling
 
 ### Tool Result Validation
+
 - **UUID Generation**: Validate `uuidgen --time-v7` output format and handle generation failures
 - **Memory Operations**: Check all `mcp__memory__*` tool results for errors, timeouts, or corruption
 - **File Operations**: Validate all file operations and handle permission or access issues
@@ -83,7 +84,8 @@ Execute the following steps to perform systematic task execution with comprehens
 - **Thinking Operations**: Handle sequential thinking timeouts or reasoning failures
 
 ### Standard Error Response Format
-```
+
+``` markdown
 ERROR: [Category] - [Specific Issue]
 Context: [Operation being attempted]
 Cause: [Root cause if identifiable]
@@ -91,6 +93,7 @@ Recovery: [Specific recovery steps]
 ```
 
 ### Recovery Procedures
+
 1. **UUID Generation Failure**:
    - Retry with alternative UUID generation methods
    - Accept manual UUID input if system generation fails
@@ -112,6 +115,7 @@ Recovery: [Specific recovery steps]
    - Handle permission and resource limitation issues
 
 ### Context Preservation
+
 - Save execution progress to memory before error recovery attempts
 - Maintain UUID tracking through error conditions
 - Document error context and recovery attempts for learning
@@ -144,7 +148,8 @@ The command should produce:
 ### Error Response Examples
 
 **Memory Entity Not Found**:
-```
+
+``` markdown
 ERROR: Memory Operation - Entity not found
 Context: Attempting to retrieve agent-01234567-89ab-cdef-0123-456789abcdef
 Cause: UUID may be incorrect or entity may have been deleted
@@ -155,7 +160,8 @@ Recovery:
 ```
 
 **Tool Execution Failure**:
-```
+
+``` markdown
 ERROR: Tool Failure - Sequential thinking timeout
 Context: Executing complex task analysis
 Cause: Analysis exceeded maximum thinking iterations
@@ -166,7 +172,8 @@ Recovery:
 ```
 
 **System Operation Error**:
-```
+
+``` markdown
 ERROR: System Operation - Command not found
 Context: Attempting to execute system command
 Cause: Required tool not installed or not in PATH

@@ -52,13 +52,15 @@ Execute the following steps to optimize memory systematically with comprehensive
 ## Error Handling
 
 ### Tool Result Validation
+
 - **Memory Operations**: Validate all `mcp__memory__*` tool results for errors, corruption, and timeout issues
 - **Thinking Operations**: Handle sequential thinking timeouts or reasoning failures
 - **Memory Server**: Check memory server connectivity and permissions before operations
 - **Data Integrity**: Verify memory graph consistency throughout optimization process
 
 ### Standard Error Response Format
-```
+
+``` markdown
 ERROR: [Category] - [Specific Issue]
 Context: [Operation being attempted]
 Cause: [Root cause if identifiable]
@@ -66,6 +68,7 @@ Recovery: [Specific recovery steps]
 ```
 
 ### Recovery Procedures
+
 1. **Memory Server Issues**:
    - Check MCP server configuration and connectivity
    - Restart memory server if connectivity fails
@@ -87,6 +90,7 @@ Recovery: [Specific recovery steps]
    - Document validation issues for future reference
 
 ### Context Preservation
+
 - Backup memory state before optimization operations
 - Save optimization progress to temporary storage during operations
 - Maintain optimization context through error conditions
@@ -121,7 +125,8 @@ The command should produce:
 ### Error Response Examples
 
 **Memory Server Connectivity Error**:
-```
+
+``` markdown
 ERROR: Memory Server - Connection failed
 Context: Attempting to retrieve memory graph for optimization
 Cause: Memory server not accessible or MCP server configuration issues
@@ -132,7 +137,8 @@ Recovery:
 ```
 
 **Memory Corruption Detection**:
-```
+
+``` markdown
 ERROR: Memory Corruption - Inconsistent entity relationships
 Context: Analyzing memory structure for optimization opportunities
 Cause: Memory graph contains broken relationships or corrupted entities
@@ -143,7 +149,8 @@ Recovery:
 ```
 
 **Optimization Validation Failure**:
-```
+
+``` markdown
 ERROR: Optimization Validation - Memory consistency check failed
 Context: Validating memory optimization results
 Cause: Optimization operations introduced inconsistencies

@@ -69,13 +69,15 @@ Execute the following steps to scaffold a project systematically with comprehens
 ## Error Handling
 
 ### Tool Result Validation
+
 - **File Operations**: Validate all `Write` and `Edit` operations for success and handle permission issues
 - **System Operations**: Check all `Bash` commands for directory creation and tool setup failures
 - **Memory Operations**: Verify all `mcp__memory__*` tool results for errors and corruption
 - **Thinking Operations**: Handle sequential thinking timeouts or reasoning failures
 
 ### Standard Error Response Format
-```
+
+``` markdown
 ERROR: [Category] - [Specific Issue]
 Context: [Operation being attempted]
 Cause: [Root cause if identifiable]
@@ -83,6 +85,7 @@ Recovery: [Specific recovery steps]
 ```
 
 ### Recovery Procedures
+
 1. **File System Issues**:
    - Check file and directory permissions
    - Validate disk space availability
@@ -104,6 +107,7 @@ Recovery: [Specific recovery steps]
    - Handle tool-specific configuration problems
 
 ### Context Preservation
+
 - Save scaffolding progress to memory before error recovery attempts
 - Maintain project structure state through error conditions
 - Document error context and recovery attempts for learning
@@ -138,7 +142,8 @@ The command should produce:
 ### Error Response Examples
 
 **File System Permission Error**:
-```
+
+``` markdown
 ERROR: File Operation - Permission denied
 Context: Attempting to create project directory structure
 Cause: Insufficient permissions to create directories in target location
@@ -149,7 +154,8 @@ Recovery:
 ```
 
 **Code Generation Failure**:
-```
+
+``` markdown
 ERROR: Code Generation - Template processing failed
 Context: Generating boilerplate code from templates
 Cause: Template syntax error or missing template variables
@@ -160,7 +166,8 @@ Recovery:
 ```
 
 **Configuration Validation Error**:
-```
+
+``` markdown
 ERROR: Configuration - Invalid configuration format
 Context: Validating generated configuration files
 Cause: Configuration file format does not match expected schema

@@ -58,6 +58,7 @@ Execute the following steps to manage a development session:
 ## Error Handling
 
 ### Tool Result Validation
+
 - **Memory Operations**: Verify all `mcp__memory__*` tool results for errors, corruption, and timeout issues
 - **Thinking Operations**: Handle sequential thinking timeouts or reasoning failures
 - **TodoWrite Operations**: Validate task list creation and management operations
@@ -65,7 +66,8 @@ Execute the following steps to manage a development session:
 - **Learning Capture**: Verify insight processing and knowledge extraction accuracy
 
 ### Standard Error Response Format
-```
+
+``` markdown
 ERROR: [Category] - [Specific Issue]
 Context: [Operation being attempted]
 Cause: [Root cause if identifiable]
@@ -73,6 +75,7 @@ Recovery: [Specific recovery steps]
 ```
 
 ### Recovery Procedures
+
 1. **Session Initialization Failures**:
    - Use simplified session initialization approach
    - Set basic session goals manually
@@ -104,6 +107,7 @@ Recovery: [Specific recovery steps]
    - Document continuity issues for future reference
 
 ### Context Preservation
+
 - Save session progress before error recovery attempts
 - Maintain session goals and tracking context through error conditions
 - Document error context and recovery attempts for learning
@@ -137,7 +141,8 @@ The command should produce:
 ### Error Response Examples
 
 **Session Initialization Failure**:
-```
+
+``` markdown
 ERROR: Session Management - Session initialization failed
 Context: Establishing clear session goals and context
 Cause: Thinking process timeout or initialization failure
@@ -148,7 +153,8 @@ Recovery:
 ```
 
 **Memory Integration Error**:
-```
+
+``` markdown
 ERROR: Memory Operation - Session memory storage failed
 Context: Storing session findings in project memory
 Cause: Memory server connectivity issues or storage limitations
@@ -159,7 +165,8 @@ Recovery:
 ```
 
 **Learning Capture Failure**:
-```
+
+``` markdown
 ERROR: Learning Capture - Insight processing failed
 Context: Identifying new insights and patterns from session
 Cause: Pattern recognition complexity or processing timeout

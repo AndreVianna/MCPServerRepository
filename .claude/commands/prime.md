@@ -14,7 +14,7 @@ This command prepares the essential context for working with the Claude Code Too
 
 Execute the following steps in order to prepare the project context:
 
-1. **Load project structure**: Run the `lt` bash command to get the latest structure of the project
+1. **Load project structure**: Run the `lt -I .claude` bash command to get the latest structure of the project. The '-I' option is important.
    - **Error Handling**: Handle command execution failures and output parsing issues
    - **Validation**: Verify project structure output is complete and accessible
    - **Recovery**: Use alternative directory listing methods or request user confirmation
@@ -48,6 +48,7 @@ Execute the following steps in order to prepare the project context:
 ## Error Handling
 
 ### Tool Result Validation
+
 - **Bash Operations**: Validate `lt` command execution and output format
 - **File Operations**: Check all `Read` operations for file access and permission issues
 - **Memory Operations**: Verify all `mcp__memory__*` tool results for errors, corruption, and timeout issues
@@ -55,7 +56,8 @@ Execute the following steps in order to prepare the project context:
 - **Project Structure**: Validate project structure completeness and accessibility
 
 ### Standard Error Response Format
-```
+
+``` markdown
 ERROR: [Category] - [Specific Issue]
 Context: [Operation being attempted]
 Cause: [Root cause if identifiable]
@@ -63,6 +65,7 @@ Recovery: [Specific recovery steps]
 ```
 
 ### Recovery Procedures
+
 1. **Project Structure Loading Failures**:
    - Use alternative directory listing methods (`ls`, `find`)
    - Request user confirmation of project structure
@@ -89,6 +92,7 @@ Recovery: [Specific recovery steps]
    - Continue without persistent state if necessary
 
 ### Context Preservation
+
 - Save context preparation progress before error recovery attempts
 - Maintain project structure and instruction context through error conditions
 - Document error context and recovery attempts for learning
@@ -120,7 +124,8 @@ The command should produce:
 ### Error Response Examples
 
 **Project Structure Loading Error**:
-```
+
+``` markdown
 ERROR: Project Structure - Command execution failed
 Context: Loading project structure using lt command
 Cause: Command not found or execution permission issues
@@ -131,7 +136,8 @@ Recovery:
 ```
 
 **CLAUDE.md Processing Error**:
-```
+
+``` markdown
 ERROR: File Operation - Project instructions not accessible
 Context: Reading and applying CLAUDE.md instructions
 Cause: File missing or insufficient permissions
@@ -142,7 +148,8 @@ Recovery:
 ```
 
 **Memory Optimization Failure**:
-```
+
+``` markdown
 ERROR: Memory Operation - Optimization process failed
 Context: Identifying and removing duplications from memory
 Cause: Memory corruption or operation timeout

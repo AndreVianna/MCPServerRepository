@@ -64,6 +64,7 @@ Execute the following steps to perform flexible, argument-driven analysis:
 ## Error Handling
 
 ### Tool Result Validation
+
 - **UUID Generation**: Validate `uuidgen --time-v7` output format and handle generation failures
 - **File Operations**: Check all `Read`, `LS`, `Glob`, and `Grep` operations for access and permission issues
 - **Memory Operations**: Verify all `mcp__memory__*` tool results for errors, corruption, and timeout issues
@@ -71,7 +72,8 @@ Execute the following steps to perform flexible, argument-driven analysis:
 - **Analysis Scope**: Validate analysis target clarity and completeness
 
 ### Standard Error Response Format
-```
+
+``` markdown
 ERROR: [Category] - [Specific Issue]
 Context: [Operation being attempted]
 Cause: [Root cause if identifiable]
@@ -79,6 +81,7 @@ Recovery: [Specific recovery steps]
 ```
 
 ### Recovery Procedures
+
 1. **File Reference Errors**:
    - Validate file paths and accessibility
    - Use alternative file access methods
@@ -100,6 +103,7 @@ Recovery: [Specific recovery steps]
    - Ensure UUID is available for all output modes
 
 ### Context Preservation
+
 - Save analysis progress to memory before error recovery attempts
 - Maintain analysis context through error conditions
 - Document error context and recovery attempts for learning
@@ -151,7 +155,8 @@ The command should produce output based on the argument mode:
 ### Error Response Examples
 
 **File Reference Error**:
-```
+
+``` markdown
 ERROR: File Operation - Referenced file not accessible
 Context: Loading file content for analysis using @ symbol notation
 Cause: File path invalid or insufficient permissions
@@ -162,7 +167,8 @@ Recovery:
 ```
 
 **Analysis Scope Validation Error**:
-```
+
+``` markdown
 ERROR: Analysis Scope - Requirements ambiguous
 Context: Validating analysis target and scope
 Cause: Analysis requirements unclear or incomplete
@@ -173,7 +179,8 @@ Recovery:
 ```
 
 **Memory Integration Failure**:
-```
+
+``` markdown
 ERROR: Memory Operation - Context loading failed
 Context: Loading memory content to enhance analysis context
 Cause: Memory server connectivity issues or corruption

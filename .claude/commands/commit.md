@@ -59,13 +59,15 @@ Execute the following steps to create an intelligent commit with comprehensive e
 ## Error Handling
 
 ### Tool Result Validation
+
 - **Git Operations**: Validate all git commands and handle repository state issues
 - **Memory Operations**: Check all `mcp__memory__*` tool results for errors and corruption
 - **Thinking Operations**: Handle sequential thinking timeouts or reasoning failures
 - **System Operations**: Validate bash command execution and handle system-level failures
 
 ### Standard Error Response Format
-```
+
+``` markdown
 ERROR: [Category] - [Specific Issue]
 Context: [Operation being attempted]
 Cause: [Root cause if identifiable]
@@ -73,6 +75,7 @@ Recovery: [Specific recovery steps]
 ```
 
 ### Recovery Procedures
+
 1. **Git Repository Issues**:
    - Check git repository integrity and status
    - Validate working directory and staging area
@@ -94,6 +97,7 @@ Recovery: [Specific recovery steps]
    - Provide alternative commit approaches
 
 ### Context Preservation
+
 - Save commit analysis to memory before error recovery attempts
 - Maintain commit patterns and conventions through error conditions
 - Document error context and recovery attempts for learning
@@ -126,7 +130,8 @@ The command should produce:
 ### Error Response Examples
 
 **Git Repository Issues**:
-```
+
+``` markdown
 ERROR: Git Operation - Repository state invalid
 Context: Attempting to analyze current changes with git status
 Cause: Git repository may be corrupted or in invalid state
@@ -137,7 +142,8 @@ Recovery:
 ```
 
 **Memory Operation Failure**:
-```
+
+``` markdown
 ERROR: Memory Operation - Commit patterns not accessible
 Context: Attempting to load commit intelligence from memory
 Cause: Memory server connectivity issues or entity corruption
@@ -148,7 +154,8 @@ Recovery:
 ```
 
 **Commit Message Validation**:
-```
+
+``` markdown
 ERROR: Commit Validation - Message format invalid
 Context: Validating generated commit message against conventions
 Cause: Message does not follow conventional commit format

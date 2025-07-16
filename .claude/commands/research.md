@@ -51,6 +51,7 @@ Execute the following steps to conduct systematic research:
 ## Error Handling
 
 ### Tool Result Validation
+
 - **Web Operations**: Verify all `WebSearch` and `WebFetch` operations for connectivity and content access
 - **Memory Operations**: Verify all `mcp__memory__*` tool results for errors, corruption, and timeout issues
 - **Thinking Operations**: Handle sequential thinking timeouts or reasoning failures
@@ -59,7 +60,8 @@ Execute the following steps to conduct systematic research:
 - **Synthesis Processing**: Check insight generation and recommendation development
 
 ### Standard Error Response Format
-```
+
+``` markdown
 ERROR: [Category] - [Specific Issue]
 Context: [Operation being attempted]
 Cause: [Root cause if identifiable]
@@ -67,6 +69,7 @@ Recovery: [Specific recovery steps]
 ```
 
 ### Recovery Procedures
+
 1. **Web Operation Failures**:
    - Check network connectivity and web service availability
    - Use alternative information sources or cached content
@@ -98,6 +101,7 @@ Recovery: [Specific recovery steps]
    - Continue with basic research summary
 
 ### Context Preservation
+
 - Save research progress before error recovery attempts
 - Maintain research objectives and methodology through error conditions
 - Document error context and recovery attempts for learning
@@ -130,7 +134,8 @@ The command should produce:
 ### Error Response Examples
 
 **Web Operation Failure**:
-```
+
+``` markdown
 ERROR: Web Operation - Search connectivity failed
 Context: Gathering information using WebSearch for research topic
 Cause: Network connectivity issues or search service unavailable
@@ -141,7 +146,8 @@ Recovery:
 ```
 
 **Source Validation Error**:
-```
+
+``` markdown
 ERROR: Source Validation - Credibility assessment failed
 Context: Validating research findings and assessing source credibility
 Cause: Source evaluation complexity or validation timeout
@@ -152,7 +158,8 @@ Recovery:
 ```
 
 **Research Synthesis Failure**:
-```
+
+``` markdown
 ERROR: Research Synthesis - Insight generation timeout
 Context: Generating comprehensive understanding and recommendations
 Cause: Research complexity exceeded synthesis processing limits

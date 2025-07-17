@@ -1,9 +1,3 @@
-using Common.Configuration;
-
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-
-using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -50,14 +44,14 @@ public static class OpenTelemetryExtensions {
                     activity.SetTag("http.response.content_length", response.Content.Headers.ContentLength);
                 };
             })
-            .AddEntityFrameworkCoreInstrumentation(options => {
-                options.SetDbStatementForText = true;
-                options.SetDbStatementForStoredProcedure = true;
-                options.EnrichWithIDbCommand = (activity, command) => {
-                    activity.SetTag("db.command.timeout", command.CommandTimeout);
-                    activity.SetTag("db.command.type", command.CommandType);
-                };
-            })
+            //.AddEntityFrameworkCoreInstrumentation(options => {
+            //    options.SetDbStatementForText = true;
+            //    options.SetDbStatementForStoredProcedure = true;
+            //    options.EnrichWithIDbCommand = (activity, command) => {
+            //        activity.SetTag("db.command.timeout", command.CommandTimeout);
+            //        activity.SetTag("db.command.type", command.CommandType);
+            //    };
+            //})
             .AddSource("MCPHub.*")
             .SetSampler(new TraceIdRatioBasedSampler(1.0))
             .AddConsoleExporter()

@@ -99,7 +99,7 @@ public class ServiceCollectionExtensionsTests {
         var assembly = typeof(ServiceCollectionExtensionsTests).Assembly;
 
         // Act
-        _services.AddMediatRFromAssembly(assembly);
+        _services.AddMediatorFromAssembly(assembly);
         var serviceProvider = _services.BuildServiceProvider();
 
         // Assert

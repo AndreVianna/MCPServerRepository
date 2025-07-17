@@ -4,9 +4,6 @@ using Amazon.S3.Model;
 
 using Common.Models;
 
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-
 namespace Common.Services;
 
 /// <summary>
@@ -34,7 +31,7 @@ public class AwsS3StorageService : IStorageService {
             _s3Client = new AmazonS3Client(s3Config);
         }
         else {
-            var credentials = string.IsNullOrEmpty(awsConfig.SessionToken)
+            AWSCredentials credentials = string.IsNullOrEmpty(awsConfig.SessionToken)
                 ? new BasicAWSCredentials(awsConfig.AccessKeyId, awsConfig.SecretAccessKey)
                 : new SessionAWSCredentials(awsConfig.AccessKeyId, awsConfig.SecretAccessKey, awsConfig.SessionToken);
 
@@ -232,16 +229,16 @@ public class AwsS3StorageService : IStorageService {
                 foreach (var obj in response.S3Objects) {
                     files.Add(new StorageFileInfo {
                         FileName = obj.Key,
-                        Size = obj.Size,
+                        Size = (long)obj.Size,
                         ContentType = "application/octet-stream", // S3 doesn't return content type in list
-                        LastModified = obj.LastModified,
+                        LastModified = (DateTimeOffset)obj.LastModified,
                         ETag = obj.ETag,
                         IsDirectory = obj.Key.EndsWith("/")
                     });
                 }
 
                 request.ContinuationToken = response.NextContinuationToken;
-            } while (response.IsTruncated);
+            } while ((bool)response.IsTruncated);
 
             return files;
         }
@@ -333,7 +330,7 @@ public class AwsS3StorageService : IStorageService {
                 }
 
                 listRequest.ContinuationToken = listResponse.NextContinuationToken;
-            } while (listResponse.IsTruncated);
+            } while ((bool)listResponse.IsTruncated);
 
             // Then delete the bucket
             var deleteBucketRequest = new DeleteBucketRequest { BucketName = containerName };
@@ -393,12 +390,12 @@ public class AwsS3StorageService : IStorageService {
                 response = await _s3Client.ListObjectsV2Async(request, cancellationToken);
 
                 foreach (var obj in response.S3Objects) {
-                    totalSize += obj.Size;
+                    totalSize += (long)obj.Size;
                     fileCount++;
                 }
 
                 request.ContinuationToken = response.NextContinuationToken;
-            } while (response.IsTruncated);
+            } while ((bool)response.IsTruncated);
 
             return new StorageUsageInfo {
                 TotalSize = totalSize,

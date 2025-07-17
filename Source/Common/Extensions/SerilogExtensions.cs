@@ -97,7 +97,7 @@ public static class LoggerExtensions {
         private readonly MsLogger _logger;
         private readonly string _operationName;
         private readonly object[] _args;
-        private readonly System.Diagnostics.Stopwatch _stopwatch;
+        private readonly Stopwatch _stopwatch;
 
         public OperationLogger(MsLogger logger, string operationName, object[] args) {
             _logger = logger;

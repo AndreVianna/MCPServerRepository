@@ -1,11 +1,6 @@
 using Common.Models;
 using Common.Services;
 
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Options;
-
 namespace Common.Extensions;
 
 /// <summary>
@@ -103,14 +98,14 @@ public class StorageHealthCheck(
 
             return healthStatus.OverallStatus switch {
                 HealthStatus.Healthy => HealthCheckResult.Healthy("Storage service is healthy", data),
-                HealthStatus.Degraded => HealthCheckResult.Degraded("Storage service is degraded", data),
-                HealthStatus.Unhealthy => HealthCheckResult.Unhealthy("Storage service is unhealthy", data),
-                _ => HealthCheckResult.Unhealthy("Storage service status unknown", data)
+                HealthStatus.Degraded => HealthCheckResult.Degraded("Storage service is degraded", null, data),
+                HealthStatus.Unhealthy => HealthCheckResult.Unhealthy("Storage service is unhealthy", null, data),
+                _ => HealthCheckResult.Unhealthy("Storage service status unknown", null, data)
             };
         }
         catch (Exception ex) {
             _logger.LogError(ex, "Error checking storage health");
-            return HealthCheckResult.Unhealthy("Storage health check failed", new Dictionary<string, object> {
+            return HealthCheckResult.Unhealthy("Storage health check failed", ex, new Dictionary<string, object> {
                 ["error"] = ex.Message
             });
         }

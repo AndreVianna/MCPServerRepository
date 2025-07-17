@@ -1,8 +1,3 @@
-using Common.Configuration;
-
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-
 namespace Common.Extensions;
 
 public static class AspireExtensions {
@@ -19,17 +14,17 @@ public static class AspireExtensions {
         // Add health checks
         builder.Services.AddInfrastructureHealthChecks();
 
-        // Add PostgreSQL with Entity Framework
-        builder.AddNpgsqlDbContext<Data.McpHubContext>("database");
+        //// Add PostgreSQL with Entity Framework
+        //builder.AddNpgsqlDbContext<Data.McpHubContext>("database");
 
-        // Add Redis cache
-        builder.AddRedis("cache");
+        //// Add Redis cache
+        //builder.AddRedis("cache");
 
-        // Add Elasticsearch
-        builder.AddElasticsearch("search");
+        //// Add Elasticsearch
+        //builder.AddElasticsearch("search");
 
-        // Add RabbitMQ
-        builder.AddRabbitMQ("messagequeue");
+        //// Add RabbitMQ
+        //builder.AddRabbitMQ("messagequeue");
 
         // Add service discovery
         builder.Services.AddServiceDiscovery();

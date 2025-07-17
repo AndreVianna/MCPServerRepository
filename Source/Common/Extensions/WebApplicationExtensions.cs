@@ -1,10 +1,9 @@
+using System.Reflection;
+
 using Common.Middleware;
 using Common.Services;
 
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Common.Extensions;
 
@@ -41,10 +40,10 @@ public static class WebApplicationExtensions {
         // Configure health checks with detailed responses
         app.UseHealthChecks("/health", new HealthCheckOptions {
             ResponseWriter = async (context, report) =>                 // Use custom health check middleware for detailed responses
-                await new Common.Middleware.HealthCheckMiddleware(
+                await new Middleware.HealthCheckMiddleware(
                     async (ctx) => await Task.CompletedTask,
                     context.RequestServices.GetRequiredService<HealthCheckService>(),
-                    context.RequestServices.GetRequiredService<ILogger<Common.Middleware.HealthCheckMiddleware>>())
+                    context.RequestServices.GetRequiredService<ILogger<Middleware.HealthCheckMiddleware>>())
                     .InvokeAsync(context)
         });
 
@@ -78,14 +77,14 @@ public static class WebApplicationExtensions {
         // Add observability services
         services.AddObservabilityServices();
 
-        // Add MediatR from calling assembly
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(System.Reflection.Assembly.GetCallingAssembly()));
+        // Add Mediator from calling assembly
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetCallingAssembly()));
 
         // Add AutoMapper from calling assembly
-        services.AddAutoMapper(System.Reflection.Assembly.GetCallingAssembly());
+        services.AddAutoMapper(_ => { }, Assembly.GetCallingAssembly());
 
         // Add FluentValidation from calling assembly
-        services.AddValidatorsFromAssembly(System.Reflection.Assembly.GetCallingAssembly());
+        services.AddFluentValidationFromAssembly(Assembly.GetCallingAssembly());
 
         return services;
     }

@@ -4,10 +4,6 @@ using Common.Configuration;
 
 using FluentValidation;
 
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-
 namespace Common.Extensions;
 
 public static class ServiceCollectionExtensions {
@@ -59,9 +55,9 @@ public static class ServiceCollectionExtensions {
     }
 
     /// <summary>
-    /// Registers MediatR handlers from an assembly
+    /// Registers Mediator handlers from an assembly
     /// </summary>
-    public static IServiceCollection AddMediatRFromAssembly(this IServiceCollection services, Assembly assembly) {
+    public static IServiceCollection AddMediatorFromAssembly(this IServiceCollection services, Assembly assembly) {
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(assembly));
         return services;
     }
@@ -70,7 +66,7 @@ public static class ServiceCollectionExtensions {
     /// Registers AutoMapper profiles from an assembly
     /// </summary>
     public static IServiceCollection AddAutoMapperFromAssembly(this IServiceCollection services, Assembly assembly) {
-        services.AddAutoMapper(assembly);
+        services.AddAutoMapper(_ => { }, assembly);
         return services;
     }
 

@@ -1,0 +1,33 @@
+{
+  "playwrightConfig": {
+    "screenshotPath": "assets/playwright-screenshots",
+    "testResultsPath": "test-results",
+    "baseUrls": {
+      "development": {
+        "webApp": "https://localhost:5001",
+        "publicApi": "https://localhost:5002",
+        "searchService": "https://localhost:5003",
+        "securityService": "https://localhost:5004"
+      },
+      "staging": {
+        "webApp": "https://staging.mcphub.dev",
+        "publicApi": "https://api-staging.mcphub.dev",
+        "searchService": "https://search-staging.mcphub.dev",
+        "securityService": "https://security-staging.mcphub.dev"
+      }
+    },
+    "testCategories": [
+      "authentication",
+      "package-discovery",
+      "user-management",
+      "security-scanning",
+      "api-endpoints",
+      "visual-regression",
+      "accessibility",
+      "performance"
+    ],
+    "defaultTimeout": 30000,
+    "retries": 2,
+    "screenshotMode": "only-on-failure"
+  }
+}

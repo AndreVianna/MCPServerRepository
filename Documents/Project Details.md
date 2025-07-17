@@ -9,18 +9,21 @@ This platform leverages .NET Aspire for orchestration, Native AOT for the CLI to
 ## Core Design Principles
 
 ### 1. Security as a Foundation
+
 - Every MCP server is treated as a potentially powerful agent
 - Three-stage security verification process (fetch → verify → install)
 - Mandatory consent manifests and behavioral verification
 - User consent and transparency are non-negotiable
 
 ### 2. Developer Experience Excellence
+
 - Familiar workflows adapted for new security requirements
 - Single language ecosystem (C#/.NET) throughout
 - Clear, helpful error messages and documentation
 - Progressive disclosure of complexity
 
 ### 3. Ecosystem Sustainability
+
 - Clear governance model from day one
 - Scalable architecture leveraging .NET Aspire
 - Community-driven development
@@ -29,12 +32,14 @@ This platform leverages .NET Aspire for orchestration, Native AOT for the CLI to
 ## Technology Stack
 
 ### Unified .NET 9 Platform
+
 - **Backend Services**: ASP.NET Core with .NET Aspire orchestration
 - **CLI Tool**: .NET 9 with Native AOT (single binary, <10ms startup)
 - **Web Portal**: Blazor United (SSR + Interactive modes)
 - **Shared Libraries**: Common models, security, and validation logic
 
 ### Infrastructure & Services
+
 - **Database**: PostgreSQL (primary), Redis (cache)
 - **Search**: Elasticsearch with .NET client
 - **Message Queue**: RabbitMQ (via Aspire integration)
@@ -42,6 +47,7 @@ This platform leverages .NET Aspire for orchestration, Native AOT for the CLI to
 - **Orchestration**: .NET Aspire for local and cloud deployment
 
 ### Security Stack
+
 - **Code Analysis**: Roslyn analyzers + custom security rules
 - **Container Scanning**: Trivy integration
 - **Dependency Scanning**: NuGet Audit + custom MCP validators
@@ -198,11 +204,11 @@ Required Permissions:
   Network Access:
     - *.internal.company.com (internal domains)
     - api.database.com (external API)
-  
+
   Filesystem Access:
     - Read: ~/mcp/config
     - Write: ~/mcp/logs
-  
+
   Environment Variables:
     - DATABASE_URL
     - API_KEY
@@ -212,7 +218,7 @@ Security Analysis:
   ✓ No hardcoded secrets found
   ✓ Behavior matches declared permissions
   ✓ Dependencies verified
-  
+
 Security Score: 9.2/10
 
 # Stage 3: Installation with Consent
@@ -284,9 +290,9 @@ Organizations can define security policies:
                             }
                         </MudText>
                         <MudText Typo="Typo.body1" Class="mb-4">@_server.Description</MudText>
-                        
+
                         <!-- Installation command -->
-                        <MudTextField Value="@($"mcpm install {_server.Name}")" 
+                        <MudTextField Value="@($"mcpm install {_server.Name}")"
                                       ReadOnly="true"
                                       Label="Installation"
                                       Variant="Variant.Outlined"
@@ -295,12 +301,12 @@ Organizations can define security policies:
                                       OnAdornmentClick="@(() => CopyToClipboard())" />
                     </MudCardContent>
                 </MudCard>
-                
+
                 <!-- Capabilities -->
                 <MudCard Class="mt-4">
                     <MudCardContent>
                         <MudText Typo="Typo.h6" Class="mb-3">Capabilities</MudText>
-                        
+
                         <MudTabs>
                             <MudTabPanel Text="Tools (@_server.Capabilities.Tools.Count)">
                                 @foreach (var tool in _server.Capabilities.Tools)
@@ -324,11 +330,11 @@ Organizations can define security policies:
                     </MudCardContent>
                 </MudCard>
             </MudItem>
-            
+
             <MudItem xs="12" md="4">
                 <!-- Security Report Card -->
                 <SecurityReportCard Server="@_server" OnValidate="ValidateAgainstPolicy" />
-                
+
                 <!-- Statistics -->
                 <MudCard Class="mt-4">
                     <MudCardContent>
@@ -359,14 +365,14 @@ Organizations can define security policies:
 @code {
     [Parameter] public string Publisher { get; set; } = "";
     [Parameter] public string Name { get; set; } = "";
-    
+
     private ServerDetails? _server;
-    
+
     protected override async Task OnInitializedAsync()
     {
         _server = await PackageService.GetServerAsync($"{Publisher}/{Name}");
     }
-    
+
     private async Task ValidateAgainstPolicy()
     {
         var result = await SecurityValidator.ValidateAgainstUserPolicyAsync(_server!.Manifest);
@@ -416,27 +422,27 @@ public class InstallCommand : Command
     {
         var packageArg = new Argument<string>("package", "Package to install");
         AddArgument(packageArg);
-        
+
         this.SetHandler(ExecuteAsync, packageArg);
     }
-    
+
     private async Task ExecuteAsync(string package)
     {
         var console = AnsiConsole.Create(new AnsiConsoleSettings());
-        
+
         // Step 1: Fetch
         await console.Status()
             .StartAsync($"Fetching {package}...", async ctx =>
             {
                 var manifest = await McpHubClient.FetchAsync(package);
                 ctx.Status($"Verifying {package}...");
-                
+
                 // Step 2: Verify
                 var report = await SecurityScanner.VerifyAsync(manifest);
-                
+
                 // Step 3: Display permissions
                 DisplaySecurityReport(console, report);
-                
+
                 if (console.Confirm("Do you approve these permissions?"))
                 {
                     ctx.Status($"Installing {package}...");
@@ -463,11 +469,11 @@ public interface ISecurityValidator
 public class SecurityValidator : ISecurityValidator
 {
     public async Task<ValidationResult> ValidateAsync(
-        ServerManifest manifest, 
+        ServerManifest manifest,
         SecurityPolicy policy)
     {
         var violations = new List<SecurityViolation>();
-        
+
         // Network validation
         foreach (var domain in manifest.RequiredPermissions.Network)
         {
@@ -481,14 +487,14 @@ public class SecurityValidator : ISecurityValidator
                 });
             }
         }
-        
+
         // This EXACT code runs in:
         // - CLI (during mcpm verify)
         // - API (during publish validation)
         // - Blazor UI (interactive validation)
         // - Background security scanner
         // - Integration tests
-        
+
         return new ValidationResult(violations);
     }
 }
@@ -501,43 +507,43 @@ public class SecurityValidator : ISecurityValidator
 ```csharp
 public class McpHubContext : DbContext
 {
-    public McpHubContext(DbContextOptions<McpHubContext> options) 
+    public McpHubContext(DbContextOptions<McpHubContext> options)
         : base(options) { }
-    
+
     public DbSet<Publisher> Publishers => Set<Publisher>();
     public DbSet<Server> Servers => Set<Server>();
     public DbSet<ServerVersion> Versions => Set<ServerVersion>();
     public DbSet<SecurityScan> SecurityScans => Set<SecurityScan>();
-    
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         // Publisher configuration
         builder.Entity<Publisher>()
             .HasIndex(p => p.Name)
             .IsUnique();
-        
+
         // Server configuration
         builder.Entity<Server>()
             .HasOne(s => s.Publisher)
             .WithMany(p => p.Servers)
             .HasForeignKey(s => s.PublisherId);
-        
+
         builder.Entity<Server>()
             .HasIndex(s => s.Name)
             .IsUnique();
-        
+
         // Version configuration
         builder.Entity<ServerVersion>()
             .HasOne(v => v.Server)
             .WithMany(s => s.Versions)
             .HasForeignKey(v => v.ServerId);
-        
+
         builder.Entity<ServerVersion>()
             .Property(v => v.Manifest)
             .HasConversion(
                 v => JsonSerializer.Serialize(v, McpHubJsonContext.Default.ServerManifest),
                 v => JsonSerializer.Deserialize(v, McpHubJsonContext.Default.ServerManifest)!);
-        
+
         // Security scan configuration
         builder.Entity<SecurityScan>()
             .HasOne(s => s.Version)
@@ -553,7 +559,7 @@ public class Publisher
     public PublisherType Type { get; set; }
     public bool Verified { get; set; }
     public DateTime CreatedAt { get; set; }
-    
+
     public List<Server> Servers { get; set; } = new();
 }
 
@@ -566,7 +572,7 @@ public class Server
     public string? RepositoryUrl { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
-    
+
     public Publisher Publisher { get; set; } = null!;
     public List<ServerVersion> Versions { get; set; } = new();
 }
@@ -582,7 +588,7 @@ public class ServerVersion
     public DateTime PublishedAt { get; set; }
     public bool IsPrerelease { get; set; }
     public bool IsDeprecated { get; set; }
-    
+
     public Server Server { get; set; } = null!;
     public List<SecurityScan> SecurityScans { get; set; } = new();
 }
@@ -599,29 +605,29 @@ public class PackageService : IPackageService
     private readonly IBlobStorage _storage;
     private readonly IMessageBus _bus;
     private readonly ILogger<PackageService> _logger;
-    
+
     public async Task<PublishResult> PublishAsync(
-        PublishRequest request, 
+        PublishRequest request,
         ClaimsPrincipal user)
     {
         using var activity = Activity.StartActivity("PublishPackage");
-        
+
         // Validate manifest
         var validation = await ValidateManifestAsync(request.Manifest);
         if (!validation.IsValid)
             return PublishResult.Failed(validation.Errors);
-        
+
         // Check permissions
         var publisher = await _db.Publishers
             .FirstOrDefaultAsync(p => p.Name == request.Manifest.Publisher);
-            
+
         if (!await UserCanPublishAsync(user, publisher))
             return PublishResult.Failed("Unauthorized");
-        
+
         // Store package
         var blobName = $"{request.Manifest.Name}/{request.Manifest.Version}/package.mcp";
         await _storage.UploadAsync(blobName, request.PackageData);
-        
+
         // Create version record
         var version = new ServerVersion
         {
@@ -629,20 +635,20 @@ public class PackageService : IPackageService
             Manifest = request.Manifest,
             PublishedAt = DateTime.UtcNow
         };
-        
+
         server.Versions.Add(version);
         await _db.SaveChangesAsync();
-        
+
         // Trigger security scan
         await _bus.PublishAsync(new ScanPackageMessage
         {
             VersionId = version.Id,
             BlobName = blobName
         });
-        
-        _logger.LogInformation("Published {Package} v{Version}", 
+
+        _logger.LogInformation("Published {Package} v{Version}",
             request.Manifest.Name, request.Manifest.Version);
-        
+
         return PublishResult.Success(version);
     }
 }
@@ -657,22 +663,22 @@ public class SecurityScannerService : BackgroundService
     private readonly IBlobStorage _storage;
     private readonly McpHubContext _db;
     private readonly ISecurityAnalyzer _analyzer;
-    
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await foreach (var message in _bus.SubscribeAsync<ScanPackageMessage>(stoppingToken))
         {
             using var activity = Activity.StartActivity("SecurityScan");
             activity?.SetTag("version.id", message.VersionId);
-            
+
             try
             {
                 // Download package
                 var packageData = await _storage.DownloadAsync(message.BlobName);
-                
+
                 // Run security analysis
                 var report = await _analyzer.AnalyzeAsync(packageData);
-                
+
                 // Update database
                 var scan = new SecurityScan
                 {
@@ -682,10 +688,10 @@ public class SecurityScannerService : BackgroundService
                     Report = report,
                     ScannedAt = DateTime.UtcNow
                 };
-                
+
                 _db.SecurityScans.Add(scan);
                 await _db.SaveChangesAsync();
-                
+
                 // Notify if issues found
                 if (report.HasCriticalIssues)
                 {
@@ -698,7 +704,7 @@ public class SecurityScannerService : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Security scan failed for version {VersionId}", 
+                _logger.LogError(ex, "Security scan failed for version {VersionId}",
                     message.VersionId);
             }
         }
@@ -726,6 +732,7 @@ dotnet run --project McpHub.AppHost \
 ### Monitoring and Observability
 
 All services automatically include:
+
 - OpenTelemetry tracing
 - Prometheus metrics
 - Structured logging
@@ -738,23 +745,23 @@ public class PackageMetrics
 {
     private readonly Counter<long> _packagesPublished;
     private readonly Histogram<double> _scanDuration;
-    
+
     public PackageMetrics(IMeterFactory meterFactory)
     {
         var meter = meterFactory.Create("McpHub.Packages");
-        
+
         _packagesPublished = meter.CreateCounter<long>(
             "mcphub.packages.published",
             description: "Number of packages published");
-            
+
         _scanDuration = meter.CreateHistogram<double>(
             "mcphub.security.scan.duration",
             unit: "seconds",
             description: "Duration of security scans");
     }
-    
+
     public void RecordPublished(string publisher, string category) =>
-        _packagesPublished.Add(1, 
+        _packagesPublished.Add(1,
             new KeyValuePair<string, object?>("publisher", publisher),
             new KeyValuePair<string, object?>("category", category));
 }
@@ -763,9 +770,11 @@ public class PackageMetrics
 ## Implementation Roadmap
 
 ### Phase 1: Foundation (Months 1-2)
+
 **Goal**: Core infrastructure and basic functionality
 
 **Deliverables**:
+
 - .NET Aspire project structure
 - PostgreSQL schema with EF Core
 - Basic Blazor UI with MudBlazor
@@ -774,14 +783,17 @@ public class PackageMetrics
 - JWT authentication
 
 **Success Criteria**:
+
 - Can publish a package via CLI
 - Can browse packages via web
 - Basic security scanning works
 
 ### Phase 2: Security Core (Month 3)
+
 **Goal**: Implement revolutionary security features
 
 **Deliverables**:
+
 - Consent manifest validation
 - Security policy engine
 - Container-based sandboxing
@@ -789,14 +801,17 @@ public class PackageMetrics
 - Vulnerability scanning integration
 
 **Success Criteria**:
+
 - Three-stage installation fully functional
 - Policy violations properly detected
 - Security scores calculated accurately
 
 ### Phase 3: Rich User Experience (Month 4)
+
 **Goal**: Polish web portal and CLI
 
 **Deliverables**:
+
 - Real-time search with Elasticsearch
 - Interactive Blazor components
 - SignalR for live updates
@@ -804,14 +819,17 @@ public class PackageMetrics
 - Package statistics and analytics
 
 **Success Criteria**:
+
 - Sub-200ms search response
 - Real-time scan progress
 - Rich filtering options
 
 ### Phase 4: Enterprise Features (Month 5)
+
 **Goal**: Add enterprise and trust features
 
 **Deliverables**:
+
 - Organization management
 - Publisher verification system
 - Private registry support
@@ -819,14 +837,17 @@ public class PackageMetrics
 - Audit logging
 
 **Success Criteria**:
+
 - Multi-tenant support working
 - SAML/OIDC authentication
 - Compliance reporting available
 
 ### Phase 5: Scale and Polish (Month 6)
+
 **Goal**: Production readiness
 
 **Deliverables**:
+
 - Performance optimization
 - Global CDN deployment
 - Comprehensive documentation
@@ -834,6 +855,7 @@ public class PackageMetrics
 - Load testing and optimization
 
 **Success Criteria**:
+
 - Handle 10,000 concurrent users
 - 99.9% uptime SLA capability
 - All security scans < 30 seconds
@@ -841,18 +863,21 @@ public class PackageMetrics
 ## Governance Model
 
 ### Package Naming
+
 - **Mandatory namespacing**: All packages must use @namespace/package format
 - **Namespace ownership**: First-come, first-served with trademark protection
 - **Verified publishers**: Blue checkmark for verified organizations
 - **Transfer process**: Clear ownership transfer mechanism
 
 ### Security Governance
+
 - **Security council**: Rotating community members review critical issues
 - **Transparency reports**: Monthly security statistics published
 - **Responsible disclosure**: 90-day disclosure policy for vulnerabilities
 - **Emergency response**: 24-hour response for critical security issues
 
 ### Content Policies
+
 - **Automated scanning**: All packages scanned for malware
 - **Manual review**: Suspicious packages flagged for human review
 - **Appeals process**: Clear process for challenging decisions
@@ -861,6 +886,7 @@ public class PackageMetrics
 ## Success Metrics
 
 ### Technical Metrics
+
 - API response time: <100ms (p95)
 - Search latency: <200ms (p95)
 - Security scan time: <30s per package
@@ -868,6 +894,7 @@ public class PackageMetrics
 - Blazor page load: <1s
 
 ### Business Metrics
+
 - Monthly active developers: 10,000+ (Year 1)
 - Published servers: 1,000+ (Year 1)
 - Security incidents: <5 per year
@@ -875,6 +902,7 @@ public class PackageMetrics
 - Enterprise customers: 50+ (Year 1)
 
 ### Security Metrics
+
 - Malicious packages caught: 100%
 - False positive rate: <1%
 - Time to security patch: <48 hours
@@ -884,16 +912,19 @@ public class PackageMetrics
 ## Risk Mitigation
 
 ### Technical Risks
+
 - **Scaling challenges**: .NET Aspire provides auto-scaling capabilities
 - **Performance issues**: Native AOT for CLI, response caching for web
 - **Security vulnerabilities**: Defense in depth, regular security audits
 
 ### Business Risks
+
 - **Low adoption**: Superior security model, enterprise features
 - **Competition**: First-mover advantage in MCP space
 - **Sustainability**: Freemium model with paid enterprise features
 
 ### Operational Risks
+
 - **Service outages**: Multi-region deployment, automated failover
 - **Data loss**: Automated backups, immutable storage
 - **Security breaches**: Zero-trust architecture, least privilege access
@@ -901,6 +932,7 @@ public class PackageMetrics
 ## Future Enhancements
 
 ### Year 2 Roadmap
+
 - **AI-powered features**: Natural language search, automated security fixes
 - **Advanced analytics**: ML-based anomaly detection, usage predictions
 - **Mobile apps**: Native iOS/Android apps for monitoring
@@ -908,6 +940,7 @@ public class PackageMetrics
 - **Global expansion**: Multi-region deployment, localization
 
 ### Long-term Vision
+
 - **Industry standard**: Become the default registry for MCP servers
 - **Ecosystem growth**: 100,000+ packages, millions of developers
 - **Security leadership**: Set new standards for package security

@@ -5,6 +5,7 @@
 ---
 
 ## 1 · Executive Summary
+
 **MCP Registry** is a secure, cloud‑native hub for **Model Context Protocol servers**. Key stack:
 
 * **Back‑end:** .NET 9 **Aspire** micro‑services, hosted on Kubernetes (cloud‑agnostic).
@@ -15,22 +16,27 @@
 ---
 
 ## 2 · Package & Manifest Standard
+
 ### 2.1 Files
+
 * **mcps.json** — canonical manifest (alias: `mcp-manifest.json` accepted for backwards compatibility; registry rewrites to mcps.json).
 * **mcps-lock.json** — signed deterministic lock.
 * `.mcp` archive layout unchanged (`dist/`, README.md, LICENSE, optional src/).
 
 ### 2.2 Manifest Highlights
+
 Same schema (runtime, capabilities, requiredConsents, dependencies) plus new field **`trustTier`** (registry‑generated: `unverified`, `community‑trusted`, `security‑audited`, `certified`).
 
 ---
 
 ## 3 · Secure Publish → Install Chain
+
 Unchanged flow: `init ➜ publish (static + sandbox) ➜ fetch ➜ vet ➜ install`. CLI remains .NET NativeAOT.
 
 ---
 
 ## 4 · System Architecture (Aspire Micro‑services)
+
 | Service | Responsibilities | Components |
 |---------|------------------|------------|
 | Gateway | YARP, auth, rate‑limit | .NET Aspire defaults |
@@ -45,6 +51,7 @@ Unchanged flow: `init ➜ publish (static + sandbox) ➜ fetch ➜ vet ➜ insta
 ---
 
 ## 5 · Web Portal UX (Blazor)
+
 * Search, Package Detail, Security Report Card, Org Dashboard.
 * Real‑time SignalR push (scan results, download counts).
 * Auth integrated with Gateway cookies.
@@ -52,11 +59,13 @@ Unchanged flow: `init ➜ publish (static + sandbox) ➜ fetch ➜ vet ➜ insta
 ---
 
 ## 6 · API Endpoints (unchanged)
+
 Minimal APIs + HotChocolate GraphQL overlay.
 
 ---
 
 ## 7 · Security Framework
+
 * **Static Scan** (Semgrep) & **Dynamic Sandbox** (Firecracker) on every publish.
 * **Vet Policy Engine** enforces org policy before install.
 * **Trust Tiers**:
@@ -69,6 +78,7 @@ Minimal APIs + HotChocolate GraphQL overlay.
 ---
 
 ## 8 · Governance & Community
+
 * **Mandatory namespacing** (`@org/pkg`), trademark & inactivity dispute policy.
 * **Progressive trust tiers** surfaced in UI & search ranking.
 * Community forums (Discourse), code‑of‑conduct, contributor guide.
@@ -76,6 +86,7 @@ Minimal APIs + HotChocolate GraphQL overlay.
 ---
 
 ## 9 · Technology Stack Overview
+
 | Layer | Choice |
 |-------|--------|
 | Back‑end | .NET 9 Aspire (C# 13) |
@@ -90,6 +101,7 @@ Minimal APIs + HotChocolate GraphQL overlay.
 ---
 
 ## 10 · Success Metrics
+
 | Category | KPI | Target after Year 1 |
 |----------|-----|--------------------|
 | Technical | API p95 latency | < 150 ms |
@@ -104,14 +116,15 @@ Minimal APIs + HotChocolate GraphQL overlay.
 ---
 
 ## 11 · Phased Road‑map (unchanged timelines)
+
 *Roadmap canvas already updated to Blazor Sprints; include tasks for trust‑tier promotion workflow & KPIs dashboards.*
 
 ---
 
 ## 12 · Next Steps
+
 1. Align team on manifest rename policy (aliases allowed but registry stores `mcps.json`).
 2. Draft Security Council charter; recruit initial 5 members.
 3. Extend DB schema: `trust_tier` column, `security_council_reviews` table.
 4. Add KPIs dashboard to Grafana (hook Prometheus + OpenSearch metrics).
 5. Update roadmap & atomic to‑do canvases replacing storage‑specific tasks with multi‑cloud abstraction.
-

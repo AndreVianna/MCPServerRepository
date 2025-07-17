@@ -9,7 +9,8 @@ The MCP Server Hub will be a comprehensive package management platform specifica
 ### High-Level Architecture Design
 
 **Multi-Tier Architecture Pattern:**
-```
+
+``` text
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
 │   Web Frontend  │────▶│   API Gateway    │────▶│  Backend APIs   │
 └─────────────────┘     └──────────────────┘     └─────────────────┘
@@ -27,22 +28,26 @@ The MCP Server Hub will be a comprehensive package management platform specifica
 
 ### Core Services Architecture
 
-**1. Registry Service**
+#### **1. Registry Service**
+
 - Manages server metadata, versions, and dependencies
 - Handles package publication and validation
 - Implements security scanning and vulnerability detection
 
-**2. Search Service**
+#### **2. Search Service**
+
 - Full-text and semantic search capabilities
 - Vector embeddings for intelligent server discovery
 - Faceted search by capabilities, tools, and resources
 
-**3. Security Service**
+#### **3. Security Service**
+
 - Container sandboxing orchestration
 - Vulnerability scanning integration
 - Code analysis and security auditing
 
-**4. Runtime Service**
+#### **4. Runtime Service**
+
 - Server health monitoring
 - Performance metrics collection
 - Runtime configuration management
@@ -52,11 +57,13 @@ The MCP Server Hub will be a comprehensive package management platform specifica
 ### 1. Server Registration and Publishing
 
 **Publishing Workflow:**
-```
+
+``` text
 Developer → Package Creation → Validation → Security Scan → Moderation → Publication
 ```
 
 **Required Metadata:**
+
 - Server name, version, and description
 - Capabilities declaration (tools, resources, prompts)
 - Runtime requirements and dependencies
@@ -67,6 +74,7 @@ Developer → Package Creation → Validation → Security Scan → Moderation �
 ### 2. Version Management
 
 **Versioning Strategy:**
+
 - Semantic versioning (SemVer 2.0.0) enforcement
 - Immutable versions once published
 - Pre-release support (alpha, beta, rc)
@@ -76,6 +84,7 @@ Developer → Package Creation → Validation → Security Scan → Moderation �
 ### 3. Search and Discovery
 
 **Search Features:**
+
 - **Capability-based Search**: Find servers by specific tools/resources
 - **Semantic Search**: AI-powered natural language queries
 - **Faceted Filtering**: By language, framework, category, security level
@@ -85,6 +94,7 @@ Developer → Package Creation → Validation → Security Scan → Moderation �
 ### 4. Security Framework
 
 **Multi-Layer Security:**
+
 1. **Static Analysis**: Code scanning for vulnerabilities
 2. **Container Sandboxing**: Mandatory Docker containerization
 3. **Runtime Permissions**: Granular capability restrictions
@@ -96,6 +106,7 @@ Developer → Package Creation → Validation → Security Scan → Moderation �
 ### Homepage and Navigation
 
 **Key Sections:**
+
 - **Hero Search**: Prominent search with natural language support
 - **Featured Servers**: Curated high-quality servers
 - **Categories**: Browse by use case (Data Access, Development Tools, APIs)
@@ -105,7 +116,8 @@ Developer → Package Creation → Validation → Security Scan → Moderation �
 ### Server Detail Pages
 
 **Information Architecture:**
-```
+
+``` text
 Server Name v1.2.3
 ├── Overview
 │   ├── Description
@@ -132,6 +144,7 @@ Server Name v1.2.3
 ### Developer Dashboard
 
 **Features:**
+
 - Server management interface
 - Analytics and usage metrics
 - Version management
@@ -143,7 +156,8 @@ Server Name v1.2.3
 ### RESTful API Structure
 
 **Core Endpoints:**
-```
+
+``` text
 # Discovery and Search
 GET /api/v1/servers                    # List servers
 GET /api/v1/servers/{id}              # Get server details
@@ -171,6 +185,7 @@ GET /api/v1/servers/{id}/config       # Server configuration template
 ### Authentication and Authorization
 
 **API Authentication:**
+
 - JWT-based authentication
 - API key management with scopes
 - OAuth 2.0 for third-party integrations
@@ -181,6 +196,7 @@ GET /api/v1/servers/{id}/config       # Server configuration template
 ### MCPM - Model Context Protocol Manager
 
 **Core Commands:**
+
 ```bash
 # Discovery
 mcpm search "database tools"        # Search for servers
@@ -217,6 +233,7 @@ mcpm outdated                      # Check for outdated servers
 ### MCPM Configuration Management
 
 **Global Configuration (~/.mcpmrc):**
+
 ```json
 {
   "registry": "https://registry.mcphub.io",
@@ -228,6 +245,7 @@ mcpm outdated                      # Check for outdated servers
 ```
 
 **Project Configuration (mcp.json):**
+
 ```json
 {
   "name": "@company/database-server",
@@ -260,6 +278,7 @@ mcpm outdated                      # Check for outdated servers
 ### MCPM Design Philosophy
 
 **Core Principles:**
+
 - **Familiar UX**: Mirror npm/yarn commands for easy adoption
 - **Security First**: All operations validate and sandbox by default
 - **Offline Capable**: Local cache for offline development
@@ -268,6 +287,7 @@ mcpm outdated                      # Check for outdated servers
 - **Host Agnostic**: Works with any MCP-compatible host
 
 **Key Features:**
+
 - Semantic version resolution
 - Lockfile support (mcpm-lock.json)
 - Workspace/monorepo support
@@ -280,7 +300,8 @@ mcpm outdated                      # Check for outdated servers
 ### MCPM Architecture
 
 **CLI Structure:**
-```
+
+``` text
 mcpm/
 ├── commands/
 │   ├── install.go      # Package installation logic
@@ -300,6 +321,7 @@ mcpm/
 ```
 
 **Installation Methods:**
+
 ```bash
 # macOS/Linux (Homebrew)
 brew install mcpm
@@ -315,6 +337,7 @@ curl -fsSL https://get.mcpm.io | bash
 ```
 
 **Example Usage Flow:**
+
 ```bash
 # Initialize a new MCP project
 $ mcpm init
@@ -352,6 +375,7 @@ $ mcpm install @mycompany/data-analyzer
 ### Backend Architecture
 
 **Programming Language & Framework:**
+
 - **Primary**: Go with Gin framework
   - High performance for API services
   - Excellent concurrency for real-time features
@@ -360,28 +384,33 @@ $ mcpm install @mycompany/data-analyzer
   - Perfect for building mcpm CLI tool
 
 **Alternative**: Node.js with Fastify
+
 - Familiar to MCP SDK developers
 - Good npm ecosystem integration
 
 ### Database Strategy
 
 **Primary Database**: PostgreSQL
+
 - JSONB support for flexible metadata
 - Full-text search capabilities
 - ACID compliance for transactional integrity
 - Excellent performance at scale
 
 **Search Database**: Elasticsearch
+
 - Full-text and faceted search
 - Relevance scoring
 - Real-time indexing
 
 **Vector Database**: Qdrant or Weaviate
+
 - Semantic search capabilities
 - AI-powered server discovery
 - Capability matching
 
 **Cache Layer**: Redis
+
 - API response caching
 - Rate limiting implementation
 - Session management
@@ -389,18 +418,21 @@ $ mcpm install @mycompany/data-analyzer
 ### Frontend Technology
 
 **Framework**: Next.js 14 with App Router
+
 - Server-side rendering for SEO
 - React Server Components
 - Built-in API routes
 - Excellent performance
 
 **UI Framework**: Tailwind CSS + shadcn/ui
+
 - Consistent design system
 - Accessible components
 - Dark mode support
 - Responsive design
 
 **Additional Frontend Tools:**
+
 - TypeScript for type safety
 - TanStack Query for data fetching
 - Zustand for state management
@@ -409,6 +441,7 @@ $ mcpm install @mycompany/data-analyzer
 ### Cloud Platform and Infrastructure
 
 **Recommended Platform**: AWS
+
 - **Compute**: ECS Fargate for containerized services
 - **Database**: RDS for PostgreSQL, ElastiCache for Redis
 - **Storage**: S3 for package storage
@@ -417,6 +450,7 @@ $ mcpm install @mycompany/data-analyzer
 - **Container Registry**: ECR for Docker images
 
 **Alternative**: Google Cloud Platform
+
 - Cloud Run for services
 - Cloud SQL for databases
 - Cloud Storage for packages
@@ -425,6 +459,7 @@ $ mcpm install @mycompany/data-analyzer
 ### CI/CD Pipeline
 
 **GitHub Actions Workflow:**
+
 ```yaml
 name: Deploy
 on:
@@ -438,7 +473,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Run tests
       - name: Security scan
-      
+
   deploy:
     needs: test
     steps:
@@ -450,6 +485,7 @@ jobs:
 ```
 
 **Pipeline Stages:**
+
 1. Code quality checks (linting, formatting)
 2. Unit and integration testing
 3. Security scanning (SAST/DAST)
@@ -464,6 +500,7 @@ jobs:
 ### Package Storage Architecture
 
 **Multi-Tier Storage:**
+
 1. **Metadata**: PostgreSQL with JSONB
 2. **Package Files**: S3 with lifecycle policies
 3. **Docker Images**: Container registry (ECR/GCR)
@@ -473,6 +510,7 @@ jobs:
 ### Data Model Design
 
 **Core Entities:**
+
 ```sql
 -- Servers table
 CREATE TABLE servers (
@@ -514,6 +552,7 @@ CREATE TABLE capabilities (
 ### Authentication System
 
 **Multi-Factor Authentication:**
+
 - Email/password with 2FA
 - OAuth providers (GitHub, Google)
 - API tokens with scopes
@@ -522,6 +561,7 @@ CREATE TABLE capabilities (
 ### Authorization Framework
 
 **Role-Based Access Control:**
+
 - **Users**: Browse, install servers
 - **Developers**: Publish, manage own servers
 - **Moderators**: Review, approve servers
@@ -530,6 +570,7 @@ CREATE TABLE capabilities (
 ### Security Scanning Pipeline
 
 **Automated Security Checks:**
+
 1. **Static Analysis**: Semgrep, CodeQL
 2. **Dependency Scanning**: Snyk, OWASP
 3. **Container Scanning**: Trivy, Clair
@@ -539,6 +580,7 @@ CREATE TABLE capabilities (
 ### Malware Prevention
 
 **Multi-Stage Protection:**
+
 - Virus scanning with multiple engines
 - Behavioral analysis in sandboxes
 - Cryptographic signing requirement
@@ -549,12 +591,14 @@ CREATE TABLE capabilities (
 ### Architecture Patterns
 
 **CQRS Implementation:**
+
 - Separate read/write models
 - Event sourcing for audit trails
 - Materialized views for performance
 - Eventually consistent search index
 
 **Caching Strategy:**
+
 - CDN edge caching (CloudFront)
 - API response caching (Redis)
 - Database query caching
@@ -570,7 +614,9 @@ CREATE TABLE capabilities (
 ## Implementation Roadmap
 
 ### Phase 1: Foundation (Months 1-2)
+
 **Goals:** Core infrastructure and basic functionality
+
 - Set up cloud infrastructure
 - Implement basic API (CRUD operations)
 - Create minimal web interface
@@ -578,13 +624,16 @@ CREATE TABLE capabilities (
 - Simple package storage
 
 **Deliverables:**
+
 - Functional API with 5 core endpoints
 - Basic web UI for browsing
 - Developer registration
 - Manual package submission
 
 ### Phase 2: Search and Discovery (Months 3-4)
+
 **Goals:** Advanced search and user experience
+
 - Elasticsearch integration
 - Faceted search implementation
 - Semantic search with embeddings
@@ -592,13 +641,16 @@ CREATE TABLE capabilities (
 - API documentation
 
 **Deliverables:**
+
 - Full-text search
 - Category browsing
 - Server detail pages
 - Interactive API docs
 
 ### Phase 3: Security and Automation (Months 5-6)
+
 **Goals:** Comprehensive security and publishing automation
+
 - Automated security scanning
 - Container sandboxing
 - CI/CD integration
@@ -606,13 +658,16 @@ CREATE TABLE capabilities (
 - Vulnerability tracking
 
 **Deliverables:**
+
 - Security scoring system
 - Automated validation
 - GitHub Actions integration
 - Moderator dashboard
 
 ### Phase 4: Developer Tools (Months 7-8)
+
 **Goals:** MCPM CLI and developer experience
+
 - MCPM CLI application development
 - Configuration management
 - Local testing tools
@@ -620,13 +675,16 @@ CREATE TABLE capabilities (
 - Version management
 
 **Deliverables:**
+
 - Feature-complete MCPM CLI
 - Developer dashboard
 - Usage analytics
 - Deprecation tools
 
 ### Phase 5: Enterprise Features (Months 9-10)
+
 **Goals:** Enterprise and scaling features
+
 - Private registries
 - Team management
 - Advanced security features
@@ -634,13 +692,16 @@ CREATE TABLE capabilities (
 - Compliance tools
 
 **Deliverables:**
+
 - Organization accounts
 - Private server hosting
 - Audit logging
 - Compliance reports
 
 ### Phase 6: Platform Maturity (Months 11-12)
+
 **Goals:** Performance optimization and ecosystem growth
+
 - Performance optimization
 - Global CDN deployment
 - Community features
@@ -648,6 +709,7 @@ CREATE TABLE capabilities (
 - Platform stability
 
 **Deliverables:**
+
 - Multi-region deployment
 - Community forums
 - Server templates
@@ -656,12 +718,14 @@ CREATE TABLE capabilities (
 ## Success Metrics
 
 ### Technical Metrics
+
 - API uptime: >99.9%
 - Response time: <100ms (p95)
 - Security scan coverage: 100%
 - CDN cache hit rate: >90%
 
 ### Business Metrics
+
 - Monthly active servers: 1,000+
 - Developer accounts: 5,000+
 - Monthly downloads: 100,000+
@@ -669,6 +733,7 @@ CREATE TABLE capabilities (
 - Security incidents: <5/year
 
 ### Community Metrics
+
 - GitHub stars: 1,000+
 - Discord members: 2,000+
 - Contribution rate: 20%
@@ -677,12 +742,14 @@ CREATE TABLE capabilities (
 ## Risk Mitigation
 
 ### Technical Risks
+
 - **Scaling challenges**: Implement horizontal scaling early
 - **Security vulnerabilities**: Continuous security auditing
 - **Performance degradation**: Comprehensive monitoring
 - **Data loss**: Multi-region backups
 
 ### Business Risks
+
 - **Low adoption**: Strong developer relations
 - **Competition**: Unique features and UX
 - **Sustainability**: Clear monetization strategy

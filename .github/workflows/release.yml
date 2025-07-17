@@ -1,0 +1,389 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.0)'
+        required: true
+        type: string
+
+env:
+  DOTNET_VERSION: '9.0.x'
+  NODE_VERSION: '20'
+  SOLUTION_PATH: 'Source/MCPHub.sln'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Create GitHub release
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+    
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Determine version
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+      
+      - name: Generate changelog
+        id: changelog
+        run: |
+          if [[ -f "CHANGELOG.md" ]]; then
+            # Extract changelog for this version
+            CHANGELOG=$(sed -n "/## \[${{ steps.version.outputs.version }}\]/,/## \[/p" CHANGELOG.md | sed '$d')
+          else
+            # Generate changelog from git commits
+            CHANGELOG=$(git log --pretty=format:"- %s" $(git describe --tags --abbrev=0 HEAD^)..HEAD)
+          fi
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          release_name: Release v${{ steps.version.outputs.version }}
+          body: |
+            ## Changes in v${{ steps.version.outputs.version }}
+            
+            ${{ steps.changelog.outputs.changelog }}
+            
+            ## Downloads
+            
+            ### CLI Tool (mcpm)
+            - [Linux x64](https://github.com/${{ github.repository }}/releases/download/v${{ steps.version.outputs.version }}/mcpm-linux-x64.tar.gz)
+            - [Linux ARM64](https://github.com/${{ github.repository }}/releases/download/v${{ steps.version.outputs.version }}/mcpm-linux-arm64.tar.gz)
+            - [macOS x64](https://github.com/${{ github.repository }}/releases/download/v${{ steps.version.outputs.version }}/mcpm-osx-x64.tar.gz)
+            - [macOS ARM64](https://github.com/${{ github.repository }}/releases/download/v${{ steps.version.outputs.version }}/mcpm-osx-arm64.tar.gz)
+            - [Windows x64](https://github.com/${{ github.repository }}/releases/download/v${{ steps.version.outputs.version }}/mcpm-win-x64.zip)
+            - [Windows ARM64](https://github.com/${{ github.repository }}/releases/download/v${{ steps.version.outputs.version }}/mcpm-win-arm64.zip)
+            
+            ### Docker Images
+            - Web App: `ghcr.io/${{ github.repository }}/webapp:v${{ steps.version.outputs.version }}`
+            - Public API: `ghcr.io/${{ github.repository }}/publicapi:v${{ steps.version.outputs.version }}`
+            - Security Service: `ghcr.io/${{ github.repository }}/securityservice:v${{ steps.version.outputs.version }}`
+            - Search Service: `ghcr.io/${{ github.repository }}/searchservice:v${{ steps.version.outputs.version }}`
+            
+            ## Installation
+            
+            ### CLI Tool
+            ```bash
+            # Linux/macOS
+            curl -L https://github.com/${{ github.repository }}/releases/download/v${{ steps.version.outputs.version }}/mcpm-linux-x64.tar.gz | tar -xz
+            sudo mv mcpm /usr/local/bin/
+            
+            # Windows (PowerShell)
+            Invoke-WebRequest -Uri https://github.com/${{ github.repository }}/releases/download/v${{ steps.version.outputs.version }}/mcpm-win-x64.zip -OutFile mcpm.zip
+            Expand-Archive -Path mcpm.zip -DestinationPath .
+            ```
+            
+            ### Docker Compose
+            ```yaml
+            version: '3.8'
+            services:
+              webapp:
+                image: ghcr.io/${{ github.repository }}/webapp:v${{ steps.version.outputs.version }}
+                ports:
+                  - "5000:5000"
+              publicapi:
+                image: ghcr.io/${{ github.repository }}/publicapi:v${{ steps.version.outputs.version }}
+                ports:
+                  - "8080:8080"
+            ```
+            
+            ## What's New
+            
+            This release includes improvements to performance, security, and developer experience. See the full changelog above for details.
+          draft: false
+          prerelease: false
+
+  # Build and publish CLI tool
+  build-cli:
+    name: Build CLI Tool
+    runs-on: ubuntu-latest
+    needs: create-release
+    
+    strategy:
+      matrix:
+        target: [linux-x64, linux-arm64, osx-x64, osx-arm64, win-x64, win-arm64]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      
+      - name: Install .NET workloads
+        run: |
+          dotnet workload install aspire
+          dotnet workload install wasm-tools
+      
+      - name: Restore dependencies
+        run: dotnet restore Source/CommandLineApp/CommandLineApp.csproj
+      
+      - name: Publish CLI tool
+        run: |
+          dotnet publish Source/CommandLineApp/CommandLineApp.csproj \
+            --configuration Release \
+            --runtime ${{ matrix.target }} \
+            --self-contained true \
+            --output ./publish/${{ matrix.target }} \
+            /p:PublishAot=true \
+            /p:PublishSingleFile=true \
+            /p:PublishTrimmed=true \
+            /p:Version=${{ needs.create-release.outputs.version }}
+      
+      - name: Create archive
+        run: |
+          cd ./publish/${{ matrix.target }}
+          if [[ "${{ matrix.target }}" == *"win"* ]]; then
+            zip -r ../../mcpm-${{ matrix.target }}.zip .
+          else
+            tar -czf ../../mcpm-${{ matrix.target }}.tar.gz .
+          fi
+      
+      - name: Upload CLI tool
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ./mcpm-${{ matrix.target }}.${{ matrix.target == 'win-x64' && 'zip' || matrix.target == 'win-arm64' && 'zip' || 'tar.gz' }}
+          asset_name: mcpm-${{ matrix.target }}.${{ matrix.target == 'win-x64' && 'zip' || matrix.target == 'win-arm64' && 'zip' || 'tar.gz' }}
+          asset_content_type: application/octet-stream
+
+  # Build and publish Docker images
+  build-docker:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: create-release
+    
+    permissions:
+      contents: read
+      packages: write
+    
+    strategy:
+      matrix:
+        service: [webapp, publicapi, securityservice, searchservice]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.service }}
+          tags: |
+            type=raw,value=v${{ needs.create-release.outputs.version }}
+            type=raw,value=latest
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Source/${{ matrix.service }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+          build-args: |
+            VERSION=${{ needs.create-release.outputs.version }}
+
+  # Publish NuGet packages
+  publish-nuget:
+    name: Publish NuGet Packages
+    runs-on: ubuntu-latest
+    needs: create-release
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.SOLUTION_PATH }}
+      
+      - name: Build solution
+        run: |
+          dotnet build ${{ env.SOLUTION_PATH }} \
+            --configuration Release \
+            --no-restore \
+            /p:Version=${{ needs.create-release.outputs.version }}
+      
+      - name: Pack NuGet packages
+        run: |
+          dotnet pack Source/Domain/Domain.csproj \
+            --configuration Release \
+            --no-build \
+            --output ./nupkg \
+            /p:PackageVersion=${{ needs.create-release.outputs.version }}
+          
+          dotnet pack Source/Common/Common.csproj \
+            --configuration Release \
+            --no-build \
+            --output ./nupkg \
+            /p:PackageVersion=${{ needs.create-release.outputs.version }}
+          
+          dotnet pack Source/Core/Core.csproj \
+            --configuration Release \
+            --no-build \
+            --output ./nupkg \
+            /p:PackageVersion=${{ needs.create-release.outputs.version }}
+      
+      - name: Publish to NuGet
+        run: |
+          dotnet nuget push ./nupkg/*.nupkg \
+            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
+      
+      - name: Publish to GitHub Packages
+        run: |
+          dotnet nuget push ./nupkg/*.nupkg \
+            --api-key ${{ secrets.GITHUB_TOKEN }} \
+            --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json \
+            --skip-duplicate
+
+  # Deploy to production
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build-cli, build-docker, publish-nuget]
+    environment: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Deploy to production
+        run: |
+          echo "Deploying version ${{ needs.create-release.outputs.version }} to production..."
+          # Add deployment logic here
+          # This could be Helm charts, kubectl, or other deployment tools
+      
+      - name: Run health checks
+        run: |
+          echo "Running health checks..."
+          # Add health check logic here
+      
+      - name: Update documentation
+        run: |
+          echo "Updating documentation..."
+          # Add documentation update logic here
+      
+      - name: Notify release
+        if: always()
+        run: |
+          echo "Release v${{ needs.create-release.outputs.version }} completed. Status: ${{ job.status }}"
+          # Add notification logic here (Slack, Teams, etc.)
+
+  # Update package managers
+  update-package-managers:
+    name: Update Package Managers
+    runs-on: ubuntu-latest
+    needs: [build-cli, deploy-production]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Update Homebrew formula
+        run: |
+          echo "Updating Homebrew formula for version ${{ needs.create-release.outputs.version }}..."
+          # Add Homebrew formula update logic here
+      
+      - name: Update Chocolatey package
+        run: |
+          echo "Updating Chocolatey package for version ${{ needs.create-release.outputs.version }}..."
+          # Add Chocolatey package update logic here
+      
+      - name: Update Scoop manifest
+        run: |
+          echo "Updating Scoop manifest for version ${{ needs.create-release.outputs.version }}..."
+          # Add Scoop manifest update logic here
+      
+      - name: Update APT repository
+        run: |
+          echo "Updating APT repository for version ${{ needs.create-release.outputs.version }}..."
+          # Add APT repository update logic here
+      
+      - name: Update RPM repository
+        run: |
+          echo "Updating RPM repository for version ${{ needs.create-release.outputs.version }}..."
+          # Add RPM repository update logic here
+
+  # Performance benchmarks
+  performance-benchmarks:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      
+      - name: Run benchmarks
+        run: |
+          echo "Running performance benchmarks for version ${{ needs.create-release.outputs.version }}..."
+          # Add benchmark logic here
+          # This could be BenchmarkDotNet or other performance testing tools
+      
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v3
+        with:
+          name: benchmark-results
+          path: BenchmarkDotNet.Artifacts/
+          retention-days: 90

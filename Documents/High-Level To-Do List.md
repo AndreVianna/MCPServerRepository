@@ -6,7 +6,7 @@ This document translates the high-level "MCPM Detailed Implementation Roadmap" i
 
 **How to Use This Document:**
 
-* **Status:** Update from Pending to In Progress, Blocked, or Done.  
+* **Status:** Update from Pending to In Progress, Blocked, or Done.
 * **Assigned To:** Assign each task to a team member or pod (e.g., Backend, Frontend, CLI).
 
 ## **Sprint 1: The "Walking Skeleton" \- Core API & Storage**
@@ -115,4 +115,3 @@ This document translates the high-level "MCPM Detailed Implementation Roadmap" i
 | 7.6 | **CLI:** Implement mcpm run and mcpm test commands. | Pending |  |
 | 7.7 | **Community:** Implement the full user reviews and ratings system. | Pending |  |
 | 7.8 | **Community:** Implement the "Verified Maintainer" process and display badges. | Pending |  |
-

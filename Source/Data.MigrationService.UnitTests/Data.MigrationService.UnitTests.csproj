@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="../Data.MigrationService/Data.MigrationService.csproj" />
+    <ProjectReference Include="..\Common.UnitTests\Common.UnitTests.csproj" />
+  </ItemGroup>
+
+</Project>

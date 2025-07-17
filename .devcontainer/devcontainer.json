@@ -1,0 +1,198 @@
+{
+    "name": "MCP Hub Development Environment",
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "mcphub-dev",
+    "workspaceFolder": "/workspace",
+    "shutdownAction": "stopCompose",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-dotnettools.csdevkit",
+                "ms-dotnettools.csharp",
+                "ms-dotnettools.vscode-dotnet-runtime",
+                "ms-vscode.vscode-json",
+                "ms-vscode.PowerShell",
+                "ms-azuretools.vscode-docker",
+                "ms-vscode.test-adapter-converter",
+                "ms-playwright.playwright",
+                "bradlc.vscode-tailwindcss",
+                "esbenp.prettier-vscode",
+                "editorconfig.editorconfig",
+                "github.vscode-github-actions",
+                "github.copilot",
+                "github.copilot-chat",
+                "ms-vscode.hexeditor",
+                "redhat.vscode-yaml",
+                "ms-vscode.vscode-typescript-next",
+                "ms-vscode.js-debug",
+                "ms-vscode.references-view",
+                "ms-vscode.npm-script",
+                "ms-vscode.vscode-markdown",
+                "ms-vscode.vscode-markdown-preview",
+                "ms-vscode.vscode-json-languageservice",
+                "ms-vscode.remote-containers"
+            ],
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash",
+                "dotnet.defaultSolution": "Source/MCPHub.sln",
+                "omnisharp.useModernNet": true,
+                "omnisharp.enableEditorConfigSupport": true,
+                "omnisharp.enableRoslynAnalyzers": true,
+                "files.trimTrailingWhitespace": true,
+                "files.insertFinalNewline": true,
+                "files.trimFinalNewlines": true,
+                "editor.formatOnSave": true,
+                "editor.formatOnPaste": true,
+                "editor.formatOnType": true,
+                "editor.codeActionsOnSave": {
+                    "source.fixAll": "explicit",
+                    "source.organizeImports": "explicit"
+                },
+                "csharp.format.enable": true,
+                "csharp.semanticHighlighting.enabled": true,
+                "csharp.inlayHints.enableInlayHintsForTypes": true,
+                "csharp.inlayHints.enableInlayHintsForParameters": true,
+                "csharp.unitTests.runSettingsPath": "Source/test.runsettings",
+                "[csharp]": {
+                    "editor.defaultFormatter": "ms-dotnettools.csharp",
+                    "editor.tabSize": 4,
+                    "editor.insertSpaces": true,
+                    "editor.detectIndentation": false
+                },
+                "[json]": {
+                    "editor.defaultFormatter": "vscode.json-language-features"
+                },
+                "[jsonc]": {
+                    "editor.defaultFormatter": "vscode.json-language-features"
+                },
+                "[yaml]": {
+                    "editor.defaultFormatter": "redhat.vscode-yaml"
+                },
+                "[markdown]": {
+                    "editor.defaultFormatter": "vscode.markdown-language-features"
+                },
+                "git.enableSmartCommit": true,
+                "git.confirmSync": false,
+                "git.autofetch": true,
+                "search.exclude": {
+                    "**/bin": true,
+                    "**/obj": true,
+                    "**/node_modules": true,
+                    "**/coverage": true,
+                    "**/TestResults": true,
+                    "**/.git": true,
+                    "**/.vs": true,
+                    "**/*.min.js": true,
+                    "**/*.min.css": true
+                },
+                "files.watcherExclude": {
+                    "**/bin/**": true,
+                    "**/obj/**": true,
+                    "**/node_modules/**": true,
+                    "**/.git/**": true,
+                    "**/.vs/**": true
+                }
+            }
+        }
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:2": {
+            "installZsh": false,
+            "configureZshAsDefaultShell": false,
+            "installOhMyZsh": false,
+            "upgradePackages": true,
+            "username": "vscode",
+            "userUid": 1000,
+            "userGid": 1000
+        },
+        "ghcr.io/devcontainers/features/dotnet:2": {
+            "version": "9.0",
+            "additionalVersions": "",
+            "installUsingApt": false,
+            "aspNetCoreRuntimeVersions": "9.0"
+        },
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "20",
+            "nodeGypDependencies": true,
+            "installYarnUsingApt": false,
+            "nvmInstallPath": "/usr/local/share/nvm"
+        },
+        "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+            "version": "latest",
+            "enableNonRootDocker": true,
+            "moby": true
+        },
+        "ghcr.io/devcontainers/features/git:1": {
+            "version": "latest",
+            "ppa": false
+        },
+        "ghcr.io/devcontainers/features/github-cli:1": {
+            "version": "latest"
+        }
+    },
+    "forwardPorts": [
+        5000,
+        5001,
+        5432,
+        6379,
+        9200,
+        6333,
+        5672,
+        15672,
+        18080,
+        18081,
+        18082,
+        18083,
+        18084,
+        18085
+    ],
+    "portsAttributes": {
+        "5000": {
+            "label": "HTTP - Web App",
+            "onAutoForward": "notify"
+        },
+        "5001": {
+            "label": "HTTPS - Web App",
+            "onAutoForward": "notify"
+        },
+        "5432": {
+            "label": "PostgreSQL",
+            "onAutoForward": "silent"
+        },
+        "6379": {
+            "label": "Redis",
+            "onAutoForward": "silent"
+        },
+        "9200": {
+            "label": "Elasticsearch",
+            "onAutoForward": "silent"
+        },
+        "6333": {
+            "label": "Qdrant",
+            "onAutoForward": "silent"
+        },
+        "5672": {
+            "label": "RabbitMQ",
+            "onAutoForward": "silent"
+        },
+        "15672": {
+            "label": "RabbitMQ Management",
+            "onAutoForward": "silent"
+        },
+        "18080": {
+            "label": "Aspire Dashboard",
+            "onAutoForward": "notify"
+        }
+    },
+    "postCreateCommand": ".devcontainer/scripts/post-create.sh",
+    "postStartCommand": ".devcontainer/scripts/post-start.sh",
+    "remoteUser": "vscode",
+    "mounts": [
+        "source=${localWorkspaceFolder}/.devcontainer/dotnet-tools,target=/home/vscode/.dotnet/tools,type=bind,consistency=cached",
+        "source=${localWorkspaceFolder}/.devcontainer/nuget-cache,target=/home/vscode/.nuget/packages,type=bind,consistency=cached",
+        "source=${localWorkspaceFolder}/.devcontainer/node-cache,target=/home/vscode/.npm,type=bind,consistency=cached"
+    ],
+    "otherPortsAttributes": {
+        "onAutoForward": "silent"
+    }
+}

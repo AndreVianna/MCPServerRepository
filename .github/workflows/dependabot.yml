@@ -1,0 +1,303 @@
+name: Dependabot Updates
+
+on:
+  schedule:
+    - cron: '0 8 * * MON'  # Run every Monday at 8 AM UTC
+  workflow_dispatch:
+
+jobs:
+  # Auto-approve and merge Dependabot PRs
+  auto-approve-dependabot:
+    name: Auto-approve Dependabot PRs
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    
+    permissions:
+      pull-requests: write
+      contents: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Get PR info
+        id: pr-info
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            const { data: pullRequest } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+            
+            const title = pullRequest.title;
+            const body = pullRequest.body;
+            
+            // Check if it's a patch or minor update
+            const isPatch = title.includes('patch') || title.includes('dependencies');
+            const isMinor = title.includes('minor');
+            const isMajor = title.includes('major');
+            
+            // Check if it's a security update
+            const isSecurity = body.includes('security') || body.includes('vulnerability');
+            
+            return JSON.stringify({
+              isPatch,
+              isMinor,
+              isMajor,
+              isSecurity,
+              title,
+              body
+            });
+      
+      - name: Auto-approve patch updates
+        if: fromJson(steps.pr-info.outputs.result).isPatch || fromJson(steps.pr-info.outputs.result).isSecurity
+        run: |
+          gh pr review --approve "${{ github.event.pull_request.html_url }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Auto-merge patch updates
+        if: fromJson(steps.pr-info.outputs.result).isPatch && !fromJson(steps.pr-info.outputs.result).isMajor
+        run: |
+          gh pr merge --auto --merge "${{ github.event.pull_request.html_url }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Comment on major updates
+        if: fromJson(steps.pr-info.outputs.result).isMajor
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚨 **Major version update detected!**
+              
+              This PR contains a major version update that may include breaking changes.
+              Please review carefully before merging.
+              
+              **What to check:**
+              - [ ] Review the changelog for breaking changes
+              - [ ] Run the full test suite
+              - [ ] Test critical functionality manually
+              - [ ] Update documentation if needed
+              
+              **Auto-merge is disabled** for this PR. Manual review and approval required.`
+            })
+      
+      - name: Request review for major updates
+        if: fromJson(steps.pr-info.outputs.result).isMajor
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              reviewers: ['${{ github.repository_owner }}']
+            })
+
+  # Check for outdated dependencies
+  check-outdated:
+    name: Check Outdated Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      
+      - name: Install dotnet-outdated
+        run: dotnet tool install --global dotnet-outdated-tool
+      
+      - name: Check for outdated packages
+        run: |
+          cd Source
+          dotnet outdated --upgrade --include-auto-references > outdated-report.txt
+          cat outdated-report.txt
+      
+      - name: Upload outdated report
+        uses: actions/upload-artifact@v3
+        with:
+          name: outdated-dependencies
+          path: Source/outdated-report.txt
+          retention-days: 30
+      
+      - name: Comment outdated packages
+        if: github.event_name == 'schedule'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            try {
+              const report = fs.readFileSync('Source/outdated-report.txt', 'utf8');
+              
+              if (report.includes('No outdated packages found')) {
+                console.log('No outdated packages found');
+                return;
+              }
+              
+              const issueTitle = `📦 Outdated Dependencies Report - ${new Date().toISOString().split('T')[0]}`;
+              const issueBody = `# Outdated Dependencies Report
+              
+              This is an automated report of outdated dependencies in the project.
+              
+              \`\`\`
+              ${report}
+              \`\`\`
+              
+              ## Recommendations
+              
+              - Review each outdated package for security vulnerabilities
+              - Consider updating to the latest stable versions
+              - Test thoroughly after updating major versions
+              - Check changelog for breaking changes
+              
+              ## Actions
+              
+              - [ ] Review security advisories
+              - [ ] Update patch versions
+              - [ ] Plan major version updates
+              - [ ] Update documentation if needed
+              
+              ---
+              
+              *This issue was automatically generated by the Dependabot workflow.*`;
+              
+              // Check if issue already exists
+              const existingIssues = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                labels: 'dependencies'
+              });
+              
+              const existingIssue = existingIssues.data.find(issue => issue.title.includes('Outdated Dependencies Report'));
+              
+              if (existingIssue) {
+                // Update existing issue
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: existingIssue.number,
+                  body: `## Updated Report - ${new Date().toISOString().split('T')[0]}
+                  
+                  \`\`\`
+                  ${report}
+                  \`\`\``
+                });
+              } else {
+                // Create new issue
+                await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: issueTitle,
+                  body: issueBody,
+                  labels: ['dependencies', 'maintenance']
+                });
+              }
+            } catch (error) {
+              console.error('Error reading report file:', error);
+            }
+
+  # Security audit
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      
+      - name: Check for vulnerable packages
+        run: |
+          cd Source
+          dotnet list package --vulnerable --include-transitive > security-report.txt
+          cat security-report.txt
+      
+      - name: Upload security report
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-audit
+          path: Source/security-report.txt
+          retention-days: 30
+      
+      - name: Create security issue
+        if: github.event_name == 'schedule'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            try {
+              const report = fs.readFileSync('Source/security-report.txt', 'utf8');
+              
+              if (!report.includes('vulnerable')) {
+                console.log('No vulnerable packages found');
+                return;
+              }
+              
+              const issueTitle = `🔒 Security Vulnerability Report - ${new Date().toISOString().split('T')[0]}`;
+              const issueBody = `# Security Vulnerability Report
+              
+              **⚠️ SECURITY ALERT: Vulnerable packages detected in the project!**
+              
+              \`\`\`
+              ${report}
+              \`\`\`
+              
+              ## Immediate Actions Required
+              
+              - [ ] 🔍 **Review each vulnerability** for impact assessment
+              - [ ] 🚨 **Update vulnerable packages** to safe versions
+              - [ ] 🧪 **Test thoroughly** after updates
+              - [ ] 📋 **Document changes** and workarounds if needed
+              
+              ## Severity Guidelines
+              
+              - **Critical/High**: Update immediately
+              - **Medium**: Update within 7 days
+              - **Low**: Update in next sprint
+              
+              ## Resources
+              
+              - [GitHub Security Advisories](https://github.com/advisories)
+              - [NuGet Security Advisories](https://github.com/NuGet/Announcements/issues?q=is%3Aissue+is%3Aopen+label%3ASecurity)
+              - [CVE Database](https://cve.mitre.org/)
+              
+              ---
+              
+              *This issue was automatically generated by the security audit workflow.*`;
+              
+              // Create security issue with high priority
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: issueTitle,
+                body: issueBody,
+                labels: ['security', 'vulnerability', 'high-priority']
+              });
+              
+              // Also create a security advisory if it's a serious issue
+              if (report.includes('Critical') || report.includes('High')) {
+                console.log('Critical/High vulnerability detected - consider creating security advisory');
+              }
+            } catch (error) {
+              console.error('Error reading security report file:', error);
+            }

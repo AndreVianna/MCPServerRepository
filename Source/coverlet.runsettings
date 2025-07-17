@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat code coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <Threshold>90</Threshold>
+          <ThresholdType>line</ThresholdType>
+          <ThresholdStat>total</ThresholdStat>
+          <Include>
+            <Source>**/Domain/**</Source>
+            <Source>**/Common/**</Source>
+            <Source>**/Core/**</Source>
+            <Source>**/Data/**</Source>
+            <Source>**/CommandLineApp/**</Source>
+            <Source>**/PublicApi/**</Source>
+            <Source>**/WebApp/**</Source>
+            <Source>**/SecurityService/**</Source>
+            <Source>**/SearchService/**</Source>
+          </Include>
+          <Exclude>
+            <Source>**/bin/**</Source>
+            <Source>**/obj/**</Source>
+            <Source>**/*.UnitTests/**</Source>
+            <Source>**/Migrations/**</Source>
+            <Source>**/Program.cs</Source>
+            <Source>**/Startup.cs</Source>
+            <Source>**/AssemblyInfo.cs</Source>
+            <Source>**/GlobalUsings.cs</Source>
+          </Exclude>
+          <ExcludeByFile>
+            <Source>**/Program.cs</Source>
+            <Source>**/Startup.cs</Source>
+            <Source>**/AssemblyInfo.cs</Source>
+            <Source>**/GlobalUsings.cs</Source>
+          </ExcludeByFile>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

@@ -1,0 +1,19 @@
+{
+  "figmaConfig": {
+    "assetOutputPath": "assets/figma",
+    "defaultSvgOptions": {
+      "includeId": false,
+      "outlineText": true,
+      "simplifyStroke": true
+    },
+    "defaultPngScale": 2,
+    "supportedFormats": ["svg", "png"],
+    "fileNamingConvention": "kebab-case"
+  },
+  "designSystem": {
+    "tokensFile": "Source/WebApp/wwwroot/styles/design-tokens.css",
+    "iconsPath": "Source/WebApp/wwwroot/assets/icons",
+    "illustrationsPath": "Source/WebApp/wwwroot/assets/illustrations",
+    "logosPath": "Source/WebApp/wwwroot/assets/logos"
+  }
+}

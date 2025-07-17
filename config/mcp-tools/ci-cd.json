@@ -1,0 +1,45 @@
+{
+  "ciCdIntegration": {
+    "github": {
+      "workflows": {
+        "designSync": {
+          "enabled": true,
+          "trigger": "figma-file-change",
+          "actions": [
+            "extract-assets",
+            "update-tokens",
+            "run-visual-tests",
+            "create-pr"
+          ]
+        },
+        "e2eTests": {
+          "enabled": true,
+          "trigger": "pull-request",
+          "environments": ["development", "staging"],
+          "parallelExecution": true,
+          "retryCount": 2
+        },
+        "visualRegression": {
+          "enabled": true,
+          "trigger": "deployment",
+          "baselineUpdate": "manual",
+          "threshold": 0.01
+        }
+      }
+    },
+    "azure": {
+      "pipelines": {
+        "buildValidation": {
+          "includePlaywrightTests": true,
+          "includeVisualTests": true,
+          "includeAccessibilityTests": true
+        },
+        "deploymentValidation": {
+          "smokeTests": true,
+          "fullE2ETests": true,
+          "performanceTests": true
+        }
+      }
+    }
+  }
+}

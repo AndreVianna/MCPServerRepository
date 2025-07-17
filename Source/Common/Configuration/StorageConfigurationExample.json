@@ -1,0 +1,133 @@
+{
+  "Storage": {
+    "Provider": "AzureBlob",
+    "AzureBlob": {
+      "ConnectionString": "DefaultEndpointsProtocol=https;AccountName=youraccount;AccountKey=yourkey;EndpointSuffix=core.windows.net",
+      "StorageAccountName": "youraccount",
+      "StorageAccountKey": "yourkey",
+      "ManagedIdentityClientId": null,
+      "UseManagedIdentity": true,
+      "DefaultContainer": "mcphub",
+      "MaxRetryAttempts": 3,
+      "RetryDelay": "00:00:01"
+    },
+    "AwsS3": {
+      "AccessKeyId": "your-access-key",
+      "SecretAccessKey": "your-secret-key",
+      "SessionToken": null,
+      "Region": "us-east-1",
+      "DefaultBucket": "mcphub",
+      "UseInstanceProfile": true,
+      "ProfileName": null,
+      "MaxRetryAttempts": 3,
+      "RetryDelay": "00:00:01"
+    },
+    "S3Compatible": {
+      "ServiceUrl": "https://your-minio-server.com",
+      "AccessKey": "your-access-key",
+      "SecretKey": "your-secret-key",
+      "Region": "us-east-1",
+      "DefaultBucket": "mcphub",
+      "UseHttps": true,
+      "MaxRetryAttempts": 3,
+      "RetryDelay": "00:00:01"
+    },
+    "Options": {
+      "MaxFileSize": 104857600,
+      "MaxConcurrentOperations": 10,
+      "EnableCompression": true,
+      "AllowedFileExtensions": [
+        ".txt",
+        ".json",
+        ".xml",
+        ".pdf",
+        ".zip",
+        ".tar.gz",
+        ".nupkg"
+      ],
+      "BlockedFileExtensions": [
+        ".exe",
+        ".bat",
+        ".cmd",
+        ".scr",
+        ".vbs",
+        ".ps1"
+      ],
+      "DefaultPresignedUrlExpiration": "01:00:00",
+      "EnableVersioning": true,
+      "MaxVersionsToKeep": 10
+    },
+    "LifecyclePolicies": [
+      {
+        "Name": "DeleteOldPackages",
+        "ContainerPattern": "packages-.*",
+        "FilePattern": ".*\\.nupkg$",
+        "IsEnabled": true,
+        "Rules": [
+          {
+            "Action": "Delete",
+            "DaysAfterCreation": 365,
+            "DaysAfterModification": 0,
+            "MinimumFileSize": null,
+            "MaximumFileSize": null
+          }
+        ]
+      },
+      {
+        "Name": "ArchiveOldVersions",
+        "ContainerPattern": "versions",
+        "FilePattern": null,
+        "IsEnabled": true,
+        "Rules": [
+          {
+            "Action": "Archive",
+            "DaysAfterCreation": 0,
+            "DaysAfterModification": 90,
+            "MinimumFileSize": null,
+            "MaximumFileSize": null
+          }
+        ]
+      }
+    ],
+    "Security": {
+      "EnableEncryptionAtRest": true,
+      "EnableEncryptionInTransit": true,
+      "EncryptionKey": null,
+      "KeyVaultUrl": null,
+      "AllowedIpAddresses": [],
+      "BlockedIpAddresses": [],
+      "EnableAccessLogging": true,
+      "EnableVirusScanning": true,
+      "MaxDownloadAttemptsPerHour": 100
+    },
+    "Monitoring": {
+      "EnableMetrics": true,
+      "EnableHealthChecks": true,
+      "MetricsInterval": "00:05:00",
+      "HealthCheckInterval": "00:01:00",
+      "AlertRecipients": [
+        "admin@mcphub.com",
+        "security@mcphub.com"
+      ],
+      "Thresholds": {
+        "HighUsagePercentage": 80.0,
+        "CriticalUsagePercentage": 95.0,
+        "MaxFailedOperationsPerMinute": 10,
+        "MaxResponseTime": "00:00:30"
+      }
+    },
+    "Backup": {
+      "EnableBackup": true,
+      "BackupType": "CrossRegion",
+      "BackupDestination": "backup-storage-account",
+      "BackupSchedule": "0 2 * * *",
+      "BackupRetentionDays": 30,
+      "EnableGeoReplication": true,
+      "ReplicationRegions": [
+        "eastus2",
+        "westus2",
+        "northeurope"
+      ]
+    }
+  }
+}

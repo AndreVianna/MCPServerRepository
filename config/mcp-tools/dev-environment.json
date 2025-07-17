@@ -1,0 +1,25 @@
+{
+  "developmentIntegration": {
+    "codeGeneration": {
+      "enabled": true,
+      "outputPath": "Source/WebApp/Components/Generated",
+      "templates": {
+        "blazorComponent": "templates/blazor-component.template",
+        "cssModule": "templates/css-module.template",
+        "testFile": "templates/test-file.template"
+      }
+    },
+    "assetManagement": {
+      "watchMode": true,
+      "autoOptimization": true,
+      "compressionLevel": 7,
+      "formats": ["svg", "png", "webp"]
+    },
+    "testing": {
+      "autoScreenshots": true,
+      "visualRegression": true,
+      "accessibilityChecks": true,
+      "performanceMonitoring": true
+    }
+  }
+}

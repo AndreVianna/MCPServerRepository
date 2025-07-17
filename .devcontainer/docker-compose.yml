@@ -1,0 +1,154 @@
+version: '3.8'
+
+services:
+  mcphub-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/workspace:cached
+      - dotnet-tools:/home/vscode/.dotnet/tools
+      - nuget-cache:/home/vscode/.nuget/packages
+      - node-cache:/home/vscode/.npm
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DOTNET_ENVIRONMENT=Development
+      - DOTNET_CLI_TELEMETRY_OPTOUT=1
+      - DOTNET_NOLOGO=1
+      - DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+      - NUGET_PACKAGES=/home/vscode/.nuget/packages
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=mcphub_dev;Username=mcphub_user;Password=mcphub_dev_password
+      - ConnectionStrings__Redis=redis:6379
+      - ConnectionStrings__Elasticsearch=http://elasticsearch:9200
+      - ConnectionStrings__Qdrant=http://qdrant:6333
+      - ConnectionStrings__RabbitMQ=amqp://guest:guest@rabbitmq:5672
+      - ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL=http://localhost:18080
+    depends_on:
+      - postgres
+      - redis
+      - elasticsearch
+      - qdrant
+      - rabbitmq
+    networks:
+      - mcphub-network
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+      - "18080:18080"
+      - "18081:18081"
+      - "18082:18082"
+      - "18083:18083"
+      - "18084:18084"
+      - "18085:18085"
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=mcphub_dev
+      - POSTGRES_USER=mcphub_user
+      - POSTGRES_PASSWORD=mcphub_dev_password
+      - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - mcphub-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mcphub_user -d mcphub_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - mcphub-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=false
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - cluster.name=mcphub-cluster
+      - node.name=mcphub-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - mcphub-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  qdrant:
+    image: qdrant/qdrant:v1.7.3
+    environment:
+      - QDRANT__SERVICE__HTTP_PORT=6333
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    volumes:
+      - qdrant-data:/qdrant/storage
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    networks:
+      - mcphub-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:6333/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - mcphub-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  postgres-data:
+  redis-data:
+  elasticsearch-data:
+  qdrant-data:
+  rabbitmq-data:
+  dotnet-tools:
+  nuget-cache:
+  node-cache:
+
+networks:
+  mcphub-network:
+    driver: bridge

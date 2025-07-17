@@ -1,13 +1,15 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
 using Common.Messaging;
 using Common.Messaging.DependencyInjection;
 using Common.Messaging.RabbitMQ;
-using Domain.Events;
-using Domain.Commands;
 using Common.UnitTests.TestUtilities;
+
+using Domain.Commands;
+using Domain.Events;
+
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Common.UnitTests.Messaging;
 
@@ -15,21 +17,18 @@ namespace Common.UnitTests.Messaging;
 /// Integration tests for RabbitMQ message queue infrastructure
 /// </summary>
 [Collection("Integration")]
-public class RabbitMQIntegrationTests : IClassFixture<RabbitMQTestFixture>
-{
+public class RabbitMQIntegrationTests : IClassFixture<RabbitMQTestFixture> {
     private readonly RabbitMQTestFixture _fixture;
     private readonly IServiceProvider _serviceProvider;
 
-    public RabbitMQIntegrationTests(RabbitMQTestFixture fixture)
-    {
+    public RabbitMQIntegrationTests(RabbitMQTestFixture fixture) {
         _fixture = fixture;
         _serviceProvider = _fixture.ServiceProvider;
     }
 
     [Fact]
     [Trait("Category", "Integration")]
-    public async Task PublishMessage_ShouldSuccessfullyPublishMessage()
-    {
+    public async Task PublishMessage_ShouldSuccessfullyPublishMessage() {
         // Arrange
         var publisher = _serviceProvider.GetRequiredService<IMessagePublisher>();
         var serverRegisteredEvent = new ServerRegisteredEvent(
@@ -50,8 +49,7 @@ public class RabbitMQIntegrationTests : IClassFixture<RabbitMQTestFixture>
 
     [Fact]
     [Trait("Category", "Integration")]
-    public async Task PublishMessageWithExchange_ShouldSuccessfullyPublishMessage()
-    {
+    public async Task PublishMessageWithExchange_ShouldSuccessfullyPublishMessage() {
         // Arrange
         var publisher = _serviceProvider.GetRequiredService<IMessagePublisher>();
         var scanCommand = new ScanServerCommand(
@@ -71,14 +69,12 @@ public class RabbitMQIntegrationTests : IClassFixture<RabbitMQTestFixture>
 
     [Fact]
     [Trait("Category", "Integration")]
-    public async Task PublishBatchMessages_ShouldSuccessfullyPublishAllMessages()
-    {
+    public async Task PublishBatchMessages_ShouldSuccessfullyPublishAllMessages() {
         // Arrange
         var publisher = _serviceProvider.GetRequiredService<IMessagePublisher>();
         var messages = new List<ServerRegisteredEvent>();
 
-        for (int i = 0; i < 5; i++)
-        {
+        for (var i = 0; i < 5; i++) {
             messages.Add(new ServerRegisteredEvent(
                 Guid.NewGuid().ToString(),
                 $"test-server-{i}",
@@ -98,8 +94,7 @@ public class RabbitMQIntegrationTests : IClassFixture<RabbitMQTestFixture>
 
     [Fact]
     [Trait("Category", "Integration")]
-    public async Task PublishDelayedMessage_ShouldSuccessfullyPublishMessage()
-    {
+    public async Task PublishDelayedMessage_ShouldSuccessfullyPublishMessage() {
         // Arrange
         var publisher = _serviceProvider.GetRequiredService<IMessagePublisher>();
         var indexCommand = new IndexServerCommand(
@@ -119,8 +114,7 @@ public class RabbitMQIntegrationTests : IClassFixture<RabbitMQTestFixture>
 
     [Fact]
     [Trait("Category", "Performance")]
-    public async Task PublishMessage_PerformanceTest_ShouldPublishWithinTimeLimit()
-    {
+    public async Task PublishMessage_PerformanceTest_ShouldPublishWithinTimeLimit() {
         // Arrange
         var publisher = _serviceProvider.GetRequiredService<IMessagePublisher>();
         var serverRegisteredEvent = new ServerRegisteredEvent(
@@ -143,14 +137,12 @@ public class RabbitMQIntegrationTests : IClassFixture<RabbitMQTestFixture>
 
     [Fact]
     [Trait("Category", "Performance")]
-    public async Task PublishBatchMessages_PerformanceTest_ShouldPublishWithinTimeLimit()
-    {
+    public async Task PublishBatchMessages_PerformanceTest_ShouldPublishWithinTimeLimit() {
         // Arrange
         var publisher = _serviceProvider.GetRequiredService<IMessagePublisher>();
         var messages = new List<ServerRegisteredEvent>();
 
-        for (int i = 0; i < 100; i++)
-        {
+        for (var i = 0; i < 100; i++) {
             messages.Add(new ServerRegisteredEvent(
                 Guid.NewGuid().ToString(),
                 $"perf-test-server-{i}",
@@ -172,12 +164,10 @@ public class RabbitMQIntegrationTests : IClassFixture<RabbitMQTestFixture>
 
     [Fact]
     [Trait("Category", "ErrorHandling")]
-    public async Task PublishMessage_WithInvalidConfiguration_ShouldThrowException()
-    {
+    public async Task PublishMessage_WithInvalidConfiguration_ShouldThrowException() {
         // Arrange
         var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
+            .AddInMemoryCollection(new Dictionary<string, string?> {
                 ["RabbitMQ:Host"] = "invalid-host",
                 ["RabbitMQ:Port"] = "5672",
                 ["RabbitMQ:Username"] = "guest",
@@ -201,9 +191,6 @@ public class RabbitMQIntegrationTests : IClassFixture<RabbitMQTestFixture>
             "test-user");
 
         // Act & Assert
-        await Assert.ThrowsAsync<Exception>(async () =>
-        {
-            await publisher.PublishAsync(serverRegisteredEvent);
-        });
+        await Assert.ThrowsAsync<Exception>(async () => await publisher.PublishAsync(serverRegisteredEvent));
     }
 }

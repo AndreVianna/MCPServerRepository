@@ -1,24 +1,23 @@
+using AwesomeAssertions;
+
 using Common.Extensions;
 using Common.Services;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using AwesomeAssertions;
 
 namespace Common.UnitTests.Extensions;
 
-public class WebApplicationExtensionsTests
-{
+public class WebApplicationExtensionsTests {
     private readonly IServiceCollection _services;
     private readonly IConfiguration _configuration;
 
-    public WebApplicationExtensionsTests()
-    {
+    public WebApplicationExtensionsTests() {
         _services = new ServiceCollection();
-        
+
         var configurationBuilder = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
+            .AddInMemoryCollection(new Dictionary<string, string?> {
                 ["Database:ConnectionString"] = "Host=localhost;Database=test;Username=user;Password=pass",
                 ["Database:MaxRetryCount"] = "3",
                 ["Database:CommandTimeout"] = "00:00:30",
@@ -41,16 +40,15 @@ public class WebApplicationExtensionsTests
                 ["Observability:Serilog:MinimumLevel"] = "Information",
                 ["Observability:Serilog:LogTemplate"] = "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] {Message:lj}{NewLine}{Exception}"
             });
-        
+
         _configuration = configurationBuilder.Build();
-        
+
         // Add required services for testing
         _services.AddLogging();
     }
 
     [Fact]
-    public void AddObservabilityServices_RegistersAllServices()
-    {
+    public void AddObservabilityServices_RegistersAllServices() {
         // Act
         _services.AddObservabilityServices();
         var serviceProvider = _services.BuildServiceProvider();
@@ -69,8 +67,7 @@ public class WebApplicationExtensionsTests
     }
 
     [Fact]
-    public void AddObservabilityServices_RegistersHealthChecks()
-    {
+    public void AddObservabilityServices_RegistersHealthChecks() {
         // Act
         _services.AddObservabilityServices();
         var serviceProvider = _services.BuildServiceProvider();
@@ -87,8 +84,7 @@ public class WebApplicationExtensionsTests
     }
 
     [Fact]
-    public void AddApplicationServices_RegistersAllServices()
-    {
+    public void AddApplicationServices_RegistersAllServices() {
         // Act
         _services.AddApplicationServices(_configuration);
         var serviceProvider = _services.BuildServiceProvider();
@@ -114,8 +110,7 @@ public class WebApplicationExtensionsTests
     }
 
     [Fact]
-    public void AddApplicationServices_RegistersConfigurationOptions()
-    {
+    public void AddApplicationServices_RegistersConfigurationOptions() {
         // Act
         _services.AddApplicationServices(_configuration);
         var serviceProvider = _services.BuildServiceProvider();
@@ -135,8 +130,7 @@ public class WebApplicationExtensionsTests
     }
 
     [Fact]
-    public void AddObservabilityServices_RegistersServicesAsSingleton()
-    {
+    public void AddObservabilityServices_RegistersServicesAsSingleton() {
         // Act
         _services.AddObservabilityServices();
         var serviceProvider = _services.BuildServiceProvider();
@@ -149,8 +143,7 @@ public class WebApplicationExtensionsTests
     }
 
     [Fact]
-    public void AddObservabilityServices_RegistersTracingAsScoped()
-    {
+    public void AddObservabilityServices_RegistersTracingAsScoped() {
         // Act
         _services.AddObservabilityServices();
         var serviceProvider = _services.BuildServiceProvider();
@@ -168,27 +161,23 @@ public class WebApplicationExtensionsTests
     }
 
     [Fact]
-    public void AddObservabilityServices_DoesNotThrow()
-    {
+    public void AddObservabilityServices_DoesNotThrow() {
         // Act & Assert
         Action act = () => _services.AddObservabilityServices();
         act.Should().NotThrow();
     }
 
     [Fact]
-    public void AddApplicationServices_DoesNotThrow()
-    {
+    public void AddApplicationServices_DoesNotThrow() {
         // Act & Assert
         Action act = () => _services.AddApplicationServices(_configuration);
         act.Should().NotThrow();
     }
 
     [Fact]
-    public void AddObservabilityServices_CanBeCalledMultipleTimes()
-    {
+    public void AddObservabilityServices_CanBeCalledMultipleTimes() {
         // Act & Assert
-        Action act = () =>
-        {
+        Action act = () => {
             _services.AddObservabilityServices();
             _services.AddObservabilityServices();
         };
@@ -196,11 +185,9 @@ public class WebApplicationExtensionsTests
     }
 
     [Fact]
-    public void AddApplicationServices_CanBeCalledMultipleTimes()
-    {
+    public void AddApplicationServices_CanBeCalledMultipleTimes() {
         // Act & Assert
-        Action act = () =>
-        {
+        Action act = () => {
             _services.AddApplicationServices(_configuration);
             _services.AddApplicationServices(_configuration);
         };

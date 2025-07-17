@@ -5,18 +5,15 @@ namespace Domain.Commands;
 /// <summary>
 /// Command to index a server for search
 /// </summary>
-public class IndexServerCommand : BaseMessage, ICommand
-{
-    public IndexServerCommand(string serverId, string serverVersionId, string indexType)
-    {
+public record IndexServerCommand : BaseMessage, ICommand {
+    public IndexServerCommand(string serverId, string serverVersionId, string indexType) {
         ServerId = serverId;
         ServerVersionId = serverVersionId;
         IndexType = indexType;
     }
 
     public IndexServerCommand(string serverId, string serverVersionId, string indexType, string? correlationId, string? initiatedBy)
-        : base(correlationId, initiatedBy)
-    {
+        : base(correlationId, initiatedBy) {
         ServerId = serverId;
         ServerVersionId = serverVersionId;
         IndexType = indexType;

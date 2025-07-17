@@ -1,19 +1,16 @@
-using System.Text.Json;
 using System.Text;
+using System.Text.Json;
 
 namespace Common.UnitTests.Messaging;
 
 /// <summary>
 /// Simple test for message serialization without complex dependencies
 /// </summary>
-public class MessageSerializationSimpleTest
-{
+public class MessageSerializationSimpleTest {
     [Fact]
-    public void SerializeMessage_ShouldWorkWithJsonSerializer()
-    {
+    public void SerializeMessage_ShouldWorkWithJsonSerializer() {
         // Arrange
-        var message = new TestMessage 
-        { 
+        var message = new TestMessage {
             Id = Guid.NewGuid(),
             Content = "Test message",
             CreatedAt = DateTime.UtcNow
@@ -32,8 +29,7 @@ public class MessageSerializationSimpleTest
         Assert.Equal(message.CreatedAt.ToString(), deserializedMessage.CreatedAt.ToString());
     }
 
-    public class TestMessage
-    {
+    public class TestMessage {
         public Guid Id { get; set; }
         public string Content { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\Domain\Domain.csproj" />
+    <ProjectReference Include="..\Domain\MCPHub.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -60,8 +60,10 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>preview</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <InternalsVisibleTo>$(AssemblyName).UnitTests</InternalsVisibleTo>
   </PropertyGroup>
 
 </Project>

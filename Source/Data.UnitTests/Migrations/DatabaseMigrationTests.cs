@@ -1,32 +1,28 @@
 using Common.UnitTests.TestUtilities;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+
 using Npgsql;
 
 namespace Data.UnitTests.Migrations;
 
 [TestCategory(TestCategories.Integration)]
-public class DatabaseMigrationTests : DatabaseTestBase
-{
+public class DatabaseMigrationTests : DatabaseTestBase {
     private McpHubContext _context = null!;
 
-    protected override void ConfigureDatabaseServices()
-    {
+    protected override void ConfigureDatabaseServices() {
         base.ConfigureDatabaseServices();
-        
+
         Services.AddDbContext<McpHubContext>(options =>
             options.UseInMemoryDatabase(DatabaseName));
     }
 
     [SetUp]
-    public void SetUp()
-    {
-        _context = CreateInMemoryContext<McpHubContext>();
-    }
+    public void SetUp() => _context = CreateInMemoryContext<McpHubContext>();
 
     [Test]
-    public async Task Database_CanBeCreated()
-    {
+    public async Task Database_CanBeCreated() {
         // Act
         var result = await _context.Database.EnsureCreatedAsync();
 
@@ -35,8 +31,7 @@ public class DatabaseMigrationTests : DatabaseTestBase
     }
 
     [Test]
-    public async Task Database_HasCorrectTableStructure()
-    {
+    public async Task Database_HasCorrectTableStructure() {
         // Arrange
         await _context.Database.EnsureCreatedAsync();
 
@@ -56,8 +51,7 @@ public class DatabaseMigrationTests : DatabaseTestBase
     }
 
     [Test]
-    public async Task Database_EnforcesRelationships()
-    {
+    public async Task Database_EnforcesRelationships() {
         // Arrange
         await _context.Database.EnsureCreatedAsync();
 
@@ -78,21 +72,20 @@ public class DatabaseMigrationTests : DatabaseTestBase
         var loadedServer = await _context.Servers
             .Include(s => s.Publisher)
             .FirstAsync(s => s.Id == server.Id);
-        
+
         loadedServer.Publisher.Should().NotBeNull();
         loadedServer.Publisher.Name.Should().Be("Test Publisher");
 
         var loadedPackage = await _context.Packages
             .Include(p => p.Publisher)
             .FirstAsync(p => p.Id == package.Id);
-        
+
         loadedPackage.Publisher.Should().NotBeNull();
         loadedPackage.Publisher.Name.Should().Be("Test Publisher");
     }
 
     [Test]
-    public async Task Database_EnforcesUniqueConstraints()
-    {
+    public async Task Database_EnforcesUniqueConstraints() {
         // Arrange
         await _context.Database.EnsureCreatedAsync();
 
@@ -104,18 +97,17 @@ public class DatabaseMigrationTests : DatabaseTestBase
 
         // Act & Assert - Try to add duplicate publisher name
         _context.Publishers.Add(publisher2);
-        
+
         // In an in-memory database, unique constraints might not be enforced
         // This test would fail with a real database, but we can verify the configuration
         var publisherConfig = _context.Model.FindEntityType(typeof(Publisher));
         var nameProperty = publisherConfig?.FindProperty(nameof(Publisher.Name));
-        
+
         nameProperty.Should().NotBeNull();
     }
 
     [Test]
-    public async Task Database_HandlesJsonColumns()
-    {
+    public async Task Database_HandlesJsonColumns() {
         // Arrange
         await _context.Database.EnsureCreatedAsync();
 
@@ -137,8 +129,7 @@ public class DatabaseMigrationTests : DatabaseTestBase
     }
 
     [Test]
-    public async Task Database_HandlesCascadeDeletes()
-    {
+    public async Task Database_HandlesCascadeDeletes() {
         // Arrange
         await _context.Database.EnsureCreatedAsync();
 
@@ -148,7 +139,7 @@ public class DatabaseMigrationTests : DatabaseTestBase
 
         var server = new Server("Test Server", "A test server", publisher.Id);
         var package = new Package("test-package", "A test package", "1.0.0", publisher.Id);
-        
+
         _context.Servers.Add(server);
         _context.Packages.Add(package);
         await _context.SaveChangesAsync();
@@ -166,8 +157,7 @@ public class DatabaseMigrationTests : DatabaseTestBase
     }
 
     [Test]
-    public async Task Database_HandlesComplexQueries()
-    {
+    public async Task Database_HandlesComplexQueries() {
         // Arrange
         await _context.Database.EnsureCreatedAsync();
 
@@ -205,15 +195,10 @@ public class DatabaseMigrationTests : DatabaseTestBase
     }
 
     [TearDown]
-    public async Task TearDown()
-    {
-        await CleanupDatabaseAsync();
-    }
+    public async Task TearDown() => await CleanupDatabaseAsync();
 
-    protected override async Task CleanupDatabaseAsync()
-    {
-        if (_context != null)
-        {
+    protected override async Task CleanupDatabaseAsync() {
+        if (_context != null) {
             await _context.Database.EnsureDeletedAsync();
             await _context.DisposeAsync();
         }

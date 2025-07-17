@@ -1,19 +1,20 @@
+using System.Reflection;
+
 using Common.Configuration;
+
 using FluentValidation;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using System.Reflection;
 
 namespace Common.Extensions;
 
-public static class ServiceCollectionExtensions
-{
+public static class ServiceCollectionExtensions {
     /// <summary>
     /// Registers all configuration options from the Common.Configuration namespace
     /// </summary>
-    public static IServiceCollection AddConfigurationOptions(this IServiceCollection services, IConfiguration configuration)
-    {
+    public static IServiceCollection AddConfigurationOptions(this IServiceCollection services, IConfiguration configuration) {
         services.Configure<DatabaseOptions>(configuration.GetSection(DatabaseOptions.SectionName));
         services.Configure<CacheOptions>(configuration.GetSection(CacheOptions.SectionName));
         services.Configure<ElasticsearchOptions>(configuration.GetSection(ElasticsearchOptions.SectionName));
@@ -33,28 +34,23 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Registers services from an assembly using automatic discovery
     /// </summary>
-    public static IServiceCollection AddServicesFromAssembly(this IServiceCollection services, Assembly assembly)
-    {
+    public static IServiceCollection AddServicesFromAssembly(this IServiceCollection services, Assembly assembly) {
         var types = assembly.GetTypes()
             .Where(type => type.IsClass && !type.IsAbstract)
             .Where(type => type.Name.EndsWith("Service"))
             .ToList();
 
-        foreach (var type in types)
-        {
+        foreach (var type in types) {
             var interfaces = type.GetInterfaces()
                 .Where(i => i.Name.EndsWith("Service"))
                 .ToList();
 
-            if (interfaces.Count > 0)
-            {
-                foreach (var interfaceType in interfaces)
-                {
+            if (interfaces.Count > 0) {
+                foreach (var interfaceType in interfaces) {
                     services.AddScoped(interfaceType, type);
                 }
             }
-            else
-            {
+            else {
                 services.AddScoped(type);
             }
         }
@@ -65,8 +61,7 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Registers MediatR handlers from an assembly
     /// </summary>
-    public static IServiceCollection AddMediatRFromAssembly(this IServiceCollection services, Assembly assembly)
-    {
+    public static IServiceCollection AddMediatRFromAssembly(this IServiceCollection services, Assembly assembly) {
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(assembly));
         return services;
     }
@@ -74,8 +69,7 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Registers AutoMapper profiles from an assembly
     /// </summary>
-    public static IServiceCollection AddAutoMapperFromAssembly(this IServiceCollection services, Assembly assembly)
-    {
+    public static IServiceCollection AddAutoMapperFromAssembly(this IServiceCollection services, Assembly assembly) {
         services.AddAutoMapper(assembly);
         return services;
     }
@@ -83,8 +77,7 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Registers FluentValidation validators from an assembly
     /// </summary>
-    public static IServiceCollection AddFluentValidationFromAssembly(this IServiceCollection services, Assembly assembly)
-    {
+    public static IServiceCollection AddFluentValidationFromAssembly(this IServiceCollection services, Assembly assembly) {
         services.AddValidatorsFromAssembly(assembly);
         return services;
     }

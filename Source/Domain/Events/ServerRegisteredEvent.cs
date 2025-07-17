@@ -5,11 +5,9 @@ namespace Domain.Events;
 /// <summary>
 /// Event raised when a new server is registered
 /// </summary>
-public class ServerRegisteredEvent : BaseEvent
-{
+public record ServerRegisteredEvent : BaseEvent {
     public ServerRegisteredEvent(string serverId, string name, string description, string publisherId)
-        : base("Server", 1)
-    {
+        : base("Server", 1) {
         ServerId = serverId;
         Name = name;
         Description = description;
@@ -18,8 +16,7 @@ public class ServerRegisteredEvent : BaseEvent
     }
 
     public ServerRegisteredEvent(string serverId, string name, string description, string publisherId, string? correlationId, string? initiatedBy)
-        : base("Server", correlationId, initiatedBy, serverId, 1)
-    {
+        : base("Server", correlationId, initiatedBy, serverId, 1) {
         ServerId = serverId;
         Name = name;
         Description = description;

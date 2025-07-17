@@ -1,33 +1,34 @@
 using Common.Services;
 using Common.UnitTests.TestUtilities;
+
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
 using NSubstitute;
+
 using StackExchange.Redis;
 
 namespace Common.UnitTests.Services;
 
 [TestCategory(TestCategories.Integration)]
-public class RedisCacheServiceTests : TestBase
-{
+public class RedisCacheServiceTests : TestBase {
     private IDistributedCache _distributedCache = null!;
     private IConnectionMultiplexer _connectionMultiplexer = null!;
     private IDatabase _database = null!;
     private ILogger<RedisCacheService> _logger = null!;
     private RedisCacheService _cacheService = null!;
 
-    protected override void ConfigureServices()
-    {
+    protected override void ConfigureServices() {
         base.ConfigureServices();
-        
+
         _distributedCache = Substitute.For<IDistributedCache>();
         _connectionMultiplexer = Substitute.For<IConnectionMultiplexer>();
         _database = Substitute.For<IDatabase>();
         _logger = Substitute.For<ILogger<RedisCacheService>>();
-        
+
         _connectionMultiplexer.GetDatabase(Arg.Any<int>(), Arg.Any<object>()).Returns(_database);
-        
+
         Services.AddSingleton(_distributedCache);
         Services.AddSingleton(_connectionMultiplexer);
         Services.AddSingleton(_logger);
@@ -35,18 +36,14 @@ public class RedisCacheServiceTests : TestBase
     }
 
     [SetUp]
-    public void SetUp()
-    {
-        _cacheService = GetService<ICacheService>() as RedisCacheService;
-    }
+    public void SetUp() => _cacheService = GetService<ICacheService>() as RedisCacheService;
 
     [Test]
-    public async Task GetAsync_WhenValueExists_ReturnsDeserializedValue()
-    {
+    public async Task GetAsync_WhenValueExists_ReturnsDeserializedValue() {
         // Arrange
         var testObject = new TestData { Name = "Test", Value = 42 };
         var serializedValue = """{"name":"Test","value":42}""";
-        
+
         _distributedCache.GetStringAsync("test-key", Arg.Any<CancellationToken>())
             .Returns(serializedValue);
 
@@ -60,8 +57,7 @@ public class RedisCacheServiceTests : TestBase
     }
 
     [Test]
-    public async Task GetAsync_WhenValueDoesNotExist_ReturnsDefault()
-    {
+    public async Task GetAsync_WhenValueDoesNotExist_ReturnsDefault() {
         // Arrange
         _distributedCache.GetStringAsync("non-existent-key", Arg.Any<CancellationToken>())
             .Returns((string?)null);
@@ -74,8 +70,7 @@ public class RedisCacheServiceTests : TestBase
     }
 
     [Test]
-    public async Task GetAsync_WhenExceptionOccurs_ReturnsDefaultAndLogsError()
-    {
+    public async Task GetAsync_WhenExceptionOccurs_ReturnsDefaultAndLogsError() {
         // Arrange
         _distributedCache.GetStringAsync("error-key", Arg.Any<CancellationToken>())
             .Throws(new InvalidOperationException("Test exception"));
@@ -85,7 +80,7 @@ public class RedisCacheServiceTests : TestBase
 
         // Assert
         result.Should().BeNull();
-        
+
         _logger.Received(1).LogError(
             Arg.Any<Exception>(),
             Arg.Is<string>(s => s.Contains("Error getting cache value for key: {Key}")),
@@ -93,8 +88,7 @@ public class RedisCacheServiceTests : TestBase
     }
 
     [Test]
-    public async Task SetAsync_WithTimeSpan_SetsValueWithSlidingExpiration()
-    {
+    public async Task SetAsync_WithTimeSpan_SetsValueWithSlidingExpiration() {
         // Arrange
         var testObject = new TestData { Name = "Test", Value = 42 };
         var expiration = TimeSpan.FromMinutes(15);
@@ -111,8 +105,7 @@ public class RedisCacheServiceTests : TestBase
     }
 
     [Test]
-    public async Task SetAsync_WithDateTimeOffset_SetsValueWithAbsoluteExpiration()
-    {
+    public async Task SetAsync_WithDateTimeOffset_SetsValueWithAbsoluteExpiration() {
         // Arrange
         var testObject = new TestData { Name = "Test", Value = 42 };
         var expiration = DateTimeOffset.UtcNow.AddMinutes(30);
@@ -129,8 +122,7 @@ public class RedisCacheServiceTests : TestBase
     }
 
     [Test]
-    public async Task SetAsync_WithoutExpiration_SetsValueWithDefaultSlidingExpiration()
-    {
+    public async Task SetAsync_WithoutExpiration_SetsValueWithDefaultSlidingExpiration() {
         // Arrange
         var testObject = new TestData { Name = "Test", Value = 42 };
 
@@ -146,11 +138,10 @@ public class RedisCacheServiceTests : TestBase
     }
 
     [Test]
-    public async Task SetAsync_WhenExceptionOccurs_LogsErrorAndContinues()
-    {
+    public async Task SetAsync_WhenExceptionOccurs_LogsErrorAndContinues() {
         // Arrange
         var testObject = new TestData { Name = "Test", Value = 42 };
-        
+
         _distributedCache.SetStringAsync(
             Arg.Any<string>(),
             Arg.Any<string>(),
@@ -163,7 +154,7 @@ public class RedisCacheServiceTests : TestBase
 
         // Assert
         await action.Should().NotThrowAsync();
-        
+
         _logger.Received(1).LogError(
             Arg.Any<Exception>(),
             Arg.Is<string>(s => s.Contains("Error setting cache value for key: {Key}")),
@@ -171,8 +162,7 @@ public class RedisCacheServiceTests : TestBase
     }
 
     [Test]
-    public async Task RemoveAsync_CallsDistributedCacheRemove()
-    {
+    public async Task RemoveAsync_CallsDistributedCacheRemove() {
         // Act
         await _cacheService.RemoveAsync("test-key");
 
@@ -181,8 +171,7 @@ public class RedisCacheServiceTests : TestBase
     }
 
     [Test]
-    public async Task RemoveAsync_WhenExceptionOccurs_LogsErrorAndContinues()
-    {
+    public async Task RemoveAsync_WhenExceptionOccurs_LogsErrorAndContinues() {
         // Arrange
         _distributedCache.RemoveAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Throws(new InvalidOperationException("Test exception"));
@@ -192,7 +181,7 @@ public class RedisCacheServiceTests : TestBase
 
         // Assert
         await action.Should().NotThrowAsync();
-        
+
         _logger.Received(1).LogError(
             Arg.Any<Exception>(),
             Arg.Is<string>(s => s.Contains("Error removing cache value for key: {Key}")),
@@ -200,8 +189,7 @@ public class RedisCacheServiceTests : TestBase
     }
 
     [Test]
-    public async Task ExistsAsync_WhenKeyExists_ReturnsTrue()
-    {
+    public async Task ExistsAsync_WhenKeyExists_ReturnsTrue() {
         // Arrange
         _database.KeyExistsAsync("test-key").Returns(true);
 
@@ -213,8 +201,7 @@ public class RedisCacheServiceTests : TestBase
     }
 
     [Test]
-    public async Task ExistsAsync_WhenKeyDoesNotExist_ReturnsFalse()
-    {
+    public async Task ExistsAsync_WhenKeyDoesNotExist_ReturnsFalse() {
         // Arrange
         _database.KeyExistsAsync("non-existent-key").Returns(false);
 
@@ -226,8 +213,7 @@ public class RedisCacheServiceTests : TestBase
     }
 
     [Test]
-    public async Task ExistsAsync_WhenExceptionOccurs_ReturnsFalseAndLogsError()
-    {
+    public async Task ExistsAsync_WhenExceptionOccurs_ReturnsFalseAndLogsError() {
         // Arrange
         _database.KeyExistsAsync("error-key").Throws(new InvalidOperationException("Test exception"));
 
@@ -236,7 +222,7 @@ public class RedisCacheServiceTests : TestBase
 
         // Assert
         result.Should().BeFalse();
-        
+
         _logger.Received(1).LogError(
             Arg.Any<Exception>(),
             Arg.Is<string>(s => s.Contains("Error checking cache existence for key: {Key}")),
@@ -244,13 +230,12 @@ public class RedisCacheServiceTests : TestBase
     }
 
     [Test]
-    public async Task RemovePatternAsync_CallsDatabaseKeyDeleteWithMatchingKeys()
-    {
+    public async Task RemovePatternAsync_CallsDatabaseKeyDeleteWithMatchingKeys() {
         // Arrange
         var server = Substitute.For<IServer>();
         var endPoints = new EndPoint[] { new DnsEndPoint("localhost", 6379) };
         var keys = new RedisKey[] { "test:key1", "test:key2", "test:key3" };
-        
+
         _connectionMultiplexer.GetEndPoints().Returns(endPoints);
         _connectionMultiplexer.GetServer(endPoints[0]).Returns(server);
         server.Keys(pattern: "test:*").Returns(keys);
@@ -262,8 +247,7 @@ public class RedisCacheServiceTests : TestBase
         await _database.Received(1).KeyDeleteAsync(Arg.Is<RedisKey[]>(k => k.Length == 3), Arg.Any<CommandFlags>());
     }
 
-    private class TestData
-    {
+    private class TestData {
         public string Name { get; set; } = string.Empty;
         public int Value { get; set; }
     }

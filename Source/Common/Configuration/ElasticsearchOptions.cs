@@ -1,7 +1,6 @@
 namespace Common.Configuration;
 
-public class ElasticsearchOptions
-{
+public class ElasticsearchOptions {
     public const string SectionName = "Elasticsearch";
 
     public string ConnectionString { get; set; } = string.Empty;

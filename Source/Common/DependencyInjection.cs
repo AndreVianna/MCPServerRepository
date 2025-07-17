@@ -1,20 +1,19 @@
 using Common.Services;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+
 using StackExchange.Redis;
 
 namespace Common;
 
-public static class DependencyInjection
-{
-    public static IServiceCollection AddCommonServices(this IServiceCollection services, IConfiguration configuration)
-    {
+public static class DependencyInjection {
+    public static IServiceCollection AddCommonServices(this IServiceCollection services, IConfiguration configuration) {
         // Redis Configuration
         var redisConnectionString = configuration.GetConnectionString("Redis")
             ?? throw new InvalidOperationException("Redis connection string not found.");
-        
-        services.AddSingleton<IConnectionMultiplexer>(provider =>
-        {
+
+        services.AddSingleton<IConnectionMultiplexer>(provider => {
             var config = ConfigurationOptions.Parse(redisConnectionString);
             config.AbortOnConnectFail = false;
             config.ConnectRetry = 3;
@@ -27,8 +26,7 @@ public static class DependencyInjection
         });
 
         // Distributed Cache
-        services.AddStackExchangeRedisCache(options =>
-        {
+        services.AddStackExchangeRedisCache(options => {
             options.Configuration = redisConnectionString;
             options.InstanceName = "MCPHub";
         });

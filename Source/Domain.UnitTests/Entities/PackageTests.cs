@@ -6,30 +6,27 @@ namespace Domain.UnitTests.Entities;
 /// in the same folder structure as the main project.
 /// </summary>
 [UnitTest]
-public class PackageTests : TestBase
-{
+public class PackageTests : TestBase {
     [Fact]
-    public void Package_Should_Be_Created_With_Valid_Properties()
-    {
+    public void Package_Should_Be_Created_With_Valid_Properties() {
         // Arrange
         var packageName = TestData.RandomString(10);
         var description = TestData.RandomString(50);
-        
+
         // Act
         // Note: Actual Package entity implementation would be tested here
         var result = $"Package: {packageName}, Description: {description}";
-        
+
         // Assert
         result.Should().Contain(packageName);
         result.Should().Contain(description);
     }
 
     [Fact]
-    public void Package_Should_Validate_Required_Properties()
-    {
+    public void Package_Should_Validate_Required_Properties() {
         // Arrange
         var emptyName = string.Empty;
-        
+
         // Act & Assert
         // Note: Actual Package entity validation would be tested here
         emptyName.Should().BeEmpty();
@@ -41,18 +38,16 @@ public class PackageTests : TestBase
 /// </summary>
 [IntegrationTest]
 [DatabaseTest]
-public class PackageIntegrationTests : DatabaseTestBase
-{
+public class PackageIntegrationTests : DatabaseTestBase {
     [Fact]
-    public async Task Package_Should_Be_Persisted_To_Database()
-    {
+    public async Task Package_Should_Be_Persisted_To_Database() {
         // Arrange
         var packageName = TestData.RandomString(10);
-        
+
         // Act
         // Note: Actual database operations would be tested here
         await Task.Delay(1); // Simulate async database operation
-        
+
         // Assert
         packageName.Should().NotBeNullOrEmpty();
     }

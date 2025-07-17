@@ -1,19 +1,20 @@
+using System.Collections.Concurrent;
+using System.Diagnostics;
+
 using Common.Models;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Hosting;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using System.Diagnostics;
-using System.Collections.Concurrent;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Common.Services;
 
 /// <summary>
 /// Service for monitoring storage operations and collecting metrics
 /// </summary>
-public interface IStorageMonitoringService
-{
+public interface IStorageMonitoringService {
     /// <summary>
     /// Records a storage operation metric
     /// </summary>
@@ -48,8 +49,7 @@ public interface IStorageMonitoringService
 /// <summary>
 /// Interface for monitoring individual storage operations
 /// </summary>
-public interface IStorageOperationMonitor : IDisposable
-{
+public interface IStorageOperationMonitor : IDisposable {
     /// <summary>
     /// Records operation success
     /// </summary>
@@ -69,44 +69,31 @@ public interface IStorageOperationMonitor : IDisposable
 /// <summary>
 /// Background service for periodic storage monitoring
 /// </summary>
-public class StorageMonitoringBackgroundService : BackgroundService
-{
-    private readonly IServiceProvider _serviceProvider;
-    private readonly StorageConfiguration _configuration;
-    private readonly ILogger<StorageMonitoringBackgroundService> _logger;
+public class StorageMonitoringBackgroundService(
+    IServiceProvider serviceProvider,
+    IOptions<StorageConfiguration> configuration,
+    ILogger<StorageMonitoringBackgroundService> logger) : BackgroundService {
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
+    private readonly StorageConfiguration _configuration = configuration.Value;
+    private readonly ILogger<StorageMonitoringBackgroundService> _logger = logger;
 
-    public StorageMonitoringBackgroundService(
-        IServiceProvider serviceProvider,
-        IOptions<StorageConfiguration> configuration,
-        ILogger<StorageMonitoringBackgroundService> logger)
-    {
-        _serviceProvider = serviceProvider;
-        _configuration = configuration.Value;
-        _logger = logger;
-    }
-
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            try
-            {
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken) {
+        while (!stoppingToken.IsCancellationRequested) {
+            try {
                 using var scope = _serviceProvider.CreateScope();
                 var monitoringService = scope.ServiceProvider.GetRequiredService<IStorageMonitoringService>();
-                
+
                 // Check thresholds and send alerts
                 var alerts = await monitoringService.CheckThresholdsAsync(stoppingToken);
-                
-                foreach (var alert in alerts)
-                {
+
+                foreach (var alert in alerts) {
                     _logger.LogWarning("Storage threshold exceeded: {AlertType} - {Message}", alert.AlertType, alert.Message);
-                    
+
                     // In production, this would send alerts via email, SMS, etc.
                     await SendAlertAsync(alert);
                 }
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 _logger.LogError(ex, "Error in storage monitoring background service");
             }
 
@@ -115,41 +102,27 @@ public class StorageMonitoringBackgroundService : BackgroundService
     }
 
     private async Task SendAlertAsync(StorageThresholdAlert alert)
-    {
         // Implementation would send alerts to configured recipients
-        _logger.LogInformation("Alert sent: {AlertType} - {Message}", alert.AlertType, alert.Message);
-    }
+        => _logger.LogInformation("Alert sent: {AlertType} - {Message}", alert.AlertType, alert.Message);
 }
 
 /// <summary>
 /// Implementation of storage monitoring service
 /// </summary>
-public class StorageMonitoringService : IStorageMonitoringService
-{
-    private readonly IStorageService _storageService;
-    private readonly ICacheService _cacheService;
-    private readonly StorageConfiguration _configuration;
-    private readonly ILogger<StorageMonitoringService> _logger;
+public class StorageMonitoringService(
+    IStorageService storageService,
+    ICacheService cacheService,
+    IOptions<StorageConfiguration> configuration,
+    ILogger<StorageMonitoringService> logger) : IStorageMonitoringService {
+    private readonly IStorageService _storageService = storageService;
+    private readonly ICacheService _cacheService = cacheService;
+    private readonly StorageConfiguration _configuration = configuration.Value;
+    private readonly ILogger<StorageMonitoringService> _logger = logger;
     private readonly ConcurrentDictionary<string, StorageOperationMetric> _recentMetrics = new();
 
-    public StorageMonitoringService(
-        IStorageService storageService,
-        ICacheService cacheService,
-        IOptions<StorageConfiguration> configuration,
-        ILogger<StorageMonitoringService> logger)
-    {
-        _storageService = storageService;
-        _cacheService = cacheService;
-        _configuration = configuration.Value;
-        _logger = logger;
-    }
-
-    public async Task RecordOperationAsync(StorageOperationMetric metric, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            if (!_configuration.Monitoring.EnableMetrics)
-            {
+    public async Task RecordOperationAsync(StorageOperationMetric metric, CancellationToken cancellationToken = default) {
+        try {
+            if (!_configuration.Monitoring.EnableMetrics) {
                 return;
             }
 
@@ -167,35 +140,30 @@ public class StorageMonitoringService : IStorageMonitoringService
                 .Select(kvp => kvp.Key)
                 .ToList();
 
-            foreach (var keyToRemove in keysToRemove)
-            {
+            foreach (var keyToRemove in keysToRemove) {
                 _recentMetrics.TryRemove(keyToRemove, out _);
             }
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Error recording storage operation metric");
         }
     }
 
-    public async Task<StorageMetrics> GetMetricsAsync(TimeSpan period, CancellationToken cancellationToken = default)
-    {
-        try
-        {
+    public async Task<StorageMetrics> GetMetricsAsync(TimeSpan period, CancellationToken cancellationToken = default) {
+        try {
             var cutoffTime = DateTimeOffset.UtcNow.Subtract(period);
             var relevantMetrics = _recentMetrics.Values
                 .Where(m => m.Timestamp >= cutoffTime)
                 .ToList();
 
-            var metrics = new StorageMetrics
-            {
+            var metrics = new StorageMetrics {
                 Period = period,
                 GeneratedAt = DateTimeOffset.UtcNow,
                 TotalOperations = relevantMetrics.Count,
                 SuccessfulOperations = relevantMetrics.Count(m => m.IsSuccess),
                 FailedOperations = relevantMetrics.Count(m => !m.IsSuccess),
                 TotalBytesTransferred = relevantMetrics.Sum(m => m.BytesTransferred),
-                AverageResponseTime = relevantMetrics.Any() 
+                AverageResponseTime = relevantMetrics.Any()
                     ? TimeSpan.FromMilliseconds(relevantMetrics.Average(m => m.ResponseTime.TotalMilliseconds))
                     : TimeSpan.Zero,
                 OperationsByType = relevantMetrics
@@ -209,19 +177,15 @@ public class StorageMonitoringService : IStorageMonitoringService
 
             return metrics;
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Error getting storage metrics");
             return new StorageMetrics { Period = period, GeneratedAt = DateTimeOffset.UtcNow };
         }
     }
 
-    public async Task<StorageHealthStatus> GetHealthStatusAsync(CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var healthStatus = new StorageHealthStatus
-            {
+    public async Task<StorageHealthStatus> GetHealthStatusAsync(CancellationToken cancellationToken = default) {
+        try {
+            var healthStatus = new StorageHealthStatus {
                 CheckedAt = DateTimeOffset.UtcNow,
                 OverallStatus = HealthStatus.Healthy
             };
@@ -231,8 +195,7 @@ public class StorageMonitoringService : IStorageMonitoringService
                 .Where(m => m.Timestamp >= DateTimeOffset.UtcNow.AddMinutes(-5))
                 .ToList();
 
-            if (recentMetrics.Any())
-            {
+            if (recentMetrics.Any()) {
                 var successRate = (double)recentMetrics.Count(m => m.IsSuccess) / recentMetrics.Count;
                 healthStatus.SuccessRate = successRate;
 
@@ -248,83 +211,68 @@ public class StorageMonitoringService : IStorageMonitoringService
             }
 
             // Check average response time
-            if (recentMetrics.Any())
-            {
+            if (recentMetrics.Any()) {
                 var avgResponseTime = TimeSpan.FromMilliseconds(recentMetrics.Average(m => m.ResponseTime.TotalMilliseconds));
                 healthStatus.AverageResponseTime = avgResponseTime;
 
-                if (avgResponseTime > _configuration.Monitoring.Thresholds.MaxResponseTime)
-                {
+                if (avgResponseTime > _configuration.Monitoring.Thresholds.MaxResponseTime) {
                     healthStatus.OverallStatus = HealthStatus.Degraded;
                 }
             }
 
             // Check error rate
-            var errorRate = recentMetrics.Any() 
-                ? (double)recentMetrics.Count(m => !m.IsSuccess) / recentMetrics.Count 
+            var errorRate = recentMetrics.Any()
+                ? (double)recentMetrics.Count(m => !m.IsSuccess) / recentMetrics.Count
                 : 0;
-            
+
             healthStatus.ErrorRate = errorRate;
 
             return healthStatus;
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Error getting storage health status");
-            return new StorageHealthStatus
-            {
+            return new StorageHealthStatus {
                 CheckedAt = DateTimeOffset.UtcNow,
                 OverallStatus = HealthStatus.Unhealthy
             };
         }
     }
 
-    public async Task<StorageUsageStatistics> GetUsageStatisticsAsync(CancellationToken cancellationToken = default)
-    {
-        try
-        {
+    public async Task<StorageUsageStatistics> GetUsageStatisticsAsync(CancellationToken cancellationToken = default) {
+        try {
             // This would typically aggregate usage across all containers
             // For now, we'll return a sample implementation
-            
-            var stats = new StorageUsageStatistics
-            {
+
+            var stats = new StorageUsageStatistics {
                 GeneratedAt = DateTimeOffset.UtcNow,
                 TotalStorageUsed = 0,
                 TotalFileCount = 0,
-                ContainerStatistics = new List<StorageContainerStatistics>()
+                ContainerStatistics = []
             };
 
             // In a real implementation, this would enumerate containers and get usage
             // For now, we'll simulate some data
-            
+
             return stats;
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Error getting storage usage statistics");
             return new StorageUsageStatistics { GeneratedAt = DateTimeOffset.UtcNow };
         }
     }
 
-    public IStorageOperationMonitor StartOperationMonitoring(string operationName, string containerName, string? fileName = null)
-    {
-        return new StorageOperationMonitor(this, operationName, containerName, fileName);
-    }
+    public IStorageOperationMonitor StartOperationMonitoring(string operationName, string containerName, string? fileName = null) => new StorageOperationMonitor(this, operationName, containerName, fileName);
 
-    public async Task<List<StorageThresholdAlert>> CheckThresholdsAsync(CancellationToken cancellationToken = default)
-    {
+    public async Task<List<StorageThresholdAlert>> CheckThresholdsAsync(CancellationToken cancellationToken = default) {
         var alerts = new List<StorageThresholdAlert>();
 
-        try
-        {
+        try {
             var thresholds = _configuration.Monitoring.Thresholds;
             var healthStatus = await GetHealthStatusAsync(cancellationToken);
 
             // Check success rate threshold
-            if (healthStatus.SuccessRate < 0.95)
-            {
-                alerts.Add(new StorageThresholdAlert
-                {
+            if (healthStatus.SuccessRate < 0.95) {
+                alerts.Add(new StorageThresholdAlert {
                     AlertType = StorageAlertType.LowSuccessRate,
                     Message = $"Storage success rate is {healthStatus.SuccessRate:P2}, below 95% threshold",
                     Severity = AlertSeverity.Warning,
@@ -335,10 +283,8 @@ public class StorageMonitoringService : IStorageMonitoringService
             }
 
             // Check response time threshold
-            if (healthStatus.AverageResponseTime > thresholds.MaxResponseTime)
-            {
-                alerts.Add(new StorageThresholdAlert
-                {
+            if (healthStatus.AverageResponseTime > thresholds.MaxResponseTime) {
+                alerts.Add(new StorageThresholdAlert {
                     AlertType = StorageAlertType.HighResponseTime,
                     Message = $"Storage response time is {healthStatus.AverageResponseTime.TotalSeconds:F2}s, above {thresholds.MaxResponseTime.TotalSeconds:F2}s threshold",
                     Severity = AlertSeverity.Warning,
@@ -351,8 +297,7 @@ public class StorageMonitoringService : IStorageMonitoringService
             // Check error rate threshold
             if (healthStatus.ErrorRate > 0.05) // 5% error rate
             {
-                alerts.Add(new StorageThresholdAlert
-                {
+                alerts.Add(new StorageThresholdAlert {
                     AlertType = StorageAlertType.HighErrorRate,
                     Message = $"Storage error rate is {healthStatus.ErrorRate:P2}, above 5% threshold",
                     Severity = AlertSeverity.Critical,
@@ -364,8 +309,7 @@ public class StorageMonitoringService : IStorageMonitoringService
 
             return alerts;
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Error checking storage thresholds");
             return alerts;
         }
@@ -375,48 +319,30 @@ public class StorageMonitoringService : IStorageMonitoringService
 /// <summary>
 /// Implementation of storage operation monitor
 /// </summary>
-public class StorageOperationMonitor : IStorageOperationMonitor
-{
-    private readonly IStorageMonitoringService _monitoringService;
-    private readonly string _operationName;
-    private readonly string _containerName;
-    private readonly string? _fileName;
-    private readonly Stopwatch _stopwatch;
-    private readonly DateTimeOffset _startTime;
+public class StorageOperationMonitor(
+    IStorageMonitoringService monitoringService,
+    string operationName,
+    string containerName,
+    string? fileName = null) : IStorageOperationMonitor {
+    private readonly IStorageMonitoringService _monitoringService = monitoringService;
+    private readonly string _operationName = operationName;
+    private readonly string _containerName = containerName;
+    private readonly string? _fileName = fileName;
+    private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
+    private readonly DateTimeOffset _startTime = DateTimeOffset.UtcNow;
     private bool _disposed = false;
 
-    public StorageOperationMonitor(
-        IStorageMonitoringService monitoringService,
-        string operationName,
-        string containerName,
-        string? fileName = null)
-    {
-        _monitoringService = monitoringService;
-        _operationName = operationName;
-        _containerName = containerName;
-        _fileName = fileName;
-        _stopwatch = Stopwatch.StartNew();
-        _startTime = DateTimeOffset.UtcNow;
-    }
+    public void RecordSuccess(long? bytesTransferred = null) => RecordCompletion(true, bytesTransferred);
 
-    public void RecordSuccess(long? bytesTransferred = null)
-    {
-        RecordCompletion(true, bytesTransferred);
-    }
+    public void RecordFailure(Exception exception) => RecordCompletion(false, null, exception);
 
-    public void RecordFailure(Exception exception)
-    {
-        RecordCompletion(false, null, exception);
-    }
-
-    public void RecordCompletion(bool success, long? bytesTransferred = null, Exception? exception = null)
-    {
-        if (_disposed) return;
+    public void RecordCompletion(bool success, long? bytesTransferred = null, Exception? exception = null) {
+        if (_disposed)
+            return;
 
         _stopwatch.Stop();
 
-        var metric = new StorageOperationMetric
-        {
+        var metric = new StorageOperationMetric {
             OperationName = _operationName,
             OperationType = ParseOperationType(_operationName),
             ContainerName = _containerName,
@@ -429,38 +355,29 @@ public class StorageOperationMonitor : IStorageOperationMonitor
             ErrorMessage = exception?.Message
         };
 
-        Task.Run(async () =>
-        {
-            try
-            {
+        Task.Run(async () => {
+            try {
                 await _monitoringService.RecordOperationAsync(metric);
             }
-            catch
-            {
+            catch {
                 // Ignore errors in metric recording to avoid affecting main operations
             }
         });
     }
 
-    private StorageOperationType ParseOperationType(string operationName)
-    {
-        return operationName.ToLowerInvariant() switch
-        {
-            "upload" => StorageOperationType.Upload,
-            "download" => StorageOperationType.Download,
-            "delete" => StorageOperationType.Delete,
-            "list" => StorageOperationType.List,
-            "getmetadata" => StorageOperationType.GetMetadata,
-            "copy" => StorageOperationType.Copy,
-            "exists" => StorageOperationType.Exists,
-            _ => StorageOperationType.Unknown
-        };
-    }
+    private static StorageOperationType ParseOperationType(string operationName) => operationName.ToLowerInvariant() switch {
+        "upload" => StorageOperationType.Upload,
+        "download" => StorageOperationType.Download,
+        "delete" => StorageOperationType.Delete,
+        "list" => StorageOperationType.List,
+        "getmetadata" => StorageOperationType.GetMetadata,
+        "copy" => StorageOperationType.Copy,
+        "exists" => StorageOperationType.Exists,
+        _ => StorageOperationType.Unknown
+    };
 
-    public void Dispose()
-    {
-        if (!_disposed)
-        {
+    public void Dispose() {
+        if (!_disposed) {
             _disposed = true;
             GC.SuppressFinalize(this);
         }
@@ -470,8 +387,7 @@ public class StorageOperationMonitor : IStorageOperationMonitor
 /// <summary>
 /// Storage operation metric
 /// </summary>
-public class StorageOperationMetric
-{
+public class StorageOperationMetric {
     public string OperationName { get; set; } = string.Empty;
     public StorageOperationType OperationType { get; set; }
     public string ContainerName { get; set; } = string.Empty;
@@ -487,8 +403,7 @@ public class StorageOperationMetric
 /// <summary>
 /// Storage operation types
 /// </summary>
-public enum StorageOperationType
-{
+public enum StorageOperationType {
     Upload,
     Download,
     Delete,
@@ -502,8 +417,7 @@ public enum StorageOperationType
 /// <summary>
 /// Storage metrics aggregate
 /// </summary>
-public class StorageMetrics
-{
+public class StorageMetrics {
     public TimeSpan Period { get; set; }
     public DateTimeOffset GeneratedAt { get; set; }
     public int TotalOperations { get; set; }
@@ -511,8 +425,8 @@ public class StorageMetrics
     public int FailedOperations { get; set; }
     public long TotalBytesTransferred { get; set; }
     public TimeSpan AverageResponseTime { get; set; }
-    public Dictionary<StorageOperationType, int> OperationsByType { get; set; } = new();
-    public Dictionary<string, int> ErrorsByType { get; set; } = new();
+    public Dictionary<StorageOperationType, int> OperationsByType { get; set; } = [];
+    public Dictionary<string, int> ErrorsByType { get; set; } = [];
     public double SuccessRate => TotalOperations > 0 ? (double)SuccessfulOperations / TotalOperations : 1.0;
     public double ErrorRate => TotalOperations > 0 ? (double)FailedOperations / TotalOperations : 0.0;
 }
@@ -520,8 +434,7 @@ public class StorageMetrics
 /// <summary>
 /// Storage health status
 /// </summary>
-public class StorageHealthStatus
-{
+public class StorageHealthStatus {
     public DateTimeOffset CheckedAt { get; set; }
     public HealthStatus OverallStatus { get; set; }
     public double SuccessRate { get; set; }
@@ -532,19 +445,17 @@ public class StorageHealthStatus
 /// <summary>
 /// Storage usage statistics
 /// </summary>
-public class StorageUsageStatistics
-{
+public class StorageUsageStatistics {
     public DateTimeOffset GeneratedAt { get; set; }
     public long TotalStorageUsed { get; set; }
     public long TotalFileCount { get; set; }
-    public List<StorageContainerStatistics> ContainerStatistics { get; set; } = new();
+    public List<StorageContainerStatistics> ContainerStatistics { get; set; } = [];
 }
 
 /// <summary>
 /// Storage container statistics
 /// </summary>
-public class StorageContainerStatistics
-{
+public class StorageContainerStatistics {
     public string ContainerName { get; set; } = string.Empty;
     public long StorageUsed { get; set; }
     public long FileCount { get; set; }
@@ -554,8 +465,7 @@ public class StorageContainerStatistics
 /// <summary>
 /// Storage threshold alert
 /// </summary>
-public class StorageThresholdAlert
-{
+public class StorageThresholdAlert {
     public StorageAlertType AlertType { get; set; }
     public string Message { get; set; } = string.Empty;
     public AlertSeverity Severity { get; set; }
@@ -567,8 +477,7 @@ public class StorageThresholdAlert
 /// <summary>
 /// Storage alert types
 /// </summary>
-public enum StorageAlertType
-{
+public enum StorageAlertType {
     HighUsage,
     LowSuccessRate,
     HighResponseTime,
@@ -580,8 +489,7 @@ public enum StorageAlertType
 /// <summary>
 /// Alert severity levels
 /// </summary>
-public enum AlertSeverity
-{
+public enum AlertSeverity {
     Info,
     Warning,
     Critical

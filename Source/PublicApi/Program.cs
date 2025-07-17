@@ -1,6 +1,8 @@
 using Common.Messaging.DependencyInjection;
-using PublicApi.Consumers;
+
 using Domain.Events;
+
+using PublicApi.Consumers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,8 +23,7 @@ builder.Services.AddLogging();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
-if (app.Environment.IsDevelopment())
-{
+if (app.Environment.IsDevelopment()) {
     app.UseSwagger();
     app.UseSwaggerUI();
 }

@@ -1,24 +1,22 @@
+using Common.Messaging.DependencyInjection;
+
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
-using Common.Messaging.DependencyInjection;
 
 namespace Common.UnitTests.Messaging;
 
 /// <summary>
 /// Test fixture for RabbitMQ integration tests
 /// </summary>
-public class RabbitMQTestFixture : IDisposable
-{
+public class RabbitMQTestFixture : IDisposable {
     public IServiceProvider ServiceProvider { get; private set; }
     private readonly IHost _host;
 
-    public RabbitMQTestFixture()
-    {
+    public RabbitMQTestFixture() {
         var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
+            .AddInMemoryCollection(new Dictionary<string, string?> {
                 ["RabbitMQ:Host"] = "localhost",
                 ["RabbitMQ:Port"] = "5672",
                 ["RabbitMQ:Username"] = "admin",
@@ -56,10 +54,8 @@ public class RabbitMQTestFixture : IDisposable
             .Build();
 
         var hostBuilder = Host.CreateDefaultBuilder()
-            .ConfigureServices((context, services) =>
-            {
-                services.AddLogging(builder =>
-                {
+            .ConfigureServices((context, services) => {
+                services.AddLogging(builder => {
                     builder.SetMinimumLevel(LogLevel.Information);
                     builder.AddConsole();
                 });
@@ -71,8 +67,5 @@ public class RabbitMQTestFixture : IDisposable
         ServiceProvider = _host.Services;
     }
 
-    public void Dispose()
-    {
-        _host?.Dispose();
-    }
+    public void Dispose() => _host?.Dispose();
 }

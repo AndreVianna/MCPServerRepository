@@ -1,7 +1,6 @@
 namespace Domain.Repositories;
 
-public interface IPackageRepository : IRepository<Package>
-{
+public interface IPackageRepository : IRepository<Package> {
     Task<Package?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
     Task<List<Package>> GetByPublisherIdAsync(Guid publisherId, CancellationToken cancellationToken = default);
     Task<List<Package>> GetByStatusAsync(PackageStatus status, CancellationToken cancellationToken = default);

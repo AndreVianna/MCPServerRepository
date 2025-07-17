@@ -3,47 +3,47 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{BA4C1A1F-2D9B-4060-888A-E69D76B2C66A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.Domain", "Domain\MCPHub.Domain.csproj", "{BA4C1A1F-2D9B-4060-888A-E69D76B2C66A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{CD4EA93A-DFB8-4A60-B2B0-1033B379AADC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.Common", "Common\MCPHub.Common.csproj", "{CD4EA93A-DFB8-4A60-B2B0-1033B379AADC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{B3916814-AD3B-4799-9934-4D8918C6A5E0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.Core", "Core\MCPHub.Core.csproj", "{B3916814-AD3B-4799-9934-4D8918C6A5E0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data", "Data\Data.csproj", "{8018844D-37B1-49D3-AB96-1C08D2305E7C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.Data", "Data\MCPHub.Data.csproj", "{8018844D-37B1-49D3-AB96-1C08D2305E7C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data.MigrationService", "Data.MigrationService\Data.MigrationService.csproj", "{85752BF6-627D-4F11-84EF-131DAD266EF5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.Data.MigrationService", "Data.MigrationService\MCPHub.Data.MigrationService.csproj", "{85752BF6-627D-4F11-84EF-131DAD266EF5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandLineApp", "CommandLineApp\CommandLineApp.csproj", "{F7E7F212-B555-4997-925B-21BA294F091E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.CommandLineApp", "CommandLineApp\MCPHub.CommandLineApp.csproj", "{F7E7F212-B555-4997-925B-21BA294F091E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublicApi", "PublicApi\PublicApi.csproj", "{C1C656A8-5426-4AB2-98D7-C8C849406234}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.PublicApi", "PublicApi\MCPHub.PublicApi.csproj", "{C1C656A8-5426-4AB2-98D7-C8C849406234}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApp", "WebApp\WebApp.csproj", "{F974E388-5009-470C-9360-F35BE97A0ADD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.WebApp", "WebApp\MCPHub.WebApp.csproj", "{F974E388-5009-470C-9360-F35BE97A0ADD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecurityService", "SecurityService\SecurityService.csproj", "{B9F65D3A-7FEE-43F5-9ECA-35296CFCCA53}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.SecurityService", "SecurityService\MCPHub.SecurityService.csproj", "{B9F65D3A-7FEE-43F5-9ECA-35296CFCCA53}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SearchService", "SearchService\SearchService.csproj", "{4720DB39-7D45-4BBB-95C4-043BD719E313}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.SearchService", "SearchService\MCPHub.SearchService.csproj", "{4720DB39-7D45-4BBB-95C4-043BD719E313}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppHost", "AppHost\AppHost.csproj", "{DC74F364-3D3F-49F0-B892-698296A355F6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.AppHost", "AppHost\MCPHub.AppHost.csproj", "{DC74F364-3D3F-49F0-B892-698296A355F6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain.UnitTests", "Domain.UnitTests\Domain.UnitTests.csproj", "{E0109135-A0C3-4714-8E09-6B4285DF736F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.Domain.UnitTests", "Domain.UnitTests\MCPHub.Domain.UnitTests.csproj", "{E0109135-A0C3-4714-8E09-6B4285DF736F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common.UnitTests", "Common.UnitTests\Common.UnitTests.csproj", "{9B446E76-3C9D-484F-83CE-D520B0A56246}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.Common.UnitTests", "Common.UnitTests\MCPHub.Common.UnitTests.csproj", "{9B446E76-3C9D-484F-83CE-D520B0A56246}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.UnitTests", "Core.UnitTests\Core.UnitTests.csproj", "{06873AD6-4EB8-4B8D-ADD2-93667F5FC7E2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.Core.UnitTests", "Core.UnitTests\MCPHub.Core.UnitTests.csproj", "{06873AD6-4EB8-4B8D-ADD2-93667F5FC7E2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data.UnitTests", "Data.UnitTests\Data.UnitTests.csproj", "{6141CAE5-2335-4DD4-AB2A-211351FFA4C6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.Data.UnitTests", "Data.UnitTests\MCPHub.Data.UnitTests.csproj", "{6141CAE5-2335-4DD4-AB2A-211351FFA4C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data.MigrationService.UnitTests", "Data.MigrationService.UnitTests\Data.MigrationService.UnitTests.csproj", "{2F95C2AA-F76A-4338-B238-50C034C40557}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.Data.MigrationService.UnitTests", "Data.MigrationService.UnitTests\MCPHub.Data.MigrationService.UnitTests.csproj", "{2F95C2AA-F76A-4338-B238-50C034C40557}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandLineApp.UnitTests", "CommandLineApp.UnitTests\CommandLineApp.UnitTests.csproj", "{8E926F46-1643-4F83-AD09-B0DDE136A22B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.CommandLineApp.UnitTests", "CommandLineApp.UnitTests\MCPHub.CommandLineApp.UnitTests.csproj", "{8E926F46-1643-4F83-AD09-B0DDE136A22B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublicApi.UnitTests", "PublicApi.UnitTests\PublicApi.UnitTests.csproj", "{35DB3182-C48D-47D8-895A-9CA0C99EE9D4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.PublicApi.UnitTests", "PublicApi.UnitTests\MCPHub.PublicApi.UnitTests.csproj", "{35DB3182-C48D-47D8-895A-9CA0C99EE9D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApp.UnitTests", "WebApp.UnitTests\WebApp.UnitTests.csproj", "{0735F203-EAFA-4E4B-BF80-9D34E7FFE484}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.WebApp.UnitTests", "WebApp.UnitTests\MCPHub.WebApp.UnitTests.csproj", "{0735F203-EAFA-4E4B-BF80-9D34E7FFE484}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecurityService.UnitTests", "SecurityService.UnitTests\SecurityService.UnitTests.csproj", "{26930F8E-049E-4DEB-A30C-79A76857C51C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.SecurityService.UnitTests", "SecurityService.UnitTests\MCPHub.SecurityService.UnitTests.csproj", "{26930F8E-049E-4DEB-A30C-79A76857C51C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SearchService.UnitTests", "SearchService.UnitTests\SearchService.UnitTests.csproj", "{424A0D7C-4756-45BF-83C7-3872EDDE4FFE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.SearchService.UnitTests", "SearchService.UnitTests\MCPHub.SearchService.UnitTests.csproj", "{424A0D7C-4756-45BF-83C7-3872EDDE4FFE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

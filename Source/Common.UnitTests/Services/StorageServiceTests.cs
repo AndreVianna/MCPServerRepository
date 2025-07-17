@@ -1,16 +1,18 @@
-using Common.Services;
-using Common.Models;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
 using System.Text;
+
+using Common.Models;
+using Common.Services;
+
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+
+using NSubstitute;
 
 namespace Common.UnitTests.Services;
 
 [TestClass]
 [TestCategory(TestCategories.Integration)]
-public class StorageServiceTests
-{
+public class StorageServiceTests {
     private IStorageService _storageService = null!;
     private IStorageSecurityService _securityService = null!;
     private IStorageMonitoringService _monitoringService = null!;
@@ -20,40 +22,34 @@ public class StorageServiceTests
     private ILogger<AzureBlobStorageService> _logger = null!;
 
     [TestInitialize]
-    public void Setup()
-    {
+    public void Setup() {
         // Setup configuration for testing
-        _configuration = new StorageConfiguration
-        {
+        _configuration = new StorageConfiguration {
             Provider = StorageProviderType.AzureBlob,
-            AzureBlob = new AzureBlobStorageConfiguration
-            {
+            AzureBlob = new AzureBlobStorageConfiguration {
                 ConnectionString = "UseDevelopmentStorage=true", // Use Azure Storage Emulator
                 DefaultContainer = "test-container",
                 MaxRetryAttempts = 3,
                 RetryDelay = TimeSpan.FromMilliseconds(100)
             },
-            Options = new StorageOptions
-            {
+            Options = new StorageOptions {
                 MaxFileSize = 10 * 1024 * 1024, // 10MB
                 MaxConcurrentOperations = 5,
                 EnableCompression = true,
-                AllowedFileExtensions = new List<string> { ".txt", ".json", ".xml" },
-                BlockedFileExtensions = new List<string> { ".exe", ".bat", ".cmd" },
+                AllowedFileExtensions = [".txt", ".json", ".xml"],
+                BlockedFileExtensions = [".exe", ".bat", ".cmd"],
                 DefaultPresignedUrlExpiration = TimeSpan.FromHours(1),
                 EnableVersioning = true,
                 MaxVersionsToKeep = 5
             },
-            Security = new StorageSecuritySettings
-            {
+            Security = new StorageSecuritySettings {
                 EnableEncryptionAtRest = true,
                 EnableEncryptionInTransit = true,
                 EnableAccessLogging = true,
                 EnableVirusScanning = true,
                 MaxDownloadAttemptsPerHour = 100
             },
-            Monitoring = new StorageMonitoringSettings
-            {
+            Monitoring = new StorageMonitoringSettings {
                 EnableMetrics = true,
                 EnableHealthChecks = true,
                 MetricsInterval = TimeSpan.FromMinutes(1),
@@ -63,29 +59,28 @@ public class StorageServiceTests
 
         var options = Options.Create(_configuration);
         _logger = Substitute.For<ILogger<AzureBlobStorageService>>();
-        
+
         // Create storage service implementation
         _storageService = new AzureBlobStorageService(options, _logger);
-        
+
         // Create supporting services
         var cacheService = Substitute.For<ICacheService>();
         var securityLogger = Substitute.For<ILogger<StorageSecurityService>>();
         _securityService = new StorageSecurityService(options, cacheService, securityLogger);
-        
+
         var monitoringLogger = Substitute.For<ILogger<StorageMonitoringService>>();
         _monitoringService = new StorageMonitoringService(_storageService, cacheService, options, monitoringLogger);
-        
+
         var lifecycleLogger = Substitute.For<ILogger<StorageLifecycleService>>();
         _lifecycleService = new StorageLifecycleService(_storageService, options, lifecycleLogger);
-        
+
         var backupLogger = Substitute.For<ILogger<StorageBackupService>>();
         _backupService = new StorageBackupService(_storageService, _storageService, options, backupLogger);
     }
 
     [TestMethod]
     [TestCategory(TestCategories.Integration)]
-    public async Task UploadAsync_ValidFile_ShouldSucceed()
-    {
+    public async Task UploadAsync_ValidFile_ShouldSucceed() {
         // Arrange
         var containerName = "test-container";
         var fileName = "test-file.txt";
@@ -105,8 +100,7 @@ public class StorageServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Integration)]
-    public async Task DownloadAsync_ExistingFile_ShouldReturnContent()
-    {
+    public async Task DownloadAsync_ExistingFile_ShouldReturnContent() {
         // Arrange
         var containerName = "test-container";
         var fileName = "test-download.txt";
@@ -127,8 +121,7 @@ public class StorageServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Integration)]
-    public async Task ExistsAsync_ExistingFile_ShouldReturnTrue()
-    {
+    public async Task ExistsAsync_ExistingFile_ShouldReturnTrue() {
         // Arrange
         var containerName = "test-container";
         var fileName = "test-exists.txt";
@@ -148,8 +141,7 @@ public class StorageServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Integration)]
-    public async Task ExistsAsync_NonExistingFile_ShouldReturnFalse()
-    {
+    public async Task ExistsAsync_NonExistingFile_ShouldReturnFalse() {
         // Arrange
         var containerName = "test-container";
         var fileName = "non-existing-file.txt";
@@ -163,8 +155,7 @@ public class StorageServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Integration)]
-    public async Task DeleteAsync_ExistingFile_ShouldSucceed()
-    {
+    public async Task DeleteAsync_ExistingFile_ShouldSucceed() {
         // Arrange
         var containerName = "test-container";
         var fileName = "test-delete.txt";
@@ -185,8 +176,7 @@ public class StorageServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Integration)]
-    public async Task ListFilesAsync_ContainerWithFiles_ShouldReturnFiles()
-    {
+    public async Task ListFilesAsync_ContainerWithFiles_ShouldReturnFiles() {
         // Arrange
         var containerName = "test-container";
         var fileNames = new[] { "file1.txt", "file2.txt", "file3.txt" };
@@ -194,8 +184,7 @@ public class StorageServiceTests
         var contentType = "text/plain";
 
         // Upload multiple files
-        foreach (var fileName in fileNames)
-        {
+        foreach (var fileName in fileNames) {
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
             await _storageService.UploadAsync(containerName, fileName, stream, contentType);
         }
@@ -211,8 +200,7 @@ public class StorageServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Integration)]
-    public async Task GetMetadataAsync_ExistingFile_ShouldReturnMetadata()
-    {
+    public async Task GetMetadataAsync_ExistingFile_ShouldReturnMetadata() {
         // Arrange
         var containerName = "test-container";
         var fileName = "test-metadata.txt";
@@ -238,8 +226,7 @@ public class StorageServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Integration)]
-    public async Task GetPresignedUrlAsync_ValidFile_ShouldReturnUrl()
-    {
+    public async Task GetPresignedUrlAsync_ValidFile_ShouldReturnUrl() {
         // Arrange
         var containerName = "test-container";
         var fileName = "test-presigned.txt";
@@ -261,8 +248,7 @@ public class StorageServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Integration)]
-    public async Task CopyAsync_ExistingFile_ShouldCopySuccessfully()
-    {
+    public async Task CopyAsync_ExistingFile_ShouldCopySuccessfully() {
         // Arrange
         var sourceContainer = "test-container";
         var sourceFileName = "source-file.txt";
@@ -281,7 +267,7 @@ public class StorageServiceTests
         // Assert
         var destinationExists = await _storageService.ExistsAsync(destinationContainer, destinationFileName);
         destinationExists.Should().BeTrue();
-        
+
         // Verify content is the same
         using var downloadStream = await _storageService.DownloadAsync(destinationContainer, destinationFileName);
         var downloadedContent = await new StreamReader(downloadStream).ReadToEndAsync();
@@ -290,8 +276,7 @@ public class StorageServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Integration)]
-    public async Task SecurityService_ValidateFileUpload_ShouldValidateCorrectly()
-    {
+    public async Task SecurityService_ValidateFileUpload_ShouldValidateCorrectly() {
         // Arrange
         var fileName = "test-file.txt";
         var content = "This is a test file content";
@@ -311,8 +296,7 @@ public class StorageServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Integration)]
-    public async Task SecurityService_ValidateFileUpload_InvalidExtension_ShouldFail()
-    {
+    public async Task SecurityService_ValidateFileUpload_InvalidExtension_ShouldFail() {
         // Arrange
         var fileName = "malicious-file.exe";
         var content = "This is a malicious file";
@@ -331,8 +315,7 @@ public class StorageServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Integration)]
-    public async Task SecurityService_ScanFile_CleanFile_ShouldPassScan()
-    {
+    public async Task SecurityService_ScanFile_CleanFile_ShouldPassScan() {
         // Arrange
         var fileName = "clean-file.txt";
         var content = "This is a clean file with no malware";
@@ -350,8 +333,7 @@ public class StorageServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Integration)]
-    public async Task SecurityService_ScanFile_MaliciousFile_ShouldFailScan()
-    {
+    public async Task SecurityService_ScanFile_MaliciousFile_ShouldFailScan() {
         // Arrange
         var fileName = "malicious-file.txt";
         var content = "This file contains EICAR-STANDARD-ANTIVIRUS-TEST-FILE signature";
@@ -369,11 +351,9 @@ public class StorageServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Integration)]
-    public async Task MonitoringService_RecordOperation_ShouldRecordMetric()
-    {
+    public async Task MonitoringService_RecordOperation_ShouldRecordMetric() {
         // Arrange
-        var metric = new StorageOperationMetric
-        {
+        var metric = new StorageOperationMetric {
             OperationName = "upload",
             OperationType = StorageOperationType.Upload,
             ContainerName = "test-container",
@@ -395,8 +375,7 @@ public class StorageServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Integration)]
-    public async Task MonitoringService_GetHealthStatus_ShouldReturnStatus()
-    {
+    public async Task MonitoringService_GetHealthStatus_ShouldReturnStatus() {
         // Act
         var healthStatus = await _monitoringService.GetHealthStatusAsync();
 
@@ -408,24 +387,22 @@ public class StorageServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Integration)]
-    public async Task LifecycleService_ValidatePolicy_ValidPolicy_ShouldReturnTrue()
-    {
+    public async Task LifecycleService_ValidatePolicy_ValidPolicy_ShouldReturnTrue() {
         // Arrange
-        var policy = new StorageLifecyclePolicy
-        {
+        var policy = new StorageLifecyclePolicy {
             Name = "Test Policy",
             ContainerPattern = "test-.*",
             FilePattern = ".*\\.txt$",
             IsEnabled = true,
-            Rules = new List<StorageLifecycleRule>
-            {
+            Rules =
+            [
                 new StorageLifecycleRule
                 {
                     Action = StorageLifecycleAction.Delete,
                     DaysAfterCreation = 30,
                     DaysAfterModification = 0
                 }
-            }
+            ]
         };
 
         // Act
@@ -437,15 +414,13 @@ public class StorageServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Integration)]
-    public async Task LifecycleService_ValidatePolicy_InvalidPolicy_ShouldReturnFalse()
-    {
+    public async Task LifecycleService_ValidatePolicy_InvalidPolicy_ShouldReturnFalse() {
         // Arrange
-        var policy = new StorageLifecyclePolicy
-        {
+        var policy = new StorageLifecyclePolicy {
             Name = "", // Invalid: empty name
             ContainerPattern = "test-.*",
             IsEnabled = true,
-            Rules = new List<StorageLifecycleRule>()
+            Rules = []
         };
 
         // Act
@@ -457,8 +432,7 @@ public class StorageServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Integration)]
-    public async Task BackupService_CreateBackup_ShouldCreateSuccessfully()
-    {
+    public async Task BackupService_CreateBackup_ShouldCreateSuccessfully() {
         // Arrange
         var containerName = "test-backup-container";
         var fileName = "backup-test-file.txt";
@@ -482,8 +456,7 @@ public class StorageServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Integration)]
-    public async Task BackupService_RestoreBackup_ShouldRestoreSuccessfully()
-    {
+    public async Task BackupService_RestoreBackup_ShouldRestoreSuccessfully() {
         // Arrange
         var containerName = "test-restore-container";
         var fileName = "restore-test-file.txt";
@@ -517,8 +490,7 @@ public class StorageServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Integration)]
-    public async Task BackupService_ValidateBackup_ShouldValidateCorrectly()
-    {
+    public async Task BackupService_ValidateBackup_ShouldValidateCorrectly() {
         // Arrange
         var containerName = "test-validation-container";
         var fileName = "validation-test-file.txt";
@@ -546,8 +518,7 @@ public class StorageServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Performance)]
-    public async Task StorageService_ConcurrentOperations_ShouldHandleLoad()
-    {
+    public async Task StorageService_ConcurrentOperations_ShouldHandleLoad() {
         // Arrange
         var containerName = "test-performance-container";
         var numberOfOperations = 50;
@@ -556,11 +527,9 @@ public class StorageServiceTests
 
         // Act
         var tasks = new List<Task>();
-        for (int i = 0; i < numberOfOperations; i++)
-        {
+        for (var i = 0; i < numberOfOperations; i++) {
             var fileName = $"perf-test-{i}.txt";
-            var task = Task.Run(async () =>
-            {
+            var task = Task.Run(async () => {
                 using var stream = new MemoryStream(Encoding.UTF8.GetBytes($"{content}-{i}"));
                 await _storageService.UploadAsync(containerName, fileName, stream, contentType);
             });
@@ -573,7 +542,7 @@ public class StorageServiceTests
 
         // Assert
         stopwatch.ElapsedMilliseconds.Should().BeLessThan(30000); // Should complete within 30 seconds
-        
+
         // Verify all files were uploaded
         var files = await _storageService.ListFilesAsync(containerName);
         files.Count().Should().BeGreaterOrEqualTo(numberOfOperations);
@@ -581,8 +550,7 @@ public class StorageServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Integration)]
-    public async Task StorageService_LargeFile_ShouldHandleWithinLimits()
-    {
+    public async Task StorageService_LargeFile_ShouldHandleWithinLimits() {
         // Arrange
         var containerName = "test-large-file-container";
         var fileName = "large-test-file.txt";
@@ -596,21 +564,19 @@ public class StorageServiceTests
 
         // Assert
         uploadResult.Should().NotBeNullOrEmpty();
-        
+
         // Verify file was uploaded correctly
         var exists = await _storageService.ExistsAsync(containerName, fileName);
         exists.Should().BeTrue();
-        
+
         var metadata = await _storageService.GetMetadataAsync(containerName, fileName);
         metadata.Size.Should().Be(largeContent.Length);
     }
 
     [TestCleanup]
-    public async Task Cleanup()
-    {
+    public async Task Cleanup() {
         // Clean up test containers and files
-        try
-        {
+        try {
             var testContainers = new[]
             {
                 "test-container",
@@ -621,20 +587,16 @@ public class StorageServiceTests
                 "test-large-file-container"
             };
 
-            foreach (var container in testContainers)
-            {
-                try
-                {
+            foreach (var container in testContainers) {
+                try {
                     await _storageService.DeleteContainerAsync(container);
                 }
-                catch
-                {
+                catch {
                     // Ignore cleanup errors
                 }
             }
         }
-        catch
-        {
+        catch {
             // Ignore cleanup errors
         }
     }

@@ -1,25 +1,26 @@
-using Common.Services;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
 using System.Diagnostics;
+
 using AwesomeAssertions;
+
+using Common.Services;
+
+using Microsoft.Extensions.Logging;
+
+using NSubstitute;
 
 namespace Common.UnitTests.Services;
 
-public class TracingServiceTests
-{
+public class TracingServiceTests {
     private readonly ILogger<TracingService> _logger;
     private readonly TracingService _tracingService;
 
-    public TracingServiceTests()
-    {
+    public TracingServiceTests() {
         _logger = Substitute.For<ILogger<TracingService>>();
         _tracingService = new TracingService(_logger);
     }
 
     [Fact]
-    public void StartActivity_ReturnsActivity()
-    {
+    public void StartActivity_ReturnsActivity() {
         // Arrange
         var name = "TestActivity";
 
@@ -32,8 +33,7 @@ public class TracingServiceTests
     }
 
     [Fact]
-    public void StartActivity_SetsDefaultTags()
-    {
+    public void StartActivity_SetsDefaultTags() {
         // Arrange
         var name = "TestActivity";
 
@@ -48,8 +48,7 @@ public class TracingServiceTests
     }
 
     [Fact]
-    public void StartActivity_WithDifferentKind_SetsKindCorrectly()
-    {
+    public void StartActivity_WithDifferentKind_SetsKindCorrectly() {
         // Arrange
         var name = "TestActivity";
         var kind = ActivityKind.Client;
@@ -63,8 +62,7 @@ public class TracingServiceTests
     }
 
     [Fact]
-    public void AddEvent_WithActivity_AddsEvent()
-    {
+    public void AddEvent_WithActivity_AddsEvent() {
         // Arrange
         var activity = _tracingService.StartActivity("TestActivity");
         var eventName = "TestEvent";
@@ -79,8 +77,7 @@ public class TracingServiceTests
     }
 
     [Fact]
-    public void AddEvent_WithNullActivity_DoesNotThrow()
-    {
+    public void AddEvent_WithNullActivity_DoesNotThrow() {
         // Arrange
         Activity? activity = null;
         var eventName = "TestEvent";
@@ -91,8 +88,7 @@ public class TracingServiceTests
     }
 
     [Fact]
-    public void SetTag_WithActivity_SetsTag()
-    {
+    public void SetTag_WithActivity_SetsTag() {
         // Arrange
         var activity = _tracingService.StartActivity("TestActivity");
         var key = "test.key";
@@ -107,8 +103,7 @@ public class TracingServiceTests
     }
 
     [Fact]
-    public void SetTag_WithNullActivity_DoesNotThrow()
-    {
+    public void SetTag_WithNullActivity_DoesNotThrow() {
         // Arrange
         Activity? activity = null;
         var key = "test.key";
@@ -120,8 +115,7 @@ public class TracingServiceTests
     }
 
     [Fact]
-    public void SetError_WithActivity_SetsErrorTags()
-    {
+    public void SetError_WithActivity_SetsErrorTags() {
         // Arrange
         var activity = _tracingService.StartActivity("TestActivity");
         var exception = new InvalidOperationException("Test exception");
@@ -137,8 +131,7 @@ public class TracingServiceTests
     }
 
     [Fact]
-    public void SetError_WithNullActivity_DoesNotThrow()
-    {
+    public void SetError_WithNullActivity_DoesNotThrow() {
         // Arrange
         Activity? activity = null;
         var exception = new InvalidOperationException("Test exception");
@@ -149,8 +142,7 @@ public class TracingServiceTests
     }
 
     [Fact]
-    public void SetStatus_WithActivity_SetsStatus()
-    {
+    public void SetStatus_WithActivity_SetsStatus() {
         // Arrange
         var activity = _tracingService.StartActivity("TestActivity");
         var statusCode = ActivityStatusCode.Ok;
@@ -166,8 +158,7 @@ public class TracingServiceTests
     }
 
     [Fact]
-    public void SetStatus_WithNullActivity_DoesNotThrow()
-    {
+    public void SetStatus_WithNullActivity_DoesNotThrow() {
         // Arrange
         Activity? activity = null;
         var statusCode = ActivityStatusCode.Ok;
@@ -178,8 +169,7 @@ public class TracingServiceTests
     }
 
     [Fact]
-    public void CreateScope_ReturnsDisposable()
-    {
+    public void CreateScope_ReturnsDisposable() {
         // Arrange
         var operationName = "TestOperation";
 
@@ -192,8 +182,7 @@ public class TracingServiceTests
     }
 
     [Fact]
-    public void CreateScope_DisposableCanBeDisposed()
-    {
+    public void CreateScope_DisposableCanBeDisposed() {
         // Arrange
         var operationName = "TestOperation";
 
@@ -204,8 +193,7 @@ public class TracingServiceTests
     }
 
     [Fact]
-    public void TraceDatabaseOperation_Extension_ReturnsDisposable()
-    {
+    public void TraceDatabaseOperation_Extension_ReturnsDisposable() {
         // Arrange
         var operation = "SELECT";
         var table = "Users";
@@ -219,8 +207,7 @@ public class TracingServiceTests
     }
 
     [Fact]
-    public void TraceCacheOperation_Extension_ReturnsDisposable()
-    {
+    public void TraceCacheOperation_Extension_ReturnsDisposable() {
         // Arrange
         var operation = "GET";
         var key = "user:123";
@@ -234,8 +221,7 @@ public class TracingServiceTests
     }
 
     [Fact]
-    public void TraceSearchOperation_Extension_ReturnsDisposable()
-    {
+    public void TraceSearchOperation_Extension_ReturnsDisposable() {
         // Arrange
         var operation = "search";
         var query = "test query";
@@ -249,8 +235,7 @@ public class TracingServiceTests
     }
 
     [Fact]
-    public void TraceMessageOperation_Extension_ReturnsDisposable()
-    {
+    public void TraceMessageOperation_Extension_ReturnsDisposable() {
         // Arrange
         var operation = "process";
         var messageType = "UserCreated";
@@ -264,8 +249,7 @@ public class TracingServiceTests
     }
 
     [Fact]
-    public void TracingExtensions_CanBeDisposed()
-    {
+    public void TracingExtensions_CanBeDisposed() {
         // Arrange & Act & Assert
         using var dbScope = _tracingService.TraceDatabaseOperation("SELECT", "Users");
         using var cacheScope = _tracingService.TraceCacheOperation("GET", "key");

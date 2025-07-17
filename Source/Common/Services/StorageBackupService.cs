@@ -1,18 +1,19 @@
-using Common.Models;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using System.Text.Json;
 using System.IO.Compression;
+using System.Text.Json;
+
+using Common.Models;
+
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Common.Services;
 
 /// <summary>
 /// Service for managing storage backup and disaster recovery
 /// </summary>
-public interface IStorageBackupService
-{
+public interface IStorageBackupService {
     /// <summary>
     /// Creates a backup of a container
     /// </summary>
@@ -57,44 +58,31 @@ public interface IStorageBackupService
 /// <summary>
 /// Background service for automatic backup execution
 /// </summary>
-public class StorageBackupBackgroundService : BackgroundService
-{
-    private readonly IServiceProvider _serviceProvider;
-    private readonly StorageConfiguration _configuration;
-    private readonly ILogger<StorageBackupBackgroundService> _logger;
+public class StorageBackupBackgroundService(
+    IServiceProvider serviceProvider,
+    IOptions<StorageConfiguration> configuration,
+    ILogger<StorageBackupBackgroundService> logger) : BackgroundService {
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
+    private readonly StorageConfiguration _configuration = configuration.Value;
+    private readonly ILogger<StorageBackupBackgroundService> _logger = logger;
 
-    public StorageBackupBackgroundService(
-        IServiceProvider serviceProvider,
-        IOptions<StorageConfiguration> configuration,
-        ILogger<StorageBackupBackgroundService> logger)
-    {
-        _serviceProvider = serviceProvider;
-        _configuration = configuration.Value;
-        _logger = logger;
-    }
-
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        if (!_configuration.Backup.EnableBackup)
-        {
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken) {
+        if (!_configuration.Backup.EnableBackup) {
             _logger.LogInformation("Backup service is disabled");
             return;
         }
 
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            try
-            {
+        while (!stoppingToken.IsCancellationRequested) {
+            try {
                 using var scope = _serviceProvider.CreateScope();
                 var backupService = scope.ServiceProvider.GetRequiredService<IStorageBackupService>();
-                
+
                 await PerformScheduledBackups(backupService, stoppingToken);
                 await CleanupExpiredBackups(backupService, stoppingToken);
-                
+
                 _logger.LogInformation("Scheduled backup operations completed");
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 _logger.LogError(ex, "Error in storage backup background service");
             }
 
@@ -103,53 +91,43 @@ public class StorageBackupBackgroundService : BackgroundService
         }
     }
 
-    private async Task PerformScheduledBackups(IStorageBackupService backupService, CancellationToken cancellationToken)
-    {
+    private async Task PerformScheduledBackups(IStorageBackupService backupService, CancellationToken cancellationToken) {
         // In a real implementation, this would read from configuration which containers to backup
         var containersToBackup = new[] { "packages", "versions", "security-scans" };
-        
-        foreach (var container in containersToBackup)
-        {
-            try
-            {
+
+        foreach (var container in containersToBackup) {
+            try {
                 var result = await backupService.CreateBackupAsync(container, cancellationToken);
-                
-                if (result.IsSuccess)
-                {
-                    _logger.LogInformation("Successfully created backup for container {Container}: {BackupId}", 
+
+                if (result.IsSuccess) {
+                    _logger.LogInformation("Successfully created backup for container {Container}: {BackupId}",
                         container, result.BackupId);
                 }
-                else
-                {
-                    _logger.LogError("Failed to create backup for container {Container}: {Error}", 
+                else {
+                    _logger.LogError("Failed to create backup for container {Container}: {Error}",
                         container, result.ErrorMessage);
                 }
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 _logger.LogError(ex, "Error creating backup for container {Container}", container);
             }
         }
     }
 
-    private async Task CleanupExpiredBackups(IStorageBackupService backupService, CancellationToken cancellationToken)
-    {
-        try
-        {
+    private async Task CleanupExpiredBackups(IStorageBackupService backupService, CancellationToken cancellationToken) {
+        try {
             var allBackups = await backupService.ListBackupsAsync(cancellationToken: cancellationToken);
             var retentionDays = _configuration.Backup.BackupRetentionDays;
             var cutoffDate = DateTimeOffset.UtcNow.AddDays(-retentionDays);
 
             var expiredBackups = allBackups.Where(b => b.CreatedAt < cutoffDate).ToList();
-            
-            foreach (var backup in expiredBackups)
-            {
+
+            foreach (var backup in expiredBackups) {
                 await backupService.DeleteBackupAsync(backup.BackupId, cancellationToken);
                 _logger.LogInformation("Deleted expired backup: {BackupId}", backup.BackupId);
             }
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Error cleaning up expired backups");
         }
     }
@@ -158,77 +136,63 @@ public class StorageBackupBackgroundService : BackgroundService
 /// <summary>
 /// Implementation of storage backup service
 /// </summary>
-public class StorageBackupService : IStorageBackupService
-{
-    private readonly IStorageService _primaryStorageService;
-    private readonly IStorageService _backupStorageService;
-    private readonly StorageConfiguration _configuration;
-    private readonly ILogger<StorageBackupService> _logger;
+public class StorageBackupService(
+    IStorageService primaryStorageService,
+    IStorageService backupStorageService,
+    IOptions<StorageConfiguration> configuration,
+    ILogger<StorageBackupService> logger) : IStorageBackupService {
+    private readonly IStorageService _primaryStorageService = primaryStorageService;
+    private readonly IStorageService _backupStorageService = backupStorageService;
+    private readonly StorageConfiguration _configuration = configuration.Value;
+    private readonly ILogger<StorageBackupService> _logger = logger;
 
-    public StorageBackupService(
-        IStorageService primaryStorageService,
-        IStorageService backupStorageService,
-        IOptions<StorageConfiguration> configuration,
-        ILogger<StorageBackupService> logger)
-    {
-        _primaryStorageService = primaryStorageService;
-        _backupStorageService = backupStorageService;
-        _configuration = configuration.Value;
-        _logger = logger;
-    }
-
-    public async Task<StorageBackupResult> CreateBackupAsync(string containerName, CancellationToken cancellationToken = default)
-    {
-        try
-        {
+    public async Task<StorageBackupResult> CreateBackupAsync(string containerName, CancellationToken cancellationToken = default) {
+        try {
             var backupId = Guid.NewGuid().ToString();
             var backupContainer = "backups";
             var backupTimestamp = DateTimeOffset.UtcNow;
-            
+
             _logger.LogInformation("Starting backup of container {ContainerName} with ID {BackupId}", containerName, backupId);
 
             // Create backup container if it doesn't exist
             await _backupStorageService.CreateContainerAsync(backupContainer, false, cancellationToken);
 
             // Create backup manifest
-            var manifest = new StorageBackupManifest
-            {
+            var manifest = new StorageBackupManifest {
                 BackupId = backupId,
                 ContainerName = containerName,
                 CreatedAt = backupTimestamp,
                 BackupType = _configuration.Backup.BackupType,
-                Files = new List<StorageBackupFileInfo>()
+                Files = []
             };
 
             // List all files in the container
             var files = await _primaryStorageService.ListFilesAsync(containerName, cancellationToken: cancellationToken);
             long totalSize = 0;
-            int fileCount = 0;
+            var fileCount = 0;
 
-            foreach (var file in files)
-            {
-                if (file.IsDirectory) continue;
+            foreach (var file in files) {
+                if (file.IsDirectory)
+                    continue;
 
-                try
-                {
+                try {
                     // Download file from primary storage
                     using var fileStream = await _primaryStorageService.DownloadAsync(containerName, file.FileName, cancellationToken);
-                    
+
                     // Get file metadata
                     var metadata = await _primaryStorageService.GetMetadataAsync(containerName, file.FileName, cancellationToken);
-                    
+
                     // Create compressed backup file name
                     var backupFileName = $"{backupId}/{file.FileName}";
-                    
+
                     // Compress and upload to backup storage
                     using var compressedStream = await CompressStreamAsync(fileStream, cancellationToken);
                     await _backupStorageService.UploadAsync(
-                        backupContainer, 
-                        backupFileName, 
-                        compressedStream, 
+                        backupContainer,
+                        backupFileName,
+                        compressedStream,
                         "application/gzip",
-                        new Dictionary<string, string>
-                        {
+                        new Dictionary<string, string> {
                             ["original-content-type"] = metadata.ContentType,
                             ["original-size"] = metadata.Size.ToString(),
                             ["backup-id"] = backupId,
@@ -236,8 +200,7 @@ public class StorageBackupService : IStorageBackupService
                         },
                         cancellationToken);
 
-                    manifest.Files.Add(new StorageBackupFileInfo
-                    {
+                    manifest.Files.Add(new StorageBackupFileInfo {
                         FileName = file.FileName,
                         OriginalSize = metadata.Size,
                         CompressedSize = compressedStream.Length,
@@ -250,9 +213,8 @@ public class StorageBackupService : IStorageBackupService
                     totalSize += metadata.Size;
                     fileCount++;
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error backing up file {FileName} from container {ContainerName}", 
+                catch (Exception ex) {
+                    _logger.LogError(ex, "Error backing up file {FileName} from container {ContainerName}",
                         file.FileName, containerName);
                 }
             }
@@ -261,15 +223,14 @@ public class StorageBackupService : IStorageBackupService
             manifest.TotalSize = totalSize;
             manifest.FileCount = fileCount;
             var manifestJson = JsonSerializer.Serialize(manifest, new JsonSerializerOptions { WriteIndented = true });
-            
+
             using var manifestStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(manifestJson));
             await _backupStorageService.UploadAsync(
                 backupContainer,
                 $"{backupId}/manifest.json",
                 manifestStream,
                 "application/json",
-                new Dictionary<string, string>
-                {
+                new Dictionary<string, string> {
                     ["backup-id"] = backupId,
                     ["source-container"] = containerName
                 },
@@ -278,8 +239,7 @@ public class StorageBackupService : IStorageBackupService
             _logger.LogInformation("Completed backup of container {ContainerName}: {FileCount} files, {TotalSize} bytes",
                 containerName, fileCount, totalSize);
 
-            return new StorageBackupResult
-            {
+            return new StorageBackupResult {
                 IsSuccess = true,
                 BackupId = backupId,
                 ContainerName = containerName,
@@ -288,62 +248,50 @@ public class StorageBackupService : IStorageBackupService
                 CreatedAt = backupTimestamp
             };
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Error creating backup for container {ContainerName}", containerName);
-            return new StorageBackupResult
-            {
+            return new StorageBackupResult {
                 IsSuccess = false,
                 ErrorMessage = ex.Message
             };
         }
     }
 
-    public async Task<StorageRestoreResult> RestoreBackupAsync(string backupId, string? targetContainerName = null, CancellationToken cancellationToken = default)
-    {
-        try
-        {
+    public async Task<StorageRestoreResult> RestoreBackupAsync(string backupId, string? targetContainerName = null, CancellationToken cancellationToken = default) {
+        try {
             var backupContainer = "backups";
             var manifestFileName = $"{backupId}/manifest.json";
-            
+
             _logger.LogInformation("Starting restore of backup {BackupId}", backupId);
 
             // Download and parse manifest
             using var manifestStream = await _backupStorageService.DownloadAsync(backupContainer, manifestFileName, cancellationToken);
             var manifestJson = await new StreamReader(manifestStream).ReadToEndAsync();
-            var manifest = JsonSerializer.Deserialize<StorageBackupManifest>(manifestJson);
-
-            if (manifest == null)
-            {
-                throw new InvalidOperationException("Invalid backup manifest");
-            }
+            var manifest = JsonSerializer.Deserialize<StorageBackupManifest>(manifestJson) ?? throw new InvalidOperationException("Invalid backup manifest");
 
             var targetContainer = targetContainerName ?? manifest.ContainerName;
-            
+
             // Create target container if it doesn't exist
             await _primaryStorageService.CreateContainerAsync(targetContainer, false, cancellationToken);
 
-            int restoredFiles = 0;
+            var restoredFiles = 0;
             long restoredBytes = 0;
 
-            foreach (var fileInfo in manifest.Files)
-            {
-                try
-                {
+            foreach (var fileInfo in manifest.Files) {
+                try {
                     // Download compressed file from backup storage
                     using var compressedStream = await _backupStorageService.DownloadAsync(backupContainer, fileInfo.BackupFileName, cancellationToken);
-                    
+
                     // Decompress file
                     using var decompressedStream = await DecompressStreamAsync(compressedStream, cancellationToken);
-                    
+
                     // Upload to target container
                     await _primaryStorageService.UploadAsync(
                         targetContainer,
                         fileInfo.FileName,
                         decompressedStream,
                         fileInfo.ContentType,
-                        new Dictionary<string, string>
-                        {
+                        new Dictionary<string, string> {
                             ["restored-from-backup"] = backupId,
                             ["original-etag"] = fileInfo.ETag ?? string.Empty
                         },
@@ -352,9 +300,8 @@ public class StorageBackupService : IStorageBackupService
                     restoredFiles++;
                     restoredBytes += fileInfo.OriginalSize;
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error restoring file {FileName} from backup {BackupId}", 
+                catch (Exception ex) {
+                    _logger.LogError(ex, "Error restoring file {FileName} from backup {BackupId}",
                         fileInfo.FileName, backupId);
                 }
             }
@@ -362,8 +309,7 @@ public class StorageBackupService : IStorageBackupService
             _logger.LogInformation("Completed restore of backup {BackupId}: {RestoredFiles} files, {RestoredBytes} bytes",
                 backupId, restoredFiles, restoredBytes);
 
-            return new StorageRestoreResult
-            {
+            return new StorageRestoreResult {
                 IsSuccess = true,
                 BackupId = backupId,
                 TargetContainerName = targetContainer,
@@ -372,39 +318,31 @@ public class StorageBackupService : IStorageBackupService
                 RestoredAt = DateTimeOffset.UtcNow
             };
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Error restoring backup {BackupId}", backupId);
-            return new StorageRestoreResult
-            {
+            return new StorageRestoreResult {
                 IsSuccess = false,
                 ErrorMessage = ex.Message
             };
         }
     }
 
-    public async Task<List<StorageBackupInfo>> ListBackupsAsync(string? containerName = null, CancellationToken cancellationToken = default)
-    {
-        try
-        {
+    public async Task<List<StorageBackupInfo>> ListBackupsAsync(string? containerName = null, CancellationToken cancellationToken = default) {
+        try {
             var backupContainer = "backups";
             var backups = new List<StorageBackupInfo>();
-            
+
             var files = await _backupStorageService.ListFilesAsync(backupContainer, cancellationToken: cancellationToken);
             var manifestFiles = files.Where(f => f.FileName.EndsWith("/manifest.json")).ToList();
 
-            foreach (var manifestFile in manifestFiles)
-            {
-                try
-                {
+            foreach (var manifestFile in manifestFiles) {
+                try {
                     using var manifestStream = await _backupStorageService.DownloadAsync(backupContainer, manifestFile.FileName, cancellationToken);
                     var manifestJson = await new StreamReader(manifestStream).ReadToEndAsync();
                     var manifest = JsonSerializer.Deserialize<StorageBackupManifest>(manifestJson);
 
-                    if (manifest != null && (containerName == null || manifest.ContainerName == containerName))
-                    {
-                        backups.Add(new StorageBackupInfo
-                        {
+                    if (manifest != null && (containerName == null || manifest.ContainerName == containerName)) {
+                        backups.Add(new StorageBackupInfo {
                             BackupId = manifest.BackupId,
                             ContainerName = manifest.ContainerName,
                             CreatedAt = manifest.CreatedAt,
@@ -414,60 +352,50 @@ public class StorageBackupService : IStorageBackupService
                         });
                     }
                 }
-                catch (Exception ex)
-                {
+                catch (Exception ex) {
                     _logger.LogError(ex, "Error reading backup manifest {ManifestFile}", manifestFile.FileName);
                 }
             }
 
             return backups.OrderByDescending(b => b.CreatedAt).ToList();
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Error listing backups");
-            return new List<StorageBackupInfo>();
+            return [];
         }
     }
 
-    public async Task DeleteBackupAsync(string backupId, CancellationToken cancellationToken = default)
-    {
-        try
-        {
+    public async Task DeleteBackupAsync(string backupId, CancellationToken cancellationToken = default) {
+        try {
             var backupContainer = "backups";
             var files = await _backupStorageService.ListFilesAsync(backupContainer, prefix: backupId, cancellationToken);
-            
+
             var filesToDelete = files.Select(f => f.FileName).ToList();
-            
-            if (filesToDelete.Count > 0)
-            {
+
+            if (filesToDelete.Count > 0) {
                 await _backupStorageService.DeleteBatchAsync(backupContainer, filesToDelete, cancellationToken);
                 _logger.LogInformation("Deleted backup {BackupId} ({FileCount} files)", backupId, filesToDelete.Count);
             }
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Error deleting backup {BackupId}", backupId);
             throw;
         }
     }
 
-    public async Task<StorageBackupValidationResult> ValidateBackupAsync(string backupId, CancellationToken cancellationToken = default)
-    {
-        var result = new StorageBackupValidationResult
-        {
+    public async Task<StorageBackupValidationResult> ValidateBackupAsync(string backupId, CancellationToken cancellationToken = default) {
+        var result = new StorageBackupValidationResult {
             BackupId = backupId,
             IsValid = true,
-            ValidationErrors = new List<string>()
+            ValidationErrors = []
         };
 
-        try
-        {
+        try {
             var backupContainer = "backups";
             var manifestFileName = $"{backupId}/manifest.json";
-            
+
             // Check if manifest exists
-            if (!await _backupStorageService.ExistsAsync(backupContainer, manifestFileName, cancellationToken))
-            {
+            if (!await _backupStorageService.ExistsAsync(backupContainer, manifestFileName, cancellationToken)) {
                 result.IsValid = false;
                 result.ValidationErrors.Add("Backup manifest not found");
                 return result;
@@ -478,18 +406,15 @@ public class StorageBackupService : IStorageBackupService
             var manifestJson = await new StreamReader(manifestStream).ReadToEndAsync();
             var manifest = JsonSerializer.Deserialize<StorageBackupManifest>(manifestJson);
 
-            if (manifest == null)
-            {
+            if (manifest == null) {
                 result.IsValid = false;
                 result.ValidationErrors.Add("Invalid backup manifest format");
                 return result;
             }
 
             // Validate each file in the backup
-            foreach (var fileInfo in manifest.Files)
-            {
-                if (!await _backupStorageService.ExistsAsync(backupContainer, fileInfo.BackupFileName, cancellationToken))
-                {
+            foreach (var fileInfo in manifest.Files) {
+                if (!await _backupStorageService.ExistsAsync(backupContainer, fileInfo.BackupFileName, cancellationToken)) {
                     result.IsValid = false;
                     result.ValidationErrors.Add($"Backup file missing: {fileInfo.BackupFileName}");
                 }
@@ -499,8 +424,7 @@ public class StorageBackupService : IStorageBackupService
             result.TotalSize = manifest.TotalSize;
             result.ValidatedAt = DateTimeOffset.UtcNow;
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Error validating backup {BackupId}", backupId);
             result.IsValid = false;
             result.ValidationErrors.Add($"Validation error: {ex.Message}");
@@ -509,50 +433,44 @@ public class StorageBackupService : IStorageBackupService
         return result;
     }
 
-    public async Task<StorageDisasterRecoveryResult> PerformDisasterRecoveryAsync(StorageDisasterRecoveryRequest request, CancellationToken cancellationToken = default)
-    {
-        try
-        {
+    public async Task<StorageDisasterRecoveryResult> PerformDisasterRecoveryAsync(StorageDisasterRecoveryRequest request, CancellationToken cancellationToken = default) {
+        try {
             _logger.LogInformation("Starting disaster recovery operation for scenario: {Scenario}", request.Scenario);
 
-            var result = new StorageDisasterRecoveryResult
-            {
+            var result = new StorageDisasterRecoveryResult {
                 Scenario = request.Scenario,
                 IsSuccess = true,
                 StartedAt = DateTimeOffset.UtcNow,
-                RecoveryActions = new List<string>()
+                RecoveryActions = []
             };
 
-            switch (request.Scenario)
-            {
+            switch (request.Scenario) {
                 case DisasterRecoveryScenario.ContainerCorruption:
                     await HandleContainerCorruptionAsync(request, result, cancellationToken);
                     break;
-                    
+
                 case DisasterRecoveryScenario.RegionalOutage:
                     await HandleRegionalOutageAsync(request, result, cancellationToken);
                     break;
-                    
+
                 case DisasterRecoveryScenario.DataLoss:
                     await HandleDataLossAsync(request, result, cancellationToken);
                     break;
-                    
+
                 default:
                     throw new ArgumentException($"Unknown disaster recovery scenario: {request.Scenario}");
             }
 
             result.CompletedAt = DateTimeOffset.UtcNow;
             result.Duration = result.CompletedAt - result.StartedAt;
-            
+
             _logger.LogInformation("Completed disaster recovery operation: {Duration}", result.Duration);
-            
+
             return result;
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Error performing disaster recovery");
-            return new StorageDisasterRecoveryResult
-            {
+            return new StorageDisasterRecoveryResult {
                 Scenario = request.Scenario,
                 IsSuccess = false,
                 ErrorMessage = ex.Message,
@@ -562,14 +480,11 @@ public class StorageBackupService : IStorageBackupService
         }
     }
 
-    public async Task<StorageBackupStatistics> GetBackupStatisticsAsync(CancellationToken cancellationToken = default)
-    {
-        try
-        {
+    public async Task<StorageBackupStatistics> GetBackupStatisticsAsync(CancellationToken cancellationToken = default) {
+        try {
             var allBackups = await ListBackupsAsync(cancellationToken: cancellationToken);
-            
-            return new StorageBackupStatistics
-            {
+
+            return new StorageBackupStatistics {
                 TotalBackups = allBackups.Count,
                 TotalBackupSize = allBackups.Sum(b => b.TotalSize),
                 BackupsByContainer = allBackups.GroupBy(b => b.ContainerName).ToDictionary(g => g.Key, g => g.Count()),
@@ -578,30 +493,25 @@ public class StorageBackupService : IStorageBackupService
                 GeneratedAt = DateTimeOffset.UtcNow
             };
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Error getting backup statistics");
             return new StorageBackupStatistics { GeneratedAt = DateTimeOffset.UtcNow };
         }
     }
 
-    public async Task<StorageDisasterRecoveryTestResult> TestDisasterRecoveryAsync(CancellationToken cancellationToken = default)
-    {
-        var result = new StorageDisasterRecoveryTestResult
-        {
+    public async Task<StorageDisasterRecoveryTestResult> TestDisasterRecoveryAsync(CancellationToken cancellationToken = default) {
+        var result = new StorageDisasterRecoveryTestResult {
             TestStartedAt = DateTimeOffset.UtcNow,
-            TestResults = new List<StorageDisasterRecoveryTestCase>()
+            TestResults = []
         };
 
-        try
-        {
+        try {
             // Test backup creation
             var backupTest = await TestBackupCreationAsync(cancellationToken);
             result.TestResults.Add(backupTest);
 
             // Test backup restoration
-            if (backupTest.IsSuccess && !string.IsNullOrEmpty(backupTest.BackupId))
-            {
+            if (backupTest.IsSuccess && !string.IsNullOrEmpty(backupTest.BackupId)) {
                 var restoreTest = await TestBackupRestorationAsync(backupTest.BackupId, cancellationToken);
                 result.TestResults.Add(restoreTest);
             }
@@ -616,8 +526,7 @@ public class StorageBackupService : IStorageBackupService
 
             return result;
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Error testing disaster recovery");
             result.OverallSuccess = false;
             result.ErrorMessage = ex.Message;
@@ -626,49 +535,37 @@ public class StorageBackupService : IStorageBackupService
         }
     }
 
-    private async Task<Stream> CompressStreamAsync(Stream input, CancellationToken cancellationToken)
-    {
+    private static async Task<Stream> CompressStreamAsync(Stream input, CancellationToken cancellationToken) {
         var output = new MemoryStream();
-        using (var gzip = new GZipStream(output, CompressionMode.Compress, true))
-        {
+        using (var gzip = new GZipStream(output, CompressionMode.Compress, true)) {
             await input.CopyToAsync(gzip, cancellationToken);
         }
         output.Position = 0;
         return output;
     }
 
-    private async Task<Stream> DecompressStreamAsync(Stream input, CancellationToken cancellationToken)
-    {
+    private static async Task<Stream> DecompressStreamAsync(Stream input, CancellationToken cancellationToken) {
         var output = new MemoryStream();
-        using (var gzip = new GZipStream(input, CompressionMode.Decompress))
-        {
+        using (var gzip = new GZipStream(input, CompressionMode.Decompress)) {
             await gzip.CopyToAsync(output, cancellationToken);
         }
         output.Position = 0;
         return output;
     }
 
-    private async Task HandleContainerCorruptionAsync(StorageDisasterRecoveryRequest request, StorageDisasterRecoveryResult result, CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrEmpty(request.ContainerName))
-        {
+    private async Task HandleContainerCorruptionAsync(StorageDisasterRecoveryRequest request, StorageDisasterRecoveryResult result, CancellationToken cancellationToken) {
+        if (string.IsNullOrEmpty(request.ContainerName)) {
             throw new ArgumentException("Container name is required for container corruption scenario");
         }
 
         // Find the most recent backup for the container
         var backups = await ListBackupsAsync(request.ContainerName, cancellationToken);
-        var latestBackup = backups.OrderByDescending(b => b.CreatedAt).FirstOrDefault();
-
-        if (latestBackup == null)
-        {
-            throw new InvalidOperationException($"No backups found for container {request.ContainerName}");
-        }
+        var latestBackup = backups.OrderByDescending(b => b.CreatedAt).FirstOrDefault() ?? throw new InvalidOperationException($"No backups found for container {request.ContainerName}");
 
         // Restore from the latest backup
         var restoreResult = await RestoreBackupAsync(latestBackup.BackupId, request.ContainerName, cancellationToken);
-        
-        if (!restoreResult.IsSuccess)
-        {
+
+        if (!restoreResult.IsSuccess) {
             throw new InvalidOperationException($"Failed to restore backup: {restoreResult.ErrorMessage}");
         }
 
@@ -676,41 +573,34 @@ public class StorageBackupService : IStorageBackupService
         result.RecoveryActions.Add($"Restored {restoreResult.RestoredFileCount} files ({restoreResult.RestoredBytes} bytes)");
     }
 
-    private async Task HandleRegionalOutageAsync(StorageDisasterRecoveryRequest request, StorageDisasterRecoveryResult result, CancellationToken cancellationToken)
-    {
+    private static async Task HandleRegionalOutageAsync(StorageDisasterRecoveryRequest request, StorageDisasterRecoveryResult result, CancellationToken cancellationToken) {
         // In a real implementation, this would failover to a different region
         result.RecoveryActions.Add("Initiated failover to secondary region");
         result.RecoveryActions.Add("Updated DNS records to point to secondary region");
         result.RecoveryActions.Add("Verified data consistency in secondary region");
     }
 
-    private async Task HandleDataLossAsync(StorageDisasterRecoveryRequest request, StorageDisasterRecoveryResult result, CancellationToken cancellationToken)
-    {
+    private async Task HandleDataLossAsync(StorageDisasterRecoveryRequest request, StorageDisasterRecoveryResult result, CancellationToken cancellationToken) {
         // Restore all containers from their latest backups
         var allBackups = await ListBackupsAsync(cancellationToken: cancellationToken);
         var latestBackupsByContainer = allBackups
             .GroupBy(b => b.ContainerName)
             .ToDictionary(g => g.Key, g => g.OrderByDescending(b => b.CreatedAt).First());
 
-        foreach (var kvp in latestBackupsByContainer)
-        {
+        foreach (var kvp in latestBackupsByContainer) {
             var restoreResult = await RestoreBackupAsync(kvp.Value.BackupId, kvp.Key, cancellationToken);
-            
-            if (restoreResult.IsSuccess)
-            {
+
+            if (restoreResult.IsSuccess) {
                 result.RecoveryActions.Add($"Restored container {kvp.Key} from backup {kvp.Value.BackupId}");
             }
-            else
-            {
+            else {
                 result.RecoveryActions.Add($"Failed to restore container {kvp.Key}: {restoreResult.ErrorMessage}");
             }
         }
     }
 
-    private async Task<StorageDisasterRecoveryTestCase> TestBackupCreationAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
+    private async Task<StorageDisasterRecoveryTestCase> TestBackupCreationAsync(CancellationToken cancellationToken) {
+        try {
             // Create a test container with sample data
             var testContainer = $"test-{Guid.NewGuid():N}";
             await _primaryStorageService.CreateContainerAsync(testContainer, false, cancellationToken);
@@ -726,8 +616,7 @@ public class StorageBackupService : IStorageBackupService
             // Cleanup test container
             await _primaryStorageService.DeleteContainerAsync(testContainer, cancellationToken);
 
-            return new StorageDisasterRecoveryTestCase
-            {
+            return new StorageDisasterRecoveryTestCase {
                 TestName = "Backup Creation Test",
                 IsSuccess = backupResult.IsSuccess,
                 BackupId = backupResult.BackupId,
@@ -735,10 +624,8 @@ public class StorageBackupService : IStorageBackupService
                 Duration = TimeSpan.FromSeconds(1) // Simplified
             };
         }
-        catch (Exception ex)
-        {
-            return new StorageDisasterRecoveryTestCase
-            {
+        catch (Exception ex) {
+            return new StorageDisasterRecoveryTestCase {
                 TestName = "Backup Creation Test",
                 IsSuccess = false,
                 ErrorMessage = ex.Message,
@@ -747,31 +634,25 @@ public class StorageBackupService : IStorageBackupService
         }
     }
 
-    private async Task<StorageDisasterRecoveryTestCase> TestBackupRestorationAsync(string backupId, CancellationToken cancellationToken)
-    {
-        try
-        {
+    private async Task<StorageDisasterRecoveryTestCase> TestBackupRestorationAsync(string backupId, CancellationToken cancellationToken) {
+        try {
             var testContainer = $"test-restore-{Guid.NewGuid():N}";
             var restoreResult = await RestoreBackupAsync(backupId, testContainer, cancellationToken);
 
             // Cleanup test container
-            if (restoreResult.IsSuccess)
-            {
+            if (restoreResult.IsSuccess) {
                 await _primaryStorageService.DeleteContainerAsync(testContainer, cancellationToken);
             }
 
-            return new StorageDisasterRecoveryTestCase
-            {
+            return new StorageDisasterRecoveryTestCase {
                 TestName = "Backup Restoration Test",
                 IsSuccess = restoreResult.IsSuccess,
                 ErrorMessage = restoreResult.ErrorMessage,
                 Duration = TimeSpan.FromSeconds(1) // Simplified
             };
         }
-        catch (Exception ex)
-        {
-            return new StorageDisasterRecoveryTestCase
-            {
+        catch (Exception ex) {
+            return new StorageDisasterRecoveryTestCase {
                 TestName = "Backup Restoration Test",
                 IsSuccess = false,
                 ErrorMessage = ex.Message,
@@ -780,17 +661,13 @@ public class StorageBackupService : IStorageBackupService
         }
     }
 
-    private async Task<StorageDisasterRecoveryTestCase> TestBackupValidationAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
+    private async Task<StorageDisasterRecoveryTestCase> TestBackupValidationAsync(CancellationToken cancellationToken) {
+        try {
             var backups = await ListBackupsAsync(cancellationToken: cancellationToken);
             var latestBackup = backups.OrderByDescending(b => b.CreatedAt).FirstOrDefault();
 
-            if (latestBackup == null)
-            {
-                return new StorageDisasterRecoveryTestCase
-                {
+            if (latestBackup == null) {
+                return new StorageDisasterRecoveryTestCase {
                     TestName = "Backup Validation Test",
                     IsSuccess = false,
                     ErrorMessage = "No backups available for validation",
@@ -800,18 +677,15 @@ public class StorageBackupService : IStorageBackupService
 
             var validationResult = await ValidateBackupAsync(latestBackup.BackupId, cancellationToken);
 
-            return new StorageDisasterRecoveryTestCase
-            {
+            return new StorageDisasterRecoveryTestCase {
                 TestName = "Backup Validation Test",
                 IsSuccess = validationResult.IsValid,
                 ErrorMessage = validationResult.ValidationErrors.FirstOrDefault(),
                 Duration = TimeSpan.FromSeconds(1)
             };
         }
-        catch (Exception ex)
-        {
-            return new StorageDisasterRecoveryTestCase
-            {
+        catch (Exception ex) {
+            return new StorageDisasterRecoveryTestCase {
                 TestName = "Backup Validation Test",
                 IsSuccess = false,
                 ErrorMessage = ex.Message,
@@ -823,19 +697,17 @@ public class StorageBackupService : IStorageBackupService
 
 // Data models for backup and disaster recovery
 
-public class StorageBackupManifest
-{
+public class StorageBackupManifest {
     public string BackupId { get; set; } = string.Empty;
     public string ContainerName { get; set; } = string.Empty;
     public DateTimeOffset CreatedAt { get; set; }
     public StorageBackupType BackupType { get; set; }
     public int FileCount { get; set; }
     public long TotalSize { get; set; }
-    public List<StorageBackupFileInfo> Files { get; set; } = new();
+    public List<StorageBackupFileInfo> Files { get; set; } = [];
 }
 
-public class StorageBackupFileInfo
-{
+public class StorageBackupFileInfo {
     public string FileName { get; set; } = string.Empty;
     public long OriginalSize { get; set; }
     public long CompressedSize { get; set; }
@@ -845,8 +717,7 @@ public class StorageBackupFileInfo
     public string BackupFileName { get; set; } = string.Empty;
 }
 
-public class StorageBackupResult
-{
+public class StorageBackupResult {
     public bool IsSuccess { get; set; }
     public string BackupId { get; set; } = string.Empty;
     public string ContainerName { get; set; } = string.Empty;
@@ -856,8 +727,7 @@ public class StorageBackupResult
     public string? ErrorMessage { get; set; }
 }
 
-public class StorageRestoreResult
-{
+public class StorageRestoreResult {
     public bool IsSuccess { get; set; }
     public string BackupId { get; set; } = string.Empty;
     public string TargetContainerName { get; set; } = string.Empty;
@@ -867,8 +737,7 @@ public class StorageRestoreResult
     public string? ErrorMessage { get; set; }
 }
 
-public class StorageBackupInfo
-{
+public class StorageBackupInfo {
     public string BackupId { get; set; } = string.Empty;
     public string ContainerName { get; set; } = string.Empty;
     public DateTimeOffset CreatedAt { get; set; }
@@ -877,56 +746,50 @@ public class StorageBackupInfo
     public StorageBackupType BackupType { get; set; }
 }
 
-public class StorageBackupValidationResult
-{
+public class StorageBackupValidationResult {
     public string BackupId { get; set; } = string.Empty;
     public bool IsValid { get; set; }
     public int FileCount { get; set; }
     public long TotalSize { get; set; }
-    public List<string> ValidationErrors { get; set; } = new();
+    public List<string> ValidationErrors { get; set; } = [];
     public DateTimeOffset ValidatedAt { get; set; }
 }
 
-public class StorageDisasterRecoveryRequest
-{
+public class StorageDisasterRecoveryRequest {
     public DisasterRecoveryScenario Scenario { get; set; }
     public string? ContainerName { get; set; }
-    public Dictionary<string, string> Parameters { get; set; } = new();
+    public Dictionary<string, string> Parameters { get; set; } = [];
 }
 
-public class StorageDisasterRecoveryResult
-{
+public class StorageDisasterRecoveryResult {
     public DisasterRecoveryScenario Scenario { get; set; }
     public bool IsSuccess { get; set; }
     public DateTimeOffset StartedAt { get; set; }
     public DateTimeOffset CompletedAt { get; set; }
     public TimeSpan Duration { get; set; }
-    public List<string> RecoveryActions { get; set; } = new();
+    public List<string> RecoveryActions { get; set; } = [];
     public string? ErrorMessage { get; set; }
 }
 
-public class StorageBackupStatistics
-{
+public class StorageBackupStatistics {
     public int TotalBackups { get; set; }
     public long TotalBackupSize { get; set; }
-    public Dictionary<string, int> BackupsByContainer { get; set; } = new();
+    public Dictionary<string, int> BackupsByContainer { get; set; } = [];
     public DateTimeOffset? OldestBackup { get; set; }
     public DateTimeOffset? NewestBackup { get; set; }
     public DateTimeOffset GeneratedAt { get; set; }
 }
 
-public class StorageDisasterRecoveryTestResult
-{
+public class StorageDisasterRecoveryTestResult {
     public bool OverallSuccess { get; set; }
     public DateTimeOffset TestStartedAt { get; set; }
     public DateTimeOffset TestCompletedAt { get; set; }
     public TimeSpan Duration { get; set; }
-    public List<StorageDisasterRecoveryTestCase> TestResults { get; set; } = new();
+    public List<StorageDisasterRecoveryTestCase> TestResults { get; set; } = [];
     public string? ErrorMessage { get; set; }
 }
 
-public class StorageDisasterRecoveryTestCase
-{
+public class StorageDisasterRecoveryTestCase {
     public string TestName { get; set; } = string.Empty;
     public bool IsSuccess { get; set; }
     public string? BackupId { get; set; }
@@ -934,8 +797,7 @@ public class StorageDisasterRecoveryTestCase
     public TimeSpan Duration { get; set; }
 }
 
-public enum DisasterRecoveryScenario
-{
+public enum DisasterRecoveryScenario {
     ContainerCorruption,
     RegionalOutage,
     DataLoss

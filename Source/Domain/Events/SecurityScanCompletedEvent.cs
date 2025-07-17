@@ -5,11 +5,9 @@ namespace Domain.Events;
 /// <summary>
 /// Event raised when a security scan is completed
 /// </summary>
-public class SecurityScanCompletedEvent : BaseEvent
-{
+public record SecurityScanCompletedEvent : BaseEvent {
     public SecurityScanCompletedEvent(string scanId, string serverId, string serverVersionId, string status, int vulnerabilityCount)
-        : base("SecurityScan", 1)
-    {
+        : base("SecurityScan", 1) {
         ScanId = scanId;
         ServerId = serverId;
         ServerVersionId = serverVersionId;
@@ -20,8 +18,7 @@ public class SecurityScanCompletedEvent : BaseEvent
     }
 
     public SecurityScanCompletedEvent(string scanId, string serverId, string serverVersionId, string status, int vulnerabilityCount, string? correlationId, string? initiatedBy)
-        : base("SecurityScan", correlationId, initiatedBy, scanId, 1)
-    {
+        : base("SecurityScan", correlationId, initiatedBy, scanId, 1) {
         ScanId = scanId;
         ServerId = serverId;
         ServerVersionId = serverVersionId;

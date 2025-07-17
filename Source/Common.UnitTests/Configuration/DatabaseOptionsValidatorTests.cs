@@ -1,24 +1,22 @@
-using Common.Configuration;
-using Microsoft.Extensions.Options;
 using AwesomeAssertions;
+
+using Common.Configuration;
+
+using Microsoft.Extensions.Options;
 
 namespace Common.UnitTests.Configuration;
 
-public class DatabaseOptionsValidatorTests
-{
+public class DatabaseOptionsValidatorTests {
     private readonly DatabaseOptionsValidator _validator;
 
-    public DatabaseOptionsValidatorTests()
-    {
+    public DatabaseOptionsValidatorTests() {
         _validator = new DatabaseOptionsValidator();
     }
 
     [Fact]
-    public void Validate_WithValidOptions_ReturnsSuccess()
-    {
+    public void Validate_WithValidOptions_ReturnsSuccess() {
         // Arrange
-        var options = new DatabaseOptions
-        {
+        var options = new DatabaseOptions {
             ConnectionString = "Host=localhost;Database=test;Username=user;Password=pass",
             MaxRetryCount = 3,
             CommandTimeout = TimeSpan.FromSeconds(30),
@@ -34,11 +32,9 @@ public class DatabaseOptionsValidatorTests
     }
 
     [Fact]
-    public void Validate_WithEmptyConnectionString_ReturnsFailure()
-    {
+    public void Validate_WithEmptyConnectionString_ReturnsFailure() {
         // Arrange
-        var options = new DatabaseOptions
-        {
+        var options = new DatabaseOptions {
             ConnectionString = "",
             MaxRetryCount = 3,
             CommandTimeout = TimeSpan.FromSeconds(30),
@@ -55,11 +51,9 @@ public class DatabaseOptionsValidatorTests
     }
 
     [Fact]
-    public void Validate_WithNegativeMaxRetryCount_ReturnsFailure()
-    {
+    public void Validate_WithNegativeMaxRetryCount_ReturnsFailure() {
         // Arrange
-        var options = new DatabaseOptions
-        {
+        var options = new DatabaseOptions {
             ConnectionString = "Host=localhost;Database=test;Username=user;Password=pass",
             MaxRetryCount = -1,
             CommandTimeout = TimeSpan.FromSeconds(30),
@@ -76,11 +70,9 @@ public class DatabaseOptionsValidatorTests
     }
 
     [Fact]
-    public void Validate_WithZeroCommandTimeout_ReturnsFailure()
-    {
+    public void Validate_WithZeroCommandTimeout_ReturnsFailure() {
         // Arrange
-        var options = new DatabaseOptions
-        {
+        var options = new DatabaseOptions {
             ConnectionString = "Host=localhost;Database=test;Username=user;Password=pass",
             MaxRetryCount = 3,
             CommandTimeout = TimeSpan.Zero,
@@ -97,11 +89,9 @@ public class DatabaseOptionsValidatorTests
     }
 
     [Fact]
-    public void Validate_WithZeroMaxPoolSize_ReturnsFailure()
-    {
+    public void Validate_WithZeroMaxPoolSize_ReturnsFailure() {
         // Arrange
-        var options = new DatabaseOptions
-        {
+        var options = new DatabaseOptions {
             ConnectionString = "Host=localhost;Database=test;Username=user;Password=pass",
             MaxRetryCount = 3,
             CommandTimeout = TimeSpan.FromSeconds(30),
@@ -118,11 +108,9 @@ public class DatabaseOptionsValidatorTests
     }
 
     [Fact]
-    public void Validate_WithZeroHealthCheckTimeout_ReturnsFailure()
-    {
+    public void Validate_WithZeroHealthCheckTimeout_ReturnsFailure() {
         // Arrange
-        var options = new DatabaseOptions
-        {
+        var options = new DatabaseOptions {
             ConnectionString = "Host=localhost;Database=test;Username=user;Password=pass",
             MaxRetryCount = 3,
             CommandTimeout = TimeSpan.FromSeconds(30),

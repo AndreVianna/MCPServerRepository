@@ -1,25 +1,23 @@
 using Common.Messaging.Serialization;
-using Domain.Events;
+
 using Domain.Commands;
+using Domain.Events;
 
 namespace Common.UnitTests.Messaging;
 
 /// <summary>
 /// Tests for message serialization and deserialization
 /// </summary>
-public class MessageSerializationTests
-{
+public class MessageSerializationTests {
     private readonly JsonMessageSerializer _serializer;
 
-    public MessageSerializationTests()
-    {
+    public MessageSerializationTests() {
         _serializer = new JsonMessageSerializer();
     }
 
     [Fact]
     [Trait("Category", "Unit")]
-    public void SerializeEvent_ShouldReturnValidBytes()
-    {
+    public void SerializeEvent_ShouldReturnValidBytes() {
         // Arrange
         var serverRegisteredEvent = new ServerRegisteredEvent(
             Guid.NewGuid().ToString(),
@@ -39,8 +37,7 @@ public class MessageSerializationTests
 
     [Fact]
     [Trait("Category", "Unit")]
-    public void DeserializeEvent_ShouldReturnValidEvent()
-    {
+    public void DeserializeEvent_ShouldReturnValidEvent() {
         // Arrange
         var originalEvent = new ServerRegisteredEvent(
             Guid.NewGuid().ToString(),
@@ -68,8 +65,7 @@ public class MessageSerializationTests
 
     [Fact]
     [Trait("Category", "Unit")]
-    public void SerializeCommand_ShouldReturnValidBytes()
-    {
+    public void SerializeCommand_ShouldReturnValidBytes() {
         // Arrange
         var scanCommand = new ScanServerCommand(
             Guid.NewGuid().ToString(),
@@ -88,8 +84,7 @@ public class MessageSerializationTests
 
     [Fact]
     [Trait("Category", "Unit")]
-    public void DeserializeCommand_ShouldReturnValidCommand()
-    {
+    public void DeserializeCommand_ShouldReturnValidCommand() {
         // Arrange
         var originalCommand = new ScanServerCommand(
             Guid.NewGuid().ToString(),
@@ -115,8 +110,7 @@ public class MessageSerializationTests
 
     [Fact]
     [Trait("Category", "Unit")]
-    public void DeserializeWithType_ShouldReturnValidObject()
-    {
+    public void DeserializeWithType_ShouldReturnValidObject() {
         // Arrange
         var originalEvent = new ServerRegisteredEvent(
             Guid.NewGuid().ToString(),
@@ -134,7 +128,7 @@ public class MessageSerializationTests
         // Assert
         Assert.NotNull(deserializedObject);
         Assert.IsType<ServerRegisteredEvent>(deserializedObject);
-        
+
         var deserializedEvent = (ServerRegisteredEvent)deserializedObject;
         Assert.Equal(originalEvent.ServerId, deserializedEvent.ServerId);
         Assert.Equal(originalEvent.Name, deserializedEvent.Name);
@@ -142,8 +136,7 @@ public class MessageSerializationTests
 
     [Fact]
     [Trait("Category", "Unit")]
-    public void ContentType_ShouldReturnApplicationJson()
-    {
+    public void ContentType_ShouldReturnApplicationJson() {
         // Act
         var contentType = _serializer.ContentType;
 
@@ -153,28 +146,24 @@ public class MessageSerializationTests
 
     [Fact]
     [Trait("Category", "ErrorHandling")]
-    public void DeserializeInvalidData_ShouldThrowException()
-    {
+    public void DeserializeInvalidData_ShouldThrowException() {
         // Arrange
         var invalidData = "invalid json data"u8.ToArray();
 
         // Act & Assert
-        Assert.Throws<System.Text.Json.JsonException>(() =>
-        {
+        Assert.Throws<System.Text.Json.JsonException>(() => {
             _serializer.Deserialize<ServerRegisteredEvent>(invalidData);
         });
     }
 
     [Fact]
     [Trait("Category", "ErrorHandling")]
-    public void DeserializeEmptyData_ShouldThrowException()
-    {
+    public void DeserializeEmptyData_ShouldThrowException() {
         // Arrange
         var emptyData = Array.Empty<byte>();
 
         // Act & Assert
-        Assert.Throws<System.Text.Json.JsonException>(() =>
-        {
+        Assert.Throws<System.Text.Json.JsonException>(() => {
             _serializer.Deserialize<ServerRegisteredEvent>(emptyData);
         });
     }

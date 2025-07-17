@@ -1,7 +1,6 @@
 namespace Common.Configuration;
 
-public class RabbitMqOptions
-{
+public class RabbitMqOptions {
     public const string SectionName = "RabbitMQ";
 
     public string ConnectionString { get; set; } = string.Empty;

@@ -1,24 +1,23 @@
+using AwesomeAssertions;
+
 using Common.Configuration;
 using Common.Extensions;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using AwesomeAssertions;
 
 namespace Common.UnitTests.Extensions;
 
-public class ServiceCollectionExtensionsTests
-{
+public class ServiceCollectionExtensionsTests {
     private readonly IServiceCollection _services;
     private readonly IConfiguration _configuration;
 
-    public ServiceCollectionExtensionsTests()
-    {
+    public ServiceCollectionExtensionsTests() {
         _services = new ServiceCollection();
-        
+
         var configurationBuilder = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
+            .AddInMemoryCollection(new Dictionary<string, string?> {
                 ["Database:ConnectionString"] = "Host=localhost;Database=test;Username=user;Password=pass",
                 ["Database:MaxRetryCount"] = "3",
                 ["Database:CommandTimeout"] = "00:00:30",
@@ -36,13 +35,12 @@ public class ServiceCollectionExtensionsTests
                 ["Observability:Serilog:MinimumLevel"] = "Information",
                 ["Observability:Serilog:LogTemplate"] = "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] {Message:lj}{NewLine}{Exception}"
             });
-        
+
         _configuration = configurationBuilder.Build();
     }
 
     [Fact]
-    public void AddConfigurationOptions_RegistersAllOptions()
-    {
+    public void AddConfigurationOptions_RegistersAllOptions() {
         // Act
         _services.AddConfigurationOptions(_configuration);
         var serviceProvider = _services.BuildServiceProvider();
@@ -62,8 +60,7 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Fact]
-    public void AddConfigurationOptions_RegistersValidators()
-    {
+    public void AddConfigurationOptions_RegistersValidators() {
         // Act
         _services.AddConfigurationOptions(_configuration);
         var serviceProvider = _services.BuildServiceProvider();
@@ -83,8 +80,7 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Fact]
-    public void AddServicesFromAssembly_RegistersServicesCorrectly()
-    {
+    public void AddServicesFromAssembly_RegistersServicesCorrectly() {
         // Arrange
         var assembly = typeof(ServiceCollectionExtensions).Assembly;
 
@@ -98,8 +94,7 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Fact]
-    public void AddMediatRFromAssembly_RegistersMediatR()
-    {
+    public void AddMediatRFromAssembly_RegistersMediatR() {
         // Arrange
         var assembly = typeof(ServiceCollectionExtensionsTests).Assembly;
 
@@ -113,8 +108,7 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Fact]
-    public void AddAutoMapperFromAssembly_RegistersAutoMapper()
-    {
+    public void AddAutoMapperFromAssembly_RegistersAutoMapper() {
         // Arrange
         var assembly = typeof(ServiceCollectionExtensionsTests).Assembly;
 
@@ -128,8 +122,7 @@ public class ServiceCollectionExtensionsTests
     }
 
     [Fact]
-    public void AddFluentValidationFromAssembly_RegistersValidators()
-    {
+    public void AddFluentValidationFromAssembly_RegistersValidators() {
         // Arrange
         var assembly = typeof(ServiceCollectionExtensionsTests).Assembly;
 

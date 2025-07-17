@@ -1,24 +1,24 @@
-using Common.Services;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
 using AwesomeAssertions;
+
+using Common.Services;
+
+using Microsoft.Extensions.Logging;
+
+using NSubstitute;
 
 namespace Common.UnitTests.Services;
 
-public class MonitoringServiceTests
-{
+public class MonitoringServiceTests {
     private readonly ILogger<MonitoringService> _logger;
     private readonly MonitoringService _monitoringService;
 
-    public MonitoringServiceTests()
-    {
+    public MonitoringServiceTests() {
         _logger = Substitute.For<ILogger<MonitoringService>>();
         _monitoringService = new MonitoringService(_logger);
     }
 
     [Fact]
-    public void RecordHttpRequest_DoesNotThrow()
-    {
+    public void RecordHttpRequest_DoesNotThrow() {
         // Arrange
         var method = "GET";
         var path = "/api/test";
@@ -31,8 +31,7 @@ public class MonitoringServiceTests
     }
 
     [Fact]
-    public void RecordDatabaseQuery_DoesNotThrow()
-    {
+    public void RecordDatabaseQuery_DoesNotThrow() {
         // Arrange
         var operation = "SELECT";
         var table = "Users";
@@ -45,8 +44,7 @@ public class MonitoringServiceTests
     }
 
     [Fact]
-    public void RecordCacheOperation_DoesNotThrow()
-    {
+    public void RecordCacheOperation_DoesNotThrow() {
         // Arrange
         var operation = "GET";
         var duration = TimeSpan.FromMilliseconds(10);
@@ -58,8 +56,7 @@ public class MonitoringServiceTests
     }
 
     [Fact]
-    public void RecordSearchOperation_DoesNotThrow()
-    {
+    public void RecordSearchOperation_DoesNotThrow() {
         // Arrange
         var operation = "search";
         var duration = TimeSpan.FromMilliseconds(200);
@@ -71,8 +68,7 @@ public class MonitoringServiceTests
     }
 
     [Fact]
-    public void RecordMessageProcessing_DoesNotThrow()
-    {
+    public void RecordMessageProcessing_DoesNotThrow() {
         // Arrange
         var messageType = "UserCreated";
         var duration = TimeSpan.FromMilliseconds(75);
@@ -84,8 +80,7 @@ public class MonitoringServiceTests
     }
 
     [Fact]
-    public void RecordSecurityScan_DoesNotThrow()
-    {
+    public void RecordSecurityScan_DoesNotThrow() {
         // Arrange
         var scanType = "vulnerability";
         var duration = TimeSpan.FromSeconds(5);
@@ -97,8 +92,7 @@ public class MonitoringServiceTests
     }
 
     [Fact]
-    public void RecordError_LogsError()
-    {
+    public void RecordError_LogsError() {
         // Arrange
         var component = "Database";
         var errorType = "ConnectionTimeout";
@@ -116,8 +110,7 @@ public class MonitoringServiceTests
     }
 
     [Fact]
-    public void StartActivity_ReturnsDisposable()
-    {
+    public void StartActivity_ReturnsDisposable() {
         // Arrange
         var operationName = "TestOperation";
 
@@ -130,8 +123,7 @@ public class MonitoringServiceTests
     }
 
     [Fact]
-    public void StartActivity_DisposableCanBeDisposed()
-    {
+    public void StartActivity_DisposableCanBeDisposed() {
         // Arrange
         var operationName = "TestOperation";
 
@@ -144,8 +136,7 @@ public class MonitoringServiceTests
     }
 
     [Fact]
-    public void Constructor_DoesNotThrow()
-    {
+    public void Constructor_DoesNotThrow() {
         // Act & Assert
         Action act = () => new MonitoringService(_logger);
         act.Should().NotThrow();
@@ -158,8 +149,7 @@ public class MonitoringServiceTests
     [InlineData("DELETE", "/api/users/1", 204)]
     [InlineData("GET", "/api/users/1", 404)]
     [InlineData("POST", "/api/users", 500)]
-    public void RecordHttpRequest_HandlesDifferentHttpMethods(string method, string path, int statusCode)
-    {
+    public void RecordHttpRequest_HandlesDifferentHttpMethods(string method, string path, int statusCode) {
         // Arrange
         var duration = TimeSpan.FromMilliseconds(100);
 
@@ -175,8 +165,7 @@ public class MonitoringServiceTests
     [InlineData("DELETE", true)]
     [InlineData("SELECT", false)]
     [InlineData("INSERT", false)]
-    public void RecordDatabaseQuery_HandlesDifferentOperations(string operation, bool success)
-    {
+    public void RecordDatabaseQuery_HandlesDifferentOperations(string operation, bool success) {
         // Arrange
         var table = "TestTable";
         var duration = TimeSpan.FromMilliseconds(50);

@@ -1,55 +1,52 @@
-using Common.Services;
-using Common.Models;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
 using System.Text;
+
+using Common.Models;
+using Common.Services;
+
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+
+using NSubstitute;
 
 namespace Common.UnitTests.Services;
 
 [TestClass]
 [TestCategory(TestCategories.Unit)]
-public class StorageSecurityServiceTests
-{
+public class StorageSecurityServiceTests {
     private IStorageSecurityService _securityService = null!;
     private ICacheService _cacheService = null!;
     private StorageConfiguration _configuration = null!;
     private ILogger<StorageSecurityService> _logger = null!;
 
     [TestInitialize]
-    public void Setup()
-    {
-        _configuration = new StorageConfiguration
-        {
-            Options = new StorageOptions
-            {
+    public void Setup() {
+        _configuration = new StorageConfiguration {
+            Options = new StorageOptions {
                 MaxFileSize = 1024 * 1024, // 1MB
-                AllowedFileExtensions = new List<string> { ".txt", ".json", ".xml" },
-                BlockedFileExtensions = new List<string> { ".exe", ".bat", ".cmd", ".scr" }
+                AllowedFileExtensions = [".txt", ".json", ".xml"],
+                BlockedFileExtensions = [".exe", ".bat", ".cmd", ".scr"]
             },
-            Security = new StorageSecuritySettings
-            {
+            Security = new StorageSecuritySettings {
                 EnableEncryptionAtRest = true,
                 EnableEncryptionInTransit = true,
                 EnableAccessLogging = true,
                 EnableVirusScanning = true,
                 MaxDownloadAttemptsPerHour = 100,
-                AllowedIpAddresses = new List<string> { "192.168.1.0/24", "10.0.0.0/8" },
-                BlockedIpAddresses = new List<string> { "192.168.1.100", "10.0.0.50" }
+                AllowedIpAddresses = ["192.168.1.0/24", "10.0.0.0/8"],
+                BlockedIpAddresses = ["192.168.1.100", "10.0.0.50"]
             }
         };
 
         var options = Options.Create(_configuration);
         _cacheService = Substitute.For<ICacheService>();
         _logger = Substitute.For<ILogger<StorageSecurityService>>();
-        
+
         _securityService = new StorageSecurityService(options, _cacheService, _logger);
     }
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task ValidateFileUploadAsync_ValidFile_ShouldReturnValid()
-    {
+    public async Task ValidateFileUploadAsync_ValidFile_ShouldReturnValid() {
         // Arrange
         var fileName = "test-file.txt";
         var content = "This is a valid test file";
@@ -69,8 +66,7 @@ public class StorageSecurityServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task ValidateFileUploadAsync_InvalidExtension_ShouldReturnInvalid()
-    {
+    public async Task ValidateFileUploadAsync_InvalidExtension_ShouldReturnInvalid() {
         // Arrange
         var fileName = "malicious-file.exe";
         var content = "This is a malicious file";
@@ -89,8 +85,7 @@ public class StorageSecurityServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task ValidateFileUploadAsync_FileTooLarge_ShouldReturnInvalid()
-    {
+    public async Task ValidateFileUploadAsync_FileTooLarge_ShouldReturnInvalid() {
         // Arrange
         var fileName = "large-file.txt";
         var content = new string('A', 2 * 1024 * 1024); // 2MB file, exceeds 1MB limit
@@ -109,8 +104,7 @@ public class StorageSecurityServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task ScanFileAsync_CleanFile_ShouldReturnClean()
-    {
+    public async Task ScanFileAsync_CleanFile_ShouldReturnClean() {
         // Arrange
         var fileName = "clean-file.txt";
         var content = "This is a clean file with no malware";
@@ -129,8 +123,7 @@ public class StorageSecurityServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task ScanFileAsync_MaliciousFile_ShouldReturnInfected()
-    {
+    public async Task ScanFileAsync_MaliciousFile_ShouldReturnInfected() {
         // Arrange
         var fileName = "infected-file.txt";
         var content = "This file contains EICAR-STANDARD-ANTIVIRUS-TEST-FILE signature";
@@ -150,8 +143,7 @@ public class StorageSecurityServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task EncryptContentAsync_ValidContent_ShouldReturnEncryptedStream()
-    {
+    public async Task EncryptContentAsync_ValidContent_ShouldReturnEncryptedStream() {
         // Arrange
         var originalContent = "This is content to encrypt";
         using var originalStream = new MemoryStream(Encoding.UTF8.GetBytes(originalContent));
@@ -167,15 +159,14 @@ public class StorageSecurityServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task DecryptContentAsync_EncryptedContent_ShouldReturnOriginalContent()
-    {
+    public async Task DecryptContentAsync_EncryptedContent_ShouldReturnOriginalContent() {
         // Arrange
         var originalContent = "This is content to encrypt and decrypt";
         using var originalStream = new MemoryStream(Encoding.UTF8.GetBytes(originalContent));
 
         // First encrypt
         using var encryptedStream = await _securityService.EncryptContentAsync(originalStream);
-        
+
         // Act
         using var decryptedStream = await _securityService.DecryptContentAsync(encryptedStream);
         var decryptedContent = await new StreamReader(decryptedStream).ReadToEndAsync();
@@ -186,8 +177,7 @@ public class StorageSecurityServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task IsIpAddressAllowedAsync_AllowedIp_ShouldReturnTrue()
-    {
+    public async Task IsIpAddressAllowedAsync_AllowedIp_ShouldReturnTrue() {
         // Arrange
         var ipAddress = "192.168.1.10";
 
@@ -200,8 +190,7 @@ public class StorageSecurityServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task IsIpAddressAllowedAsync_BlockedIp_ShouldReturnFalse()
-    {
+    public async Task IsIpAddressAllowedAsync_BlockedIp_ShouldReturnFalse() {
         // Arrange
         var ipAddress = "192.168.1.100";
 
@@ -214,8 +203,7 @@ public class StorageSecurityServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task GetRateLimitStatusAsync_NewClient_ShouldReturnAllowed()
-    {
+    public async Task GetRateLimitStatusAsync_NewClient_ShouldReturnAllowed() {
         // Arrange
         var clientIdentifier = "test-client-123";
         _cacheService.GetAsync<int>($"rate_limit:{clientIdentifier}", Arg.Any<CancellationToken>())
@@ -233,12 +221,11 @@ public class StorageSecurityServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task GetRateLimitStatusAsync_ExceededLimit_ShouldReturnNotAllowed()
-    {
+    public async Task GetRateLimitStatusAsync_ExceededLimit_ShouldReturnNotAllowed() {
         // Arrange
         var clientIdentifier = "test-client-456";
         var currentCount = _configuration.Security.MaxDownloadAttemptsPerHour + 1;
-        
+
         _cacheService.GetAsync<int>($"rate_limit:{clientIdentifier}", Arg.Any<CancellationToken>())
                     .Returns(Task.FromResult<int?>(currentCount));
 
@@ -254,12 +241,11 @@ public class StorageSecurityServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task UpdateRateLimitAsync_ShouldIncrementCount()
-    {
+    public async Task UpdateRateLimitAsync_ShouldIncrementCount() {
         // Arrange
         var clientIdentifier = "test-client-789";
         var initialCount = 5;
-        
+
         _cacheService.GetAsync<int>($"rate_limit:{clientIdentifier}", Arg.Any<CancellationToken>())
                     .Returns(Task.FromResult<int?>(initialCount));
 
@@ -276,11 +262,9 @@ public class StorageSecurityServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task LogSecurityEventAsync_ShouldLogEvent()
-    {
+    public async Task LogSecurityEventAsync_ShouldLogEvent() {
         // Arrange
-        var securityEvent = new StorageSecurityEvent
-        {
+        var securityEvent = new StorageSecurityEvent {
             EventType = StorageSecurityEventType.FileUploadValidation,
             FileName = "test-file.txt",
             ContainerName = "test-container",
@@ -300,8 +284,7 @@ public class StorageSecurityServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task ValidateFileDownloadAsync_ValidRequest_ShouldReturnValid()
-    {
+    public async Task ValidateFileDownloadAsync_ValidRequest_ShouldReturnValid() {
         // Arrange
         var containerName = "test-container";
         var fileName = "test-file.txt";
@@ -321,8 +304,7 @@ public class StorageSecurityServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task ValidateFileDownloadAsync_RateLimitExceeded_ShouldReturnInvalid()
-    {
+    public async Task ValidateFileDownloadAsync_RateLimitExceeded_ShouldReturnInvalid() {
         // Arrange
         var containerName = "test-container";
         var fileName = "test-file.txt";
@@ -342,8 +324,7 @@ public class StorageSecurityServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task ValidateFileDownloadAsync_BlockedIp_ShouldReturnInvalid()
-    {
+    public async Task ValidateFileDownloadAsync_BlockedIp_ShouldReturnInvalid() {
         // Arrange
         var containerName = "test-container";
         var fileName = "test-file.txt";
@@ -360,8 +341,7 @@ public class StorageSecurityServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task ScanFileAsync_ScriptContent_ShouldDetectThreat()
-    {
+    public async Task ScanFileAsync_ScriptContent_ShouldDetectThreat() {
         // Arrange
         var fileName = "script-file.txt";
         var content = "This file contains <script>alert('xss')</script> content";
@@ -380,8 +360,7 @@ public class StorageSecurityServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task ScanFileAsync_JavaScriptContent_ShouldDetectThreat()
-    {
+    public async Task ScanFileAsync_JavaScriptContent_ShouldDetectThreat() {
         // Arrange
         var fileName = "js-file.txt";
         var content = "This file contains eval('malicious code') content";

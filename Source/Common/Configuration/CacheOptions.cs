@@ -1,7 +1,6 @@
 namespace Common.Configuration;
 
-public class CacheOptions
-{
+public class CacheOptions {
     public const string SectionName = "Cache";
 
     public string ConnectionString { get; set; } = string.Empty;

@@ -1,16 +1,15 @@
 using Common.Configuration;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace Common.Extensions;
 
-public static class AspireExtensions
-{
+public static class AspireExtensions {
     /// <summary>
     /// Configures comprehensive infrastructure services for Aspire applications
     /// </summary>
-    public static IHostApplicationBuilder AddInfrastructureServices(this IHostApplicationBuilder builder)
-    {
+    public static IHostApplicationBuilder AddInfrastructureServices(this IHostApplicationBuilder builder) {
         // Add configuration options
         builder.Services.AddConfigurationOptions(builder.Configuration);
 
@@ -45,8 +44,7 @@ public static class AspireExtensions
     /// <summary>
     /// Configures the Aspire distributed application
     /// </summary>
-    public static IDistributedApplicationBuilder AddMcpHubInfrastructure(this IDistributedApplicationBuilder builder)
-    {
+    public static IDistributedApplicationBuilder AddMcpHubInfrastructure(this IDistributedApplicationBuilder builder) {
         // Add PostgreSQL database
         var database = builder.AddPostgres("postgres")
             .WithPgAdmin()

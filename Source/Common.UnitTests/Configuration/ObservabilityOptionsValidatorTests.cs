@@ -1,29 +1,26 @@
-using Common.Configuration;
-using Microsoft.Extensions.Options;
 using AwesomeAssertions;
+
+using Common.Configuration;
+
+using Microsoft.Extensions.Options;
 
 namespace Common.UnitTests.Configuration;
 
-public class ObservabilityOptionsValidatorTests
-{
+public class ObservabilityOptionsValidatorTests {
     private readonly ObservabilityOptionsValidator _validator;
 
-    public ObservabilityOptionsValidatorTests()
-    {
+    public ObservabilityOptionsValidatorTests() {
         _validator = new ObservabilityOptionsValidator();
     }
 
     [Fact]
-    public void Validate_WithValidOptions_ReturnsSuccess()
-    {
+    public void Validate_WithValidOptions_ReturnsSuccess() {
         // Arrange
-        var options = new ObservabilityOptions
-        {
+        var options = new ObservabilityOptions {
             ServiceName = "MCPHub",
             ServiceVersion = "1.0.0",
             Environment = "Development",
-            OpenTelemetry = new OpenTelemetryOptions
-            {
+            OpenTelemetry = new OpenTelemetryOptions {
                 EnableTracing = true,
                 EnableMetrics = true,
                 EnableLogging = true,
@@ -32,8 +29,7 @@ public class ObservabilityOptionsValidatorTests
                 EnableConsoleExporter = true,
                 EnableOtlpExporter = true
             },
-            Serilog = new SerilogOptions
-            {
+            Serilog = new SerilogOptions {
                 MinimumLevel = "Information",
                 EnableConsole = true,
                 EnableFile = true,
@@ -55,25 +51,21 @@ public class ObservabilityOptionsValidatorTests
     }
 
     [Fact]
-    public void Validate_WithEmptyServiceName_ReturnsFailure()
-    {
+    public void Validate_WithEmptyServiceName_ReturnsFailure() {
         // Arrange
-        var options = new ObservabilityOptions
-        {
+        var options = new ObservabilityOptions {
             ServiceName = "",
             ServiceVersion = "1.0.0",
             Environment = "Development",
-            OpenTelemetry = new OpenTelemetryOptions
-            {
+            OpenTelemetry = new OpenTelemetryOptions {
                 EnableOtlpExporter = false,
                 Sources = ["MCPHub.*"]
             },
-            Serilog = new SerilogOptions
-            {
+            Serilog = new SerilogOptions {
                 MinimumLevel = "Information",
                 EnableFile = false,
                 LogTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] {Message:lj}{NewLine}{Exception}",
-                MinimumLevelOverrides = new Dictionary<string, string>()
+                MinimumLevelOverrides = []
             }
         };
 
@@ -86,26 +78,22 @@ public class ObservabilityOptionsValidatorTests
     }
 
     [Fact]
-    public void Validate_WithOtlpExporterEnabledButNoEndpoint_ReturnsFailure()
-    {
+    public void Validate_WithOtlpExporterEnabledButNoEndpoint_ReturnsFailure() {
         // Arrange
-        var options = new ObservabilityOptions
-        {
+        var options = new ObservabilityOptions {
             ServiceName = "MCPHub",
             ServiceVersion = "1.0.0",
             Environment = "Development",
-            OpenTelemetry = new OpenTelemetryOptions
-            {
+            OpenTelemetry = new OpenTelemetryOptions {
                 EnableOtlpExporter = true,
                 OtlpEndpoint = "",
                 Sources = ["MCPHub.*"]
             },
-            Serilog = new SerilogOptions
-            {
+            Serilog = new SerilogOptions {
                 MinimumLevel = "Information",
                 EnableFile = false,
                 LogTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] {Message:lj}{NewLine}{Exception}",
-                MinimumLevelOverrides = new Dictionary<string, string>()
+                MinimumLevelOverrides = []
             }
         };
 
@@ -118,25 +106,21 @@ public class ObservabilityOptionsValidatorTests
     }
 
     [Fact]
-    public void Validate_WithEmptyOpenTelemetrySources_ReturnsFailure()
-    {
+    public void Validate_WithEmptyOpenTelemetrySources_ReturnsFailure() {
         // Arrange
-        var options = new ObservabilityOptions
-        {
+        var options = new ObservabilityOptions {
             ServiceName = "MCPHub",
             ServiceVersion = "1.0.0",
             Environment = "Development",
-            OpenTelemetry = new OpenTelemetryOptions
-            {
+            OpenTelemetry = new OpenTelemetryOptions {
                 EnableOtlpExporter = false,
                 Sources = []
             },
-            Serilog = new SerilogOptions
-            {
+            Serilog = new SerilogOptions {
                 MinimumLevel = "Information",
                 EnableFile = false,
                 LogTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] {Message:lj}{NewLine}{Exception}",
-                MinimumLevelOverrides = new Dictionary<string, string>()
+                MinimumLevelOverrides = []
             }
         };
 
@@ -149,26 +133,22 @@ public class ObservabilityOptionsValidatorTests
     }
 
     [Fact]
-    public void Validate_WithFileLoggingEnabledButNoDirectory_ReturnsFailure()
-    {
+    public void Validate_WithFileLoggingEnabledButNoDirectory_ReturnsFailure() {
         // Arrange
-        var options = new ObservabilityOptions
-        {
+        var options = new ObservabilityOptions {
             ServiceName = "MCPHub",
             ServiceVersion = "1.0.0",
             Environment = "Development",
-            OpenTelemetry = new OpenTelemetryOptions
-            {
+            OpenTelemetry = new OpenTelemetryOptions {
                 EnableOtlpExporter = false,
                 Sources = ["MCPHub.*"]
             },
-            Serilog = new SerilogOptions
-            {
+            Serilog = new SerilogOptions {
                 MinimumLevel = "Information",
                 EnableFile = true,
                 LogDirectory = "",
                 LogTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] {Message:lj}{NewLine}{Exception}",
-                MinimumLevelOverrides = new Dictionary<string, string>()
+                MinimumLevelOverrides = []
             }
         };
 

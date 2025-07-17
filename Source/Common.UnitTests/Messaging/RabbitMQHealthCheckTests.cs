@@ -1,26 +1,25 @@
+using Common.Messaging.Configuration;
+using Common.Messaging.Health;
+
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
 using NSubstitute;
-using Common.Messaging.Health;
-using Common.Messaging.Configuration;
 
 namespace Common.UnitTests.Messaging;
 
 /// <summary>
 /// Tests for RabbitMQ health check
 /// </summary>
-public class RabbitMQHealthCheckTests
-{
+public class RabbitMQHealthCheckTests {
     private readonly ILogger<RabbitMQHealthCheck> _logger;
     private readonly IOptions<RabbitMQConfiguration> _options;
     private readonly RabbitMQConfiguration _configuration;
 
-    public RabbitMQHealthCheckTests()
-    {
+    public RabbitMQHealthCheckTests() {
         _logger = Substitute.For<ILogger<RabbitMQHealthCheck>>();
-        _configuration = new RabbitMQConfiguration
-        {
+        _configuration = new RabbitMQConfiguration {
             Host = "localhost",
             Port = 5672,
             Username = "admin",
@@ -28,19 +27,15 @@ public class RabbitMQHealthCheckTests
             VirtualHost = "/",
             ConnectionTimeout = 30,
             HeartbeatInterval = 60,
-            Exchanges = new Dictionary<string, ExchangeConfiguration>
-            {
-                ["test-exchange"] = new ExchangeConfiguration
-                {
+            Exchanges = new Dictionary<string, ExchangeConfiguration> {
+                ["test-exchange"] = new ExchangeConfiguration {
                     Name = "test-exchange",
                     Type = "topic",
                     Durable = true
                 }
             },
-            Queues = new Dictionary<string, QueueConfiguration>
-            {
-                ["test-queue"] = new QueueConfiguration
-                {
+            Queues = new Dictionary<string, QueueConfiguration> {
+                ["test-queue"] = new QueueConfiguration {
                     Name = "test-queue",
                     Durable = true,
                     Exchange = "test-exchange",
@@ -53,8 +48,7 @@ public class RabbitMQHealthCheckTests
 
     [Fact]
     [Trait("Category", "Unit")]
-    public void Constructor_ShouldNotThrow()
-    {
+    public void Constructor_ShouldNotThrow() {
         // Act & Assert
         var healthCheck = new RabbitMQHealthCheck(_options, _logger);
         Assert.NotNull(healthCheck);
@@ -62,8 +56,7 @@ public class RabbitMQHealthCheckTests
 
     [Fact]
     [Trait("Category", "Unit")]
-    public async Task CheckHealthAsync_WithValidConfiguration_ShouldReturnHealthy()
-    {
+    public async Task CheckHealthAsync_WithValidConfiguration_ShouldReturnHealthy() {
         // Arrange
         var healthCheck = new RabbitMQHealthCheck(_options, _logger);
         var context = new HealthCheckContext();
@@ -79,11 +72,9 @@ public class RabbitMQHealthCheckTests
 
     [Fact]
     [Trait("Category", "Unit")]
-    public async Task CheckHealthAsync_WithInvalidConfiguration_ShouldReturnUnhealthy()
-    {
+    public async Task CheckHealthAsync_WithInvalidConfiguration_ShouldReturnUnhealthy() {
         // Arrange
-        var invalidConfiguration = new RabbitMQConfiguration
-        {
+        var invalidConfiguration = new RabbitMQConfiguration {
             Host = "invalid-host",
             Port = 5672,
             Username = "invalid-user",
@@ -109,8 +100,7 @@ public class RabbitMQHealthCheckTests
 
     [Fact]
     [Trait("Category", "Unit")]
-    public async Task CheckHealthAsync_WithCancellation_ShouldRespectCancellation()
-    {
+    public async Task CheckHealthAsync_WithCancellation_ShouldRespectCancellation() {
         // Arrange
         var healthCheck = new RabbitMQHealthCheck(_options, _logger);
         var context = new HealthCheckContext();
@@ -118,9 +108,6 @@ public class RabbitMQHealthCheckTests
         cancellationTokenSource.Cancel();
 
         // Act & Assert
-        await Assert.ThrowsAsync<OperationCanceledException>(async () =>
-        {
-            await healthCheck.CheckHealthAsync(context, cancellationTokenSource.Token);
-        });
+        await Assert.ThrowsAsync<OperationCanceledException>(async () => await healthCheck.CheckHealthAsync(context, cancellationTokenSource.Token));
     }
 }

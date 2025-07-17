@@ -1,16 +1,17 @@
-using Common.Services;
 using Common.Models;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Logging;
+using Common.Services;
+
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+
 using NSubstitute;
 
 namespace Common.UnitTests.Services;
 
 [TestClass]
 [TestCategory(TestCategories.Unit)]
-public class StorageMonitoringServiceTests
-{
+public class StorageMonitoringServiceTests {
     private IStorageMonitoringService _monitoringService = null!;
     private IStorageService _storageService = null!;
     private ICacheService _cacheService = null!;
@@ -18,18 +19,14 @@ public class StorageMonitoringServiceTests
     private ILogger<StorageMonitoringService> _logger = null!;
 
     [TestInitialize]
-    public void Setup()
-    {
-        _configuration = new StorageConfiguration
-        {
-            Monitoring = new StorageMonitoringSettings
-            {
+    public void Setup() {
+        _configuration = new StorageConfiguration {
+            Monitoring = new StorageMonitoringSettings {
                 EnableMetrics = true,
                 EnableHealthChecks = true,
                 MetricsInterval = TimeSpan.FromMinutes(5),
                 HealthCheckInterval = TimeSpan.FromMinutes(1),
-                Thresholds = new StorageThresholds
-                {
+                Thresholds = new StorageThresholds {
                     HighUsagePercentage = 80.0,
                     CriticalUsagePercentage = 95.0,
                     MaxFailedOperationsPerMinute = 10,
@@ -42,17 +39,15 @@ public class StorageMonitoringServiceTests
         _storageService = Substitute.For<IStorageService>();
         _cacheService = Substitute.For<ICacheService>();
         _logger = Substitute.For<ILogger<StorageMonitoringService>>();
-        
+
         _monitoringService = new StorageMonitoringService(_storageService, _cacheService, options, _logger);
     }
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task RecordOperationAsync_ValidMetric_ShouldStoreMetric()
-    {
+    public async Task RecordOperationAsync_ValidMetric_ShouldStoreMetric() {
         // Arrange
-        var metric = new StorageOperationMetric
-        {
+        var metric = new StorageOperationMetric {
             OperationName = "upload",
             OperationType = StorageOperationType.Upload,
             ContainerName = "test-container",
@@ -76,16 +71,14 @@ public class StorageMonitoringServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task GetMetricsAsync_WithMultipleOperations_ShouldReturnAggregatedMetrics()
-    {
+    public async Task GetMetricsAsync_WithMultipleOperations_ShouldReturnAggregatedMetrics() {
         // Arrange
         var period = TimeSpan.FromMinutes(10);
         var now = DateTimeOffset.UtcNow;
-        
+
         var metrics = new List<StorageOperationMetric>
         {
-            new StorageOperationMetric
-            {
+            new() {
                 OperationName = "upload",
                 OperationType = StorageOperationType.Upload,
                 IsSuccess = true,
@@ -93,8 +86,7 @@ public class StorageMonitoringServiceTests
                 BytesTransferred = 1024,
                 Timestamp = now.AddMinutes(-5)
             },
-            new StorageOperationMetric
-            {
+            new() {
                 OperationName = "download",
                 OperationType = StorageOperationType.Download,
                 IsSuccess = true,
@@ -102,8 +94,7 @@ public class StorageMonitoringServiceTests
                 BytesTransferred = 2048,
                 Timestamp = now.AddMinutes(-3)
             },
-            new StorageOperationMetric
-            {
+            new() {
                 OperationName = "delete",
                 OperationType = StorageOperationType.Delete,
                 IsSuccess = false,
@@ -115,8 +106,7 @@ public class StorageMonitoringServiceTests
         };
 
         // Simulate metrics being stored
-        foreach (var metric in metrics)
-        {
+        foreach (var metric in metrics) {
             await _monitoringService.RecordOperationAsync(metric);
         }
 
@@ -136,24 +126,21 @@ public class StorageMonitoringServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task GetHealthStatusAsync_HealthyOperations_ShouldReturnHealthy()
-    {
+    public async Task GetHealthStatusAsync_HealthyOperations_ShouldReturnHealthy() {
         // Arrange
         var now = DateTimeOffset.UtcNow;
-        
+
         // Record successful operations
         var successfulMetrics = new List<StorageOperationMetric>
         {
-            new StorageOperationMetric
-            {
+            new() {
                 OperationName = "upload",
                 OperationType = StorageOperationType.Upload,
                 IsSuccess = true,
                 ResponseTime = TimeSpan.FromMilliseconds(100),
                 Timestamp = now.AddMinutes(-2)
             },
-            new StorageOperationMetric
-            {
+            new() {
                 OperationName = "download",
                 OperationType = StorageOperationType.Download,
                 IsSuccess = true,
@@ -162,8 +149,7 @@ public class StorageMonitoringServiceTests
             }
         };
 
-        foreach (var metric in successfulMetrics)
-        {
+        foreach (var metric in successfulMetrics) {
             await _monitoringService.RecordOperationAsync(metric);
         }
 
@@ -180,16 +166,14 @@ public class StorageMonitoringServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task GetHealthStatusAsync_HighErrorRate_ShouldReturnUnhealthy()
-    {
+    public async Task GetHealthStatusAsync_HighErrorRate_ShouldReturnUnhealthy() {
         // Arrange
         var now = DateTimeOffset.UtcNow;
-        
+
         // Record mostly failed operations
         var failedMetrics = new List<StorageOperationMetric>
         {
-            new StorageOperationMetric
-            {
+            new() {
                 OperationName = "upload",
                 OperationType = StorageOperationType.Upload,
                 IsSuccess = false,
@@ -197,8 +181,7 @@ public class StorageMonitoringServiceTests
                 Timestamp = now.AddMinutes(-4),
                 ErrorType = "ConnectionException"
             },
-            new StorageOperationMetric
-            {
+            new() {
                 OperationName = "download",
                 OperationType = StorageOperationType.Download,
                 IsSuccess = false,
@@ -206,8 +189,7 @@ public class StorageMonitoringServiceTests
                 Timestamp = now.AddMinutes(-3),
                 ErrorType = "TimeoutException"
             },
-            new StorageOperationMetric
-            {
+            new() {
                 OperationName = "delete",
                 OperationType = StorageOperationType.Delete,
                 IsSuccess = false,
@@ -215,8 +197,7 @@ public class StorageMonitoringServiceTests
                 Timestamp = now.AddMinutes(-2),
                 ErrorType = "AuthenticationException"
             },
-            new StorageOperationMetric
-            {
+            new() {
                 OperationName = "upload",
                 OperationType = StorageOperationType.Upload,
                 IsSuccess = false,
@@ -226,8 +207,7 @@ public class StorageMonitoringServiceTests
             }
         };
 
-        foreach (var metric in failedMetrics)
-        {
+        foreach (var metric in failedMetrics) {
             await _monitoringService.RecordOperationAsync(metric);
         }
 
@@ -243,24 +223,21 @@ public class StorageMonitoringServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task GetHealthStatusAsync_SlowOperations_ShouldReturnDegraded()
-    {
+    public async Task GetHealthStatusAsync_SlowOperations_ShouldReturnDegraded() {
         // Arrange
         var now = DateTimeOffset.UtcNow;
-        
+
         // Record slow but successful operations
         var slowMetrics = new List<StorageOperationMetric>
         {
-            new StorageOperationMetric
-            {
+            new() {
                 OperationName = "upload",
                 OperationType = StorageOperationType.Upload,
                 IsSuccess = true,
                 ResponseTime = TimeSpan.FromSeconds(35), // Exceeds MaxResponseTime threshold
                 Timestamp = now.AddMinutes(-3)
             },
-            new StorageOperationMetric
-            {
+            new() {
                 OperationName = "download",
                 OperationType = StorageOperationType.Download,
                 IsSuccess = true,
@@ -269,8 +246,7 @@ public class StorageMonitoringServiceTests
             }
         };
 
-        foreach (var metric in slowMetrics)
-        {
+        foreach (var metric in slowMetrics) {
             await _monitoringService.RecordOperationAsync(metric);
         }
 
@@ -285,8 +261,7 @@ public class StorageMonitoringServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public void StartOperationMonitoring_ShouldReturnMonitor()
-    {
+    public void StartOperationMonitoring_ShouldReturnMonitor() {
         // Arrange
         var operationName = "upload";
         var containerName = "test-container";
@@ -302,22 +277,20 @@ public class StorageMonitoringServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task CheckThresholdsAsync_HighErrorRate_ShouldReturnAlert()
-    {
+    public async Task CheckThresholdsAsync_HighErrorRate_ShouldReturnAlert() {
         // Arrange
         var now = DateTimeOffset.UtcNow;
-        
+
         // Record high error rate operations
         var metrics = new List<StorageOperationMetric>
         {
-            new StorageOperationMetric { IsSuccess = false, ResponseTime = TimeSpan.FromMilliseconds(100), Timestamp = now.AddMinutes(-2) },
-            new StorageOperationMetric { IsSuccess = false, ResponseTime = TimeSpan.FromMilliseconds(150), Timestamp = now.AddMinutes(-2) },
-            new StorageOperationMetric { IsSuccess = false, ResponseTime = TimeSpan.FromMilliseconds(200), Timestamp = now.AddMinutes(-1) },
-            new StorageOperationMetric { IsSuccess = true, ResponseTime = TimeSpan.FromMilliseconds(100), Timestamp = now.AddMinutes(-1) }
+            new() { IsSuccess = false, ResponseTime = TimeSpan.FromMilliseconds(100), Timestamp = now.AddMinutes(-2) },
+            new() { IsSuccess = false, ResponseTime = TimeSpan.FromMilliseconds(150), Timestamp = now.AddMinutes(-2) },
+            new() { IsSuccess = false, ResponseTime = TimeSpan.FromMilliseconds(200), Timestamp = now.AddMinutes(-1) },
+            new() { IsSuccess = true, ResponseTime = TimeSpan.FromMilliseconds(100), Timestamp = now.AddMinutes(-1) }
         };
 
-        foreach (var metric in metrics)
-        {
+        foreach (var metric in metrics) {
             await _monitoringService.RecordOperationAsync(metric);
         }
 
@@ -332,20 +305,18 @@ public class StorageMonitoringServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task CheckThresholdsAsync_HighResponseTime_ShouldReturnAlert()
-    {
+    public async Task CheckThresholdsAsync_HighResponseTime_ShouldReturnAlert() {
         // Arrange
         var now = DateTimeOffset.UtcNow;
-        
+
         // Record slow operations
         var metrics = new List<StorageOperationMetric>
         {
-            new StorageOperationMetric { IsSuccess = true, ResponseTime = TimeSpan.FromSeconds(35), Timestamp = now.AddMinutes(-2) },
-            new StorageOperationMetric { IsSuccess = true, ResponseTime = TimeSpan.FromSeconds(40), Timestamp = now.AddMinutes(-1) }
+            new() { IsSuccess = true, ResponseTime = TimeSpan.FromSeconds(35), Timestamp = now.AddMinutes(-2) },
+            new() { IsSuccess = true, ResponseTime = TimeSpan.FromSeconds(40), Timestamp = now.AddMinutes(-1) }
         };
 
-        foreach (var metric in metrics)
-        {
+        foreach (var metric in metrics) {
             await _monitoringService.RecordOperationAsync(metric);
         }
 
@@ -360,22 +331,20 @@ public class StorageMonitoringServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task CheckThresholdsAsync_LowSuccessRate_ShouldReturnAlert()
-    {
+    public async Task CheckThresholdsAsync_LowSuccessRate_ShouldReturnAlert() {
         // Arrange
         var now = DateTimeOffset.UtcNow;
-        
+
         // Record operations with low success rate
         var metrics = new List<StorageOperationMetric>
         {
-            new StorageOperationMetric { IsSuccess = false, ResponseTime = TimeSpan.FromMilliseconds(100), Timestamp = now.AddMinutes(-3) },
-            new StorageOperationMetric { IsSuccess = false, ResponseTime = TimeSpan.FromMilliseconds(150), Timestamp = now.AddMinutes(-2) },
-            new StorageOperationMetric { IsSuccess = false, ResponseTime = TimeSpan.FromMilliseconds(200), Timestamp = now.AddMinutes(-2) },
-            new StorageOperationMetric { IsSuccess = true, ResponseTime = TimeSpan.FromMilliseconds(100), Timestamp = now.AddMinutes(-1) }
+            new() { IsSuccess = false, ResponseTime = TimeSpan.FromMilliseconds(100), Timestamp = now.AddMinutes(-3) },
+            new() { IsSuccess = false, ResponseTime = TimeSpan.FromMilliseconds(150), Timestamp = now.AddMinutes(-2) },
+            new() { IsSuccess = false, ResponseTime = TimeSpan.FromMilliseconds(200), Timestamp = now.AddMinutes(-2) },
+            new() { IsSuccess = true, ResponseTime = TimeSpan.FromMilliseconds(100), Timestamp = now.AddMinutes(-1) }
         };
 
-        foreach (var metric in metrics)
-        {
+        foreach (var metric in metrics) {
             await _monitoringService.RecordOperationAsync(metric);
         }
 
@@ -390,8 +359,7 @@ public class StorageMonitoringServiceTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public async Task GetUsageStatisticsAsync_ShouldReturnStatistics()
-    {
+    public async Task GetUsageStatisticsAsync_ShouldReturnStatistics() {
         // Act
         var statistics = await _monitoringService.GetUsageStatisticsAsync();
 
@@ -404,22 +372,19 @@ public class StorageMonitoringServiceTests
 
 [TestClass]
 [TestCategory(TestCategories.Unit)]
-public class StorageOperationMonitorTests
-{
+public class StorageOperationMonitorTests {
     private IStorageMonitoringService _monitoringService = null!;
     private IStorageOperationMonitor _monitor = null!;
 
     [TestInitialize]
-    public void Setup()
-    {
+    public void Setup() {
         _monitoringService = Substitute.For<IStorageMonitoringService>();
         _monitor = new StorageOperationMonitor(_monitoringService, "test-operation", "test-container", "test-file.txt");
     }
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public void RecordSuccess_ShouldCallMonitoringService()
-    {
+    public void RecordSuccess_ShouldCallMonitoringService() {
         // Arrange
         var bytesTransferred = 1024L;
 
@@ -434,8 +399,7 @@ public class StorageOperationMonitorTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public void RecordFailure_ShouldCallMonitoringService()
-    {
+    public void RecordFailure_ShouldCallMonitoringService() {
         // Arrange
         var exception = new InvalidOperationException("Test error");
 
@@ -450,8 +414,7 @@ public class StorageOperationMonitorTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public void RecordCompletion_Success_ShouldCallMonitoringService()
-    {
+    public void RecordCompletion_Success_ShouldCallMonitoringService() {
         // Arrange
         var bytesTransferred = 2048L;
 
@@ -466,8 +429,7 @@ public class StorageOperationMonitorTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public void RecordCompletion_Failure_ShouldCallMonitoringService()
-    {
+    public void RecordCompletion_Failure_ShouldCallMonitoringService() {
         // Arrange
         var exception = new TimeoutException("Operation timed out");
 
@@ -482,16 +444,12 @@ public class StorageOperationMonitorTests
 
     [TestMethod]
     [TestCategory(TestCategories.Unit)]
-    public void Dispose_ShouldNotThrow()
-    {
+    public void Dispose_ShouldNotThrow() {
         // Act & Assert
-        var action = () => _monitor.Dispose();
+        var action = _monitor.Dispose;
         action.Should().NotThrow();
     }
 
     [TestCleanup]
-    public void Cleanup()
-    {
-        _monitor?.Dispose();
-    }
+    public void Cleanup() => _monitor?.Dispose();
 }

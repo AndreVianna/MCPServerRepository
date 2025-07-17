@@ -1,21 +1,22 @@
+using AwesomeAssertions;
+
 using Common.Middleware;
 using Common.Services;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+
 using NSubstitute;
-using AwesomeAssertions;
 
 namespace Common.UnitTests.Middleware;
 
-public class RequestMonitoringMiddlewareTests
-{
+public class RequestMonitoringMiddlewareTests {
     private readonly RequestDelegate _next;
     private readonly IMonitoringService _monitoringService;
     private readonly ILogger<RequestMonitoringMiddleware> _logger;
     private readonly RequestMonitoringMiddleware _middleware;
 
-    public RequestMonitoringMiddlewareTests()
-    {
+    public RequestMonitoringMiddlewareTests() {
         _next = Substitute.For<RequestDelegate>();
         _monitoringService = Substitute.For<IMonitoringService>();
         _logger = Substitute.For<ILogger<RequestMonitoringMiddleware>>();
@@ -23,8 +24,7 @@ public class RequestMonitoringMiddlewareTests
     }
 
     [Fact]
-    public async Task InvokeAsync_CallsNextMiddleware()
-    {
+    public async Task InvokeAsync_CallsNextMiddleware() {
         // Arrange
         var context = CreateHttpContext();
 
@@ -36,8 +36,7 @@ public class RequestMonitoringMiddlewareTests
     }
 
     [Fact]
-    public async Task InvokeAsync_AddsCorrelationIdWhenNotPresent()
-    {
+    public async Task InvokeAsync_AddsCorrelationIdWhenNotPresent() {
         // Arrange
         var context = CreateHttpContext();
 
@@ -50,8 +49,7 @@ public class RequestMonitoringMiddlewareTests
     }
 
     [Fact]
-    public async Task InvokeAsync_PreservesExistingCorrelationId()
-    {
+    public async Task InvokeAsync_PreservesExistingCorrelationId() {
         // Arrange
         var context = CreateHttpContext();
         var correlationId = Guid.NewGuid().ToString();
@@ -66,8 +64,7 @@ public class RequestMonitoringMiddlewareTests
     }
 
     [Fact]
-    public async Task InvokeAsync_RecordsHttpRequestMetrics()
-    {
+    public async Task InvokeAsync_RecordsHttpRequestMetrics() {
         // Arrange
         var context = CreateHttpContext();
         context.Request.Method = "GET";
@@ -86,8 +83,7 @@ public class RequestMonitoringMiddlewareTests
     }
 
     [Fact]
-    public async Task InvokeAsync_LogsRequestStartAndCompletion()
-    {
+    public async Task InvokeAsync_LogsRequestStartAndCompletion() {
         // Arrange
         var context = CreateHttpContext();
         context.Request.Method = "GET";
@@ -114,8 +110,7 @@ public class RequestMonitoringMiddlewareTests
     }
 
     [Fact]
-    public async Task InvokeAsync_HandlesExceptionsProperly()
-    {
+    public async Task InvokeAsync_HandlesExceptionsProperly() {
         // Arrange
         var context = CreateHttpContext();
         var exception = new InvalidOperationException("Test exception");
@@ -138,8 +133,7 @@ public class RequestMonitoringMiddlewareTests
     }
 
     [Fact]
-    public async Task InvokeAsync_LogsErrorWhenExceptionOccurs()
-    {
+    public async Task InvokeAsync_LogsErrorWhenExceptionOccurs() {
         // Arrange
         var context = CreateHttpContext();
         var exception = new InvalidOperationException("Test exception");
@@ -164,8 +158,7 @@ public class RequestMonitoringMiddlewareTests
     [InlineData("DELETE", "/api/users/1", 204)]
     [InlineData("GET", "/api/users/1", 404)]
     [InlineData("POST", "/api/users", 500)]
-    public async Task InvokeAsync_HandlesDifferentHttpMethodsAndStatusCodes(string method, string path, int statusCode)
-    {
+    public async Task InvokeAsync_HandlesDifferentHttpMethodsAndStatusCodes(string method, string path, int statusCode) {
         // Arrange
         var context = CreateHttpContext();
         context.Request.Method = method;
@@ -184,12 +177,11 @@ public class RequestMonitoringMiddlewareTests
     }
 
     [Fact]
-    public async Task InvokeAsync_MeasuresRequestDuration()
-    {
+    public async Task InvokeAsync_MeasuresRequestDuration() {
         // Arrange
         var context = CreateHttpContext();
         var delay = TimeSpan.FromMilliseconds(100);
-        
+
         _next.When(x => x.Invoke(context))
             .Do(async _ => await Task.Delay(delay));
 
@@ -204,8 +196,7 @@ public class RequestMonitoringMiddlewareTests
             Arg.Is<TimeSpan>(ts => ts >= delay));
     }
 
-    private static HttpContext CreateHttpContext()
-    {
+    private static HttpContext CreateHttpContext() {
         var context = new DefaultHttpContext();
         context.Request.Method = "GET";
         context.Request.Path = "/";

@@ -1,8 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-  <ItemGroup>
-    <ProjectReference Include="../PublicApi/PublicApi.csproj" />
-    <ProjectReference Include="..\Common.UnitTests\Common.UnitTests.csproj" />
-  </ItemGroup>
-
-</Project>

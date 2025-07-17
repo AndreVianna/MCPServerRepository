@@ -4,8 +4,7 @@ namespace Common.UnitTests.TestUtilities;
 /// Attribute to mark tests as unit tests.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
-public class UnitTestAttribute : TraitAttribute
-{
+public class UnitTestAttribute : TraitAttribute {
     public UnitTestAttribute() : base("Category", TestCategories.Unit) { }
 }
 
@@ -13,8 +12,7 @@ public class UnitTestAttribute : TraitAttribute
 /// Attribute to mark tests as integration tests.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
-public class IntegrationTestAttribute : TraitAttribute
-{
+public class IntegrationTestAttribute : TraitAttribute {
     public IntegrationTestAttribute() : base("Category", TestCategories.Integration) { }
 }
 
@@ -22,8 +20,7 @@ public class IntegrationTestAttribute : TraitAttribute
 /// Attribute to mark tests as end-to-end tests.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
-public class EndToEndTestAttribute : TraitAttribute
-{
+public class EndToEndTestAttribute : TraitAttribute {
     public EndToEndTestAttribute() : base("Category", TestCategories.EndToEnd) { }
 }
 
@@ -31,8 +28,7 @@ public class EndToEndTestAttribute : TraitAttribute
 /// Attribute to mark tests as performance tests.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
-public class PerformanceTestAttribute : TraitAttribute
-{
+public class PerformanceTestAttribute : TraitAttribute {
     public PerformanceTestAttribute() : base("Category", TestCategories.Performance) { }
 }
 
@@ -40,8 +36,7 @@ public class PerformanceTestAttribute : TraitAttribute
 /// Attribute to mark tests as security tests.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
-public class SecurityTestAttribute : TraitAttribute
-{
+public class SecurityTestAttribute : TraitAttribute {
     public SecurityTestAttribute() : base("Category", TestCategories.Security) { }
 }
 
@@ -49,8 +44,7 @@ public class SecurityTestAttribute : TraitAttribute
 /// Attribute to mark tests as database tests.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
-public class DatabaseTestAttribute : TraitAttribute
-{
+public class DatabaseTestAttribute : TraitAttribute {
     public DatabaseTestAttribute() : base("Category", TestCategories.Database) { }
 }
 
@@ -58,8 +52,7 @@ public class DatabaseTestAttribute : TraitAttribute
 /// Attribute to mark tests as external API tests.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
-public class ExternalApiTestAttribute : TraitAttribute
-{
+public class ExternalApiTestAttribute : TraitAttribute {
     public ExternalApiTestAttribute() : base("Category", TestCategories.ExternalApi) { }
 }
 
@@ -67,7 +60,6 @@ public class ExternalApiTestAttribute : TraitAttribute
 /// Attribute to mark tests as long-running tests.
 /// </summary>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
-public class LongRunningTestAttribute : TraitAttribute
-{
+public class LongRunningTestAttribute : TraitAttribute {
     public LongRunningTestAttribute() : base("Category", TestCategories.LongRunning) { }
 }

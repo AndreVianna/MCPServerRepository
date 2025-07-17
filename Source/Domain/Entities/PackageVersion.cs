@@ -3,21 +3,24 @@ namespace Domain.Entities;
 /// <summary>
 /// Represents a specific version of an MCP package
 /// </summary>
-public class PackageVersion
-{
-    public Guid Id { get; private set; }
-    public Guid PackageId { get; private set; }
-    public string Version { get; private set; }
-    public string? ReleaseNotes { get; private set; }
-    public string DownloadUrl { get; private set; }
-    public string ChecksumSha256 { get; private set; }
-    public long FileSize { get; private set; }
-    public DateTime CreatedAt { get; private set; }
-    public bool IsPrerelease { get; private set; }
-    public SecurityScanResult? SecurityScan { get; private set; }
+public class PackageVersion {
+    public Guid Id { get; set; }
+    public Guid PackageId { get; set; }
+    [MaxLength(32)]
+    public string Version { get; set; } = string.Empty;
+    [MaxLength(4096)]
+    public string? ReleaseNotes { get; set; }
+    [MaxLength(256)]
+    public string DownloadUrl { get; set; } = string.Empty;
+    [MaxLength(4096)]
+    public string ChecksumSha256 { get; set; } = string.Empty;
+    public long FileSize { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public bool IsPrerelease { get; set; }
+    public SecurityScanResult? SecurityScan { get; set; }
 
     // Navigation properties
-    public Package Package { get; private set; } = null!;
+    public Package Package { get; set; } = null!;
 
     private PackageVersion() { } // For EF Core
 
@@ -28,8 +31,7 @@ public class PackageVersion
         string checksumSha256,
         long fileSize,
         string? releaseNotes = null,
-        bool isPrerelease = false)
-    {
+        bool isPrerelease = false) {
         Id = Guid.NewGuid();
         PackageId = packageId;
         Version = version ?? throw new ArgumentNullException(nameof(version));
@@ -41,8 +43,5 @@ public class PackageVersion
         CreatedAt = DateTime.UtcNow;
     }
 
-    public void UpdateSecurityScan(SecurityScanResult scanResult)
-    {
-        SecurityScan = scanResult;
-    }
+    public void UpdateSecurityScan(SecurityScanResult scanResult) => SecurityScan = scanResult;
 }

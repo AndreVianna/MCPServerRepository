@@ -3,8 +3,7 @@ namespace Common.Services;
 /// <summary>
 /// Storage service for managing file operations in cloud storage
 /// </summary>
-public interface IStorageService
-{
+public interface IStorageService {
     /// <summary>
     /// Uploads a file to storage
     /// </summary>
@@ -171,21 +170,19 @@ public interface IStorageService
 /// <summary>
 /// Storage file metadata
 /// </summary>
-public class StorageFileMetadata
-{
+public class StorageFileMetadata {
     public string FileName { get; set; } = string.Empty;
     public long Size { get; set; }
     public string ContentType { get; set; } = string.Empty;
     public string? ETag { get; set; }
     public DateTimeOffset LastModified { get; set; }
-    public Dictionary<string, string> Metadata { get; set; } = new();
+    public Dictionary<string, string> Metadata { get; set; } = [];
 }
 
 /// <summary>
 /// Storage file information
 /// </summary>
-public class StorageFileInfo
-{
+public class StorageFileInfo {
     public string FileName { get; set; } = string.Empty;
     public long Size { get; set; }
     public string ContentType { get; set; } = string.Empty;
@@ -198,8 +195,7 @@ public class StorageFileInfo
 /// Storage access permissions
 /// </summary>
 [Flags]
-public enum StoragePermissions
-{
+public enum StoragePermissions {
     Read = 1,
     Write = 2,
     Delete = 4,
@@ -210,8 +206,7 @@ public enum StoragePermissions
 /// <summary>
 /// Storage usage information
 /// </summary>
-public class StorageUsageInfo
-{
+public class StorageUsageInfo {
     public long TotalSize { get; set; }
     public long FileCount { get; set; }
     public string ContainerName { get; set; } = string.Empty;

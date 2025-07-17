@@ -2,8 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>preview</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <InternalsVisibleTo>$(AssemblyName).UnitTests</InternalsVisibleTo>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Domain\Domain.csproj" />
-    <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\Domain\MCPHub.Domain.csproj" />
+    <ProjectReference Include="..\Common\MCPHub.Common.csproj" />
   </ItemGroup>
 
 </Project>

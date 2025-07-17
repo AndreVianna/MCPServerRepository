@@ -1,25 +1,24 @@
+using AwesomeAssertions;
+
 using Common.Configuration;
 using Common.Extensions;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
-using AwesomeAssertions;
 
 namespace Common.UnitTests.Extensions;
 
-public class HealthCheckExtensionsTests
-{
+public class HealthCheckExtensionsTests {
     private readonly IServiceCollection _services;
     private readonly IConfiguration _configuration;
 
-    public HealthCheckExtensionsTests()
-    {
+    public HealthCheckExtensionsTests() {
         _services = new ServiceCollection();
-        
+
         var configurationBuilder = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
+            .AddInMemoryCollection(new Dictionary<string, string?> {
                 ["Database:ConnectionString"] = "Host=localhost;Database=test;Username=user;Password=pass",
                 ["Database:HealthCheckTimeout"] = "00:00:05",
                 ["Cache:ConnectionString"] = "localhost:6379",
@@ -29,16 +28,15 @@ public class HealthCheckExtensionsTests
                 ["RabbitMQ:ConnectionString"] = "amqp://guest:guest@localhost:5672/",
                 ["RabbitMQ:HealthCheckTimeout"] = "00:00:05"
             });
-        
+
         _configuration = configurationBuilder.Build();
-        
+
         // Add required configuration options
         _services.AddConfigurationOptions(_configuration);
     }
 
     [Fact]
-    public void AddInfrastructureHealthChecks_RegistersAllHealthChecks()
-    {
+    public void AddInfrastructureHealthChecks_RegistersAllHealthChecks() {
         // Act
         _services.AddInfrastructureHealthChecks();
         var serviceProvider = _services.BuildServiceProvider();
@@ -64,8 +62,7 @@ public class HealthCheckExtensionsTests
     }
 
     [Fact]
-    public void AddInfrastructureHealthChecks_RegistersHealthChecksWithCorrectNames()
-    {
+    public void AddInfrastructureHealthChecks_RegistersHealthChecksWithCorrectNames() {
         // Arrange
         _services.AddInfrastructureHealthChecks();
         var serviceProvider = _services.BuildServiceProvider();
@@ -83,8 +80,7 @@ public class HealthCheckExtensionsTests
     }
 
     [Fact]
-    public void AddInfrastructureHealthChecks_RegistersHealthChecksWithCorrectTags()
-    {
+    public void AddInfrastructureHealthChecks_RegistersHealthChecksWithCorrectTags() {
         // Arrange
         _services.AddInfrastructureHealthChecks();
         var serviceProvider = _services.BuildServiceProvider();
@@ -96,23 +92,22 @@ public class HealthCheckExtensionsTests
         // Assert
         healthReport.Entries["database"].Tags.Should().Contain("database");
         healthReport.Entries["database"].Tags.Should().Contain("infrastructure");
-        
+
         healthReport.Entries["cache"].Tags.Should().Contain("cache");
         healthReport.Entries["cache"].Tags.Should().Contain("infrastructure");
-        
+
         healthReport.Entries["search"].Tags.Should().Contain("search");
         healthReport.Entries["search"].Tags.Should().Contain("infrastructure");
-        
+
         healthReport.Entries["messagequeue"].Tags.Should().Contain("messagequeue");
         healthReport.Entries["messagequeue"].Tags.Should().Contain("infrastructure");
-        
+
         healthReport.Entries["application"].Tags.Should().Contain("application");
         healthReport.Entries["application"].Tags.Should().Contain("readiness");
     }
 
     [Fact]
-    public void ApplicationHealthCheck_ReturnsHealthy_WhenMemoryUsageIsLow()
-    {
+    public void ApplicationHealthCheck_ReturnsHealthy_WhenMemoryUsageIsLow() {
         // Arrange
         var healthCheck = new ApplicationHealthCheck();
         var context = new HealthCheckContext();
@@ -129,8 +124,7 @@ public class HealthCheckExtensionsTests
     }
 
     [Fact]
-    public void ApplicationHealthCheck_CanBeCancelled()
-    {
+    public void ApplicationHealthCheck_CanBeCancelled() {
         // Arrange
         var healthCheck = new ApplicationHealthCheck();
         var context = new HealthCheckContext();

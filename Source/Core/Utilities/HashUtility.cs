@@ -8,14 +8,12 @@ namespace Core.Utilities;
 /// </summary>
 public static class HashUtility {
     public static string ComputeSha256(string input) {
-        using var sha256 = SHA256.Create();
-        var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(input));
         return Convert.ToHexString(bytes).ToLowerInvariant();
     }
 
     public static string ComputeSha256(byte[] input) {
-        using var sha256 = SHA256.Create();
-        var bytes = sha256.ComputeHash(input);
+        var bytes = SHA256.HashData(input);
         return Convert.ToHexString(bytes).ToLowerInvariant();
     }
 

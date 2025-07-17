@@ -5,7 +5,7 @@ namespace Domain.Commands;
 /// <summary>
 /// Command to initiate a security scan for a server version
 /// </summary>
-public class ScanServerCommand : BaseMessage, ICommand<ScanServerCommandResult> {
+public record ScanServerCommand : BaseMessage, ICommand<ScanServerCommandResult> {
     public ScanServerCommand(string serverId, string serverVersionId, string scanType) {
         ServerId = serverId;
         ServerVersionId = serverVersionId;

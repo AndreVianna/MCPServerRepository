@@ -1,6 +1,6 @@
-using Domain.Messaging;
+using MCPHub.Domain.Messaging;
 
-namespace Domain.Commands;
+namespace MCPHub.Domain.Commands;
 
 /// <summary>
 /// Command to index a server for search

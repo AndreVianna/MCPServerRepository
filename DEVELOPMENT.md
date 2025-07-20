@@ -165,28 +165,28 @@ When running, the following services are available:
 
 ``` text
 MCPHub/
-├── .devcontainer/          # Dev container configuration
-├── .github/               # GitHub Actions workflows
-├── .vscode/               # VS Code settings
-├── Documents/             # Project documentation
-├── Scripts/              # Development scripts
-├── Source/               # Source code
-│   ├── Domain/           # Domain layer (entities, value objects)
-│   ├── Common/           # Shared infrastructure
-│   ├── Core/             # Shared utilities
-│   ├── Data/             # Data access layer
-│   ├── Data.MigrationService/  # Database migrations
-│   ├── CommandLineApp/   # CLI tool (mcpm)
-│   ├── PublicApi/        # Public API service
-│   ├── WebApp/           # Blazor web application
-│   ├── SecurityService/  # Security scanning service
-│   ├── SearchService/    # Search service
-│   ├── AppHost/          # .NET Aspire orchestration
-│   └── *.UnitTests/      # Unit tests for each project
-├── Tests/                # Integration and E2E tests
-├── Monitoring/           # Monitoring configuration
-├── Deployment/           # Deployment scripts
-└── Build/               # Build artifacts
+├── Configuration/              # Configurations
+│   ├── Container/              # Dev container configuration
+│   ├── Tools/                  # Project Tools configuration
+├── Documents/                  # Project documentation
+│   ├── Templates/              # Template documentation
+│   ├── Tools/                  # Project Tools documentation
+├── Scripts/                    # Development scripts
+│   ├── Container/              # Dev container scripts
+│   ├── Helpers/                # Helper scripts
+└── Source/                     # Source code
+    ├── AppHost/                # .NET Aspire orchestration
+    ├── Core/                   # Shared utilities
+    ├── Domain/                 # Domain layer (entities, value objects)
+    ├── Common/                 # Shared infrastructure
+    ├── Data/                   # Data access layer
+    ├── Data.MigrationService/  # Database migrations
+    ├── CommandLineApp/         # CLI tool (mcpm)
+    ├── PublicApi/              # Public API service
+    ├── WebApp/                 # Blazor web application
+    ├── SecurityService/        # Security scanning service
+    ├── SearchService/          # Search service
+    └── *.UnitTests/            # Unit tests for each project
 ```
 
 ### Architecture Overview

@@ -1,75 +1,236 @@
-namespace Domain.UnitTests.ValueObjects;
+namespace MCPHub.Domain.ValueObjects;
 
 /// <summary>
 /// Unit tests for SecurityScanResult value object.
 /// This demonstrates testing value objects and their immutability.
 /// </summary>
-[UnitTest]
-public class SecurityScanResultTests : TestBase {
+public class SecurityScanResultTests {
     [Fact]
     public void SecurityScanResult_Should_Be_Created_With_Valid_Properties() {
         // Arrange
-        var scanId = TestData.RandomGuid();
-        var isSecure = TestData.RandomBool();
-        var findings = TestData.RandomStringList(3);
+        var status = SecurityScanStatus.Passed;
+        var vulnerabilities = new List<SecurityVulnerability>
+        {
+            new("VULN-001", "Test vulnerability", "Test description", SecurityScanSeverity.Low)
+        };
+        var scannerVersion = "Scanner v1.0";
+        var scanLog = "Test scan log";
 
         // Act
-        // Note: Actual SecurityScanResult creation would be tested here
-        var result = $"Scan: {scanId}, Secure: {isSecure}, Findings: {findings.Count}";
+        var result = new SecurityScanResult(status, vulnerabilities, scannerVersion, scanLog);
 
         // Assert
-        result.Should().Contain(scanId);
-        result.Should().Contain(isSecure.ToString());
-        result.Should().Contain(findings.Count.ToString());
+        result.Status.Should().Be(status);
+        result.Vulnerabilities.Should().BeEquivalentTo(vulnerabilities);
+        result.VulnerabilityCount.Should().Be(vulnerabilities.Count);
+        result.HighestSeverity.Should().Be(SecurityScanSeverity.Low);
+        result.ScannerVersion.Should().Be(scannerVersion);
+        result.ScanLog.Should().Be(scanLog);
+        result.ScannedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
     }
 
     [Fact]
-    public void SecurityScanResult_Should_Be_Immutable() {
+    public void SecurityScanResult_Should_Calculate_Correct_VulnerabilityCount() {
         // Arrange
-        var scanId = TestData.RandomGuid();
-        var findings = TestData.RandomStringList(2);
+        var vulnerabilities = new List<SecurityVulnerability>
+        {
+            new("VULN-001", "Vuln 1", "Description 1", SecurityScanSeverity.Low),
+            new("VULN-002", "Vuln 2", "Description 2", SecurityScanSeverity.Medium),
+            new("VULN-003", "Vuln 3", "Description 3", SecurityScanSeverity.High)
+        };
 
         // Act
-        // Note: Actual SecurityScanResult immutability would be tested here
-        var originalFindingsCount = findings.Count;
-        findings.Add(TestData.RandomString());
+        var result = new SecurityScanResult(SecurityScanStatus.Failed, vulnerabilities, "Scanner v1.0");
 
         // Assert
-        findings.Count.Should().Be(originalFindingsCount + 1);
+        result.VulnerabilityCount.Should().Be(3);
+    }
+
+    [Fact]
+    public void SecurityScanResult_Should_Calculate_Correct_HighestSeverity() {
+        // Arrange
+        var vulnerabilities = new List<SecurityVulnerability>
+        {
+            new("VULN-001", "Vuln 1", "Description 1", SecurityScanSeverity.Low),
+            new("VULN-002", "Vuln 2", "Description 2", SecurityScanSeverity.Critical),
+            new("VULN-003", "Vuln 3", "Description 3", SecurityScanSeverity.Medium)
+        };
+
+        // Act
+        var result = new SecurityScanResult(SecurityScanStatus.Failed, vulnerabilities, "Scanner v1.0");
+
+        // Assert
+        result.HighestSeverity.Should().Be(SecurityScanSeverity.Critical);
+    }
+
+    [Fact]
+    public void SecurityScanResult_Should_Set_HighestSeverity_To_None_When_No_Vulnerabilities() {
+        // Arrange
+        var vulnerabilities = new List<SecurityVulnerability>();
+
+        // Act
+        var result = new SecurityScanResult(SecurityScanStatus.Passed, vulnerabilities, "Scanner v1.0");
+
+        // Assert
+        result.HighestSeverity.Should().Be(SecurityScanSeverity.None);
+        result.VulnerabilityCount.Should().Be(0);
+    }
+
+    [Fact]
+    public void SecurityScanResult_Should_Handle_Null_Vulnerabilities() {
+        // Arrange & Act
+        var result = new SecurityScanResult(SecurityScanStatus.Passed, null!, "Scanner v1.0");
+
+        // Assert
+        result.Vulnerabilities.Should().BeEmpty();
+        result.VulnerabilityCount.Should().Be(0);
+        result.HighestSeverity.Should().Be(SecurityScanSeverity.None);
+    }
+
+    [Fact]
+    public void SecurityScanResult_Should_Throw_ArgumentNullException_When_ScannerVersion_Is_Null() {
+        // Arrange
+        var vulnerabilities = new List<SecurityVulnerability>();
+
+        // Act & Assert
+        var exception = Assert.Throws<ArgumentNullException>(() =>
+            new SecurityScanResult(SecurityScanStatus.Passed, vulnerabilities, null!));
+        exception.ParamName.Should().Be("scannerVersion");
+    }
+
+    [Fact]
+    public void IsClean_Should_Return_True_When_Passed_And_No_Vulnerabilities() {
+        // Arrange
+        var result = new SecurityScanResult(
+            SecurityScanStatus.Passed,
+            new List<SecurityVulnerability>(),
+            "Scanner v1.0");
+
+        // Act & Assert
+        result.IsClean.Should().BeTrue();
+    }
+
+    [Fact]
+    public void IsClean_Should_Return_False_When_Failed() {
+        // Arrange
+        var result = new SecurityScanResult(
+            SecurityScanStatus.Failed,
+            new List<SecurityVulnerability>(),
+            "Scanner v1.0");
+
+        // Act & Assert
+        result.IsClean.Should().BeFalse();
+    }
+
+    [Fact]
+    public void IsClean_Should_Return_False_When_Has_Vulnerabilities() {
+        // Arrange
+        var vulnerabilities = new List<SecurityVulnerability>
+        {
+            new("VULN-001", "Test", "Description", SecurityScanSeverity.Low)
+        };
+        var result = new SecurityScanResult(
+            SecurityScanStatus.Passed,
+            vulnerabilities,
+            "Scanner v1.0");
+
+        // Act & Assert
+        result.IsClean.Should().BeFalse();
+    }
+
+    [Fact]
+    public void HasCriticalVulnerabilities_Should_Return_True_When_Critical_Vulnerabilities_Exist() {
+        // Arrange
+        var vulnerabilities = new List<SecurityVulnerability>
+        {
+            new("VULN-001", "Test 1", "Description 1", SecurityScanSeverity.Low),
+            new("VULN-002", "Test 2", "Description 2", SecurityScanSeverity.Critical)
+        };
+        var result = new SecurityScanResult(
+            SecurityScanStatus.Failed,
+            vulnerabilities,
+            "Scanner v1.0");
+
+        // Act & Assert
+        result.HasCriticalVulnerabilities.Should().BeTrue();
+    }
+
+    [Fact]
+    public void HasCriticalVulnerabilities_Should_Return_False_When_No_Critical_Vulnerabilities() {
+        // Arrange
+        var vulnerabilities = new List<SecurityVulnerability>
+        {
+            new("VULN-001", "Test 1", "Description 1", SecurityScanSeverity.Low),
+            new("VULN-002", "Test 2", "Description 2", SecurityScanSeverity.Medium)
+        };
+        var result = new SecurityScanResult(
+            SecurityScanStatus.Passed,
+            vulnerabilities,
+            "Scanner v1.0");
+
+        // Act & Assert
+        result.HasCriticalVulnerabilities.Should().BeFalse();
+    }
+
+    [Fact]
+    public void HasHighVulnerabilities_Should_Return_True_When_High_Vulnerabilities_Exist() {
+        // Arrange
+        var vulnerabilities = new List<SecurityVulnerability>
+        {
+            new("VULN-001", "Test 1", "Description 1", SecurityScanSeverity.Low),
+            new("VULN-002", "Test 2", "Description 2", SecurityScanSeverity.High)
+        };
+        var result = new SecurityScanResult(
+            SecurityScanStatus.Failed,
+            vulnerabilities,
+            "Scanner v1.0");
+
+        // Act & Assert
+        result.HasHighVulnerabilities.Should().BeTrue();
+    }
+
+    [Fact]
+    public void HasHighVulnerabilities_Should_Return_False_When_No_High_Vulnerabilities() {
+        // Arrange
+        var vulnerabilities = new List<SecurityVulnerability>
+        {
+            new("VULN-001", "Test 1", "Description 1", SecurityScanSeverity.Low),
+            new("VULN-002", "Test 2", "Description 2", SecurityScanSeverity.Medium)
+        };
+        var result = new SecurityScanResult(
+            SecurityScanStatus.Passed,
+            vulnerabilities,
+            "Scanner v1.0");
+
+        // Act & Assert
+        result.HasHighVulnerabilities.Should().BeFalse();
     }
 
     [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void SecurityScanResult_Should_Handle_Different_Security_States(bool isSecure) {
+    [InlineData(SecurityScanStatus.Passed)]
+    [InlineData(SecurityScanStatus.Failed)]
+    [InlineData(SecurityScanStatus.Error)]
+    public void SecurityScanResult_Should_Handle_Different_Statuses(SecurityScanStatus status) {
         // Arrange
-        var scanId = TestData.RandomGuid();
+        var vulnerabilities = new List<SecurityVulnerability>();
 
         // Act
-        // Note: Actual SecurityScanResult state handling would be tested here
-        var result = $"Scan: {scanId}, Secure: {isSecure}";
+        var result = new SecurityScanResult(status, vulnerabilities, "Scanner v1.0");
 
         // Assert
-        result.Should().Contain(isSecure.ToString());
+        result.Status.Should().Be(status);
     }
-}
 
-/// <summary>
-/// Security tests for SecurityScanResult value object.
-/// </summary>
-[SecurityTest]
-public class SecurityScanResultSecurityTests : TestBase {
     [Fact]
-    public void SecurityScanResult_Should_Not_Expose_Sensitive_Information() {
-        // Arrange
-        var sensitiveData = "sensitive_api_key_12345";
-
-        // Act
-        // Note: Actual security testing would be implemented here
-        var maskedData = new string('*', sensitiveData.Length);
+    public void SecurityScanResult_Should_Handle_Null_ScanLog() {
+        // Arrange & Act
+        var result = new SecurityScanResult(
+            SecurityScanStatus.Passed,
+            new List<SecurityVulnerability>(),
+            "Scanner v1.0",
+            null);
 
         // Assert
-        maskedData.Should().NotContain("api_key");
-        maskedData.Should().NotContain("12345");
+        result.ScanLog.Should().BeNull();
     }
 }

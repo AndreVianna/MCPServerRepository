@@ -1,4 +1,4 @@
-namespace Common.Services;
+namespace MCPHub.Common.Services;
 
 /// <summary>
 /// Email service interface for sending notifications

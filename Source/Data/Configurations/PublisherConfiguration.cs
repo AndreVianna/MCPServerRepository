@@ -1,4 +1,6 @@
-﻿namespace Data.Configurations;
+﻿using MCPHub.Domain.Entities;
+
+namespace MCPHub.Data.Configurations;
 
 public class PublisherConfiguration : IEntityTypeConfiguration<Publisher> {
     public void Configure(EntityTypeBuilder<Publisher> builder) {

@@ -1,4 +1,4 @@
-namespace Domain.Common;
+namespace MCPHub.Domain.Common;
 
 /// <summary>
 /// Base class for all domain entities

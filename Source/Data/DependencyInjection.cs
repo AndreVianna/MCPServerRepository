@@ -1,27 +1,37 @@
-﻿using Common;
-using Common.Services;
+﻿using MCPHub.Common.Extensions;
+using MCPHub.Common.Services;
+using MCPHub.Data.Configuration;
+using MCPHub.Data.Extensions;
+using MCPHub.Data.Repositories;
+using MCPHub.Domain.Repositories;
 
-using Data.Repositories;
-
-namespace Data;
+namespace MCPHub.Data;
 
 public static class DependencyInjection {
     public static IServiceCollection AddDataServices(this IServiceCollection services, IConfiguration configuration) {
-        var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+        // Add database configuration
+        services.AddDatabaseConfiguration(configuration);
+        
+        // Get database options from configuration
+        var databaseOptions = configuration.GetSection(DatabaseOptions.SectionName).Get<DatabaseOptions>()
+            ?? throw new InvalidOperationException("Database configuration not found.");
 
         services.AddDbContext<McpHubContext>(options =>
-            options.UseNpgsql(connectionString, npgsqlOptions => {
+            options.UseNpgsql(databaseOptions.ConnectionString, npgsqlOptions => {
                 npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                npgsqlOptions.EnableRetryOnFailure(maxRetryCount: 3, maxRetryDelay: TimeSpan.FromSeconds(5), errorCodesToAdd: null);
-                npgsqlOptions.CommandTimeout(30);
+                npgsqlOptions.EnableRetryOnFailure(
+                    maxRetryCount: databaseOptions.MaxRetryCount, 
+                    maxRetryDelay: TimeSpan.FromSeconds(5), 
+                    errorCodesToAdd: null);
+                npgsqlOptions.CommandTimeout((int)databaseOptions.CommandTimeout.TotalSeconds);
             })
-            .EnableSensitiveDataLogging(false)
+            .EnableSensitiveDataLogging(databaseOptions.EnableSensitiveDataLogging)
             .EnableServiceProviderCaching()
-            .EnableDetailedErrors(false));
+            .EnableDetailedErrors(databaseOptions.EnableDetailedErrors));
 
-        // Add Common services (including cache)
-        services.AddCommonServices(configuration);
+        // Note: Common services removed during cleanup - only configuration options available
+        // Add configuration options from Common
+        services.AddConfigurationOptions(configuration);
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 

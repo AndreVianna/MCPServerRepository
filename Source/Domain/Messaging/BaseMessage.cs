@@ -1,4 +1,4 @@
-namespace Domain.Messaging;
+namespace MCPHub.Domain.Messaging;
 
 /// <summary>
 /// Base class for all messages in the system

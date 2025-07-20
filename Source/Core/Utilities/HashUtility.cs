@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Core.Utilities;
+namespace MCPHub.Core.Utilities;
 
 /// <summary>
 /// Utility class for hashing operations

@@ -1,4 +1,4 @@
-namespace Domain.ValueObjects;
+namespace MCPHub.Domain.ValueObjects;
 
 public enum SecurityScanSeverity {
     None,

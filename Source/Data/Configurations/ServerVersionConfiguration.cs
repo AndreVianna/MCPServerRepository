@@ -1,4 +1,6 @@
-﻿namespace Data.Configurations;
+﻿using MCPHub.Domain.Entities;
+
+namespace MCPHub.Data.Configurations;
 
 public class ServerVersionConfiguration : IEntityTypeConfiguration<ServerVersion> {
     public void Configure(EntityTypeBuilder<ServerVersion> builder) {
@@ -9,27 +11,22 @@ public class ServerVersionConfiguration : IEntityTypeConfiguration<ServerVersion
 
         builder.Property(v => v.Version)
             .IsRequired()
-            .HasMaxLength(50);
-
-        builder.Property(v => v.ManifestJson)
-            .IsRequired()
-            .HasColumnType("jsonb");
+            .HasMaxLength(32);
 
         builder.Property(v => v.ReleaseNotes)
-            .HasMaxLength(1000);
+            .HasMaxLength(4096);
 
-        builder.Property(v => v.PackagePath)
-            .HasMaxLength(255);
+        builder.Property(v => v.PackageUrl)
+            .HasMaxLength(256);
 
-        builder.Property(v => v.PackageHash)
+        builder.Property(v => v.PackageSize);
+
+        builder.Property(v => v.Checksum)
             .HasMaxLength(64);
 
-        builder.Property(v => v.TrustTier)
+        builder.Property(v => v.Status)
             .IsRequired()
             .HasConversion<string>();
-
-        builder.Property(v => v.PublishedAt)
-            .IsRequired();
 
         builder.Property(v => v.CreatedAt)
             .IsRequired();
@@ -43,13 +40,9 @@ public class ServerVersionConfiguration : IEntityTypeConfiguration<ServerVersion
 
         builder.HasIndex(v => v.ServerId);
 
-        builder.HasIndex(v => v.TrustTier);
+        builder.HasIndex(v => v.Status);
 
-        builder.HasIndex(v => v.PublishedAt);
-
-        builder.HasIndex(v => v.IsPrerelease);
-
-        builder.HasIndex(v => v.IsDeprecated);
+        builder.HasIndex(v => v.CreatedAt);
 
         // Relationships
         builder.HasOne(v => v.Server)
@@ -58,8 +51,8 @@ public class ServerVersionConfiguration : IEntityTypeConfiguration<ServerVersion
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasMany(v => v.SecurityScans)
-            .WithOne(s => s.Version)
-            .HasForeignKey(s => s.VersionId)
+            .WithOne(s => s.ServerVersion)
+            .HasForeignKey(s => s.ServerVersionId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

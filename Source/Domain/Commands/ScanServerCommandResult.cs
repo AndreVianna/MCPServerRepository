@@ -1,6 +1,4 @@
-using Domain.Messaging;
-
-namespace Domain.Commands;
+namespace MCPHub.Domain.Commands;
 
 /// <summary>
 /// Result of the scan server command

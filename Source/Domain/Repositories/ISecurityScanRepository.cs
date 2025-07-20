@@ -1,6 +1,6 @@
-using Domain.Entities;
+using MCPHub.Domain.Entities;
 
-namespace Domain.Repositories;
+namespace MCPHub.Domain.Repositories;
 
 public interface ISecurityScanRepository : IRepository<SecurityScan> {
     Task<List<SecurityScan>> GetByVersionIdAsync(Guid versionId, CancellationToken cancellationToken = default);

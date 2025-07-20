@@ -1,4 +1,4 @@
-namespace Domain.Entities;
+namespace MCPHub.Domain.Entities;
 
 public enum ServerStatus {
     Pending,

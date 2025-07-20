@@ -1,26 +1,31 @@
-namespace Domain.ValueObjects;
+using System.Diagnostics.CodeAnalysis;
+
+namespace MCPHub.Domain.ValueObjects;
 
 /// <summary>
 /// Value object representing the result of a security scan
 /// </summary>
-public class SecurityScanResult {
-    public SecurityScanStatus Status { get; set; }
-    public int VulnerabilityCount { get; set; }
-    public SecurityScanSeverity HighestSeverity { get; set; }
-    public List<SecurityVulnerability> Vulnerabilities { get; set; } = [];
-    public DateTime ScannedAt { get; set; }
+public record SecurityScanResult {
+    public SecurityScanStatus Status { get; init; }
+    public int VulnerabilityCount { get; init; }
+    public SecurityScanSeverity HighestSeverity { get; init; }
+    public List<SecurityVulnerability> Vulnerabilities { get; init; } = [];
+    public DateTime ScannedAt { get; init; }
     [MaxLength(32)]
-    public string ScannerVersion { get; set; } = string.Empty;
+    public string ScannerVersion { get; init; } = string.Empty;
     [MaxLength(4096)]
-    public string? ScanLog { get; set; }
+    public string? ScanLog { get; init; }
 
     private SecurityScanResult() { } // For EF Core
 
+    [SetsRequiredMembers]
     public SecurityScanResult(
         SecurityScanStatus status,
         List<SecurityVulnerability> vulnerabilities,
         string scannerVersion,
         string? scanLog = null) {
+        ArgumentException.ThrowIfNullOrWhiteSpace(scannerVersion);
+
         Status = status;
         Vulnerabilities = vulnerabilities ?? [];
         VulnerabilityCount = Vulnerabilities.Count;
@@ -28,7 +33,7 @@ public class SecurityScanResult {
             ? Vulnerabilities.Max(v => v.Severity)
             : SecurityScanSeverity.None;
         ScannedAt = DateTime.UtcNow;
-        ScannerVersion = scannerVersion ?? throw new ArgumentNullException(nameof(scannerVersion));
+        ScannerVersion = scannerVersion;
         ScanLog = scanLog;
     }
 

@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Data\MCPHub.Data.csproj" />
+    <ProjectReference Include="..\Common.UnitTests\MCPHub.Common.UnitTests.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,53 @@
+{
+  "servers": {
+    "github": {
+      "type": "stdio",
+      "command": "wsl docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN=$env:GITHUB_KEY",
+        "ghcr.io/github/github-mcp-server"
+      ]
+    },
+    "thinking": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "memory": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "env": {
+        "MEMORY_FILE_PATH": "C:\\Projects\\Personal\\MCPServerRepository\\.claude\\memory.local.json"
+      }
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest"
+      ]
+    },
+    "figma": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "figma-developer-mcp",
+        "--figma-api-key=$env:FIGMA_KEY",
+        "--stdio"
+      ]
+    }
+  }
+}

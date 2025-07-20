@@ -1,4 +1,7 @@
-namespace Data.Repositories;
+using MCPHub.Domain.Entities;
+using MCPHub.Domain.Repositories;
+
+namespace MCPHub.Data.Repositories;
 
 public class PackageRepository(McpHubContext context) : Repository<Package>(context), IPackageRepository {
     public async Task<Package?> GetByNameAsync(string name, CancellationToken cancellationToken = default) => await _dbSet

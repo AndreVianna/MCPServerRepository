@@ -1,4 +1,6 @@
-﻿namespace Data.Configurations;
+﻿using MCPHub.Domain.Entities;
+
+namespace MCPHub.Data.Configurations;
 
 public class ServerConfiguration : IEntityTypeConfiguration<Server> {
     public void Configure(EntityTypeBuilder<Server> builder) {
@@ -15,13 +17,7 @@ public class ServerConfiguration : IEntityTypeConfiguration<Server> {
         builder.Property(s => s.PublisherId)
             .IsRequired();
 
-        builder.Property(s => s.RepositoryUrl)
-            .HasMaxLength(255);
-
-        builder.Property(s => s.DocumentationUrl)
-            .HasMaxLength(255);
-
-        builder.Property(s => s.LicenseUrl)
+        builder.Property(s => s.Repository)
             .HasMaxLength(255);
 
         builder.Property(s => s.License)
@@ -33,6 +29,18 @@ public class ServerConfiguration : IEntityTypeConfiguration<Server> {
         builder.Property(s => s.UpdatedAt)
             .IsRequired();
 
+        builder.Property(s => s.Status)
+            .IsRequired();
+
+        builder.Property(s => s.TrustTier)
+            .IsRequired();
+
+        builder.Property(s => s.Tags)
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
+                v => JsonSerializer.Deserialize<List<string>>(v, JsonSerializerOptions.Default) ?? new List<string>()
+            );
+
         // Indexes
         builder.HasIndex(s => s.Name)
             .IsUnique();
@@ -41,7 +49,9 @@ public class ServerConfiguration : IEntityTypeConfiguration<Server> {
 
         builder.HasIndex(s => s.CreatedAt);
 
-        builder.HasIndex(s => s.IsDeprecated);
+        builder.HasIndex(s => s.Status);
+
+        builder.HasIndex(s => s.TrustTier);
 
         // Relationships
         builder.HasOne(s => s.Publisher)

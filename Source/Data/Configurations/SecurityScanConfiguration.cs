@@ -1,10 +1,15 @@
-﻿namespace Data.Configurations;
+﻿using MCPHub.Domain.Entities;
+
+namespace MCPHub.Data.Configurations;
 
 public class SecurityScanConfiguration : IEntityTypeConfiguration<SecurityScan> {
     public void Configure(EntityTypeBuilder<SecurityScan> builder) {
         builder.HasKey(s => s.Id);
 
         builder.Property(s => s.VersionId)
+            .IsRequired();
+
+        builder.Property(s => s.ServerVersionId)
             .IsRequired();
 
         builder.Property(s => s.ScanType)
@@ -15,60 +20,50 @@ public class SecurityScanConfiguration : IEntityTypeConfiguration<SecurityScan> 
             .IsRequired()
             .HasConversion<string>();
 
-        builder.Property(s => s.StartedAt)
+
+        builder.Property(s => s.ScanStartedAt)
             .IsRequired();
 
-        builder.Property(s => s.Score)
-            .IsRequired()
-            .HasDefaultValue(0);
-
-        builder.Property(s => s.ResultsJson)
-            .HasColumnType("jsonb");
-
-        builder.Property(s => s.ErrorMessage)
-            .HasMaxLength(1000);
+        builder.Property(s => s.ScanCompletedAt);
 
         builder.Property(s => s.CriticalIssues)
             .IsRequired()
             .HasDefaultValue(0);
 
-        builder.Property(s => s.HighIssues)
+        builder.Property(s => s.ErrorMessage)
+            .HasMaxLength(4096);
+
+        builder.Property(s => s.ScannerVersion)
             .IsRequired()
-            .HasDefaultValue(0);
+            .HasMaxLength(32);
 
-        builder.Property(s => s.MediumIssues)
-            .IsRequired()
-            .HasDefaultValue(0);
-
-        builder.Property(s => s.LowIssues)
-            .IsRequired()
-            .HasDefaultValue(0);
-
-        builder.Property(s => s.CreatedAt)
-            .IsRequired();
-
-        builder.Property(s => s.UpdatedAt)
-            .IsRequired();
+        builder.Property(s => s.Metadata)
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
+                v => JsonSerializer.Deserialize<Dictionary<string, object>>(v, JsonSerializerOptions.Default) ?? new Dictionary<string, object>()
+            );
 
         // Indexes
         builder.HasIndex(s => s.VersionId);
+
+        builder.HasIndex(s => s.ServerVersionId);
 
         builder.HasIndex(s => s.ScanType);
 
         builder.HasIndex(s => s.Status);
 
-        builder.HasIndex(s => s.StartedAt);
+        builder.HasIndex(s => s.ScanStartedAt);
 
-        builder.HasIndex(s => s.CompletedAt);
+        builder.HasIndex(s => s.ScanCompletedAt);
 
         builder.HasIndex(s => s.CriticalIssues);
 
         builder.HasIndex(s => new { s.VersionId, s.ScanType });
 
         // Relationships
-        builder.HasOne(s => s.Version)
+        builder.HasOne(s => s.ServerVersion)
             .WithMany(v => v.SecurityScans)
-            .HasForeignKey(s => s.VersionId)
+            .HasForeignKey(s => s.ServerVersionId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

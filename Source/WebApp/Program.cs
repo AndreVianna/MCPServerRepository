@@ -1,6 +1,6 @@
-using WebApp.Components;
+using MCPHub.WebApp.Components;
 
-namespace WebApp;
+namespace MCPHub.WebApp;
 
 internal class Program {
     public static void Main(string[] args) {

@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace Domain.Messaging;
+namespace MCPHub.Domain.Messaging;
 
 /// <summary>
 /// Interface for event handlers

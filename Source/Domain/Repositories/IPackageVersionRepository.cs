@@ -1,4 +1,6 @@
-namespace Domain.Repositories;
+using MCPHub.Domain.Entities;
+
+namespace MCPHub.Domain.Repositories;
 
 public interface IPackageVersionRepository : IRepository<PackageVersion> {
     Task<PackageVersion?> GetByPackageAndVersionAsync(Guid packageId, string version, CancellationToken cancellationToken = default);

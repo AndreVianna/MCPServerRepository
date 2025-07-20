@@ -12,8 +12,6 @@ global using System.Threading.Tasks;
 
 global using AwesomeAssertions;
 // Common test utilities
-global using Common.UnitTests.TestUtilities;
-
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Diagnostics.HealthChecks;

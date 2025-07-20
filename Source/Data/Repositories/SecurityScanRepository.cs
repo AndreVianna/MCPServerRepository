@@ -1,4 +1,7 @@
-﻿namespace Data.Repositories;
+﻿using MCPHub.Domain.Entities;
+using MCPHub.Domain.Repositories;
+
+namespace MCPHub.Data.Repositories;
 
 public class SecurityScanRepository(McpHubContext context) : Repository<SecurityScan>(context), ISecurityScanRepository {
     public async Task<List<SecurityScan>> GetByVersionIdAsync(Guid versionId, CancellationToken cancellationToken = default) => await _dbSet.Where(s => s.VersionId == versionId).ToListAsync(cancellationToken);
@@ -11,9 +14,9 @@ public class SecurityScanRepository(McpHubContext context) : Repository<Security
 
     public async Task<List<SecurityScan>> GetPendingScansAsync(CancellationToken cancellationToken = default) => await _dbSet.Where(s => s.Status == ScanStatus.Pending).ToListAsync(cancellationToken);
 
-    public async Task<SecurityScan?> GetLatestScanAsync(Guid versionId, ScanType scanType, CancellationToken cancellationToken = default) => await _dbSet
-            .Where(s => s.VersionId == versionId && s.ScanType == scanType)
-            .OrderByDescending(s => s.StartedAt)
+    public async Task<SecurityScan?> GetLatestScanAsync(Guid versionId, CancellationToken cancellationToken = default) => await _dbSet
+            .Where(s => s.VersionId == versionId)
+            .OrderByDescending(s => s.ScanStartedAt)
             .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<List<SecurityScan>> GetScansWithCriticalIssuesAsync(CancellationToken cancellationToken = default) => await _dbSet.Where(s => s.CriticalIssues > 0).ToListAsync(cancellationToken);

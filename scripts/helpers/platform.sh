@@ -308,7 +308,7 @@ check_rwp_repository() {
     # Input validation
     if [[ -z "$RWP_PATH" ]]; then
         log_error "USE_LOCAL=true but RWP_PATH not set"
-        return "$INVALID_CONFIGURATIONURATION_ERROR"
+        return "$INVALID_CONFIGURATION"
     fi
 
     local rwp_repo_path="$RWP_PATH/releng/com.rossvideo.rwp.releng.update/target/repository"

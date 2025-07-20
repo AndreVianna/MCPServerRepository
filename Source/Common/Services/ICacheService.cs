@@ -1,4 +1,4 @@
-namespace Common.Services;
+namespace MCPHub.Common.Services;
 
 /// <summary>
 /// Cache service interface for distributed caching

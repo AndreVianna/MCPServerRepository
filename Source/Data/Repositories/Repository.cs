@@ -1,14 +1,16 @@
-﻿namespace Data.Repositories;
+﻿using MCPHub.Domain.Repositories;
+
+namespace MCPHub.Data.Repositories;
 
 public class Repository<TEntity>(McpHubContext context) : IRepository<TEntity> where TEntity : class {
     protected readonly McpHubContext _context = context;
     protected readonly DbSet<TEntity> _dbSet = context.Set<TEntity>();
 
-    public virtual async Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) => await _dbSet.FindAsync(new object[] { id }, cancellationToken);
+    public virtual async Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) => await _dbSet.FindAsync([id], cancellationToken);
 
-    public virtual async Task<List<TEntity>> GetAllAsync(CancellationToken cancellationToken = default) => await _dbSet.ToListAsync(cancellationToken);
+    public virtual async Task<IReadOnlyList<TEntity>> GetAllAsync(CancellationToken cancellationToken = default) => await _dbSet.ToListAsync(cancellationToken);
 
-    public virtual async Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) => await _dbSet.Where(predicate).ToListAsync(cancellationToken);
+    public virtual async Task<IReadOnlyList<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) => await _dbSet.Where(predicate).ToListAsync(cancellationToken);
 
     public virtual async Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) => await _dbSet.FirstOrDefaultAsync(predicate, cancellationToken);
 
@@ -21,7 +23,7 @@ public class Repository<TEntity>(McpHubContext context) : IRepository<TEntity> w
         return entity;
     }
 
-    public virtual async Task<List<TEntity>> AddRangeAsync(List<TEntity> entities, CancellationToken cancellationToken = default) {
+    public virtual async Task<IReadOnlyList<TEntity>> AddRangeAsync(IReadOnlyList<TEntity> entities, CancellationToken cancellationToken = default) {
         await _dbSet.AddRangeAsync(entities, cancellationToken);
         return entities;
     }
@@ -36,7 +38,7 @@ public class Repository<TEntity>(McpHubContext context) : IRepository<TEntity> w
         return Task.CompletedTask;
     }
 
-    public virtual Task DeleteRangeAsync(List<TEntity> entities, CancellationToken cancellationToken = default) {
+    public virtual Task DeleteRangeAsync(IReadOnlyList<TEntity> entities, CancellationToken cancellationToken = default) {
         _dbSet.RemoveRange(entities);
         return Task.CompletedTask;
     }

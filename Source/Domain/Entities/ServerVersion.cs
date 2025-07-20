@@ -1,20 +1,21 @@
-namespace Domain.Entities;
+using MCPHub.Domain.Common;
+using MCPHub.Domain.ValueObjects;
+
+namespace MCPHub.Domain.Entities;
 
 /// <summary>
 /// Represents a version of an MCP server
 /// </summary>
-public class ServerVersion {
-    public Guid Id { get; set; } = Guid.CreateVersion7();
+public class ServerVersion : BaseEntity {
     [MaxLength(32)]
     public string Version { get; set; } = string.Empty;
     public Guid ServerId { get; set; }
     public Server Server { get; set; } = null!;
     [MaxLength(4096)]
     public string? ReleaseNotes { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
-    public VersionStatus Status { get; set; }
+    public VersionStatus Status { get; set; } = VersionStatus.Pending;
     public SecurityScanResult? SecurityScan { get; set; }
+    public List<SecurityScan> SecurityScans { get; set; } = [];
     [MaxLength(256)]
     public string? PackageUrl { get; set; }
     public long? PackageSize { get; set; }
@@ -30,33 +31,32 @@ public class ServerVersion {
         string? packageUrl = null,
         long? packageSize = null,
         string? checksum = null) {
-        Id = Guid.NewGuid();
-        Version = version ?? throw new ArgumentNullException(nameof(version));
+        ArgumentException.ThrowIfNullOrWhiteSpace(version);
+
+        Version = version;
         ServerId = serverId;
         ReleaseNotes = releaseNotes;
         PackageUrl = packageUrl;
         PackageSize = packageSize;
         Checksum = checksum;
-        CreatedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
         Status = VersionStatus.Pending;
     }
 
     public void UpdateStatus(VersionStatus status) {
         Status = status;
-        UpdatedAt = DateTime.UtcNow;
+        SetUpdatedBy(UpdatedBy ?? "system");
     }
 
     public void UpdateSecurityScan(SecurityScanResult scanResult) {
         SecurityScan = scanResult;
-        UpdatedAt = DateTime.UtcNow;
+        SetUpdatedBy(UpdatedBy ?? "system");
     }
 
     public void UpdatePackageInfo(string? packageUrl, long? packageSize, string? checksum) {
         PackageUrl = packageUrl;
         PackageSize = packageSize;
         Checksum = checksum;
-        UpdatedAt = DateTime.UtcNow;
+        SetUpdatedBy(UpdatedBy ?? "system");
     }
 }
 

@@ -1,7 +1,4 @@
-using System.Text;
-using System.Text.Json;
-
-namespace Common.UnitTests.Messaging;
+namespace MCPHub.Common.Messaging;
 
 /// <summary>
 /// Simple test for message serialization without complex dependencies
@@ -23,10 +20,10 @@ public class MessageSerializationSimpleTest {
         var deserializedMessage = JsonSerializer.Deserialize<TestMessage>(deserializedJson);
 
         // Assert
-        Assert.NotNull(deserializedMessage);
-        Assert.Equal(message.Id, deserializedMessage.Id);
-        Assert.Equal(message.Content, deserializedMessage.Content);
-        Assert.Equal(message.CreatedAt.ToString(), deserializedMessage.CreatedAt.ToString());
+        deserializedMessage.Should().NotBeNull();
+        deserializedMessage.Id.Should().Be(message.Id);
+        deserializedMessage.Content.Should().Be(message.Content);
+        deserializedMessage.CreatedAt.ToString().Should().Be(message.CreatedAt.ToString());
     }
 
     public class TestMessage {

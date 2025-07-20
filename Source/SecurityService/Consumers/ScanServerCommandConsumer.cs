@@ -1,25 +1,22 @@
-using Common.Messaging.Configuration;
-using Common.Messaging.RabbitMQ;
+using MCPHub.Common.Messaging;
+using MCPHub.Domain.Commands;
+using MCPHub.Domain.Events;
 
-using Domain.Commands;
-using Domain.Events;
-
-using Microsoft.Extensions.Options;
-
-namespace SecurityService.Consumers;
+namespace MCPHub.SecurityService.Consumers;
 
 /// <summary>
 /// Consumer for ScanServerCommand messages
 /// </summary>
 public class ScanServerCommandConsumer(
     ILogger<ScanServerCommandConsumer> logger,
-    IOptions<RabbitMQConfiguration> configuration,
-    IMessagePublisher messagePublisher) : BaseMessageConsumer<ScanServerCommand>(logger, configuration), BaseMessageConsumer<ScanServerCommand> {
+    IMessagePublisher messagePublisher) {
     private readonly IMessagePublisher _messagePublisher = messagePublisher;
     private readonly ILogger<ScanServerCommandConsumer> _logger = logger;
 
-    /// <inheritdoc />
-    public override async Task ConsumeAsync(ScanServerCommand message, CancellationToken cancellationToken = default) {
+    /// <summary>
+    /// Processes a ScanServerCommand message
+    /// </summary>
+    public async Task ConsumeAsync(ScanServerCommand message, CancellationToken cancellationToken = default) {
         _logger.LogInformation("Processing security scan for server {ServerId}, version {ServerVersionId}, scan type {ScanType}",
             message.ServerId, message.ServerVersionId, message.ScanType);
 
@@ -35,7 +32,7 @@ public class ScanServerCommandConsumer(
                 "Passed",
                 0,
                 message.CorrelationId,
-                message.InitiatedBy);
+                message.UserId);
 
             await _messagePublisher.PublishAsync(completionEvent, cancellationToken);
 
@@ -54,7 +51,7 @@ public class ScanServerCommandConsumer(
                 "Failed",
                 0,
                 message.CorrelationId,
-                message.InitiatedBy);
+                message.UserId);
 
             await _messagePublisher.PublishAsync(failureEvent, cancellationToken);
             throw;

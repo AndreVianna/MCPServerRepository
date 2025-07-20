@@ -2,7 +2,7 @@ using System.Net.Mail;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Core.Helpers;
+namespace MCPHub.Core.Helpers;
 
 /// <summary>
 /// Helper class for string operations

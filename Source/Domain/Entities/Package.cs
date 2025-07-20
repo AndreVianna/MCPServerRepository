@@ -1,27 +1,30 @@
-namespace Domain.Entities;
+using System.Diagnostics.CodeAnalysis;
+
+using MCPHub.Domain.Common;
+using MCPHub.Domain.ValueObjects;
+
+namespace MCPHub.Domain.Entities;
 
 /// <summary>
 /// Represents an MCP package in the registry
 /// </summary>
-public class Package {
-    public Guid Id { get; set; }
+public class Package : BaseEntity {
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Version { get; set; } = string.Empty;
     public Guid PublisherId { get; set; }
     public Publisher Publisher { get; set; } = null!;
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
-    public PackageStatus Status { get; set; }
+    public PackageStatus Status { get; set; } = PackageStatus.Pending;
     public string? Repository { get; set; }
     public string? License { get; set; }
     public List<string> Tags { get; set; } = [];
     public List<PackageVersion> Versions { get; set; } = [];
-    public SecurityScanResult? SecurityScan { get; set; }
-    public TrustTier TrustTier { get; set; }
+    public SecurityScanResult? ScanResult { get; set; }
+    public TrustTier TrustTier { get; set; } = TrustTier.Unverified;
 
     private Package() { } // For EF Core
 
+    [SetsRequiredMembers]
     public Package(
         string name,
         string description,
@@ -30,32 +33,33 @@ public class Package {
         string? repository = null,
         string? license = null,
         List<string>? tags = null) {
-        Id = Guid.NewGuid();
-        Name = name ?? throw new ArgumentNullException(nameof(name));
-        Description = description ?? throw new ArgumentNullException(nameof(description));
-        Version = version ?? throw new ArgumentNullException(nameof(version));
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        ArgumentException.ThrowIfNullOrWhiteSpace(description);
+        ArgumentException.ThrowIfNullOrWhiteSpace(version);
+
+        Name = name;
+        Description = description;
+        Version = version;
         PublisherId = publisherId;
         Repository = repository;
         License = license;
         Tags = tags ?? [];
-        CreatedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
         Status = PackageStatus.Pending;
         TrustTier = TrustTier.Unverified;
     }
 
     public void UpdateStatus(PackageStatus status) {
         Status = status;
-        UpdatedAt = DateTime.UtcNow;
+        SetUpdatedBy(UpdatedBy ?? "system");
     }
 
     public void UpdateSecurityScan(SecurityScanResult scanResult) {
-        SecurityScan = scanResult;
-        UpdatedAt = DateTime.UtcNow;
+        ScanResult = scanResult;
+        SetUpdatedBy(UpdatedBy ?? "system");
     }
 
     public void UpdateTrustTier(TrustTier trustTier) {
         TrustTier = trustTier;
-        UpdatedAt = DateTime.UtcNow;
+        SetUpdatedBy(UpdatedBy ?? "system");
     }
 }

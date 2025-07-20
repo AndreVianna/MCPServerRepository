@@ -282,10 +282,8 @@ run_container_async() {
     trap 'handle_container_interrupt; exit 143' TERM
     
     # Wait for completion and capture exit code
-    local exit_code=0
-    if ! wait $CONTAINER_PID; then
-        exit_code=$?
-    fi
+    wait $CONTAINER_PID
+    local exit_code=$?
     
     # Remove the trap after wait completes
     trap - INT TERM
@@ -386,10 +384,8 @@ run_maven_container_async() {
     trap 'handle_maven_interrupt; exit 143' TERM
     
     # Wait for completion and capture exit code
-    local exit_code=0
-    if ! wait $CONTAINER_PID; then
-        exit_code=$?
-    fi
+    wait $CONTAINER_PID
+    local exit_code=$?
     
     # Remove the trap after wait completes
     trap - INT TERM

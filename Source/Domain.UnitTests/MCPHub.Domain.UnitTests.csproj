@@ -12,10 +12,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Using Include="Xunit" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Domain\MCPHub.Domain.csproj" />
   </ItemGroup>
 

@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
 
-namespace Data.Repositories;
+using MCPHub.Domain.Repositories;
+
+namespace MCPHub.Data.Repositories;
 
 public class UnitOfWork : IUnitOfWork {
     private readonly McpHubContext _context;

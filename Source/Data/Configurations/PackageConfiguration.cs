@@ -1,4 +1,8 @@
-namespace Data.Configurations;
+using System.Text.Json;
+using MCPHub.Domain.Entities;
+using MCPHub.Domain.ValueObjects;
+
+namespace MCPHub.Data.Configurations;
 
 public class PackageConfiguration : IEntityTypeConfiguration<Package> {
     public void Configure(EntityTypeBuilder<Package> builder) {
@@ -74,23 +78,27 @@ public class PackageConfiguration : IEntityTypeConfiguration<Package> {
             .HasForeignKey(v => v.PackageId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Complex type for SecurityScan
-        builder.OwnsOne(p => p.SecurityScan, scan => {
+        // Configure ScanResult as owned entity
+        builder.OwnsOne(p => p.ScanResult, scan => {
             scan.Property(s => s.Status)
                 .IsRequired()
                 .HasConversion<string>();
-
-            scan.Property(s => s.ScanDate)
+            scan.Property(s => s.VulnerabilityCount)
                 .IsRequired();
-
-            scan.Property(s => s.Issues)
+            scan.Property(s => s.HighestSeverity)
+                .IsRequired()
+                .HasConversion<string>();
+            scan.Property(s => s.ScannedAt)
+                .IsRequired();
+            scan.Property(s => s.ScannerVersion)
+                .IsRequired()
+                .HasMaxLength(32);
+            scan.Property(s => s.ScanLog)
+                .HasMaxLength(4096);
+            scan.Property(s => s.Vulnerabilities)
                 .HasConversion(
                     v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
-                    v => JsonSerializer.Deserialize<List<SecurityIssue>>(v, JsonSerializerOptions.Default) ?? new List<SecurityIssue>(),
-                    new ValueComparer<List<SecurityIssue>>(
-                        (c1, c2) => c1!.SequenceEqual(c2!),
-                        c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                        c => c.ToList()))
+                    v => JsonSerializer.Deserialize<List<SecurityVulnerability>>(v, JsonSerializerOptions.Default) ?? new List<SecurityVulnerability>())
                 .HasColumnType("jsonb");
         });
     }

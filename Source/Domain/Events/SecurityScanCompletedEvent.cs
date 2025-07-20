@@ -1,6 +1,6 @@
-using Domain.Messaging;
+using MCPHub.Domain.Messaging;
 
-namespace Domain.Events;
+namespace MCPHub.Domain.Events;
 
 /// <summary>
 /// Event raised when a security scan is completed

@@ -144,6 +144,10 @@ output_cross() {
     echo -e "${_RED}✗${_NO_COLOR} $1"
 }
 
+output_warning() {
+    echo -e "${_YELLOW}⚠${_NO_COLOR} $1"
+}
+
 output_arrow() {
     echo -e "${_BLUE}→${_NO_COLOR} $1"
 }

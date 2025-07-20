@@ -1,8 +1,7 @@
-using System.Linq.Expressions;
+using MCPHub.Common.Services;
+using MCPHub.Domain.Repositories;
 
-using Common.Services;
-
-namespace Data.Repositories;
+namespace MCPHub.Data.Repositories;
 
 public abstract class CachedRepository<TEntity>(IRepository<TEntity> repository, ICacheService cacheService, string cacheKeyPrefix) : IRepository<TEntity> where TEntity : class {
     protected readonly IRepository<TEntity> _repository = repository;
@@ -24,9 +23,9 @@ public abstract class CachedRepository<TEntity>(IRepository<TEntity> repository,
         return entity;
     }
 
-    public virtual async Task<List<TEntity>> GetAllAsync(CancellationToken cancellationToken = default) {
+    public virtual async Task<IReadOnlyList<TEntity>> GetAllAsync(CancellationToken cancellationToken = default) {
         var cacheKey = $"{_cacheKeyPrefix}:all";
-        var cachedEntities = await _cacheService.GetAsync<List<TEntity>>(cacheKey, cancellationToken);
+        var cachedEntities = await _cacheService.GetAsync<IReadOnlyList<TEntity>>(cacheKey, cancellationToken);
 
         if (cachedEntities != null)
             return cachedEntities;
@@ -37,7 +36,7 @@ public abstract class CachedRepository<TEntity>(IRepository<TEntity> repository,
         return entities;
     }
 
-    public virtual async Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
+    public virtual async Task<IReadOnlyList<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
         // For complex queries, we don't cache due to the difficulty of generating cache keys
         => await _repository.FindAsync(predicate, cancellationToken);
 
@@ -53,7 +52,7 @@ public abstract class CachedRepository<TEntity>(IRepository<TEntity> repository,
         return result;
     }
 
-    public virtual async Task<List<TEntity>> AddRangeAsync(List<TEntity> entities, CancellationToken cancellationToken = default) {
+    public virtual async Task<IReadOnlyList<TEntity>> AddRangeAsync(IReadOnlyList<TEntity> entities, CancellationToken cancellationToken = default) {
         var result = await _repository.AddRangeAsync(entities, cancellationToken);
         await InvalidateCacheAsync(cancellationToken);
         return result;
@@ -70,7 +69,7 @@ public abstract class CachedRepository<TEntity>(IRepository<TEntity> repository,
         await InvalidateCacheAsync(cancellationToken);
     }
 
-    public virtual async Task DeleteRangeAsync(List<TEntity> entities, CancellationToken cancellationToken = default) {
+    public virtual async Task DeleteRangeAsync(IReadOnlyList<TEntity> entities, CancellationToken cancellationToken = default) {
         await _repository.DeleteRangeAsync(entities, cancellationToken);
         await InvalidateCacheAsync(cancellationToken);
     }

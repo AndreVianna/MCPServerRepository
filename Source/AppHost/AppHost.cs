@@ -1,6 +1,17 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-// Add MCP Hub infrastructure with comprehensive setup
-builder.AddMcpHubInfrastructure();
+// Note: External services removed during cleanup - only interface abstractions available
+// Future implementations will add specific providers as needed
+
+// Configure basic service projects
+builder.AddProject<Projects.MCPHub_PublicApi>("publicapi");
+
+builder.AddProject<Projects.MCPHub_WebApp>("webapp");
+
+builder.AddProject<Projects.MCPHub_SecurityService>("securityservice");
+
+builder.AddProject<Projects.MCPHub_SearchService>("searchservice");
+
+builder.AddProject<Projects.MCPHub_Data_MigrationService>("datamigrationservice");
 
 builder.Build().Run();

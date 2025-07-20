@@ -1,8 +1,4 @@
-using Common.Messaging.DependencyInjection;
-
-using Domain.Events;
-
-using PublicApi.Consumers;
+using MCPHub.PublicApi.Consumers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,11 +7,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add RabbitMQ messaging
-builder.Services.AddRabbitMQMessaging(builder.Configuration);
-
-// Add message consumers
-builder.Services.AddMessageConsumer<ServerRegisteredEventConsumer, ServerRegisteredEvent>();
+// Note: Messaging implementations removed - only interfaces available
+// Register consumer services
+builder.Services.AddScoped<ServerRegisteredEventConsumer>();
 
 // Add logging
 builder.Services.AddLogging();

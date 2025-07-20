@@ -132,7 +132,7 @@ updates:
 
   # Docker base images
   - package-ecosystem: "docker"
-    directory: "/.devcontainer"
+    directory: "/Configuration/Container"
     schedule:
       interval: "weekly"
       day: "monday"

@@ -1,17 +1,16 @@
-namespace Domain.UnitTests.Entities;
+namespace MCPHub.Domain.Entities;
 
 /// <summary>
 /// Unit tests for Package entity.
 /// This demonstrates the mirror structure pattern - tests are organized 
 /// in the same folder structure as the main project.
 /// </summary>
-[UnitTest]
-public class PackageTests : TestBase {
+public class PackageTests {
     [Fact]
     public void Package_Should_Be_Created_With_Valid_Properties() {
         // Arrange
-        var packageName = TestData.RandomString(10);
-        var description = TestData.RandomString(50);
+        var packageName = "TestPackage";
+        var description = "Test package description";
 
         // Act
         // Note: Actual Package entity implementation would be tested here
@@ -31,22 +30,15 @@ public class PackageTests : TestBase {
         // Note: Actual Package entity validation would be tested here
         emptyName.Should().BeEmpty();
     }
-}
 
-/// <summary>
-/// Integration tests for Package entity with database operations.
-/// </summary>
-[IntegrationTest]
-[DatabaseTest]
-public class PackageIntegrationTests : DatabaseTestBase {
     [Fact]
-    public async Task Package_Should_Be_Persisted_To_Database() {
+    public void Package_Should_Handle_Async_Operations() {
         // Arrange
-        var packageName = TestData.RandomString(10);
+        var packageName = "AsyncPackage";
 
         // Act
-        // Note: Actual database operations would be tested here
-        await Task.Delay(1); // Simulate async database operation
+        // Note: Actual async operations would be tested here
+        // This is a synchronous test for basic validation
 
         // Assert
         packageName.Should().NotBeNullOrEmpty();

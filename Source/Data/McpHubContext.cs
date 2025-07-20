@@ -1,4 +1,6 @@
-﻿namespace Data;
+﻿using MCPHub.Domain.Entities;
+
+namespace MCPHub.Data;
 
 public class McpHubContext(DbContextOptions<McpHubContext> options) : DbContext(options) {
     public DbSet<Publisher> Publishers => Set<Publisher>();

@@ -1,4 +1,8 @@
-namespace Data.Configurations;
+using System.Text.Json;
+using MCPHub.Domain.Entities;
+using MCPHub.Domain.ValueObjects;
+
+namespace MCPHub.Data.Configurations;
 
 public class PackageVersionConfiguration : IEntityTypeConfiguration<PackageVersion> {
     public void Configure(EntityTypeBuilder<PackageVersion> builder) {
@@ -6,21 +10,21 @@ public class PackageVersionConfiguration : IEntityTypeConfiguration<PackageVersi
 
         builder.Property(pv => pv.Version)
             .IsRequired()
-            .HasMaxLength(50);
+            .HasMaxLength(32);
 
         builder.Property(pv => pv.ReleaseNotes)
-            .HasMaxLength(5000);
+            .HasMaxLength(4096);
 
         builder.Property(pv => pv.DownloadUrl)
             .IsRequired()
-            .HasMaxLength(1000);
+            .HasMaxLength(256);
+
+        builder.Property(pv => pv.ChecksumSha256)
+            .IsRequired()
+            .HasMaxLength(4096);
 
         builder.Property(pv => pv.FileSize)
             .IsRequired();
-
-        builder.Property(pv => pv.FileHash)
-            .IsRequired()
-            .HasMaxLength(128);
 
         builder.Property(pv => pv.IsPrerelease)
             .IsRequired()
@@ -28,16 +32,6 @@ public class PackageVersionConfiguration : IEntityTypeConfiguration<PackageVersi
 
         builder.Property(pv => pv.CreatedAt)
             .IsRequired();
-
-        builder.Property(pv => pv.Dependencies)
-            .HasConversion(
-                v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
-                v => JsonSerializer.Deserialize<List<PackageDependency>>(v, JsonSerializerOptions.Default) ?? new List<PackageDependency>(),
-                new ValueComparer<List<PackageDependency>>(
-                    (c1, c2) => c1!.SequenceEqual(c2!),
-                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                    c => c.ToList()))
-            .HasColumnType("jsonb");
 
         // Indexes
         builder.HasIndex(pv => pv.PackageId);
@@ -54,5 +48,29 @@ public class PackageVersionConfiguration : IEntityTypeConfiguration<PackageVersi
             .WithMany(p => p.Versions)
             .HasForeignKey(pv => pv.PackageId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure ScanResult as owned entity
+        builder.OwnsOne(pv => pv.ScanResult, scan => {
+            scan.Property(s => s.Status)
+                .IsRequired()
+                .HasConversion<string>();
+            scan.Property(s => s.VulnerabilityCount)
+                .IsRequired();
+            scan.Property(s => s.HighestSeverity)
+                .IsRequired()
+                .HasConversion<string>();
+            scan.Property(s => s.ScannedAt)
+                .IsRequired();
+            scan.Property(s => s.ScannerVersion)
+                .IsRequired()
+                .HasMaxLength(32);
+            scan.Property(s => s.ScanLog)
+                .HasMaxLength(4096);
+            scan.Property(s => s.Vulnerabilities)
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
+                    v => JsonSerializer.Deserialize<List<SecurityVulnerability>>(v, JsonSerializerOptions.Default) ?? new List<SecurityVulnerability>())
+                .HasColumnType("jsonb");
+        });
     }
 }

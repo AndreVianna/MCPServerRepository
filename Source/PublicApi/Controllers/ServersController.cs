@@ -1,11 +1,8 @@
-using Common.Messaging;
+using MCPHub.Common.Messaging;
+using MCPHub.Domain.Commands;
+using MCPHub.Domain.Events;
 
-using Domain.Commands;
-using Domain.Events;
-
-using Microsoft.AspNetCore.Mvc;
-
-namespace PublicApi.Controllers;
+namespace MCPHub.PublicApi.Controllers;
 
 /// <summary>
 /// Controller for server management operations
@@ -52,7 +49,7 @@ public class ServersController(IMessagePublisher messagePublisher, ILogger<Serve
                     correlationId,
                     initiatedBy);
 
-                await _messagePublisher.PublishAsync(scanCommand, "commands", "security.scan", cancellationToken);
+                await _messagePublisher.PublishAsync(scanCommand, "security.scan", cancellationToken);
             }
 
             var response = new RegisterServerResponse {
@@ -92,7 +89,7 @@ public class ServersController(IMessagePublisher messagePublisher, ILogger<Serve
                 correlationId,
                 initiatedBy);
 
-            await _messagePublisher.PublishAsync(scanCommand, "commands", "security.scan", cancellationToken);
+            await _messagePublisher.PublishAsync(scanCommand, "security.scan", cancellationToken);
 
             var response = new ScanServerResponse {
                 ServerId = serverId,
@@ -132,7 +129,7 @@ public class ServersController(IMessagePublisher messagePublisher, ILogger<Serve
                 correlationId,
                 initiatedBy);
 
-            await _messagePublisher.PublishAsync(indexCommand, "commands", "search.index", cancellationToken);
+            await _messagePublisher.PublishAsync(indexCommand, "search.index", cancellationToken);
 
             var response = new IndexServerResponse {
                 ServerId = serverId,

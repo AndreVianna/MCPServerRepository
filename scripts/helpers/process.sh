@@ -74,8 +74,8 @@ handle_exit() {
     # Run exit hooks
     run_exit_hooks
     
-    # Don't change the exit code
-    exit_with "$exit_code"
+    # Don't change the exit code and don't show additional error messages
+    exit "$exit_code"
 }
 
 # Setup signal handlers

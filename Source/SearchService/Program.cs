@@ -1,8 +1,4 @@
-using Common.Messaging.DependencyInjection;
-
-using Domain.Commands;
-
-using SearchService.Consumers;
+using MCPHub.SearchService.Consumers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,11 +7,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add RabbitMQ messaging
-builder.Services.AddRabbitMQMessaging(builder.Configuration);
-
-// Add message consumers
-builder.Services.AddMessageConsumer<IndexServerCommandConsumer, IndexServerCommand>();
+// Note: Messaging implementations removed - only interfaces available
+// Register consumer services
+builder.Services.AddScoped<IndexServerCommandConsumer>();
 
 // Add logging
 builder.Services.AddLogging();

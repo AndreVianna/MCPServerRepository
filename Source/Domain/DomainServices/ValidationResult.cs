@@ -1,4 +1,4 @@
-namespace Domain.DomainServices;
+namespace MCPHub.Domain.DomainServices;
 
 public sealed record ValidationResult {
     public bool IsValid { get; init; }
@@ -11,4 +11,6 @@ public sealed record ValidationResult {
 
     public static ValidationResult Success() => new(true);
     public static ValidationResult Failure(string errorMessage) => new(false, errorMessage);
+
+    public static implicit operator bool(ValidationResult result) => result.IsValid;
 }

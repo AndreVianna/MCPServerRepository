@@ -1,10 +1,6 @@
-using AwesomeAssertions;
+using MCPHub.Common.Configuration.Validators;
 
-using Common.Configuration;
-
-using Microsoft.Extensions.Options;
-
-namespace Common.UnitTests.Configuration;
+namespace MCPHub.Common.Configuration;
 
 public class ObservabilityOptionsValidatorTests {
     private readonly ObservabilityOptionsValidator _validator;
@@ -19,28 +15,7 @@ public class ObservabilityOptionsValidatorTests {
         var options = new ObservabilityOptions {
             ServiceName = "MCPHub",
             ServiceVersion = "1.0.0",
-            Environment = "Development",
-            OpenTelemetry = new OpenTelemetryOptions {
-                EnableTracing = true,
-                EnableMetrics = true,
-                EnableLogging = true,
-                OtlpEndpoint = "http://localhost:4317",
-                Sources = ["MCPHub.*"],
-                EnableConsoleExporter = true,
-                EnableOtlpExporter = true
-            },
-            Serilog = new SerilogOptions {
-                MinimumLevel = "Information",
-                EnableConsole = true,
-                EnableFile = true,
-                LogDirectory = "logs",
-                LogTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] {Message:lj}{NewLine}{Exception}",
-                MinimumLevelOverrides = new Dictionary<string, string>
-                {
-                    { "Microsoft", "Warning" },
-                    { "System", "Warning" }
-                }
-            }
+            Environment = "Development"
         };
 
         // Act
@@ -56,17 +31,7 @@ public class ObservabilityOptionsValidatorTests {
         var options = new ObservabilityOptions {
             ServiceName = "",
             ServiceVersion = "1.0.0",
-            Environment = "Development",
-            OpenTelemetry = new OpenTelemetryOptions {
-                EnableOtlpExporter = false,
-                Sources = ["MCPHub.*"]
-            },
-            Serilog = new SerilogOptions {
-                MinimumLevel = "Information",
-                EnableFile = false,
-                LogTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] {Message:lj}{NewLine}{Exception}",
-                MinimumLevelOverrides = []
-            }
+            Environment = "Development"
         };
 
         // Act
@@ -74,89 +39,8 @@ public class ObservabilityOptionsValidatorTests {
 
         // Assert
         result.Failed.Should().BeTrue();
-        result.FailureMessage.Should().Contain("Observability ServiceName is required");
+        result.FailureMessage.Should().Contain("Service name is required");
     }
 
-    [Fact]
-    public void Validate_WithOtlpExporterEnabledButNoEndpoint_ReturnsFailure() {
-        // Arrange
-        var options = new ObservabilityOptions {
-            ServiceName = "MCPHub",
-            ServiceVersion = "1.0.0",
-            Environment = "Development",
-            OpenTelemetry = new OpenTelemetryOptions {
-                EnableOtlpExporter = true,
-                OtlpEndpoint = "",
-                Sources = ["MCPHub.*"]
-            },
-            Serilog = new SerilogOptions {
-                MinimumLevel = "Information",
-                EnableFile = false,
-                LogTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] {Message:lj}{NewLine}{Exception}",
-                MinimumLevelOverrides = []
-            }
-        };
 
-        // Act
-        var result = _validator.Validate(null, options);
-
-        // Assert
-        result.Failed.Should().BeTrue();
-        result.FailureMessage.Should().Contain("OpenTelemetry OtlpEndpoint is required when OtlpExporter is enabled");
-    }
-
-    [Fact]
-    public void Validate_WithEmptyOpenTelemetrySources_ReturnsFailure() {
-        // Arrange
-        var options = new ObservabilityOptions {
-            ServiceName = "MCPHub",
-            ServiceVersion = "1.0.0",
-            Environment = "Development",
-            OpenTelemetry = new OpenTelemetryOptions {
-                EnableOtlpExporter = false,
-                Sources = []
-            },
-            Serilog = new SerilogOptions {
-                MinimumLevel = "Information",
-                EnableFile = false,
-                LogTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] {Message:lj}{NewLine}{Exception}",
-                MinimumLevelOverrides = []
-            }
-        };
-
-        // Act
-        var result = _validator.Validate(null, options);
-
-        // Assert
-        result.Failed.Should().BeTrue();
-        result.FailureMessage.Should().Contain("OpenTelemetry Sources must contain at least one source");
-    }
-
-    [Fact]
-    public void Validate_WithFileLoggingEnabledButNoDirectory_ReturnsFailure() {
-        // Arrange
-        var options = new ObservabilityOptions {
-            ServiceName = "MCPHub",
-            ServiceVersion = "1.0.0",
-            Environment = "Development",
-            OpenTelemetry = new OpenTelemetryOptions {
-                EnableOtlpExporter = false,
-                Sources = ["MCPHub.*"]
-            },
-            Serilog = new SerilogOptions {
-                MinimumLevel = "Information",
-                EnableFile = true,
-                LogDirectory = "",
-                LogTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] {Message:lj}{NewLine}{Exception}",
-                MinimumLevelOverrides = []
-            }
-        };
-
-        // Act
-        var result = _validator.Validate(null, options);
-
-        // Assert
-        result.Failed.Should().BeTrue();
-        result.FailureMessage.Should().Contain("Serilog LogDirectory is required when file logging is enabled");
-    }
 }

@@ -1,4 +1,6 @@
-namespace Domain.Repositories;
+using MCPHub.Domain.Entities;
+
+namespace MCPHub.Domain.Repositories;
 
 public interface IServerRepository : IRepository<Server> {
     Task<Server?> GetByNameAsync(string name, CancellationToken cancellationToken = default);

@@ -1,6 +1,8 @@
-using Common.Services;
+using MCPHub.Common.Services;
+using MCPHub.Domain.Entities;
+using MCPHub.Domain.Repositories;
 
-namespace Data.Repositories;
+namespace MCPHub.Data.Repositories;
 
 public class CachedPackageRepository(IPackageRepository packageRepository, ICacheService cacheService) : CachedRepository<Package>(packageRepository, cacheService, "package"), IPackageRepository {
     private readonly IPackageRepository _packageRepository = packageRepository;

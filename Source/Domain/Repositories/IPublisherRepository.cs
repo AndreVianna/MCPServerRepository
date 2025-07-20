@@ -1,6 +1,6 @@
-using Domain.Entities;
+using MCPHub.Domain.Entities;
 
-namespace Domain.Repositories;
+namespace MCPHub.Domain.Repositories;
 
 public interface IPublisherRepository : IRepository<Publisher> {
     Task<Publisher?> GetByNameAsync(string name, CancellationToken cancellationToken = default);

@@ -5,7 +5,3 @@ global using System.ComponentModel.DataAnnotations.Schema;
 global using System.Linq;
 global using System.Text.Json;
 global using System.Threading.Tasks;
-
-global using Domain.Entities;
-global using Domain.Repositories;
-global using Domain.ValueObjects;

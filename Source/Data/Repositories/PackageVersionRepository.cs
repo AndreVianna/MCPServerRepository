@@ -1,4 +1,7 @@
-namespace Data.Repositories;
+using MCPHub.Domain.Entities;
+using MCPHub.Domain.Repositories;
+
+namespace MCPHub.Data.Repositories;
 
 public class PackageVersionRepository(McpHubContext context) : Repository<PackageVersion>(context), IPackageVersionRepository {
     public async Task<PackageVersion?> GetByPackageAndVersionAsync(Guid packageId, string version, CancellationToken cancellationToken = default) => await _dbSet

@@ -17,7 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Common\MCPHub.Common.csproj" />
     <ProjectReference Include="..\PublicApi\MCPHub.PublicApi.csproj" />
     <ProjectReference Include="..\WebApp\MCPHub.WebApp.csproj" />
     <ProjectReference Include="..\SecurityService\MCPHub.SecurityService.csproj" />

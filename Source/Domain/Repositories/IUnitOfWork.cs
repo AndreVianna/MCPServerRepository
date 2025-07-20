@@ -1,4 +1,4 @@
-namespace Domain.Repositories;
+namespace MCPHub.Domain.Repositories;
 
 public interface IUnitOfWork : IDisposable {
     IPublisherRepository Publishers { get; }

@@ -1,48 +1,50 @@
-namespace Domain.Entities;
+using System.Diagnostics.CodeAnalysis;
+
+using MCPHub.Domain.Common;
+
+namespace MCPHub.Domain.Entities;
 
 /// <summary>
 /// Represents a package publisher in the MCP registry
 /// </summary>
-public class Publisher {
-    public Guid Id { get; set; }
+public class Publisher : BaseEntity {
     public string Name { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string? OrganizationName { get; set; }
     public string? Website { get; set; }
-    public bool Verified { get; set; }
+    public bool Verified { get; set; } = false;
     public PublisherType Type { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
     public List<Server> Servers { get; set; } = [];
     public List<Package> Packages { get; set; } = [];
 
     private Publisher() { } // For EF Core
 
+    [SetsRequiredMembers]
     public Publisher(
         string name,
         string email,
         PublisherType type,
         string? organizationName = null,
         string? website = null) {
-        Id = Guid.NewGuid();
-        Name = name ?? throw new ArgumentNullException(nameof(name));
-        Email = email ?? throw new ArgumentNullException(nameof(email));
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        ArgumentException.ThrowIfNullOrWhiteSpace(email);
+
+        Name = name;
+        Email = email;
         Type = type;
         OrganizationName = organizationName;
         Website = website;
         Verified = false;
-        CreatedAt = DateTime.UtcNow;
-        UpdatedAt = DateTime.UtcNow;
     }
 
     public void Verify() {
         Verified = true;
-        UpdatedAt = DateTime.UtcNow;
+        SetUpdatedBy(UpdatedBy ?? "system");
     }
 
     public void UpdateDetails(string? organizationName, string? website) {
         OrganizationName = organizationName;
         Website = website;
-        UpdatedAt = DateTime.UtcNow;
+        SetUpdatedBy(UpdatedBy ?? "system");
     }
 }

@@ -1,25 +1,21 @@
-using Common.Messaging.Configuration;
-using Common.Messaging.RabbitMQ;
+using MCPHub.Common.Messaging;
+using MCPHub.Domain.Commands;
 
-using Domain.Commands;
-using Domain.Events;
-
-using Microsoft.Extensions.Options;
-
-namespace SearchService.Consumers;
+namespace MCPHub.SearchService.Consumers;
 
 /// <summary>
 /// Consumer for IndexServerCommand messages
 /// </summary>
 public class IndexServerCommandConsumer(
     ILogger<IndexServerCommandConsumer> logger,
-    IOptions<RabbitMQConfiguration> configuration,
-    IMessagePublisher messagePublisher) : BaseMessageConsumer<IndexServerCommand>(logger, configuration), BaseMessageConsumer<IndexServerCommand> {
+    IMessagePublisher messagePublisher) {
     private readonly IMessagePublisher _messagePublisher = messagePublisher;
     private readonly ILogger<IndexServerCommandConsumer> _logger = logger;
 
-    /// <inheritdoc />
-    public override async Task ConsumeAsync(IndexServerCommand message, CancellationToken cancellationToken = default) {
+    /// <summary>
+    /// Processes an IndexServerCommand message
+    /// </summary>
+    public async Task ConsumeAsync(IndexServerCommand message, CancellationToken cancellationToken = default) {
         _logger.LogInformation("Processing search index for server {ServerId}, version {ServerVersionId}, index type {IndexType}",
             message.ServerId, message.ServerVersionId, message.IndexType);
 

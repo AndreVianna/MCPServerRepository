@@ -1,4 +1,6 @@
-namespace Domain.Repositories;
+using MCPHub.Domain.Entities;
+
+namespace MCPHub.Domain.Repositories;
 
 public interface IServerVersionRepository : IRepository<ServerVersion> {
     Task<List<ServerVersion>> GetByServerIdAsync(Guid serverId, CancellationToken cancellationToken = default);

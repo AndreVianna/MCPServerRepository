@@ -40,6 +40,11 @@ public class SecurityScan : BaseEntity {
         ScanStartedAt = DateTime.UtcNow;
         Status = ScanStatus.InProgress;
         CriticalIssues = 0;
+        AuditTrail.Add(new AuditEntry {
+            Action = $"Security Scan Started ({scanType})",
+            UserId = Guid.Empty, // System action
+            DateTime = DateTimeOffset.UtcNow
+        });
     }
 
     public void Complete(SecurityScanResult result) {
@@ -49,7 +54,11 @@ public class SecurityScan : BaseEntity {
         Status = ScanStatus.Completed;
         ScanCompletedAt = DateTime.UtcNow;
         ErrorMessage = null;
-        SetUpdatedBy(UpdatedBy ?? "system");
+        AuditTrail.Add(new AuditEntry {
+            Action = "Security Scan Completed",
+            UserId = Guid.Empty, // System action
+            DateTime = DateTimeOffset.UtcNow
+        });
     }
 
     public void Fail(string errorMessage) {
@@ -58,16 +67,13 @@ public class SecurityScan : BaseEntity {
         ErrorMessage = errorMessage;
         Status = ScanStatus.Failed;
         ScanCompletedAt = DateTime.UtcNow;
-        SetUpdatedBy(UpdatedBy ?? "system");
+        AuditTrail.Add(new AuditEntry {
+            Action = "Security Scan Failed",
+            UserId = Guid.Empty, // System action
+            DateTime = DateTimeOffset.UtcNow
+        });
     }
 
     public void AddMetadata(string key, object value) => Metadata[key] = value;
 }
 
-public enum ScanStatus {
-    Pending,
-    InProgress,
-    Completed,
-    Failed,
-    Cancelled
-}

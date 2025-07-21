@@ -1,16 +1,24 @@
-﻿using MCPHub.Domain.Entities;
+using MCPHub.Domain.Entities;
 using MCPHub.Domain.Repositories;
 
 namespace MCPHub.Data.Repositories;
 
+/// <summary>
+/// Publisher repository implementation following contracts-first approach
+/// </summary>
 public class PublisherRepository(McpHubContext context) : Repository<Publisher>(context), IPublisherRepository {
-    public async Task<Publisher?> GetByNameAsync(string name, CancellationToken cancellationToken = default) => await _dbSet.FirstOrDefaultAsync(p => p.Name == name, cancellationToken);
+    public Task<Publisher?> GetByNameAsync(string name, CancellationToken cancellationToken = default)
+        => throw new NotImplementedException("Publisher name lookup will be implemented when first consumer requires it");
 
-    public async Task<List<Publisher>> GetVerifiedPublishersAsync(CancellationToken cancellationToken = default) => await _dbSet.Where(p => p.Verified).ToListAsync(cancellationToken);
+    public Task<List<Publisher>> GetVerifiedPublishersAsync(CancellationToken cancellationToken = default)
+        => throw new NotImplementedException("Verified publishers query will be implemented when verification service requires it");
 
-    public async Task<List<Publisher>> GetPublishersByTypeAsync(PublisherType type, CancellationToken cancellationToken = default) => await _dbSet.Where(p => p.Type == type).ToListAsync(cancellationToken);
+    public Task<List<Publisher>> GetPublishersByTypeAsync(PublisherType type, CancellationToken cancellationToken = default)
+        => throw new NotImplementedException("Publisher type filtering will be implemented when first consumer requires it");
 
-    public async Task<bool> IsNameAvailableAsync(string name, CancellationToken cancellationToken = default) => !await _dbSet.AnyAsync(p => p.Name == name, cancellationToken);
+    public Task<bool> IsNameAvailableAsync(string name, CancellationToken cancellationToken = default)
+        => throw new NotImplementedException("Publisher name availability check will be implemented when registration service requires it");
 
-    public async Task<Publisher?> GetByEmailAsync(string email, CancellationToken cancellationToken = default) => await _dbSet.FirstOrDefaultAsync(p => p.Email == email, cancellationToken);
+    public Task<Publisher?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+        => throw new NotImplementedException("Publisher email lookup will be implemented when authentication service requires it");
 }

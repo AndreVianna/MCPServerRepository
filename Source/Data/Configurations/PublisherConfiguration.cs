@@ -1,4 +1,5 @@
 ﻿using MCPHub.Domain.Entities;
+using MCPHub.Domain.Common;
 
 namespace MCPHub.Data.Configurations;
 
@@ -14,11 +15,6 @@ public class PublisherConfiguration : IEntityTypeConfiguration<Publisher> {
             .IsRequired()
             .HasConversion<string>();
 
-        builder.Property(p => p.CreatedAt)
-            .IsRequired();
-
-        builder.Property(p => p.UpdatedAt)
-            .IsRequired();
 
         // Indexes
         builder.HasIndex(p => p.Name)
@@ -26,9 +22,21 @@ public class PublisherConfiguration : IEntityTypeConfiguration<Publisher> {
 
         builder.HasIndex(p => p.Type);
 
-        builder.HasIndex(p => p.CreatedAt);
+
+        // Configure AuditTrail as JSON column
+        builder.OwnsMany(p => p.AuditTrail, auditBuilder => {
+            auditBuilder.ToJson();
+            auditBuilder.Property(a => a.Action).IsRequired();
+            auditBuilder.Property(a => a.UserId).IsRequired();
+            auditBuilder.Property(a => a.DateTime).IsRequired();
+        });
 
         // Relationships
+        builder.HasOne(p => p.User)
+            .WithMany(u => u.Publishers)
+            .HasForeignKey(p => p.UserId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         builder.HasMany(p => p.Servers)
             .WithOne(s => s.Publisher)
             .HasForeignKey(s => s.PublisherId)

@@ -1,4 +1,7 @@
-﻿using MCPHub.Domain.Entities;
+﻿using System.Text.Json;
+using MCPHub.Domain.Entities;
+using MCPHub.Domain.ValueObjects;
+using MCPHub.Domain.Common;
 
 namespace MCPHub.Data.Configurations;
 
@@ -28,11 +31,12 @@ public class ServerVersionConfiguration : IEntityTypeConfiguration<ServerVersion
             .IsRequired()
             .HasConversion<string>();
 
-        builder.Property(v => v.CreatedAt)
-            .IsRequired();
 
-        builder.Property(v => v.UpdatedAt)
-            .IsRequired();
+        builder.Property(v => v.SecurityScan)
+            .HasConversion(
+                v => v == null ? null : JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
+                v => v == null ? null : JsonSerializer.Deserialize<SecurityScanResult>(v, JsonSerializerOptions.Default)
+            );
 
         // Indexes
         builder.HasIndex(v => new { v.ServerId, v.Version })
@@ -42,7 +46,14 @@ public class ServerVersionConfiguration : IEntityTypeConfiguration<ServerVersion
 
         builder.HasIndex(v => v.Status);
 
-        builder.HasIndex(v => v.CreatedAt);
+
+        // Configure AuditTrail as JSON column
+        builder.OwnsMany(v => v.AuditTrail, auditBuilder => {
+            auditBuilder.ToJson();
+            auditBuilder.Property(a => a.Action).IsRequired();
+            auditBuilder.Property(a => a.UserId).IsRequired();
+            auditBuilder.Property(a => a.DateTime).IsRequired();
+        });
 
         // Relationships
         builder.HasOne(v => v.Server)

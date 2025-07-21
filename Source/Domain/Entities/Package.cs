@@ -46,20 +46,37 @@ public class Package : BaseEntity {
         Tags = tags ?? [];
         Status = PackageStatus.Pending;
         TrustTier = TrustTier.Unverified;
+        AuditTrail.Add(new AuditEntry {
+            Action = "Created",
+            UserId = Guid.Empty, // System action
+            DateTime = DateTimeOffset.UtcNow
+        });
     }
 
     public void UpdateStatus(PackageStatus status) {
         Status = status;
-        SetUpdatedBy(UpdatedBy ?? "system");
+        AuditTrail.Add(new AuditEntry {
+            Action = $"Status Updated to {status}",
+            UserId = Guid.Empty, // System action
+            DateTime = DateTimeOffset.UtcNow
+        });
     }
 
     public void UpdateSecurityScan(SecurityScanResult scanResult) {
         ScanResult = scanResult;
-        SetUpdatedBy(UpdatedBy ?? "system");
+        AuditTrail.Add(new AuditEntry {
+            Action = "Security Scan Updated",
+            UserId = Guid.Empty, // System action
+            DateTime = DateTimeOffset.UtcNow
+        });
     }
 
     public void UpdateTrustTier(TrustTier trustTier) {
         TrustTier = trustTier;
-        SetUpdatedBy(UpdatedBy ?? "system");
+        AuditTrail.Add(new AuditEntry {
+            Action = $"Trust Tier Updated to {trustTier}",
+            UserId = Guid.Empty, // System action
+            DateTime = DateTimeOffset.UtcNow
+        });
     }
 }

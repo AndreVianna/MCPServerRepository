@@ -21,7 +21,6 @@
     <ProjectReference Include="..\WebApp\MCPHub.WebApp.csproj" />
     <ProjectReference Include="..\SecurityService\MCPHub.SecurityService.csproj" />
     <ProjectReference Include="..\SearchService\MCPHub.SearchService.csproj" />
-    <ProjectReference Include="..\Data.MigrationService\MCPHub.Data.MigrationService.csproj" />
   </ItemGroup>
 
 </Project>

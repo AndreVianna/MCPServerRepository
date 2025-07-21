@@ -10,4 +10,8 @@
   <PropertyGroup>
     <InternalsVisibleTo>$(AssemblyName).UnitTests</InternalsVisibleTo>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.7" />
+  </ItemGroup>
 </Project>

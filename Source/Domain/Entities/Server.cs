@@ -40,16 +40,29 @@ public class Server : BaseEntity {
         Tags = tags ?? [];
         Status = ServerStatus.Pending;
         TrustTier = TrustTier.Unverified;
+        AuditTrail.Add(new AuditEntry {
+            Action = "Created",
+            UserId = Guid.Empty, // System action
+            DateTime = DateTimeOffset.UtcNow
+        });
     }
 
     public void UpdateStatus(ServerStatus status) {
         Status = status;
-        SetUpdatedBy(UpdatedBy ?? "system");
+        AuditTrail.Add(new AuditEntry {
+            Action = $"Status Updated to {status}",
+            UserId = Guid.Empty, // System action
+            DateTime = DateTimeOffset.UtcNow
+        });
     }
 
     public void UpdateTrustTier(TrustTier trustTier) {
         TrustTier = trustTier;
-        SetUpdatedBy(UpdatedBy ?? "system");
+        AuditTrail.Add(new AuditEntry {
+            Action = $"Trust Tier Updated to {trustTier}",
+            UserId = Guid.Empty, // System action
+            DateTime = DateTimeOffset.UtcNow
+        });
     }
 
     public void UpdateDetails(string description, string? repository, string? license, List<string>? tags) {
@@ -59,6 +72,10 @@ public class Server : BaseEntity {
         Repository = repository;
         License = license;
         Tags = tags ?? [];
-        SetUpdatedBy(UpdatedBy ?? "system");
+        AuditTrail.Add(new AuditEntry {
+            Action = "Details Updated",
+            UserId = Guid.Empty, // System action
+            DateTime = DateTimeOffset.UtcNow
+        });
     }
 }

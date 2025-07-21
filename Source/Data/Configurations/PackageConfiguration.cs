@@ -1,6 +1,7 @@
 using System.Text.Json;
 using MCPHub.Domain.Entities;
 using MCPHub.Domain.ValueObjects;
+using MCPHub.Domain.Common;
 
 namespace MCPHub.Data.Configurations;
 
@@ -44,11 +45,6 @@ public class PackageConfiguration : IEntityTypeConfiguration<Package> {
                     c => c.ToList()))
             .HasColumnType("jsonb");
 
-        builder.Property(p => p.CreatedAt)
-            .IsRequired();
-
-        builder.Property(p => p.UpdatedAt)
-            .IsRequired();
 
         // Indexes
         builder.HasIndex(p => p.Name)
@@ -60,12 +56,19 @@ public class PackageConfiguration : IEntityTypeConfiguration<Package> {
 
         builder.HasIndex(p => p.TrustTier);
 
-        builder.HasIndex(p => p.CreatedAt);
 
         // Full-text search index for PostgreSQL
         builder.HasIndex(p => new { p.Name, p.Description })
             .HasMethod("gin")
             .HasDatabaseName("IX_Packages_FullText");
+
+        // Configure AuditTrail as JSON column
+        builder.OwnsMany(p => p.AuditTrail, auditBuilder => {
+            auditBuilder.ToJson();
+            auditBuilder.Property(a => a.Action).IsRequired();
+            auditBuilder.Property(a => a.UserId).IsRequired();
+            auditBuilder.Property(a => a.DateTime).IsRequired();
+        });
 
         // Relationships
         builder.HasOne(p => p.Publisher)

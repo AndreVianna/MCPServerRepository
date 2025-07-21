@@ -44,7 +44,19 @@ public class PackageVersion : BaseEntity {
         FileSize = fileSize;
         ReleaseNotes = releaseNotes;
         IsPrerelease = isPrerelease;
+        AuditTrail.Add(new AuditEntry {
+            Action = "Created",
+            UserId = Guid.Empty, // System action
+            DateTime = DateTimeOffset.UtcNow
+        });
     }
 
-    public void UpdateSecurityScan(SecurityScanResult scanResult) => ScanResult = scanResult;
+    public void UpdateSecurityScan(SecurityScanResult scanResult) {
+        ScanResult = scanResult;
+        AuditTrail.Add(new AuditEntry {
+            Action = "Security Scan Updated",
+            UserId = Guid.Empty, // System action
+            DateTime = DateTimeOffset.UtcNow
+        });
+    }
 }

@@ -39,6 +39,17 @@ This file provides essential guidance to Claude Code (claude.ai/code) when worki
 - All UI design must use **Figma MCP**
 - All UI testing must use **Playwright MCP**
 
+## Main commands for project.sh
+
+- `./scripts/project.sh init` - Initializes the development container
+- `./scripts/project.sh doctor` - Validates the development environment
+- `./scripts/project.sh lint` - Formats code using dotnet format
+- `./scripts/project.sh build` - Builds the entire solution or specified projects
+- `./scripts/project.sh build --project <project>` - Builds a specific project
+- `./scripts/project.sh build --project <project>.UnitTests` - Builds a specific project's unit tests
+- `./scripts/project.sh test` - Runs all unit tests with proper reporting
+- `./scripts/project.sh test --project <project>` - Runs unit tests for a specific project
+
 ## Core Architecture Principles
 
 **EXTREMELY IMPORTANT**: Always maintain full abstraction layers while implementing only one provider:
@@ -56,6 +67,65 @@ This ensures future extensibility while maintaining clean architecture principle
 - **.NET 9** with C# 13 preview features as unified platform
 - **PostgreSQL** as primary database with Entity Framework Core  
 - **Clean Architecture** principles with comprehensive testing
+
+## Audit System Architecture
+
+**CRITICAL REQUIREMENT**: All domain entities use granular audit trail system:
+
+- **Entity IDs**: All entities use `Guid` type initialized with `Guid.CreateVersion7()` for better database indexing
+- **Audit Trail**: Replace old audit properties (`CreatedAt`, `UpdatedAt`, `UpdatedBy`) with `ICollection<IAuditEntry> AuditTrail`
+- **Granular Tracking**: Each entity operation adds specific audit entries with `Action`, `UserId`, and `DateTime`
+- **ApplicationUser Integration**: ApplicationUser includes audit trail to track user profile changes
+- **Entity Framework**: AuditTrail collections stored as JSON in database with proper EF configuration
+- **Repository Sorting**: Use AuditTrail queries instead of old audit properties for creation/update date sorting
+
+**Example Audit Entry:**
+```csharp
+AuditTrail.Add(new AuditEntry {
+    Action = "Created", // or "Updated", "Verified", etc.
+    UserId = currentUserId, // or Guid.Empty for system actions
+    DateTime = DateTimeOffset.UtcNow
+});
+```
+
+This system provides comprehensive change tracking while maintaining clean domain entity design.
+
+## Contracts First Development Principle
+
+**CRITICAL ARCHITECTURAL GUIDELINE**: Prioritize contracts and interfaces over implementations.
+
+**Core Principle**: "Do not code what is not needed. Contracts and interfaces are more important at this moment."
+
+### **Development Approach:**
+
+- **Interfaces First**: Define clear interfaces and contracts before any implementation
+- **YAGNI Enforcement**: You Aren't Gonna Need It - implement functionality only when actually required by consumers
+- **Buildable Skeletons**: Create service classes with NotImplementedException to maintain compilation
+- **Explicit Dependencies**: Make all dependencies clear through interface contracts
+- **Parallel Development**: Teams can work against interfaces while implementations are developed separately
+
+### **Implementation Guidelines:**
+
+1. **Define Interface**: Create clear method signatures with proper return types and parameters
+2. **Create Skeleton**: Implement interface with NotImplementedException placeholders  
+3. **Register Services**: Add to DI container to prevent build errors
+4. **Implement When Needed**: Add actual logic only when functionality is consumed
+5. **Test Contracts**: Focus on testing interface contracts, not implementation details
+
+**Benefits**: Prevents over-engineering, maintains clean architecture boundaries, enables parallel development, reduces unnecessary complexity, and follows Lean principles.
+
+**Example Pattern**:
+```csharp
+public interface IAuthenticationService {
+    Task<AuthenticationResult> LoginAsync(LoginRequest request);
+    Task<TokenResult> RefreshTokenAsync(string refreshToken);
+}
+
+public class AuthenticationService : IAuthenticationService {
+    public Task<AuthenticationResult> LoginAsync(LoginRequest request) 
+        => throw new NotImplementedException("Authentication logic will be implemented when first consumer requires it");
+}
+```
 
 ## Critical Development Rule: No Assumptions About Library APIs
 
@@ -100,3 +170,24 @@ This rule applies to ALL external libraries, frameworks, and APIs to prevent inc
 - Sub-sub-tasks (1.1.1., 1.1.2.) can be used for detailed breakdowns when needed
 
 This system ensures no work is lost between sessions and provides clear project progress tracking.
+
+### **Contracts First Task Creation Guidelines**
+
+**IMPORTANT**: All new service and feature tasks must follow the Contracts First approach:
+
+- **Phase 1 - Contracts**: Always separate "Define Interfaces" from "Implement Logic"
+- **Task Pattern**: Use format like "1.1 Define IServiceName interface" then "1.2 Implement ServiceName skeleton"
+- **Implementation Tasks**: Mark implementation tasks as "when needed" or "when first consumer requires"
+- **Skeleton Priority**: Interface and skeleton creation should be high priority, implementation should be lower priority
+- **Dependency Clarity**: Tasks should make interface dependencies explicit before implementation dependencies
+
+**Example Task Structure**:
+```
+1. Create AuthenticationService Infrastructure
+1.1. Define IAuthenticationService interface - Status: pending, Priority: high
+1.2. Create AuthenticationService skeleton with NotImplementedException - Status: pending, Priority: high
+1.3. Register services in DI container - Status: pending, Priority: high
+1.4. Implement login logic - Status: pending, Priority: low (when first consumer needs it)
+```
+
+This ensures all future development follows the contracts-first architectural principle.

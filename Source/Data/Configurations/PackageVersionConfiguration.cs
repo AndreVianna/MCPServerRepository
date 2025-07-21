@@ -1,6 +1,7 @@
 using System.Text.Json;
 using MCPHub.Domain.Entities;
 using MCPHub.Domain.ValueObjects;
+using MCPHub.Domain.Common;
 
 namespace MCPHub.Data.Configurations;
 
@@ -30,18 +31,23 @@ public class PackageVersionConfiguration : IEntityTypeConfiguration<PackageVersi
             .IsRequired()
             .HasDefaultValue(false);
 
-        builder.Property(pv => pv.CreatedAt)
-            .IsRequired();
 
         // Indexes
         builder.HasIndex(pv => pv.PackageId);
 
         builder.HasIndex(pv => pv.Version);
 
-        builder.HasIndex(pv => pv.CreatedAt);
 
         builder.HasIndex(pv => new { pv.PackageId, pv.Version })
             .IsUnique();
+
+        // Configure AuditTrail as JSON column
+        builder.OwnsMany(pv => pv.AuditTrail, auditBuilder => {
+            auditBuilder.ToJson();
+            auditBuilder.Property(a => a.Action).IsRequired();
+            auditBuilder.Property(a => a.UserId).IsRequired();
+            auditBuilder.Property(a => a.DateTime).IsRequired();
+        });
 
         // Relationships
         builder.HasOne(pv => pv.Package)

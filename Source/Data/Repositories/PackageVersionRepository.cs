@@ -3,36 +3,25 @@ using MCPHub.Domain.Repositories;
 
 namespace MCPHub.Data.Repositories;
 
+/// <summary>
+/// Package version repository implementation following contracts-first approach
+/// </summary>
 public class PackageVersionRepository(McpHubContext context) : Repository<PackageVersion>(context), IPackageVersionRepository {
-    public async Task<PackageVersion?> GetByPackageAndVersionAsync(Guid packageId, string version, CancellationToken cancellationToken = default) => await _dbSet
-            .Include(pv => pv.Package)
-            .ThenInclude(p => p.Publisher)
-            .FirstOrDefaultAsync(pv => pv.PackageId == packageId && pv.Version == version, cancellationToken);
+    public Task<PackageVersion?> GetByPackageAndVersionAsync(Guid packageId, string version, CancellationToken cancellationToken = default)
+        => throw new NotImplementedException("Package version lookup will be implemented when first consumer requires it");
 
-    public async Task<List<PackageVersion>> GetByPackageIdAsync(Guid packageId, CancellationToken cancellationToken = default) => await _dbSet
-            .Include(pv => pv.Package)
-            .Where(pv => pv.PackageId == packageId)
-            .OrderByDescending(pv => pv.CreatedAt)
-            .ToListAsync(cancellationToken);
+    public Task<List<PackageVersion>> GetByPackageIdAsync(Guid packageId, CancellationToken cancellationToken = default)
+        => throw new NotImplementedException("Package versions query will be implemented when package service requires it");
 
-    public async Task<PackageVersion?> GetLatestVersionAsync(Guid packageId, CancellationToken cancellationToken = default) => await _dbSet
-            .Include(pv => pv.Package)
-            .Where(pv => pv.PackageId == packageId && !pv.IsPrerelease)
-            .OrderByDescending(pv => pv.CreatedAt)
-            .FirstOrDefaultAsync(cancellationToken);
+    public Task<PackageVersion?> GetLatestVersionAsync(Guid packageId, CancellationToken cancellationToken = default)
+        => throw new NotImplementedException("Latest package version query will be implemented when package service requires it");
 
-    public async Task<List<PackageVersion>> GetPrereleasesAsync(Guid packageId, CancellationToken cancellationToken = default) => await _dbSet
-            .Include(pv => pv.Package)
-            .Where(pv => pv.PackageId == packageId && pv.IsPrerelease)
-            .OrderByDescending(pv => pv.CreatedAt)
-            .ToListAsync(cancellationToken);
+    public Task<List<PackageVersion>> GetPrereleasesAsync(Guid packageId, CancellationToken cancellationToken = default)
+        => throw new NotImplementedException("Prerelease versions query will be implemented when package service requires it");
 
-    public async Task<List<PackageVersion>> GetStableVersionsAsync(Guid packageId, CancellationToken cancellationToken = default) => await _dbSet
-            .Include(pv => pv.Package)
-            .Where(pv => pv.PackageId == packageId && !pv.IsPrerelease)
-            .OrderByDescending(pv => pv.CreatedAt)
-            .ToListAsync(cancellationToken);
+    public Task<List<PackageVersion>> GetStableVersionsAsync(Guid packageId, CancellationToken cancellationToken = default)
+        => throw new NotImplementedException("Stable versions query will be implemented when package service requires it");
 
-    public async Task<bool> VersionExistsAsync(Guid packageId, string version, CancellationToken cancellationToken = default) => await _dbSet
-            .AnyAsync(pv => pv.PackageId == packageId && pv.Version == version, cancellationToken);
+    public Task<bool> VersionExistsAsync(Guid packageId, string version, CancellationToken cancellationToken = default)
+        => throw new NotImplementedException("Version existence check will be implemented when package service requires it");
 }

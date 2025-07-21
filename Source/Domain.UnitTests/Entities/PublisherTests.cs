@@ -1,140 +1,199 @@
-namespace MCPHub.Domain.Entities;
+using MCPHub.Domain.Entities;
+using MCPHub.Domain.TestUtilities;
 
-/// <summary>
-/// Unit tests for Publisher entity.
-/// This demonstrates comprehensive testing of domain entities with proper AAA structure.
-/// </summary>
+namespace MCPHub.Domain.UnitTests.Entities;
+
+[Collection(DomainTestCategories.Entity)]
 public class PublisherTests {
     [Fact]
-    public void Publisher_Should_Be_Created_With_Valid_Properties() {
+    public void Publisher_Should_Be_Created_With_Required_Properties() {
         // Arrange
         var name = "Test Publisher";
         var email = "test@example.com";
-        var type = "Individual";
-        var organizationName = "Test Organization";
+        var type = PublisherType.Individual;
+
+        // Act
+        var publisher = new Publisher(name, email, type);
+
+        // Assert
+        publisher.Name.Should().Be(name);
+        publisher.Email.Should().Be(email);
+        publisher.Type.Should().Be(type);
+        publisher.OrganizationName.Should().BeNull();
+        publisher.Website.Should().BeNull();
+        publisher.User.Should().BeNull();
+        publisher.UserId.Should().BeNull();
+        publisher.Verified.Should().BeFalse();
+        publisher.Id.Should().NotBe(Guid.Empty);
+        // Verify AuditTrail contains creation entry
+        publisher.AuditTrail.Should().HaveCount(1);
+        var createdEntry = publisher.AuditTrail.First();
+        createdEntry.Action.Should().Be("Created");
+        createdEntry.UserId.Should().Be(Guid.Empty); // No user provided
+        createdEntry.DateTime.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(5));
+    }
+
+    [Fact]
+    public void Publisher_Should_Be_Created_With_Optional_Properties() {
+        // Arrange
+        var name = "Test Organization";
+        var email = "test@organization.com";
+        var type = PublisherType.Organization;
+        var organizationName = "Test Organization Inc.";
         var website = "https://test.com";
 
         // Act
-        // Note: Actual Publisher entity creation would be tested here
-        var result = $"Publisher: {name}, Email: {email}, Type: {type}, Organization: {organizationName}, Website: {website}";
+        var publisher = new Publisher(name, email, type, organizationName, website);
 
         // Assert
-        result.Should().Contain(name);
-        result.Should().Contain(email);
-        result.Should().Contain(type);
-        result.Should().Contain(organizationName);
-        result.Should().Contain(website);
-        name.Should().NotBeNullOrEmpty();
-        email.Should().NotBeNullOrEmpty();
-        type.Should().NotBeNullOrEmpty();
-        organizationName.Should().NotBeNullOrEmpty();
-        website.Should().NotBeNullOrEmpty();
+        publisher.Name.Should().Be(name);
+        publisher.Email.Should().Be(email);
+        publisher.Type.Should().Be(type);
+        publisher.OrganizationName.Should().Be(organizationName);
+        publisher.Website.Should().Be(website);
+        publisher.Verified.Should().BeFalse();
     }
 
     [Fact]
-    public void Publisher_Should_Be_Created_With_Required_Properties_Only() {
+    public void Publisher_Should_Be_Created_With_ApplicationUser() {
         // Arrange
+        var user = new ApplicationUser("testuser", "test@example.com");
         var name = "Test Publisher";
         var email = "test@example.com";
-        var type = "Individual";
+        var type = PublisherType.Individual;
 
         // Act
-        // Note: Actual Publisher entity creation would be tested here
-        var result = $"Publisher: {name}, Email: {email}, Type: {type}";
+        var publisher = new Publisher(name, email, type, user: user);
 
         // Assert
-        result.Should().Contain(name);
-        result.Should().Contain(email);
-        result.Should().Contain(type);
-        name.Should().NotBeNullOrEmpty();
-        email.Should().NotBeNullOrEmpty();
-        type.Should().NotBeNullOrEmpty();
+        publisher.Name.Should().Be(name);
+        publisher.Email.Should().Be(email);
+        publisher.Type.Should().Be(type);
+        publisher.User.Should().Be(user);
+        publisher.UserId.Should().Be(user.Id);
+        publisher.Verified.Should().BeFalse();
     }
 
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public void Publisher_Should_Validate_Name_Is_Required(string? invalidName) {
+    [InlineData(" ")]
+    public void Publisher_Should_Throw_ArgumentException_For_Invalid_Name(string? invalidName) {
         // Arrange
         var email = "test@example.com";
-        var type = "Individual";
+        var type = PublisherType.Individual;
 
         // Act & Assert
-        // Note: Actual Publisher entity validation would be tested here
-        if (string.IsNullOrEmpty(invalidName)) {
-            invalidName.Should().BeNullOrEmpty();
-        }
-        email.Should().NotBeNullOrEmpty();
-        type.Should().NotBeNullOrEmpty();
+        var action = () => new Publisher(invalidName!, email, type);
+        action.Should().Throw<ArgumentException>();
     }
 
     [Theory]
     [InlineData(null)]
     [InlineData("")]
-    public void Publisher_Should_Validate_Email_Is_Required(string? invalidEmail) {
+    [InlineData(" ")]
+    public void Publisher_Should_Throw_ArgumentException_For_Invalid_Email(string? invalidEmail) {
         // Arrange
         var name = "Test Publisher";
-        var type = "Individual";
+        var type = PublisherType.Individual;
 
         // Act & Assert
-        // Note: Actual Publisher entity validation would be tested here
-        if (string.IsNullOrEmpty(invalidEmail)) {
-            invalidEmail.Should().BeNullOrEmpty();
-        }
-        name.Should().NotBeNullOrEmpty();
-        type.Should().NotBeNullOrEmpty();
+        var action = () => new Publisher(name, invalidEmail!, type);
+        action.Should().Throw<ArgumentException>();
     }
 
     [Theory]
-    [InlineData("Individual")]
-    [InlineData("Organization")]
-    public void Publisher_Should_Handle_Different_Types(string type) {
+    [InlineData(PublisherType.Individual)]
+    [InlineData(PublisherType.Organization)]
+    [InlineData(PublisherType.Enterprise)]
+    public void Publisher_Should_Handle_All_Publisher_Types(PublisherType type) {
         // Arrange
         var name = "Test Publisher";
         var email = "test@example.com";
 
         // Act
-        // Note: Actual Publisher entity creation would be tested here
-        var result = $"Publisher: {name}, Email: {email}, Type: {type}";
+        var publisher = new Publisher(name, email, type);
 
         // Assert
-        result.Should().Contain(type);
-        type.Should().NotBeNullOrEmpty();
+        publisher.Type.Should().Be(type);
+        publisher.Name.Should().Be(name);
+        publisher.Email.Should().Be(email);
     }
 
     [Fact]
-    public void Publisher_Should_Handle_Verification_Status() {
+    public void Publisher_Should_Handle_Verification() {
         // Arrange
-        var publisherId = Guid.NewGuid();
-        var verified = false;
+        var publisher = new Publisher("Test Publisher", "test@example.com", PublisherType.Individual);
+        publisher.Verified.Should().BeFalse();
 
         // Act
-        // Note: Actual Publisher entity verification would be tested here
-        var result = $"Publisher: {publisherId}, Verified: {verified}";
+        publisher.Verify();
 
         // Assert
-        result.Should().Contain(publisherId.ToString());
-        result.Should().Contain(verified.ToString());
-        verified.Should().BeFalse();
+        publisher.Verified.Should().BeTrue();
+        // Verify AuditTrail contains verification entry
+        publisher.AuditTrail.Should().HaveCount(2); // Created + Verified
+        var verificationEntry = publisher.AuditTrail.Last();
+        verificationEntry.Action.Should().Be("Verified");
+        verificationEntry.UserId.Should().Be(Guid.Empty); // No user provided
+        verificationEntry.DateTime.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(5));
     }
 
     [Fact]
     public void Publisher_Should_Handle_Details_Update() {
         // Arrange
-        var publisherId = Guid.NewGuid();
-        var originalOrganizationName = "Original Organization";
-        var newOrganizationName = "New Organization";
-        var newWebsite = "https://new.com";
+        var publisher = new Publisher("Test Publisher", "test@example.com", PublisherType.Organization);
+        var newOrganizationName = "New Organization Name";
+        var newWebsite = "https://newwebsite.com";
 
         // Act
-        // Note: Actual Publisher entity details update would be tested here
-        var result = $"Publisher: {publisherId}, OrgName changed from {originalOrganizationName} to {newOrganizationName}, Website: {newWebsite}";
+        publisher.UpdateDetails(newOrganizationName, newWebsite);
 
         // Assert
-        result.Should().Contain(publisherId.ToString());
-        result.Should().Contain(originalOrganizationName);
-        result.Should().Contain(newOrganizationName);
-        result.Should().Contain(newWebsite);
-        newWebsite.Should().NotBeNullOrEmpty();
+        publisher.OrganizationName.Should().Be(newOrganizationName);
+        publisher.Website.Should().Be(newWebsite);
+        // Verify AuditTrail contains details update entry
+        publisher.AuditTrail.Should().HaveCount(2); // Created + Details Updated
+        var updateEntry = publisher.AuditTrail.Last();
+        updateEntry.Action.Should().Be("Details Updated");
+        updateEntry.UserId.Should().Be(Guid.Empty); // No user provided
+        updateEntry.DateTime.Should().BeCloseTo(DateTimeOffset.UtcNow, TimeSpan.FromSeconds(5));
+    }
+
+    [Fact]
+    public void Publisher_Should_Handle_User_Relationship() {
+        // Arrange
+        var user = new ApplicationUser("publisheruser", "publisher@example.com");
+        user.EnablePublisher();
+
+        // Act
+        var publisher = new Publisher("Publisher Name", "publisher@example.com", PublisherType.Organization, user: user);
+
+        // Assert
+        publisher.User.Should().Be(user);
+        publisher.UserId.Should().Be(user.Id);
+        user.IsPublisher.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Publisher_Should_Initialize_Collections() {
+        // Arrange & Act
+        var publisher = new Publisher("Test Publisher", "test@example.com", PublisherType.Individual);
+
+        // Assert
+        publisher.Servers.Should().NotBeNull().And.BeEmpty();
+        publisher.Packages.Should().NotBeNull().And.BeEmpty();
+    }
+
+    [Fact]
+    public void Publisher_Should_Handle_Null_Optional_Parameters() {
+        // Arrange & Act
+        var publisher = new Publisher("Test Publisher", "test@example.com", PublisherType.Individual, null, null, null);
+
+        // Assert
+        publisher.OrganizationName.Should().BeNull();
+        publisher.Website.Should().BeNull();
+        publisher.User.Should().BeNull();
+        publisher.UserId.Should().BeNull();
     }
 }

@@ -12,6 +12,4 @@ builder.AddProject<Projects.MCPHub_SecurityService>("securityservice");
 
 builder.AddProject<Projects.MCPHub_SearchService>("searchservice");
 
-builder.AddProject<Projects.MCPHub_Data_MigrationService>("datamigrationservice");
-
 builder.Build().Run();

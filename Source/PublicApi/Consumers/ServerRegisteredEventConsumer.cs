@@ -16,38 +16,6 @@ public class ServerRegisteredEventConsumer(
     /// <summary>
     /// Processes a ServerRegisteredEvent message
     /// </summary>
-    public async Task ConsumeAsync(ServerRegisteredEvent message, CancellationToken cancellationToken = default) {
-        _logger.LogInformation("Processing server registered event for server {ServerId} ({ServerName})",
-            message.ServerId, message.Name);
-
-        try {
-            // Trigger security scan
-            var scanCommand = new ScanServerCommand(
-                message.ServerId,
-                message.ServerId, // Using serverId as version for this example
-                "StaticAnalysis",
-                message.CorrelationId,
-                "system");
-
-            await _messagePublisher.PublishAsync(scanCommand, cancellationToken);
-
-            // Trigger search indexing
-            var indexCommand = new IndexServerCommand(
-                message.ServerId,
-                message.ServerId, // Using serverId as version for this example
-                "Full",
-                message.CorrelationId,
-                "system");
-
-            await _messagePublisher.PublishAsync(indexCommand, cancellationToken);
-
-            _logger.LogInformation("Successfully processed server registered event for server {ServerId}",
-                message.ServerId);
-        }
-        catch (Exception ex) {
-            _logger.LogError(ex, "Failed to process server registered event for server {ServerId}",
-                message.ServerId);
-            throw;
-        }
-    }
+    public Task ConsumeAsync(ServerRegisteredEvent message, CancellationToken cancellationToken = default) 
+        => throw new NotImplementedException("Server registration event processing will be implemented when messaging infrastructure is available");
 }

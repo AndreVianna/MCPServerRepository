@@ -1,4 +1,6 @@
-﻿using MCPHub.Domain.Entities;
+﻿using System.Text.Json;
+using MCPHub.Domain.Entities;
+using MCPHub.Domain.Common;
 
 namespace MCPHub.Data.Configurations;
 
@@ -23,11 +25,6 @@ public class ServerConfiguration : IEntityTypeConfiguration<Server> {
         builder.Property(s => s.License)
             .HasMaxLength(100);
 
-        builder.Property(s => s.CreatedAt)
-            .IsRequired();
-
-        builder.Property(s => s.UpdatedAt)
-            .IsRequired();
 
         builder.Property(s => s.Status)
             .IsRequired();
@@ -47,11 +44,18 @@ public class ServerConfiguration : IEntityTypeConfiguration<Server> {
 
         builder.HasIndex(s => s.PublisherId);
 
-        builder.HasIndex(s => s.CreatedAt);
 
         builder.HasIndex(s => s.Status);
 
         builder.HasIndex(s => s.TrustTier);
+
+        // Configure AuditTrail as JSON column
+        builder.OwnsMany(s => s.AuditTrail, auditBuilder => {
+            auditBuilder.ToJson();
+            auditBuilder.Property(a => a.Action).IsRequired();
+            auditBuilder.Property(a => a.UserId).IsRequired();
+            auditBuilder.Property(a => a.DateTime).IsRequired();
+        });
 
         // Relationships
         builder.HasOne(s => s.Publisher)

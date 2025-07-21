@@ -14,6 +14,8 @@ public class Publisher : BaseEntity {
     public string? Website { get; set; }
     public bool Verified { get; set; } = false;
     public PublisherType Type { get; set; }
+    public Guid? UserId { get; set; }
+    public ApplicationUser? User { get; set; }
     public List<Server> Servers { get; set; } = [];
     public List<Package> Packages { get; set; } = [];
 
@@ -25,7 +27,8 @@ public class Publisher : BaseEntity {
         string email,
         PublisherType type,
         string? organizationName = null,
-        string? website = null) {
+        string? website = null,
+        ApplicationUser? user = null) {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentException.ThrowIfNullOrWhiteSpace(email);
 
@@ -34,17 +37,32 @@ public class Publisher : BaseEntity {
         Type = type;
         OrganizationName = organizationName;
         Website = website;
+        User = user;
+        UserId = user?.Id;
+        AuditTrail.Add(new AuditEntry {
+            Action = "Created",
+            UserId = UserId ?? Guid.Empty,
+            DateTime = DateTimeOffset.UtcNow
+        });
         Verified = false;
     }
 
     public void Verify() {
         Verified = true;
-        SetUpdatedBy(UpdatedBy ?? "system");
+        AuditTrail.Add(new AuditEntry {
+            Action = "Verified",
+            UserId = UserId ?? Guid.Empty,
+            DateTime = DateTimeOffset.UtcNow
+        });
     }
 
     public void UpdateDetails(string? organizationName, string? website) {
         OrganizationName = organizationName;
         Website = website;
-        SetUpdatedBy(UpdatedBy ?? "system");
+        AuditTrail.Add(new AuditEntry {
+            Action = "Details Updated",
+            UserId = UserId ?? Guid.Empty,
+            DateTime = DateTimeOffset.UtcNow
+        });
     }
 }

@@ -3,7 +3,9 @@ using MCPHub.Common.Services;
 using MCPHub.Data.Configuration;
 using MCPHub.Data.Extensions;
 using MCPHub.Data.Repositories;
+using MCPHub.Domain.Entities;
 using MCPHub.Domain.Repositories;
+
 
 namespace MCPHub.Data;
 
@@ -29,6 +31,7 @@ public static class DependencyInjection {
             .EnableServiceProviderCaching()
             .EnableDetailedErrors(databaseOptions.EnableDetailedErrors));
 
+        // Note: Identity services will be configured in the AuthenticationService
         // Note: Common services removed during cleanup - only configuration options available
         // Add configuration options from Common
         services.AddConfigurationOptions(configuration);
@@ -36,6 +39,7 @@ public static class DependencyInjection {
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         // Register base repositories
+        services.AddScoped<ApplicationUserRepository>();
         services.AddScoped<PublisherRepository>();
         services.AddScoped<ServerRepository>();
         services.AddScoped<ServerVersionRepository>();
@@ -44,6 +48,7 @@ public static class DependencyInjection {
         services.AddScoped<SecurityScanRepository>();
 
         // Register repository interfaces with cached decorators
+        services.AddScoped<IApplicationUserRepository, ApplicationUserRepository>();
         services.AddScoped<IPublisherRepository, PublisherRepository>();
         services.AddScoped<IServerRepository, ServerRepository>();
         services.AddScoped<IServerVersionRepository, ServerVersionRepository>();

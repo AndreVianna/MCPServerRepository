@@ -1,23 +1,30 @@
-﻿using MCPHub.Domain.Entities;
+using MCPHub.Domain.Entities;
 using MCPHub.Domain.Repositories;
 
 namespace MCPHub.Data.Repositories;
 
+/// <summary>
+/// Security scan repository implementation following contracts-first approach
+/// </summary>
 public class SecurityScanRepository(McpHubContext context) : Repository<SecurityScan>(context), ISecurityScanRepository {
-    public async Task<List<SecurityScan>> GetByVersionIdAsync(Guid versionId, CancellationToken cancellationToken = default) => await _dbSet.Where(s => s.VersionId == versionId).ToListAsync(cancellationToken);
+    public Task<List<SecurityScan>> GetByVersionIdAsync(Guid versionId, CancellationToken cancellationToken = default)
+        => throw new NotImplementedException("Security scans by version query will be implemented when security service requires it");
 
-    public async Task<List<SecurityScan>> GetByScanTypeAsync(ScanType scanType, CancellationToken cancellationToken = default) => await _dbSet.Where(s => s.ScanType == scanType).ToListAsync(cancellationToken);
+    public Task<List<SecurityScan>> GetByScanTypeAsync(ScanType scanType, CancellationToken cancellationToken = default)
+        => throw new NotImplementedException("Security scans by type query will be implemented when security service requires it");
 
-    public async Task<List<SecurityScan>> GetByStatusAsync(ScanStatus status, CancellationToken cancellationToken = default) => await _dbSet.Where(s => s.Status == status).ToListAsync(cancellationToken);
+    public Task<List<SecurityScan>> GetByStatusAsync(ScanStatus status, CancellationToken cancellationToken = default)
+        => throw new NotImplementedException("Security scans by status query will be implemented when security service requires it");
 
-    public async Task<List<SecurityScan>> GetFailedScansAsync(CancellationToken cancellationToken = default) => await _dbSet.Where(s => s.Status == ScanStatus.Failed).ToListAsync(cancellationToken);
+    public Task<List<SecurityScan>> GetFailedScansAsync(CancellationToken cancellationToken = default)
+        => throw new NotImplementedException("Failed security scans query will be implemented when monitoring service requires it");
 
-    public async Task<List<SecurityScan>> GetPendingScansAsync(CancellationToken cancellationToken = default) => await _dbSet.Where(s => s.Status == ScanStatus.Pending).ToListAsync(cancellationToken);
+    public Task<List<SecurityScan>> GetPendingScansAsync(CancellationToken cancellationToken = default)
+        => throw new NotImplementedException("Pending security scans query will be implemented when security service requires it");
 
-    public async Task<SecurityScan?> GetLatestScanAsync(Guid versionId, CancellationToken cancellationToken = default) => await _dbSet
-            .Where(s => s.VersionId == versionId)
-            .OrderByDescending(s => s.ScanStartedAt)
-            .FirstOrDefaultAsync(cancellationToken);
+    public Task<SecurityScan?> GetLatestScanAsync(Guid versionId, CancellationToken cancellationToken = default)
+        => throw new NotImplementedException("Latest security scan query will be implemented when security service requires it");
 
-    public async Task<List<SecurityScan>> GetScansWithCriticalIssuesAsync(CancellationToken cancellationToken = default) => await _dbSet.Where(s => s.CriticalIssues > 0).ToListAsync(cancellationToken);
+    public Task<List<SecurityScan>> GetScansWithCriticalIssuesAsync(CancellationToken cancellationToken = default)
+        => throw new NotImplementedException("Critical security scans query will be implemented when monitoring service requires it");
 }

@@ -1,8 +1,11 @@
 ﻿using MCPHub.Domain.Entities;
 
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+
 namespace MCPHub.Data;
 
-public class McpHubContext(DbContextOptions<McpHubContext> options) : DbContext(options) {
+public class McpHubContext(DbContextOptions<McpHubContext> options) : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>(options) {
     public DbSet<Publisher> Publishers => Set<Publisher>();
     public DbSet<Server> Servers => Set<Server>();
     public DbSet<ServerVersion> ServerVersions => Set<ServerVersion>();

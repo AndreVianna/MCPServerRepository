@@ -40,29 +40,40 @@ public class ServerVersion : BaseEntity {
         PackageSize = packageSize;
         Checksum = checksum;
         Status = VersionStatus.Pending;
+        AuditTrail.Add(new AuditEntry {
+            Action = "Created",
+            UserId = Guid.Empty, // System action
+            DateTime = DateTimeOffset.UtcNow
+        });
     }
 
     public void UpdateStatus(VersionStatus status) {
         Status = status;
-        SetUpdatedBy(UpdatedBy ?? "system");
+        AuditTrail.Add(new AuditEntry {
+            Action = $"Status Updated to {status}",
+            UserId = Guid.Empty, // System action
+            DateTime = DateTimeOffset.UtcNow
+        });
     }
 
     public void UpdateSecurityScan(SecurityScanResult scanResult) {
         SecurityScan = scanResult;
-        SetUpdatedBy(UpdatedBy ?? "system");
+        AuditTrail.Add(new AuditEntry {
+            Action = "Security Scan Updated",
+            UserId = Guid.Empty, // System action
+            DateTime = DateTimeOffset.UtcNow
+        });
     }
 
     public void UpdatePackageInfo(string? packageUrl, long? packageSize, string? checksum) {
         PackageUrl = packageUrl;
         PackageSize = packageSize;
         Checksum = checksum;
-        SetUpdatedBy(UpdatedBy ?? "system");
+        AuditTrail.Add(new AuditEntry {
+            Action = "Package Info Updated",
+            UserId = Guid.Empty, // System action
+            DateTime = DateTimeOffset.UtcNow
+        });
     }
 }
 
-public enum VersionStatus {
-    Pending,
-    Approved,
-    Rejected,
-    Deprecated
-}

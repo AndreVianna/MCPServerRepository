@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Domain\MCPHub.Domain.csproj" />
+    <ProjectReference Include="..\Storage\MCPHub.Storage.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

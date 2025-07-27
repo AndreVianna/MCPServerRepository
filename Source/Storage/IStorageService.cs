@@ -165,4 +165,23 @@ public interface IStorageService {
     Task<StorageUsageInfo> GetUsageAsync(
         string containerName,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the storage provider type
+    /// </summary>
+    StorageProviderType ProviderType { get; }
+    
+    /// <summary>
+    /// Checks storage service health
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Storage health information</returns>
+    Task<StorageHealthInfo> CheckHealthAsync(CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Gets storage performance metrics
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Storage performance metrics</returns>
+    Task<StoragePerformanceMetrics> GetPerformanceMetricsAsync(CancellationToken cancellationToken = default);
 }

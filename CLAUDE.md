@@ -12,9 +12,10 @@ This file provides essential guidance to Claude Code (claude.ai/code) when worki
 
 ## Reference Documents
 
-- See `Documents/ARCHITECTURE.md` for detailed project structure guidelines
-- See `Documents/PROJECT-ROADMAP.md` for implementation timeline and success metrics
-- See `Documents/DEVELOPMENT-STANDARDS.md` for technology stack and development approach
+- See `Documents/Core/ARCHITECTURE.md` for detailed project structure guidelines
+- See `Documents/Core/ROADMAP.md` for implementation timeline and success metrics
+- See `Documents/Core/DEVELOPMENT-GUIDE.md` for technology stack and development approach
+- See `Documents/README.md` for complete documentation organization guide
 
 ## Development Tool Requirements
 
@@ -139,6 +140,10 @@ public class AuthenticationService : IAuthenticationService {
 - **Web search official docs** for authoritative syntax and usage patterns
 
 This rule applies to ALL external libraries, frameworks, and APIs to prevent incorrect implementations.
+
+## Project Structure Exploration
+
+- Always use the bash command `tree -I '.claude|.git|bin|obj|lib|.github|.cursor|.vscode|.vs|Assets'` to get the file structure of the project.
 
 ## Git Repository
 

@@ -6,6 +6,9 @@ global using System.Linq;
 global using System.Threading.Tasks;
 
 global using MCPHub.Common.Messaging;
+global using MCPHub.Common.Providers;
+global using MCPHub.Common.Services;
+global using MCPHub.Storage;
 
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;

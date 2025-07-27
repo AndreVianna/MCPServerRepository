@@ -17,6 +17,46 @@ This file provides essential guidance to Claude Code (claude.ai/code) when worki
 - See `Documents/Core/DEVELOPMENT-GUIDE.md` for technology stack and development approach
 - See `Documents/README.md` for complete documentation organization guide
 
+## Documents Folder Structure
+
+The `Documents/` folder is organized as follows:
+
+```
+Documents/
+├── Core/                           # Master project documents
+│   ├── ARCHITECTURE.md             # Technical architecture and design patterns
+│   ├── BUSINESS-CASE.md            # Business case and market analysis
+│   ├── DEVELOPMENT-GUIDE.md        # Development workflow and standards
+│   ├── ROADMAP.md                  # Project roadmap and implementation timeline
+│   └── PHASE1-COMPLETION-REPORT.md # Phase 1 completion documentation
+├── UX/                            # User Experience design specifications
+│   ├── README.md                   # UX documentation navigation index
+│   ├── CLI-Command-Reference.md    # Complete CLI command structure and flows
+│   ├── Web-Application-User-Journey.md # Web app site architecture and specifications
+│   ├── UX-Design-Summary.md        # Executive summary of UX deliverables
+│   ├── UI-DESIGN-SYSTEM.md        # Visual design foundation and component library
+│   ├── UI-DESIGN-IMPLEMENTATION-SUMMARY.md # Technical implementation guidelines
+│   ├── HOMEPAGE-MOCKUP-SPEC.md    # Homepage design specifications
+│   ├── SEARCH-RESULTS-MOCKUP-SPEC.md # Search interface specifications
+│   ├── PACKAGE-DETAIL-MOCKUP-SPEC.md # Package detail page specifications
+│   └── PUBLISHER-DASHBOARD-MOCKUP-SPEC.md # Publisher dashboard specifications
+├── Investor-Package/              # Investor and funding documentation
+│   ├── MARKET-ANALYSIS.md          # Market research and competitive analysis
+│   ├── FINANCIAL-PROJECTIONS.md   # Financial models and projections
+│   ├── TECHNICAL-OVERVIEW.md       # Technical overview for investors
+│   └── [8 additional investor documents]
+├── Technical-Specifications/      # Detailed technical specifications
+│   ├── HEXAGONAL-ARCHITECTURE-SPECIFICATION.md # Architecture patterns
+│   └── HEXAGONAL-ARCHITECTURE-IMPLEMENTATION-STATUS.md # Implementation status
+└── README.md                      # Documentation overview and navigation
+```
+
+**Key Documentation Areas:**
+- **Core/**: Essential project documents for development teams
+- **UX/**: Complete user experience specifications for Phase 2 implementation
+- **Investor-Package/**: Business-focused documentation for funding and partnerships
+- **Technical-Specifications/**: Detailed architectural and implementation specifications
+
 ## Development Tool Requirements
 
 **CRITICAL REQUIREMENT**: All build, lint, and test operations must use the project.sh script.

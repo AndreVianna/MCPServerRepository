@@ -37,5 +37,20 @@ public enum ScanType {
     /// <summary>
     /// Network security scan
     /// </summary>
-    Network
+    Network,
+
+    /// <summary>
+    /// MCP manifest security scan
+    /// </summary>
+    Manifest,
+
+    /// <summary>
+    /// Package content security scan
+    /// </summary>
+    Content,
+
+    /// <summary>
+    /// Full comprehensive scan (all scan types)
+    /// </summary>
+    Full
 }

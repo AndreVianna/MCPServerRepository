@@ -1,3 +1,5 @@
+using MCPHub.Domain.Contracts.Requests;
+using MCPHub.Domain.Contracts.Services;
 using MCPHub.Domain.Entities;
 
 namespace MCPHub.Domain.Repositories;
@@ -8,6 +10,7 @@ public interface IPackageRepository : IRepository<Package> {
     Task<List<Package>> GetByStatusAsync(PackageStatus status, CancellationToken cancellationToken = default);
     Task<List<Package>> GetByTrustTierAsync(TrustTier trustTier, CancellationToken cancellationToken = default);
     Task<List<Package>> SearchAsync(string query, int page = 0, int pageSize = 20, CancellationToken cancellationToken = default);
+    Task<SearchResult<Package>> SearchAsync(SearchRequest request, CancellationToken cancellationToken = default);
     Task<List<Package>> GetByTagsAsync(List<string> tags, CancellationToken cancellationToken = default);
     Task<List<Package>> GetRecentlyUpdatedAsync(int count = 10, CancellationToken cancellationToken = default);
     Task<List<Package>> GetMostDownloadedAsync(int count = 10, CancellationToken cancellationToken = default);

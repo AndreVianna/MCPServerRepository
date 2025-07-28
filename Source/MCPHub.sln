@@ -44,6 +44,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.Storage", "Storage\M
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.AuthenticationService", "AuthenticationService\MCPHub.AuthenticationService.csproj", "{0CAF7FE1-0D83-44D7-BBD1-4DCE8939D1DD}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PublicApi.UnitTests", "PublicApi.UnitTests", "{DB9C22E8-945B-7247-EE56-10CB0DAE3718}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.PublicApi.UnitTests", "PublicApi.UnitTests\MCPHub.PublicApi.UnitTests.csproj", "{9840A08B-5A4B-4DA1-BDEF-FD5D07446775}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -246,6 +250,18 @@ Global
 		{0CAF7FE1-0D83-44D7-BBD1-4DCE8939D1DD}.Release|x64.Build.0 = Release|Any CPU
 		{0CAF7FE1-0D83-44D7-BBD1-4DCE8939D1DD}.Release|x86.ActiveCfg = Release|Any CPU
 		{0CAF7FE1-0D83-44D7-BBD1-4DCE8939D1DD}.Release|x86.Build.0 = Release|Any CPU
+		{9840A08B-5A4B-4DA1-BDEF-FD5D07446775}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9840A08B-5A4B-4DA1-BDEF-FD5D07446775}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9840A08B-5A4B-4DA1-BDEF-FD5D07446775}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9840A08B-5A4B-4DA1-BDEF-FD5D07446775}.Debug|x64.Build.0 = Debug|Any CPU
+		{9840A08B-5A4B-4DA1-BDEF-FD5D07446775}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9840A08B-5A4B-4DA1-BDEF-FD5D07446775}.Debug|x86.Build.0 = Debug|Any CPU
+		{9840A08B-5A4B-4DA1-BDEF-FD5D07446775}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9840A08B-5A4B-4DA1-BDEF-FD5D07446775}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9840A08B-5A4B-4DA1-BDEF-FD5D07446775}.Release|x64.ActiveCfg = Release|Any CPU
+		{9840A08B-5A4B-4DA1-BDEF-FD5D07446775}.Release|x64.Build.0 = Release|Any CPU
+		{9840A08B-5A4B-4DA1-BDEF-FD5D07446775}.Release|x86.ActiveCfg = Release|Any CPU
+		{9840A08B-5A4B-4DA1-BDEF-FD5D07446775}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -267,6 +283,7 @@ Global
 		{6141CAE5-2335-4DD4-AB2A-211351FFA4C6} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{46A117C5-E161-4A8D-9DAC-35A2A7325719} = {B8EFCA5F-814F-285C-A8CB-F00F14650265}
 		{0CAF7FE1-0D83-44D7-BBD1-4DCE8939D1DD} = {B8EFCA5F-814F-285C-A8CB-F00F14650265}
+		{9840A08B-5A4B-4DA1-BDEF-FD5D07446775} = {DB9C22E8-945B-7247-EE56-10CB0DAE3718}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D73B147F-16BE-44A5-897C-C2A085DB777A}

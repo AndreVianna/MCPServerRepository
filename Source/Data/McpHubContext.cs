@@ -12,6 +12,9 @@ public class McpHubContext(DbContextOptions<McpHubContext> options) : IdentityDb
     public DbSet<Package> Packages => Set<Package>();
     public DbSet<PackageVersion> PackageVersions => Set<PackageVersion>();
     public DbSet<SecurityScan> SecurityScans => Set<SecurityScan>();
+    public DbSet<PackageDownload> PackageDownloads => Set<PackageDownload>();
+    public DbSet<PackageInstallation> PackageInstallations => Set<PackageInstallation>();
+    public DbSet<TrustTierHistoryEntry> TrustTierHistory => Set<TrustTierHistoryEntry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder) {
         base.OnModelCreating(modelBuilder);

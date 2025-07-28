@@ -12,8 +12,15 @@ public class SecurityScanConfiguration : IEntityTypeConfiguration<SecurityScan> 
         builder.Property(s => s.VersionId)
             .IsRequired();
 
-        builder.Property(s => s.ServerVersionId)
-            .IsRequired();
+        // Server-specific properties (nullable for package scans)
+        builder.Property(s => s.ServerVersionId);
+
+        // Package-specific properties (nullable for server scans)
+        builder.Property(s => s.PackageVersionId);
+
+        builder.Property(s => s.EntityType)
+            .IsRequired()
+            .HasMaxLength(16);
 
         builder.Property(s => s.ScanType)
             .IsRequired()
@@ -22,7 +29,6 @@ public class SecurityScanConfiguration : IEntityTypeConfiguration<SecurityScan> 
         builder.Property(s => s.Status)
             .IsRequired()
             .HasConversion<string>();
-
 
         builder.Property(s => s.ScanStartedAt)
             .IsRequired();
@@ -54,20 +60,17 @@ public class SecurityScanConfiguration : IEntityTypeConfiguration<SecurityScan> 
 
         // Indexes
         builder.HasIndex(s => s.VersionId);
-
         builder.HasIndex(s => s.ServerVersionId);
-
+        builder.HasIndex(s => s.PackageVersionId);
+        builder.HasIndex(s => s.EntityType);
         builder.HasIndex(s => s.ScanType);
-
         builder.HasIndex(s => s.Status);
-
         builder.HasIndex(s => s.ScanStartedAt);
-
         builder.HasIndex(s => s.ScanCompletedAt);
-
         builder.HasIndex(s => s.CriticalIssues);
-
         builder.HasIndex(s => new { s.VersionId, s.ScanType });
+        builder.HasIndex(s => new { s.EntityType, s.VersionId });
+        builder.HasIndex(s => new { s.PackageVersionId, s.ScanType });
 
         // Configure AuditTrail as JSON column
         builder.OwnsMany(s => s.AuditTrail, auditBuilder => {
@@ -81,6 +84,11 @@ public class SecurityScanConfiguration : IEntityTypeConfiguration<SecurityScan> 
         builder.HasOne(s => s.ServerVersion)
             .WithMany(v => v.SecurityScans)
             .HasForeignKey(s => s.ServerVersionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(s => s.PackageVersion)
+            .WithMany(v => v.SecurityScans)
+            .HasForeignKey(s => s.PackageVersionId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

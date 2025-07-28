@@ -23,7 +23,7 @@ Analyze the following steps to perform enhanced meta-analysis planning through p
    - **IMPORTANT** Do not make assumptions about incomplete or ambiguous requirements.
 3. **Prepare Sub-Agent Tasks**: Design identical task prompts for each sub-agent that will analyze using the `/analyze id-only` command. Ensure each sub-agent receives the same analysis target and context. The `id-only` flag ensures sub-agents return only UUIDs for memory retrieval.
 4. **Delegate Parallel Analysis**: Use `Task` tool to spawn the specified number of concurrent sub-agents for analysis planning. Each sub-agent executes `/analyze id-only` with the prepared prompt. Collect the returned UUIDs from each sub-agent and handle any failures gracefully.
-   - **IMPORTAN!** Run multiple Task invocations in a SINGLE message.
+   - **IMPORTANT!** Run multiple Task invocations in a SINGLE message.
 5. **Retrieve Sub-Agent Results**: Systematically analyze and aggregate the analysis results from all sub-agents from the memory or context. Identify successful completions, execution patterns, common outcomes, and any errors or failures encountered across the agents.
 6. **Analyze the Results**: Use `mcp__thinking__sequentialthinking` to perform the following analysis tasks:
     6.1. **Compare Analysis Results**: Use `mcp__thinking__sequentialthinking` to systematically compare the analysis results from all sub-agent memory entities. Identify strengths, weaknesses, unique insights, and areas of consensus or disagreement across the different analyses.

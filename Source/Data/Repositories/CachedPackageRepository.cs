@@ -1,4 +1,6 @@
 using MCPHub.Common.Services;
+using MCPHub.Domain.Contracts.Requests;
+using MCPHub.Domain.Contracts.Services;
 using MCPHub.Domain.Entities;
 using MCPHub.Domain.Repositories;
 
@@ -72,6 +74,26 @@ public class CachedPackageRepository(IPackageRepository packageRepository, ICach
         await _cacheService.SetAsync(cacheKey, packages, TimeSpan.FromMinutes(10), cancellationToken);
 
         return packages;
+    }
+
+    public async Task<SearchResult<Package>> SearchAsync(SearchRequest request, CancellationToken cancellationToken = default) {
+        // Generate cache key based on search parameters
+        var categoriesKey = request.Categories != null ? string.Join(",", request.Categories.OrderBy(c => c)) : "none";
+        var trustTierKey = request.MinimumTrustTier?.ToString() ?? "none";
+        var sortKey = $"{request.SortBy ?? "none"}:{request.SortDirection}";
+        var cacheKey = $"{_cacheKeyPrefix}:search_advanced:{request.Query}:{categoriesKey}:{trustTierKey}:{request.Page}:{request.PageSize}:{sortKey}";
+        
+        var cachedResult = await _cacheService.GetAsync<SearchResult<Package>>(cacheKey, cancellationToken);
+
+        if (cachedResult != null)
+            return cachedResult;
+
+        var searchResult = await _packageRepository.SearchAsync(request, cancellationToken);
+        
+        // Cache search results for 5 minutes (shorter than simple search due to complexity)
+        await _cacheService.SetAsync(cacheKey, searchResult, TimeSpan.FromMinutes(5), cancellationToken);
+
+        return searchResult;
     }
 
     public async Task<List<Package>> GetByTagsAsync(List<string> tags, CancellationToken cancellationToken = default) {

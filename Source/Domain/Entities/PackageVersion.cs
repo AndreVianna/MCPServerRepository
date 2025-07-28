@@ -22,6 +22,7 @@ public class PackageVersion : BaseEntity {
 
     // Navigation properties
     public Package Package { get; set; } = null!;
+    public ICollection<SecurityScan> SecurityScans { get; set; } = [];
 
     private PackageVersion() { } // For EF Core
 

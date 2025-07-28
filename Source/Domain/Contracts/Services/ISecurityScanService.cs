@@ -1,3 +1,4 @@
+using MCPHub.Domain.Contracts.Requests;
 using MCPHub.Domain.Entities;
 using MCPHub.Domain.ValueObjects;
 
@@ -6,7 +7,8 @@ namespace MCPHub.Domain.Contracts.Services;
 /// <summary>
 /// Application service interface for security scanning operations
 /// </summary>
-public interface ISecurityScanService {
+public interface ISecurityScanService 
+{
     /// <summary>
     /// Initiates a security scan for a package
     /// </summary>
@@ -17,6 +19,50 @@ public interface ISecurityScanService {
     Task<SecurityScan> InitiateScanAsync(string packageId, ScanType scanType, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Scans a package for security vulnerabilities
+    /// </summary>
+    /// <param name="packageId">Package identifier</param>
+    /// <param name="version">Package version</param>
+    /// <param name="request">Scan request with options</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Security scan result</returns>
+    Task<SecurityScanResult> ScanPackageAsync(Guid packageId, string version, ScanRequest request, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Scans a package manifest for security issues
+    /// </summary>
+    /// <param name="manifestContent">Raw manifest JSON content</param>
+    /// <param name="request">Scan request with options</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Security scan result</returns>
+    Task<SecurityScanResult> ScanManifestAsync(string manifestContent, ScanRequest request, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets all security scans for a package
+    /// </summary>
+    /// <param name="packageId">Package identifier</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>List of security scans</returns>
+    Task<IEnumerable<SecurityScan>> GetPackageScansAsync(Guid packageId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets the latest security scan result for a package version
+    /// </summary>
+    /// <param name="packageId">Package identifier</param>
+    /// <param name="version">Package version</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Latest security scan result or null if none found</returns>
+    Task<SecurityScanResult?> GetLatestScanResultAsync(Guid packageId, string version, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets a comprehensive security summary for a package across all versions
+    /// </summary>
+    /// <param name="packageId">Package identifier</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Security scan summary</returns>
+    Task<SecurityScanSummary> GetPackageSecuritySummaryAsync(Guid packageId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets a security scan by its identifier
     /// </summary>
     /// <param name="scanId">Scan identifier</param>
@@ -25,7 +71,7 @@ public interface ISecurityScanService {
     Task<SecurityScan?> GetScanAsync(string scanId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets all security scans for a package
+    /// Gets all security scans for a package (legacy method)
     /// </summary>
     /// <param name="packageId">Package identifier</param>
     /// <param name="cancellationToken">Cancellation token</param>
@@ -33,7 +79,7 @@ public interface ISecurityScanService {
     Task<IEnumerable<SecurityScan>> GetScansByPackageAsync(string packageId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets the latest security scan for a package
+    /// Gets the latest security scan for a package (legacy method)
     /// </summary>
     /// <param name="packageId">Package identifier</param>
     /// <param name="scanType">Optional scan type filter</param>

@@ -16,6 +16,8 @@ public class UnitOfWork : IUnitOfWork {
         Packages = new PackageRepository(_context);
         PackageVersions = new PackageVersionRepository(_context);
         SecurityScans = new SecurityScanRepository(_context);
+        PackageDownloads = new PackageDownloadRepository(_context);
+        PackageInstallations = new PackageInstallationRepository(_context);
     }
 
     public IPublisherRepository Publishers { get; }
@@ -24,6 +26,8 @@ public class UnitOfWork : IUnitOfWork {
     public IPackageRepository Packages { get; }
     public IPackageVersionRepository PackageVersions { get; }
     public ISecurityScanRepository SecurityScans { get; }
+    public IPackageDownloadRepository PackageDownloads { get; }
+    public IPackageInstallationRepository PackageInstallations { get; }
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) => await _context.SaveChangesAsync(cancellationToken);
 

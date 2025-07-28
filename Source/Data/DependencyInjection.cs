@@ -46,6 +46,7 @@ public static class DependencyInjection {
         services.AddScoped<PackageRepository>();
         services.AddScoped<PackageVersionRepository>();
         services.AddScoped<SecurityScanRepository>();
+        services.AddScoped<TrustTierHistoryRepository>();
 
         // Register repository interfaces with cached decorators
         services.AddScoped<IApplicationUserRepository, ApplicationUserRepository>();
@@ -59,6 +60,7 @@ public static class DependencyInjection {
         });
         services.AddScoped<IPackageVersionRepository, PackageVersionRepository>();
         services.AddScoped<ISecurityScanRepository, SecurityScanRepository>();
+        services.AddScoped<ITrustTierHistoryRepository, TrustTierHistoryRepository>();
 
         return services;
     }

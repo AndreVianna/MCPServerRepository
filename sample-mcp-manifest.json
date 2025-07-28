@@ -1,0 +1,94 @@
+{
+  "name": "sample-mcp-server",
+  "version": "1.0.0",
+  "description": "A sample MCP server for testing the publish command",
+  "author": {
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "url": "https://github.com/johndoe"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/johndoe/sample-mcp-server",
+  "repository": "https://github.com/johndoe/sample-mcp-server.git",
+  "bugs": "https://github.com/johndoe/sample-mcp-server/issues",
+  "keywords": ["mcp", "server", "sample", "testing"],
+  "capabilities": {
+    "tools": [
+      {
+        "name": "sample_tool",
+        "description": "A sample tool for demonstration",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "input": {
+              "type": "string",
+              "description": "Input text to process"
+            }
+          },
+          "required": ["input"]
+        }
+      }
+    ],
+    "resources": [
+      {
+        "uri": "file://data/*",
+        "name": "data_files",
+        "description": "Access to data files",
+        "mimeType": "text/plain"
+      }
+    ],
+    "prompts": [
+      {
+        "name": "sample_prompt",
+        "description": "A sample prompt template",
+        "arguments": [
+          {
+            "name": "topic",
+            "description": "The topic to discuss",
+            "required": true
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "network": {
+      "allowedHosts": ["api.example.com"],
+      "allowAll": false
+    },
+    "filesystem": {
+      "allowedPaths": ["./data"],
+      "readOnly": true
+    },
+    "environment": ["API_KEY"]
+  },
+  "runtime": {
+    "docker": {
+      "image": "node",
+      "tag": "18-alpine",
+      "env": {
+        "NODE_ENV": "production"
+      },
+      "ports": ["3000"],
+      "volumes": ["./data:/app/data:ro"]
+    }
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^18.0.0"
+  },
+  "main": "dist/index.js",
+  "bin": {
+    "sample-mcp": "./bin/sample-mcp"
+  },
+  "files": [
+    "dist/",
+    "bin/",
+    "README.md",
+    "LICENSE"
+  ]
+}

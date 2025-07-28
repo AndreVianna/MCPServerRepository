@@ -7,6 +7,8 @@ public interface IUnitOfWork : IDisposable {
     IPackageRepository Packages { get; }
     IPackageVersionRepository PackageVersions { get; }
     ISecurityScanRepository SecurityScans { get; }
+    IPackageDownloadRepository PackageDownloads { get; }
+    IPackageInstallationRepository PackageInstallations { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 

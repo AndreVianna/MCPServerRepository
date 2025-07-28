@@ -6,24 +6,39 @@ namespace MCPHub.Domain.Contracts.Services;
 /// <typeparam name="T">Type of search results</typeparam>
 public class SearchResult<T> {
     /// <summary>
-    /// Search results
+    /// Search result items
     /// </summary>
-    public IEnumerable<T> Results { get; init; } = [];
+    public IEnumerable<T> Items { get; init; } = [];
 
     /// <summary>
-    /// Total number of results available
+    /// Search results (alias for Items for backward compatibility)
+    /// </summary>
+    public IEnumerable<T> Results => Items;
+
+    /// <summary>
+    /// Total number of results available across all pages
     /// </summary>
     public int TotalCount { get; init; }
 
     /// <summary>
-    /// Current page index
+    /// Current page number (1-based)
     /// </summary>
-    public int PageIndex { get; init; }
+    public int Page { get; init; }
+
+    /// <summary>
+    /// Current page index (0-based, for backward compatibility)
+    /// </summary>
+    public int PageIndex => Page - 1;
 
     /// <summary>
     /// Number of results per page
     /// </summary>
     public int PageSize { get; init; }
+
+    /// <summary>
+    /// Total number of pages available
+    /// </summary>
+    public int TotalPages => TotalCount > 0 ? (int)Math.Ceiling((double)TotalCount / PageSize) : 0;
 
     /// <summary>
     /// Search query that was executed

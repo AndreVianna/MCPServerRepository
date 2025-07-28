@@ -236,3 +236,27 @@ This system ensures no work is lost between sessions and provides clear project 
 ```
 
 This ensures all future development follows the contracts-first architectural principle.
+
+## Specialized Agent Usage Requirement
+
+**CRITICAL REQUIREMENT**: All implementation tasks must use the appropriate specialized sub-agents:
+
+### **Mandatory Agent Usage:**
+- **Backend Development**: MUST use `backend-developer` sub-agent for all .NET/C# backend implementation
+- **Frontend Development**: MUST use `frontend-developer` sub-agent for all Blazor/UI implementation
+- **Never Implement Directly**: Never implement backend or frontend code directly - always delegate to specialized agents
+
+### **Parallel Execution Strategy:**
+- **Multiple Task Invocations**: Run multiple Task tool calls in a SINGLE message for parallel execution
+- **Task Decomposition**: Break complex tasks requiring both agents into smaller, agent-specific subtasks
+- **Expertise Alignment**: Ensures proper technical expertise is applied to each implementation area
+
+### **Implementation Process:**
+1. **Identify Task Type**: Determine if task requires backend, frontend, or both agents
+2. **Decompose Complex Tasks**: Split tasks that need both agents into separate backend and frontend subtasks
+3. **Parallel Execution**: Use multiple Task invocations in one message when possible
+4. **Agent Specialization**: Let each agent focus on their technical domain expertise
+
+**Benefits**: Ensures expert implementation quality, enables true parallel development, maintains separation of concerns, and maximizes development efficiency.
+
+This requirement applies to ALL Phase 2 implementation work and ensures optimal use of specialized technical expertise.

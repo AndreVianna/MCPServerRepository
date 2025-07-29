@@ -51,4 +51,3 @@ public interface ISearchService {
     /// <returns>True if removal was successful</returns>
     Task<bool> RemovePackageFromIndexAsync(string packageId, CancellationToken cancellationToken = default);
 }
-

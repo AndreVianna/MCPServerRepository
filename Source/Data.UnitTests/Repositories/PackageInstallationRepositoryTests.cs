@@ -7,21 +7,18 @@ namespace MCPHub.Data.UnitTests.Repositories;
 /// <summary>
 /// Unit tests for PackageInstallationRepository
 /// </summary>
-public class PackageInstallationRepositoryTests : IDisposable
-{
+public class PackageInstallationRepositoryTests : IDisposable {
     private readonly McpHubContext _context;
     private readonly IPackageInstallationRepository _repository;
 
-    public PackageInstallationRepositoryTests()
-    {
+    public PackageInstallationRepositoryTests() {
         // TODO: Replace with proper test database setup when implementation is ready
         _context = null!; // Placeholder for in-memory database context
         _repository = new PackageInstallationRepository(_context);
     }
 
     [Fact]
-    public async Task GetByUserIdAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetByUserIdAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var userId = Guid.NewGuid();
 
@@ -31,8 +28,7 @@ public class PackageInstallationRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task GetByPackageIdAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetByPackageIdAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var packageId = Guid.NewGuid();
 
@@ -42,8 +38,7 @@ public class PackageInstallationRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task GetByPackageVersionAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetByPackageVersionAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var packageId = Guid.NewGuid();
         const string version = "1.0.0";
@@ -54,8 +49,7 @@ public class PackageInstallationRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task GetByUserAndPackageAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetByUserAndPackageAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var userId = Guid.NewGuid();
         var packageId = Guid.NewGuid();
@@ -66,8 +60,7 @@ public class PackageInstallationRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task GetByStatusAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetByStatusAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         const InstallationStatus status = InstallationStatus.Completed;
 
@@ -77,8 +70,7 @@ public class PackageInstallationRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task IsPackageInstalledAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task IsPackageInstalledAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var userId = Guid.NewGuid();
         var packageId = Guid.NewGuid();
@@ -89,8 +81,7 @@ public class PackageInstallationRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task GetActiveInstallationsAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetActiveInstallationsAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var userId = Guid.NewGuid();
 
@@ -100,8 +91,7 @@ public class PackageInstallationRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task GetInstallationCountAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetInstallationCountAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var packageId = Guid.NewGuid();
 
@@ -111,8 +101,7 @@ public class PackageInstallationRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task GetInstallationsInDateRangeAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetInstallationsInDateRangeAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var startDate = DateTimeOffset.UtcNow.AddDays(-30);
         var endDate = DateTimeOffset.UtcNow;
@@ -123,33 +112,24 @@ public class PackageInstallationRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task GetInstallationsByStatusAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetInstallationsByStatusAsync_WhenCalled_ThrowsNotImplementedException() =>
         // Arrange & Act & Assert
         await Assert.ThrowsAsync<NotImplementedException>(() =>
             _repository.GetInstallationsByStatusAsync());
-    }
 
     [Fact]
-    public async Task GetFailedInstallationsAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetFailedInstallationsAsync_WhenCalled_ThrowsNotImplementedException() =>
         // Arrange & Act & Assert
         await Assert.ThrowsAsync<NotImplementedException>(() =>
             _repository.GetFailedInstallationsAsync());
-    }
 
     [Fact]
-    public async Task GetStuckInstallationsAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetStuckInstallationsAsync_WhenCalled_ThrowsNotImplementedException() =>
         // Arrange & Act & Assert
         await Assert.ThrowsAsync<NotImplementedException>(() =>
             _repository.GetStuckInstallationsAsync());
-    }
 
-    public void Dispose()
-    {
-        _context?.Dispose();
-    }
+    public void Dispose() => _context?.Dispose();
 
     // TODO: When implementation is added, replace these tests with actual behavior tests:
     // - Test installation retrieval by user with filtering options

@@ -5,14 +5,11 @@ namespace MCPHub.Domain.UnitTests.ValueObjects;
 /// <summary>
 /// Unit tests for ValidationSummary value object
 /// </summary>
-[TestClass]
-public class ValidationSummaryTests
-{
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("ValidationSummary")]
-    public void Constructor_WithValidParameters_ShouldCreateInstance()
-    {
+public class ValidationSummaryTests {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "ValidationSummary")]
+    public void Constructor_WithValidParameters_ShouldCreateInstance() {
         // Arrange
         var errors = new[] { "Error 1", "Error 2" };
         var warnings = new[] { "Warning 1" };
@@ -23,36 +20,34 @@ public class ValidationSummaryTests
         var summary = new ValidationSummary(false, errors, warnings, context, validationTime);
 
         // Assert
-        Assert.IsFalse(summary.IsValid);
-        Assert.AreEqual(2, summary.Errors.Count);
-        Assert.AreEqual(1, summary.Warnings.Count);
-        Assert.AreEqual(context, summary.Context);
-        Assert.AreEqual(validationTime, summary.ValidationTimeMs);
-        CollectionAssert.AreEqual(errors.ToList(), summary.Errors.ToList());
-        CollectionAssert.AreEqual(warnings.ToList(), summary.Warnings.ToList());
+        summary.IsValid.Should().BeFalse();
+        summary.Errors.Should().HaveCount(2);
+        summary.Warnings.Should().HaveCount(1);
+        summary.Context.Should().Be(context);
+        summary.ValidationTimeMs.Should().Be(validationTime);
+        summary.Errors.Should().BeEquivalentTo(errors);
+        summary.Warnings.Should().BeEquivalentTo(warnings);
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("ValidationSummary")]
-    public void Success_WithDefaultParameters_ShouldCreateValidSummary()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "ValidationSummary")]
+    public void Success_WithDefaultParameters_ShouldCreateValidSummary() {
         // Act
         var summary = ValidationSummary.Success();
 
         // Assert
-        Assert.IsTrue(summary.IsValid);
-        Assert.AreEqual(0, summary.Errors.Count);
-        Assert.AreEqual(0, summary.Warnings.Count);
-        Assert.AreEqual(string.Empty, summary.Context);
-        Assert.AreEqual(0L, summary.ValidationTimeMs);
+        summary.IsValid.Should().BeTrue();
+        summary.Errors.Should().BeEmpty();
+        summary.Warnings.Should().BeEmpty();
+        summary.Context.Should().Be(string.Empty);
+        summary.ValidationTimeMs.Should().Be(0L);
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("ValidationSummary")]
-    public void Success_WithParameters_ShouldCreateValidSummary()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "ValidationSummary")]
+    public void Success_WithParameters_ShouldCreateValidSummary() {
         // Arrange
         var context = "manifest";
         var validationTime = 50L;
@@ -62,19 +57,18 @@ public class ValidationSummaryTests
         var summary = ValidationSummary.Success(context, validationTime, warnings);
 
         // Assert
-        Assert.IsTrue(summary.IsValid);
-        Assert.AreEqual(0, summary.Errors.Count);
-        Assert.AreEqual(1, summary.Warnings.Count);
-        Assert.AreEqual(context, summary.Context);
-        Assert.AreEqual(validationTime, summary.ValidationTimeMs);
-        Assert.AreEqual("Minor issue", summary.Warnings.First());
+        summary.IsValid.Should().BeTrue();
+        summary.Errors.Should().BeEmpty();
+        summary.Warnings.Should().HaveCount(1);
+        summary.Context.Should().Be(context);
+        summary.ValidationTimeMs.Should().Be(validationTime);
+        summary.Warnings.First().Should().Be("Minor issue");
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("ValidationSummary")]
-    public void Failure_WithMultipleErrors_ShouldCreateInvalidSummary()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "ValidationSummary")]
+    public void Failure_WithMultipleErrors_ShouldCreateInvalidSummary() {
         // Arrange
         var errors = new[] { "Error 1", "Error 2", "Error 3" };
         var context = "security";
@@ -84,19 +78,18 @@ public class ValidationSummaryTests
         var summary = ValidationSummary.Failure(errors, context, validationTime);
 
         // Assert
-        Assert.IsFalse(summary.IsValid);
-        Assert.AreEqual(3, summary.Errors.Count);
-        Assert.AreEqual(0, summary.Warnings.Count);
-        Assert.AreEqual(context, summary.Context);
-        Assert.AreEqual(validationTime, summary.ValidationTimeMs);
-        CollectionAssert.AreEqual(errors.ToList(), summary.Errors.ToList());
+        Assert.False(summary.IsValid);
+        Assert.Equal(3, summary.Errors.Count);
+        Assert.Equal(0, summary.Warnings.Count);
+        Assert.Equal(context, summary.Context);
+        Assert.Equal(validationTime, summary.ValidationTimeMs);
+        Assert.Equal(errors.ToList(), summary.Errors.ToList());
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("ValidationSummary")]
-    public void Failure_WithSingleError_ShouldCreateInvalidSummary()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "ValidationSummary")]
+    public void Failure_WithSingleError_ShouldCreateInvalidSummary() {
         // Arrange
         var error = "Critical validation error";
         var context = "manifest";
@@ -105,17 +98,16 @@ public class ValidationSummaryTests
         var summary = ValidationSummary.Failure(error, context);
 
         // Assert
-        Assert.IsFalse(summary.IsValid);
-        Assert.AreEqual(1, summary.Errors.Count);
-        Assert.AreEqual(error, summary.Errors.First());
-        Assert.AreEqual(context, summary.Context);
+        Assert.False(summary.IsValid);
+        Assert.Equal(1, summary.Errors.Count);
+        Assert.Equal(error, summary.Errors.First());
+        Assert.Equal(context, summary.Context);
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("ValidationSummary")]
-    public void Failure_WithErrorsAndWarnings_ShouldCreateInvalidSummary()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "ValidationSummary")]
+    public void Failure_WithErrorsAndWarnings_ShouldCreateInvalidSummary() {
         // Arrange
         var errors = new[] { "Error 1" };
         var warnings = new[] { "Warning 1", "Warning 2" };
@@ -125,31 +117,29 @@ public class ValidationSummaryTests
         var summary = ValidationSummary.Failure(errors, context, 0, warnings);
 
         // Assert
-        Assert.IsFalse(summary.IsValid);
-        Assert.AreEqual(1, summary.Errors.Count);
-        Assert.AreEqual(2, summary.Warnings.Count);
-        Assert.AreEqual(context, summary.Context);
+        Assert.False(summary.IsValid);
+        Assert.Equal(1, summary.Errors.Count);
+        Assert.Equal(2, summary.Warnings.Count);
+        Assert.Equal(context, summary.Context);
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("ValidationSummary")]
-    public void Combine_WithNoSummaries_ShouldReturnSuccess()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "ValidationSummary")]
+    public void Combine_WithNoSummaries_ShouldReturnSuccess() {
         // Act
         var combined = ValidationSummary.Combine();
 
         // Assert
-        Assert.IsTrue(combined.IsValid);
-        Assert.AreEqual(0, combined.Errors.Count);
-        Assert.AreEqual(0, combined.Warnings.Count);
+        Assert.True(combined.IsValid);
+        Assert.Equal(0, combined.Errors.Count);
+        Assert.Equal(0, combined.Warnings.Count);
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("ValidationSummary")]
-    public void Combine_WithAllValidSummaries_ShouldReturnValid()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "ValidationSummary")]
+    public void Combine_WithAllValidSummaries_ShouldReturnValid() {
         // Arrange
         var summary1 = ValidationSummary.Success("manifest", 10, ["Warning 1"]);
         var summary2 = ValidationSummary.Success("security", 20, ["Warning 2"]);
@@ -159,18 +149,17 @@ public class ValidationSummaryTests
         var combined = ValidationSummary.Combine(summary1, summary2, summary3);
 
         // Assert
-        Assert.IsTrue(combined.IsValid);
-        Assert.AreEqual(0, combined.Errors.Count);
-        Assert.AreEqual(2, combined.Warnings.Count);
-        Assert.AreEqual(60L, combined.ValidationTimeMs);
-        Assert.AreEqual("manifest, security, dependencies", combined.Context);
+        Assert.True(combined.IsValid);
+        Assert.Equal(0, combined.Errors.Count);
+        Assert.Equal(2, combined.Warnings.Count);
+        Assert.Equal(60L, combined.ValidationTimeMs);
+        Assert.Equal("manifest, security, dependencies", combined.Context);
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("ValidationSummary")]
-    public void Combine_WithSomeInvalidSummaries_ShouldReturnInvalid()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "ValidationSummary")]
+    public void Combine_WithSomeInvalidSummaries_ShouldReturnInvalid() {
         // Arrange
         var summary1 = ValidationSummary.Success("manifest", 10, ["Warning 1"]);
         var summary2 = ValidationSummary.Failure(["Error 1", "Error 2"], "security", 20, ["Warning 2"]);
@@ -180,23 +169,22 @@ public class ValidationSummaryTests
         var combined = ValidationSummary.Combine(summary1, summary2, summary3);
 
         // Assert
-        Assert.IsFalse(combined.IsValid);
-        Assert.AreEqual(3, combined.Errors.Count);
-        Assert.AreEqual(2, combined.Warnings.Count);
-        Assert.AreEqual(60L, combined.ValidationTimeMs);
-        Assert.AreEqual("manifest, security, dependencies", combined.Context);
-        Assert.IsTrue(combined.Errors.Contains("Error 1"));
-        Assert.IsTrue(combined.Errors.Contains("Error 2"));
-        Assert.IsTrue(combined.Errors.Contains("Error 3"));
-        Assert.IsTrue(combined.Warnings.Contains("Warning 1"));
-        Assert.IsTrue(combined.Warnings.Contains("Warning 2"));
+        Assert.False(combined.IsValid);
+        Assert.Equal(3, combined.Errors.Count);
+        Assert.Equal(2, combined.Warnings.Count);
+        Assert.Equal(60L, combined.ValidationTimeMs);
+        Assert.Equal("manifest, security, dependencies", combined.Context);
+        Assert.True(combined.Errors.Contains("Error 1"));
+        Assert.True(combined.Errors.Contains("Error 2"));
+        Assert.True(combined.Errors.Contains("Error 3"));
+        Assert.True(combined.Warnings.Contains("Warning 1"));
+        Assert.True(combined.Warnings.Contains("Warning 2"));
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("ValidationSummary")]
-    public void Combine_WithEmptyContextSummaries_ShouldIgnoreEmptyContexts()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "ValidationSummary")]
+    public void Combine_WithEmptyContextSummaries_ShouldIgnoreEmptyContexts() {
         // Arrange
         var summary1 = ValidationSummary.Success("manifest", 10);
         var summary2 = ValidationSummary.Success("", 20); // Empty context
@@ -206,23 +194,22 @@ public class ValidationSummaryTests
         var combined = ValidationSummary.Combine(summary1, summary2, summary3);
 
         // Assert
-        Assert.IsTrue(combined.IsValid);
-        Assert.AreEqual("manifest, security", combined.Context);
-        Assert.AreEqual(60L, combined.ValidationTimeMs);
+        Assert.True(combined.IsValid);
+        Assert.Equal("manifest, security", combined.Context);
+        Assert.Equal(60L, combined.ValidationTimeMs);
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("ValidationSummary")]
-    public void Constructor_WithNullCollections_ShouldUseEmptyCollections()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "ValidationSummary")]
+    public void Constructor_WithNullCollections_ShouldUseEmptyCollections() {
         // Act
         var summary = new ValidationSummary(true, null, null, "test", 0);
 
         // Assert
-        Assert.IsTrue(summary.IsValid);
-        Assert.AreEqual(0, summary.Errors.Count);
-        Assert.AreEqual(0, summary.Warnings.Count);
-        Assert.AreEqual("test", summary.Context);
+        Assert.True(summary.IsValid);
+        Assert.Equal(0, summary.Errors.Count);
+        Assert.Equal(0, summary.Warnings.Count);
+        Assert.Equal("test", summary.Context);
     }
 }

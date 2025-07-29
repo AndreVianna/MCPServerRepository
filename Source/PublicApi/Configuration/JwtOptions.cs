@@ -5,8 +5,7 @@ namespace MCPHub.PublicApi.Configuration;
 /// <summary>
 /// Configuration options for JWT authentication
 /// </summary>
-public class JwtOptions
-{
+public class JwtOptions {
     public const string SectionName = "Jwt";
 
     /// <summary>

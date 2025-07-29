@@ -7,8 +7,7 @@ namespace MCPHub.Domain.Events;
 /// <summary>
 /// Event raised when a package's trust tier is updated
 /// </summary>
-public record TrustTierUpdatedEvent : BaseMessage
-{
+public record TrustTierUpdatedEvent : BaseMessage {
     /// <summary>
     /// Gets or sets the package identifier
     /// </summary>

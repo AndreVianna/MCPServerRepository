@@ -5,8 +5,7 @@ namespace MCPHub.Domain.Contracts.Requests;
 /// <summary>
 /// Request model for publishing a new version of an existing MCP package
 /// </summary>
-public class PublishVersionRequest
-{
+public class PublishVersionRequest {
     /// <summary>
     /// Semantic version string (e.g., "1.2.0", "2.0.0-beta.1")
     /// </summary>
@@ -47,8 +46,5 @@ public class PublishVersionRequest
     /// <summary>
     /// Validates that either PackageArchive or PackageUrl is provided
     /// </summary>
-    public bool IsValid()
-    {
-        return PackageArchive?.Length > 0 || !string.IsNullOrWhiteSpace(PackageUrl);
-    }
+    public bool IsValid() => PackageArchive?.Length > 0 || !string.IsNullOrWhiteSpace(PackageUrl);
 }

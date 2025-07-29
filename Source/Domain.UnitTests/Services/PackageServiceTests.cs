@@ -322,7 +322,7 @@ public class PackageServiceTests {
     [InlineData(null!)]
     public async Task GetPackageByNameAsync_WithInvalidName_ThrowsArgumentException(string? invalidName) {
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() => 
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
             _packageService.GetPackageByNameAsync(invalidName!));
         exception.Message.Should().Contain("name");
     }
@@ -334,7 +334,7 @@ public class PackageServiceTests {
     [InlineData(null!)]
     public async Task SearchPackagesAsync_WithInvalidQuery_ThrowsArgumentException(string? invalidQuery) {
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() => 
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
             _packageService.SearchPackagesAsync(invalidQuery!));
         exception.Message.Should().Contain("query");
     }
@@ -343,7 +343,7 @@ public class PackageServiceTests {
     [Trait("Category", "Unit")]
     public async Task CreatePackageAsync_WithNullPackage_ThrowsArgumentNullException() {
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ArgumentNullException>(() => 
+        var exception = await Assert.ThrowsAsync<ArgumentNullException>(() =>
             _packageService.CreatePackageAsync(null!));
         exception.ParamName.Should().Be("package");
     }
@@ -352,7 +352,7 @@ public class PackageServiceTests {
     [Trait("Category", "Unit")]
     public async Task UpdatePackageAsync_WithNullPackage_ThrowsArgumentNullException() {
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ArgumentNullException>(() => 
+        var exception = await Assert.ThrowsAsync<ArgumentNullException>(() =>
             _packageService.UpdatePackageAsync(null!));
         exception.ParamName.Should().Be("package");
     }
@@ -421,7 +421,7 @@ public class PackageServiceTests {
     [Trait("Category", "Unit")]
     public async Task SearchPackagesAsync_WithNullSearchRequest_ThrowsArgumentNullException() {
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ArgumentNullException>(() => 
+        var exception = await Assert.ThrowsAsync<ArgumentNullException>(() =>
             _packageService.SearchPackagesAsync((SearchRequest)null!));
         exception.ParamName.Should().Be("request");
     }
@@ -437,7 +437,7 @@ public class PackageServiceTests {
         };
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() => 
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
             _packageService.SearchPackagesAsync(invalidRequest));
         exception.ParamName.Should().Be("request");
         exception.Message.Should().Contain("Query is required");
@@ -456,7 +456,7 @@ public class PackageServiceTests {
         };
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() => 
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
             _packageService.SearchPackagesAsync(invalidRequest));
         exception.ParamName.Should().Be("request");
         exception.Message.Should().Contain("Page must be 1 or greater");
@@ -475,7 +475,7 @@ public class PackageServiceTests {
         };
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() => 
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
             _packageService.SearchPackagesAsync(invalidRequest));
         exception.ParamName.Should().Be("request");
         exception.Message.Should().Contain("Page size must be between 1 and 100");

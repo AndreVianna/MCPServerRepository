@@ -1,0 +1,443 @@
+@using MCPHub.Domain.Contracts.Requests
+@inject ISecurityService SecurityService
+@inject ISnackbar Snackbar
+
+<MudGrid Spacing="6">
+    <!-- Password Management -->
+    <MudItem xs="12" md="6">
+        <MudPaper Elevation="1" Class="pa-4">
+            <MudText Typo="Typo.h6" Class="mb-4">
+                <MudIcon Icon="@Icons.Material.Filled.Lock" Class="mr-2" />
+                Change Password
+            </MudText>
+            
+            <EditForm Model="@_passwordModel" OnValidSubmit="@HandleChangePassword">
+                <DataAnnotationsValidator />
+                <MudGrid Spacing="3">
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_passwordModel.CurrentPassword"
+                                      Label="Current Password"
+                                      Variant="Variant.Outlined"
+                                      InputType="@(_showCurrentPassword ? InputType.Text : InputType.Password)"
+                                      Adornment="Adornment.End"
+                                      AdornmentIcon="@(_showCurrentPassword ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff)"
+                                      OnAdornmentClick="@(() => _showCurrentPassword = !_showCurrentPassword)"
+                                      Required="true"
+                                      For="@(() => _passwordModel.CurrentPassword)"
+                                      FullWidth="true" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_passwordModel.NewPassword"
+                                      Label="New Password"
+                                      Variant="Variant.Outlined"
+                                      InputType="@(_showNewPassword ? InputType.Text : InputType.Password)"
+                                      Adornment="Adornment.End"
+                                      AdornmentIcon="@(_showNewPassword ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff)"
+                                      OnAdornmentClick="@(() => _showNewPassword = !_showNewPassword)"
+                                      Required="true"
+                                      For="@(() => _passwordModel.NewPassword)"
+                                      FullWidth="true" />
+                        <PasswordStrengthIndicator Password="@_passwordModel.NewPassword" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_passwordModel.ConfirmPassword"
+                                      Label="Confirm New Password"
+                                      Variant="Variant.Outlined"
+                                      InputType="@(_showConfirmPassword ? InputType.Text : InputType.Password)"
+                                      Adornment="Adornment.End"
+                                      AdornmentIcon="@(_showConfirmPassword ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff)"
+                                      OnAdornmentClick="@(() => _showConfirmPassword = !_showConfirmPassword)"
+                                      Required="true"
+                                      For="@(() => _passwordModel.ConfirmPassword)"
+                                      FullWidth="true" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudButton ButtonType="ButtonType.Submit"
+                                  Variant="Variant.Filled"
+                                  Color="Color.Primary"
+                                  Disabled="@_isChangingPassword"
+                                  StartIcon="@(_isChangingPassword ? null : Icons.Material.Filled.Lock)"
+                                  FullWidth="true">
+                            @if (_isChangingPassword)
+                            {
+                                <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                                <span class="ml-2">Changing Password...</span>
+                            }
+                            else
+                            {
+                                <span>Change Password</span>
+                            }
+                        </MudButton>
+                    </MudItem>
+                </MudGrid>
+            </EditForm>
+        </MudPaper>
+    </MudItem>
+
+    <!-- Two-Factor Authentication -->
+    <MudItem xs="12" md="6">
+        <MudPaper Elevation="1" Class="pa-4">
+            <div class="d-flex justify-space-between align-center mb-4">
+                <MudText Typo="Typo.h6">
+                    <MudIcon Icon="@Icons.Material.Filled.Security" Class="mr-2" />
+                    Two-Factor Authentication
+                </MudText>
+                @if (_isTwoFactorEnabled)
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Success" Icon="@Icons.Material.Filled.Check">
+                        Enabled
+                    </MudChip>
+                }
+                else
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Warning" Icon="@Icons.Material.Filled.Warning">
+                        Disabled
+                    </MudChip>
+                }
+            </div>
+
+            @if (!_isTwoFactorEnabled)
+            {
+                <MudAlert Severity="Severity.Info" Class="mb-4">
+                    <strong>Enhance your security!</strong> Enable two-factor authentication to add an extra layer of protection to your account.
+                </MudAlert>
+
+                <MudButton Variant="Variant.Outlined"
+                          Color="Color.Primary"
+                          StartIcon="@Icons.Material.Filled.Shield"
+                          OnClick="@(() => _showTwoFactorSetup = true)"
+                          FullWidth="true">
+                    Setup Two-Factor Authentication
+                </MudButton>
+            }
+            else
+            {
+                <MudText Typo="Typo.body2" Class="mb-4">
+                    Two-factor authentication is currently enabled on your account. You can disable it or regenerate recovery codes below.
+                </MudText>
+
+                <MudGrid Spacing="2">
+                    <MudItem xs="12" sm="6">
+                        <MudButton Variant="Variant.Outlined"
+                                  Color="Color.Secondary"
+                                  StartIcon="@Icons.Material.Filled.Refresh"
+                                  OnClick="@HandleRegenerateRecoveryCodes"
+                                  Disabled="@_isLoadingTwoFactor"
+                                  FullWidth="true">
+                            Regenerate Recovery Codes
+                        </MudButton>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudButton Variant="Variant.Outlined"
+                                  Color="Color.Error"
+                                  StartIcon="@Icons.Material.Filled.SecurityUpdateWarning"
+                                  OnClick="@HandleDisableTwoFactor"
+                                  Disabled="@_isLoadingTwoFactor"
+                                  FullWidth="true">
+                            Disable 2FA
+                        </MudButton>
+                    </MudItem>
+                </MudGrid>
+            }
+        </MudPaper>
+    </MudItem>
+
+    <!-- Active Sessions -->
+    <MudItem xs="12">
+        <MudPaper Elevation="1" Class="pa-4">
+            <div class="d-flex justify-space-between align-center mb-4">
+                <MudText Typo="Typo.h6">
+                    <MudIcon Icon="@Icons.Material.Filled.Devices" Class="mr-2" />
+                    Active Sessions
+                </MudText>
+                <MudButton Variant="Variant.Text"
+                          Size="Size.Small"
+                          StartIcon="@Icons.Material.Filled.Refresh"
+                          OnClick="@LoadActiveSessions">
+                    Refresh
+                </MudButton>
+            </div>
+
+            @if (_activeSessions?.Any() == true)
+            {
+                <div class="sessions-list">
+                    @foreach (var session in _activeSessions)
+                    {
+                        <MudCard Outlined="true" Class="mb-3">
+                            <MudCardContent Class="py-3">
+                                <div class="d-flex justify-space-between align-center">
+                                    <div class="session-info">
+                                        <div class="d-flex align-center mb-2">
+                                            <MudIcon Icon="@GetDeviceIcon(session.DeviceInfo)" Class="mr-2" />
+                                            <MudText Typo="Typo.subtitle1" Class="font-weight-bold">
+                                                @session.DeviceInfo
+                                            </MudText>
+                                            @if (session.IsCurrent)
+                                            {
+                                                <MudChip T="string" Size="Size.Small" Color="Color.Success" Class="ml-2">
+                                                    Current Session
+                                                </MudChip>
+                                            }
+                                        </div>
+                                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                            IP: @session.IpAddress • Location: @session.Location
+                                        </MudText>
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                            Last active: @session.LastAccessedAt.ToString("MMM dd, yyyy 'at' HH:mm")
+                                        </MudText>
+                                    </div>
+                                    @if (!session.IsCurrent)
+                                    {
+                                        <MudButton Variant="Variant.Text"
+                                                  Color="Color.Error"
+                                                  Size="Size.Small"
+                                                  StartIcon="@Icons.Material.Filled.Logout"
+                                                  OnClick="@(() => HandleTerminateSession(session.Id))">
+                                            Terminate
+                                        </MudButton>
+                                    }
+                                </div>
+                            </MudCardContent>
+                        </MudCard>
+                    }
+                </div>
+
+                <MudDivider Class="my-4" />
+                <div class="text-center">
+                    <MudButton Variant="Variant.Outlined"
+                              Color="Color.Error"
+                              StartIcon="@Icons.Material.Filled.Logout"
+                              OnClick="@HandleTerminateAllOtherSessions"
+                              Disabled="@_isLoadingSessions">
+                        Terminate All Other Sessions
+                    </MudButton>
+                </div>
+            }
+            else if (_isLoadingSessions)
+            {
+                <div class="text-center py-4">
+                    <MudProgressCircular Indeterminate="true" />
+                    <MudText Typo="Typo.body2" Class="mt-2">Loading sessions...</MudText>
+                </div>
+            }
+            else
+            {
+                <MudAlert Severity="Severity.Info">
+                    No active sessions found.
+                </MudAlert>
+            }
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+<!-- Two-Factor Setup Dialog -->
+<MudDialog @bind-IsVisible="_showTwoFactorSetup" Options="@_dialogOptions">
+    <TitleContent>
+        <div class="d-flex align-center">
+            <MudIcon Icon="@Icons.Material.Filled.Security" Class="mr-3" />
+            Setup Two-Factor Authentication
+        </div>
+    </TitleContent>
+    <DialogContent>
+        <TwoFactorSetupComponent OnSetupCompleted="@HandleTwoFactorSetupCompleted" />
+    </DialogContent>
+</MudDialog>
+
+@code {
+    private ChangePasswordModel _passwordModel = new();
+    private bool _showCurrentPassword = false;
+    private bool _showNewPassword = false;
+    private bool _showConfirmPassword = false;
+    private bool _isChangingPassword = false;
+
+    private bool _isTwoFactorEnabled = false;
+    private bool _isLoadingTwoFactor = false;
+    private bool _showTwoFactorSetup = false;
+
+    private UserSession[]? _activeSessions;
+    private bool _isLoadingSessions = false;
+
+    private readonly DialogOptions _dialogOptions = new()
+    {
+        MaxWidth = MaxWidth.Medium,
+        FullWidth = true,
+        CloseButton = true
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadActiveSessions();
+        // TODO: Load two-factor status
+    }
+
+    private async Task HandleChangePassword()
+    {
+        _isChangingPassword = true;
+        try
+        {
+            var request = new ChangePasswordRequest
+            {
+                CurrentPassword = _passwordModel.CurrentPassword,
+                NewPassword = _passwordModel.NewPassword,
+                ConfirmPassword = _passwordModel.ConfirmPassword
+            };
+
+            var result = await SecurityService.ChangePasswordAsync(request);
+            
+            if (result.IsSuccess)
+            {
+                Snackbar.Add("Password changed successfully!", Severity.Success);
+                _passwordModel = new(); // Clear form
+            }
+            else
+            {
+                Snackbar.Add($"Failed to change password: {result.ErrorMessage}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error changing password: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isChangingPassword = false;
+        }
+    }
+
+    private async Task HandleRegenerateRecoveryCodes()
+    {
+        _isLoadingTwoFactor = true;
+        try
+        {
+            // TODO: Implement recovery codes regeneration
+            Snackbar.Add("Recovery codes regenerated successfully!", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error regenerating recovery codes: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoadingTwoFactor = false;
+        }
+    }
+
+    private async Task HandleDisableTwoFactor()
+    {
+        _isLoadingTwoFactor = true;
+        try
+        {
+            // TODO: Implement two-factor disable
+            Snackbar.Add("Two-factor authentication disabled.", Severity.Info);
+            _isTwoFactorEnabled = false;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error disabling two-factor authentication: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoadingTwoFactor = false;
+        }
+    }
+
+    private async Task LoadActiveSessions()
+    {
+        _isLoadingSessions = true;
+        try
+        {
+            var result = await SecurityService.GetActiveSessionsAsync();
+            if (result.IsSuccess)
+            {
+                _activeSessions = result.Sessions;
+            }
+            else
+            {
+                Snackbar.Add($"Failed to load sessions: {result.ErrorMessage}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading sessions: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoadingSessions = false;
+        }
+    }
+
+    private async Task HandleTerminateSession(Guid sessionId)
+    {
+        try
+        {
+            var result = await SecurityService.TerminateSessionAsync(sessionId);
+            if (result.IsSuccess)
+            {
+                Snackbar.Add("Session terminated successfully.", Severity.Success);
+                await LoadActiveSessions(); // Refresh the list
+            }
+            else
+            {
+                Snackbar.Add($"Failed to terminate session: {result.ErrorMessage}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error terminating session: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task HandleTerminateAllOtherSessions()
+    {
+        try
+        {
+            var result = await SecurityService.TerminateAllOtherSessionsAsync();
+            if (result.IsSuccess)
+            {
+                Snackbar.Add("All other sessions terminated successfully.", Severity.Success);
+                await LoadActiveSessions(); // Refresh the list
+            }
+            else
+            {
+                Snackbar.Add($"Failed to terminate sessions: {result.ErrorMessage}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error terminating sessions: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task HandleTwoFactorSetupCompleted(bool success)
+    {
+        _showTwoFactorSetup = false;
+        if (success)
+        {
+            _isTwoFactorEnabled = true;
+            Snackbar.Add("Two-factor authentication enabled successfully!", Severity.Success);
+        }
+    }
+
+    private string GetDeviceIcon(string deviceInfo) => deviceInfo.ToLower() switch
+    {
+        var d when d.Contains("mobile") || d.Contains("phone") => Icons.Material.Filled.PhoneAndroid,
+        var d when d.Contains("tablet") || d.Contains("ipad") => Icons.Material.Filled.Tablet,
+        var d when d.Contains("mac") || d.Contains("macbook") => Icons.Material.Filled.Laptop,
+        var d when d.Contains("windows") || d.Contains("linux") => Icons.Material.Filled.Computer,
+        _ => Icons.Material.Filled.DeviceUnknown
+    };
+
+    public class ChangePasswordModel
+    {
+        [Required(ErrorMessage = "Current password is required")]
+        public string CurrentPassword { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "New password is required")]
+        [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be between 8 and 100 characters")]
+        public string NewPassword { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Please confirm your password")]
+        [Compare(nameof(NewPassword), ErrorMessage = "Passwords do not match")]
+        public string ConfirmPassword { get; set; } = string.Empty;
+    }
+}

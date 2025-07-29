@@ -1,0 +1,471 @@
+@using MCPHub.WebApp.Services
+@using MudBlazor
+@inject IExportService ExportService
+@inject ISnackbar Snackbar
+@inject IJSRuntime JSRuntime
+
+<MudDialog>
+    <DialogContent>
+        <div class="export-dialog-content">
+            <div class="export-header mb-4">
+                <MudIcon Icon="Icons.Material.Filled.Download" Size="Size.Large" Color="Color.Primary" Class="mr-3" />
+                <div>
+                    <MudText Typo="Typo.h6">Export Data</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        Choose your preferred export format and options
+                    </MudText>
+                </div>
+            </div>
+
+            <MudGrid Spacing="3">
+                <!-- Format Selection -->
+                <MudItem xs="12" md="6">
+                    <MudCard Outlined="true" Class="format-selection-card">
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.subtitle1">📁 Export Format</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudRadioGroup @bind-SelectedOption="_selectedFormat" T="ExportFormat">
+                                @foreach (var format in _supportedFormats)
+                                {
+                                    <div class="format-option d-flex align-center mb-2">
+                                        <MudRadio Option="@format" Value="@format" Color="Color.Primary" />
+                                        <div class="format-info ml-2">
+                                            <MudText Typo="Typo.body2" Class="font-weight-bold">
+                                                @GetFormatDisplayName(format)
+                                            </MudText>
+                                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                @GetFormatDescription(format)
+                                            </MudText>
+                                        </div>
+                                        <MudSpacer />
+                                        <MudIcon Icon="@GetFormatIcon(format)" Color="Color.Secondary" Size="Size.Small" />
+                                    </div>
+                                }
+                            </MudRadioGroup>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+
+                <!-- Export Options -->
+                <MudItem xs="12" md="6">
+                    <MudCard Outlined="true" Class="options-card">
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.subtitle1">⚙️ Export Options</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <div class="export-options">
+                                <MudTextField @bind-Value="_fileName"
+                                              Label="File Name"
+                                              Variant="Variant.Outlined"
+                                              Margin="Margin.Dense"
+                                              HelperText="Without file extension"
+                                              Class="mb-3" />
+
+                                <MudTextField @bind-Value="_title"
+                                              Label="Report Title"
+                                              Variant="Variant.Outlined"
+                                              Margin="Margin.Dense"
+                                              Class="mb-3" />
+
+                                <MudTextField @bind-Value="_description"
+                                              Label="Description (Optional)"
+                                              Variant="Variant.Outlined"
+                                              Margin="Margin.Dense"
+                                              Lines="2"
+                                              Class="mb-3" />
+
+                                <div class="export-checkboxes">
+                                    <MudCheckBox T="bool" @bind-Checked="_includeTimestamp"
+                                                 Label="Include timestamp"
+                                                 Color="Color.Primary"
+                                                 Class="mb-2" />
+
+                                    @if (HasChartData)
+                                    {
+                                        <MudCheckBox T="bool" @bind-Checked="_includeCharts"
+                                                     Label="Include chart data"
+                                                     Color="Color.Primary"
+                                                     Class="mb-2" />
+                                    }
+                                </div>
+                            </div>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+
+                <!-- Preview Section -->
+                @if (!string.IsNullOrEmpty(PreviewContent))
+                {
+                    <MudItem xs="12">
+                        <MudCard Outlined="true" Class="preview-card">
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.subtitle1">👁️ Data Preview</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        Preview of data to be exported
+                                    </MudText>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                            <MudCardContent>
+                                <div class="preview-content">
+                                    <MudText Typo="Typo.body2" Class="preview-text">
+                                        @PreviewContent.Truncate(200)
+                                    </MudText>
+                                    
+                                    @if (EstimatedSize > 0)
+                                    {
+                                        <MudDivider Class="my-2" />
+                                        <div class="preview-stats d-flex justify-space-between">
+                                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                Estimated size: @FormatFileSize(EstimatedSize)
+                                            </MudText>
+                                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                Format: @_selectedFormat.ToString().ToUpper()
+                                            </MudText>
+                                        </div>
+                                    }
+                                </div>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                }
+            </MudGrid>
+        </div>
+    </DialogContent>
+    
+    <DialogActions>
+        <div class="export-actions d-flex justify-space-between w-100">
+            <MudText Typo="Typo.caption" Color="Color.Secondary" Class="align-self-center">
+                @if (_isExporting)
+                {
+                    <span>Preparing export...</span>
+                }
+                else
+                {
+                    <span>Ready to export in @_selectedFormat format</span>
+                }
+            </MudText>
+            
+            <div class="action-buttons d-flex gap-2">
+                <MudButton Variant="Variant.Text" 
+                           @onclick="Cancel"
+                           Disabled="_isExporting">
+                    Cancel
+                </MudButton>
+                
+                <MudButton Variant="Variant.Filled" 
+                           Color="Color.Primary"
+                           StartIcon="@(_isExporting ? Icons.Material.Filled.HourglassEmpty : Icons.Material.Filled.Download)"
+                           @onclick="StartExport"
+                           Disabled="_isExporting || string.IsNullOrWhiteSpace(_fileName)">
+                    @if (_isExporting)
+                    {
+                        <span>Exporting...</span>
+                    }
+                    else
+                    {
+                        <span>Export</span>
+                    }
+                </MudButton>
+            </div>
+        </div>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    
+    [Parameter] public Services.ExportAnalyticsData? AnalyticsData { get; set; }
+    [Parameter] public Services.ExportChartData? ChartData { get; set; }
+    [Parameter] public List<Dictionary<string, object>>? TableData { get; set; }
+    [Parameter] public string DefaultFileName { get; set; } = "export";
+    [Parameter] public string PreviewContent { get; set; } = string.Empty;
+    [Parameter] public long EstimatedSize { get; set; }
+    [Parameter] public bool HasChartData { get; set; }
+
+    private ExportFormat _selectedFormat = ExportFormat.Csv;
+    private List<ExportFormat> _supportedFormats = new();
+    private string _fileName = string.Empty;
+    private string _title = string.Empty;
+    private string _description = string.Empty;
+    private bool _includeTimestamp = true;
+    private bool _includeCharts = true;
+    private bool _isExporting = false;
+
+    protected override void OnInitialized()
+    {
+        _supportedFormats = ExportService.GetSupportedFormats();
+        _fileName = DefaultFileName;
+        _title = AnalyticsData?.Title ?? ChartData?.Title ?? "Data Export";
+        _description = AnalyticsData?.Description ?? ChartData?.Description ?? "";
+    }
+
+    private async Task StartExport()
+    {
+        try
+        {
+            _isExporting = true;
+            StateHasChanged();
+
+            var options = new ExportOptions
+            {
+                FileName = _fileName,
+                Format = _selectedFormat,
+                Title = _title,
+                Description = _description,
+                IncludeTimestamp = _includeTimestamp,
+                IncludeCharts = _includeCharts
+            };
+
+            ExportResult result;
+
+            if (AnalyticsData != null)
+            {
+                result = await ExportService.ExportAnalyticsAsync(AnalyticsData, options);
+            }
+            else if (ChartData != null)
+            {
+                result = await ExportService.ExportChartAsync(ChartData, options);
+            }
+            else if (TableData != null)
+            {
+                result = await ExportService.ExportTableAsync(TableData, options);
+            }
+            else
+            {
+                Snackbar.Add("No data available for export", Severity.Warning);
+                return;
+            }
+
+            if (result.Success && result.Data != null)
+            {
+                await DownloadFile(result.FileName!, result.Data, result.ContentType!);
+                
+                if (!string.IsNullOrEmpty(result.ErrorMessage))
+                {
+                    Snackbar.Add(result.ErrorMessage, Severity.Info);
+                }
+                else
+                {
+                    Snackbar.Add($"Successfully exported {result.FileName}", Severity.Success);
+                }
+                
+                MudDialog.Close(DialogResult.Ok(result));
+            }
+            else
+            {
+                Snackbar.Add($"Export failed: {result.ErrorMessage}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Export error: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isExporting = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task DownloadFile(string fileName, byte[] data, string contentType)
+    {
+        try
+        {
+            var base64 = Convert.ToBase64String(data);
+            await JSRuntime.InvokeVoidAsync("downloadFile", fileName, contentType, base64);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Download failed: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private string GetFormatDisplayName(ExportFormat format) => format switch
+    {
+        ExportFormat.Csv => "CSV",
+        ExportFormat.Json => "JSON",
+        ExportFormat.Pdf => "PDF",
+        ExportFormat.Excel => "Excel",
+        _ => format.ToString()
+    };
+
+    private string GetFormatDescription(ExportFormat format) => format switch
+    {
+        ExportFormat.Csv => "Comma-separated values, opens in spreadsheet apps",
+        ExportFormat.Json => "JavaScript Object Notation, structured data format",
+        ExportFormat.Pdf => "Portable Document Format, professional reports",
+        ExportFormat.Excel => "Microsoft Excel format with multiple sheets",
+        _ => "Unknown format"
+    };
+
+    private string GetFormatIcon(ExportFormat format) => format switch
+    {
+        ExportFormat.Csv => Icons.Material.Filled.TableChart,
+        ExportFormat.Json => Icons.Material.Filled.Code,
+        ExportFormat.Pdf => Icons.Material.Filled.PictureAsPdf,
+        ExportFormat.Excel => Icons.Material.Filled.GridOn,
+        _ => Icons.Material.Filled.InsertDriveFile
+    };
+
+    private string FormatFileSize(long bytes)
+    {
+        if (bytes < 1024) return $"{bytes} B";
+        if (bytes < 1024 * 1024) return $"{bytes / 1024.0:F1} KB";
+        if (bytes < 1024 * 1024 * 1024) return $"{bytes / (1024.0 * 1024.0):F1} MB";
+        return $"{bytes / (1024.0 * 1024.0 * 1024.0):F1} GB";
+    }
+}
+
+<style>
+.export-dialog-content {
+    min-width: 600px;
+    max-width: 800px;
+}
+
+.export-header {
+    display: flex;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--mud-palette-divider);
+}
+
+.format-selection-card,
+.options-card,
+.preview-card {
+    height: 100%;
+    border-radius: 12px;
+}
+
+.format-option {
+    padding: 8px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.format-option:hover {
+    background-color: var(--mud-palette-action-hover);
+}
+
+.format-info {
+    flex: 1;
+}
+
+.export-options .mud-input {
+    margin-bottom: 12px;
+}
+
+.export-checkboxes {
+    border-top: 1px solid var(--mud-palette-divider);
+    padding-top: 16px;
+}
+
+.preview-content {
+    background-color: var(--mud-palette-background-grey);
+    border: 1px solid var(--mud-palette-divider);
+    border-radius: 8px;
+    padding: 16px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.preview-text {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.preview-stats {
+    margin-top: 8px;
+    padding-top: 8px;
+}
+
+.export-actions {
+    padding: 16px 0;
+    border-top: 1px solid var(--mud-palette-divider);
+}
+
+.action-buttons .mud-button {
+    min-width: 100px;
+}
+
+/* Mobile optimizations */
+@@media (max-width: 768px) {
+    .export-dialog-content {
+        min-width: 100%;
+        max-width: 100%;
+    }
+    
+    .export-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+    }
+    
+    .export-actions {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+    
+    .action-buttons {
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .action-buttons .mud-button {
+        flex: 1;
+        max-width: 120px;
+    }
+}
+
+/* Dark theme adjustments */
+@@media (prefers-color-scheme: dark) {
+    .preview-content {
+        background-color: rgba(255, 255, 255, 0.02);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Accessibility enhancements */
+.format-option:focus-within {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: 2px;
+}
+
+/* Animation for loading states */
+.mud-button .mud-button-start-icon {
+    transition: transform 0.3s ease;
+}
+
+.mud-button:disabled .mud-button-start-icon {
+    animation: rotate 1s linear infinite;
+}
+
+@@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+</style>
+
+<script>
+    window.downloadFile = (filename, contentType, base64Data) => {
+        const linkElement = document.createElement('a');
+        linkElement.setAttribute('href', `data:${contentType};base64,${base64Data}`);
+        linkElement.setAttribute('download', filename);
+        linkElement.style.display = 'none';
+        document.body.appendChild(linkElement);
+        linkElement.click();
+        document.body.removeChild(linkElement);
+    };
+</script>

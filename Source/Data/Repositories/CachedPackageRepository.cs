@@ -82,14 +82,14 @@ public class CachedPackageRepository(IPackageRepository packageRepository, ICach
         var trustTierKey = request.MinimumTrustTier?.ToString() ?? "none";
         var sortKey = $"{request.SortBy ?? "none"}:{request.SortDirection}";
         var cacheKey = $"{_cacheKeyPrefix}:search_advanced:{request.Query}:{categoriesKey}:{trustTierKey}:{request.Page}:{request.PageSize}:{sortKey}";
-        
+
         var cachedResult = await _cacheService.GetAsync<SearchResult<Package>>(cacheKey, cancellationToken);
 
         if (cachedResult != null)
             return cachedResult;
 
         var searchResult = await _packageRepository.SearchAsync(request, cancellationToken);
-        
+
         // Cache search results for 5 minutes (shorter than simple search due to complexity)
         await _cacheService.SetAsync(cacheKey, searchResult, TimeSpan.FromMinutes(5), cancellationToken);
 

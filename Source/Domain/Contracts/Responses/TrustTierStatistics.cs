@@ -5,8 +5,7 @@ namespace MCPHub.Domain.Contracts.Responses;
 /// <summary>
 /// Represents overall trust tier statistics across the platform
 /// </summary>
-public class TrustTierStatistics
-{
+public class TrustTierStatistics {
     /// <summary>
     /// Gets or sets the total number of packages in the system
     /// </summary>
@@ -76,8 +75,7 @@ public class TrustTierStatistics
 /// <summary>
 /// Represents trend data for a specific trust tier
 /// </summary>
-public class TrustTierTrend
-{
+public class TrustTierTrend {
     /// <summary>
     /// Gets or sets the current count of packages in this tier
     /// </summary>
@@ -111,15 +109,14 @@ public class TrustTierTrend
     /// <summary>
     /// Gets or sets the trend direction
     /// </summary>
-    public TrendDirection Direction => Change > 0 ? TrendDirection.Up : 
+    public TrendDirection Direction => Change > 0 ? TrendDirection.Up :
                                      Change < 0 ? TrendDirection.Down : TrendDirection.Stable;
 }
 
 /// <summary>
 /// Represents the direction of a trend
 /// </summary>
-public enum TrendDirection
-{
+public enum TrendDirection {
     /// <summary>
     /// Trend is stable (no significant change)
     /// </summary>

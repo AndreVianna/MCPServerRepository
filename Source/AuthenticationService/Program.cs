@@ -1,8 +1,9 @@
 using MCPHub.AuthenticationService.Services;
 using MCPHub.Data;
 using MCPHub.Data.Extensions;
-using Microsoft.AspNetCore.Identity;
 using MCPHub.Domain.Entities;
+
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 

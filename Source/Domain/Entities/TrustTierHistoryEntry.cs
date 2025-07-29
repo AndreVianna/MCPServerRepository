@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+
 using MCPHub.Domain.Common;
 using MCPHub.Domain.Contracts.Responses;
 
@@ -7,8 +8,7 @@ namespace MCPHub.Domain.Entities;
 /// <summary>
 /// Represents a historical record of trust tier changes for a package
 /// </summary>
-public class TrustTierHistoryEntry : BaseEntity
-{
+public class TrustTierHistoryEntry : BaseEntity {
     /// <summary>
     /// Gets or sets the package identifier this history belongs to
     /// </summary>
@@ -82,8 +82,7 @@ public class TrustTierHistoryEntry : BaseEntity
         bool isAutomatic = true,
         int? trustScoreAtChange = null,
         Dictionary<string, object>? metadata = null,
-        Guid? assessmentId = null)
-    {
+        Guid? assessmentId = null) {
         ArgumentException.ThrowIfNullOrWhiteSpace(reason);
 
         PackageId = packageId;
@@ -98,8 +97,7 @@ public class TrustTierHistoryEntry : BaseEntity
         Metadata = metadata ?? new Dictionary<string, object>();
         AssessmentId = assessmentId;
 
-        AuditTrail.Add(new AuditEntry
-        {
+        AuditTrail.Add(new AuditEntry {
             Action = $"Trust Tier Changed from {fromTier} to {toTier}",
             UserId = changedByUserId ?? Guid.Empty,
             DateTime = DateTimeOffset.UtcNow
@@ -126,17 +124,14 @@ public class TrustTierHistoryEntry : BaseEntity
     /// </summary>
     /// <param name="newMetadata">New metadata to add or update</param>
     /// <param name="userId">User performing the update</param>
-    public void UpdateMetadata(Dictionary<string, object> newMetadata, Guid? userId = null)
-    {
+    public void UpdateMetadata(Dictionary<string, object> newMetadata, Guid? userId = null) {
         ArgumentNullException.ThrowIfNull(newMetadata);
 
-        foreach (var kvp in newMetadata)
-        {
+        foreach (var kvp in newMetadata) {
             Metadata[kvp.Key] = kvp.Value;
         }
 
-        AuditTrail.Add(new AuditEntry
-        {
+        AuditTrail.Add(new AuditEntry {
             Action = "Trust Tier History Metadata Updated",
             UserId = userId ?? Guid.Empty,
             DateTime = DateTimeOffset.UtcNow

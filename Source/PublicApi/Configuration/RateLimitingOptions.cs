@@ -5,15 +5,13 @@ namespace MCPHub.PublicApi.Configuration;
 /// <summary>
 /// Configuration options for rate limiting
 /// </summary>
-public class RateLimitingOptions
-{
+public class RateLimitingOptions {
     public const string SectionName = "RateLimiting";
 
     /// <summary>
     /// Authentication endpoint rate limiting configuration (5 req/min per IP)
     /// </summary>
-    public EndpointRateLimitConfig Authentication { get; init; } = new()
-    {
+    public EndpointRateLimitConfig Authentication { get; init; } = new() {
         PermitLimit = 5,
         WindowMinutes = 1,
         QueueLimit = 0,
@@ -24,8 +22,7 @@ public class RateLimitingOptions
     /// <summary>
     /// Search endpoint rate limiting configuration (100 req/min per IP)
     /// </summary>
-    public EndpointRateLimitConfig Search { get; init; } = new()
-    {
+    public EndpointRateLimitConfig Search { get; init; } = new() {
         PermitLimit = 100,
         WindowMinutes = 1,
         QueueLimit = 10,
@@ -36,8 +33,7 @@ public class RateLimitingOptions
     /// <summary>
     /// Package CRUD operation rate limiting (50 req/min per authenticated user)
     /// </summary>
-    public EndpointRateLimitConfig PackageCrud { get; init; } = new()
-    {
+    public EndpointRateLimitConfig PackageCrud { get; init; } = new() {
         PermitLimit = 50,
         WindowMinutes = 1,
         QueueLimit = 5,
@@ -48,8 +44,7 @@ public class RateLimitingOptions
     /// <summary>
     /// Public read operation rate limiting (200 req/min per IP)
     /// </summary>
-    public EndpointRateLimitConfig PublicRead { get; init; } = new()
-    {
+    public EndpointRateLimitConfig PublicRead { get; init; } = new() {
         PermitLimit = 200,
         WindowMinutes = 1,
         QueueLimit = 20,
@@ -60,8 +55,7 @@ public class RateLimitingOptions
     /// <summary>
     /// Global fallback rate limiting configuration
     /// </summary>
-    public EndpointRateLimitConfig Global { get; init; } = new()
-    {
+    public EndpointRateLimitConfig Global { get; init; } = new() {
         PermitLimit = 1000,
         WindowMinutes = 1,
         QueueLimit = 100,
@@ -98,8 +92,7 @@ public class RateLimitingOptions
 /// <summary>
 /// Rate limiting configuration for specific endpoint categories
 /// </summary>
-public class EndpointRateLimitConfig
-{
+public class EndpointRateLimitConfig {
     /// <summary>
     /// Maximum number of requests per window
     /// </summary>

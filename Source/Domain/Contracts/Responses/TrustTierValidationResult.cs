@@ -5,8 +5,7 @@ namespace MCPHub.Domain.Contracts.Responses;
 /// <summary>
 /// Represents the result of trust tier eligibility validation
 /// </summary>
-public class TrustTierValidationResult
-{
+public class TrustTierValidationResult {
     /// <summary>
     /// Gets or sets the package identifier being validated
     /// </summary>
@@ -75,10 +74,8 @@ public class TrustTierValidationResult
     /// <summary>
     /// Gets the percentage of requirements that are met
     /// </summary>
-    public decimal CompletionPercentage
-    {
-        get
-        {
+    public decimal CompletionPercentage {
+        get {
             var totalRequirements = MetRequirements.Count() + UnmetRequirements.Count();
             return totalRequirements > 0 ? (decimal)MetRequirements.Count() / totalRequirements * 100 : 100;
         }
@@ -88,8 +85,7 @@ public class TrustTierValidationResult
 /// <summary>
 /// Represents validation results for a specific trust tier category
 /// </summary>
-public class TrustTierCategoryValidation
-{
+public class TrustTierCategoryValidation {
     /// <summary>
     /// Gets or sets the category name (e.g., "Security", "Community", "Publisher")
     /// </summary>

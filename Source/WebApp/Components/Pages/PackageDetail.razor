@@ -1,0 +1,1721 @@
+@page "/package/{publisherName}/{packageName}"
+@page "/package/{publisherName}/{packageName}/{version?}"
+@inject IApiClientService ApiClient
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@using MCPHub.WebApp.Components.UI.Search
+@using MCPHub.WebApp.Components.UI.Packages
+@using MCPHub.WebApp.Components.UI.Layout
+@using MCPHub.WebApp.Components.UI.Models
+@using MCPHub.WebApp.Components.UI.Analytics
+@using MCPHub.WebApp.Components.UI.Security
+@using MCPHub.WebApp.Services
+@using MCPHub.Domain.Entities
+@using MCPHub.Domain.ValueObjects
+
+<PageTitle>@(_package?.Name ?? "Package") - MCP Hub</PageTitle>
+
+@if (_package != null)
+{
+    <ResponsiveContainer MaxWidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
+        <HeaderContent>
+            <!-- Package Header -->
+            <div class="package-detail-header">
+                <div class="d-flex align-center mb-3">
+                    <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
+                                 Color="Color.Default"
+                                 @onclick="@(() => Navigation.NavigateTo("/search"))"
+                                 Title="Back to search"
+                                 Class="mr-2" />
+                    <MudBreadcrumbs Items="@GetBreadcrumbs()" Class="flex-grow-1" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Share"
+                                 Color="Color.Default"
+                                 @onclick="SharePackage"
+                                 Title="Share package" />
+                </div>
+
+                <div class="package-title-section mb-4">
+                    <div class="d-flex justify-space-between align-start">
+                        <div class="package-title-info">
+                            <MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-1">
+                                @_package.Publisher.Name/@_package.Name
+                            </MudText>
+                            <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-3">
+                                @_package.Description
+                            </MudText>
+                            
+                            <!-- Package Metadata -->
+                            <div class="package-metadata d-flex flex-wrap align-center gap-4 mb-3">
+                                <div class="metadata-item d-flex align-center">
+                                    <MudIcon Icon="@Icons.Material.Filled.Tag" Size="Size.Small" Class="mr-1" />
+                                    <MudText Typo="Typo.body2">v@(_selectedVersion ?? _package.LatestVersion)</MudText>
+                                </div>
+                                
+                                <div class="metadata-item d-flex align-center">
+                                    <MudIcon Icon="@Icons.Material.Filled.Download" Size="Size.Small" Class="mr-1" />
+                                    <MudText Typo="Typo.body2">@FormatDownloads(_package.WeeklyDownloads)/week</MudText>
+                                </div>
+                                
+                                <div class="metadata-item d-flex align-center">
+                                    <MudIcon Icon="@Icons.Material.Filled.Star" Size="Size.Small" Class="mr-1" />
+                                    <MudText Typo="Typo.body2">@_package.Rating.ToString("F1") (@GetReviewCount() reviews)</MudText>
+                                </div>
+                                
+                                <div class="metadata-item d-flex align-center">
+                                    <MudIcon Icon="@Icons.Material.Filled.Schedule" Size="Size.Small" Class="mr-1" />
+                                    <MudText Typo="Typo.body2">Updated @FormatLastUpdated(_package.LastUpdated)</MudText>
+                                </div>
+
+                                <div class="metadata-item d-flex align-center">
+                                    <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small" Class="mr-1" />
+                                    <MudLink Href="@($"/publisher/{_package.Publisher.Name}")" Class="publisher-link">
+                                        @_package.Publisher.DisplayName
+                                        @if (_package.Publisher.IsVerified)
+                                        {
+                                            <MudIcon Icon="@Icons.Material.Filled.Verified" 
+                                                   Color="Color.Success" 
+                                                   Size="Size.Small" 
+                                                   Class="ml-1" />
+                                        }
+                                    </MudLink>
+                                </div>
+                            </div>
+
+                            <!-- Security and Trust Indicators -->
+                            <div class="security-indicators d-flex align-center gap-3 mb-4">
+                                <SecurityGradeBadge Grade="@_package.SecurityGrade" 
+                                                  Score="@_package.SecurityScore"
+                                                  DetailedReport="@_package.SecurityReport"
+                                                  OnDetailClick="@ShowSecurityModal" />
+                                
+                                <TrustTierIndicator Tier="@_package.TrustTier" 
+                                                  ShowProgressIndicator="true"
+                                                  Progress="@_package.TrustProgress"
+                                                  OnDetailsClick="@ShowTrustModal" />
+                                
+                                @if (_package.IsTrending)
+                                {
+                                    <MudChip T="string" 
+                                           Color="Color.Success" 
+                                           Variant="Variant.Filled"
+                                           StartIcon="@Icons.Material.Filled.TrendingUp">
+                                        Trending
+                                    </MudChip>
+                                }
+                            </div>
+
+                            <!-- Package Tags -->
+                            <div class="package-tags d-flex flex-wrap gap-2">
+                                @foreach (var tag in _package.Tags)
+                                {
+                                    <MudChip T="string" 
+                                           Color="Color.Primary" 
+                                           Variant="Variant.Outlined"
+                                           Size="Size.Small"
+                                           OnClick="@(() => SearchByTag(tag))">
+                                        @tag
+                                    </MudChip>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="package-actions">
+                            <div class="install-section mb-3">
+                                <MudButton Color="Color.Primary" 
+                                         Variant="Variant.Filled"
+                                         Size="Size.Large"
+                                         StartIcon="@Icons.Material.Filled.Download"
+                                         @onclick="InstallPackage"
+                                         FullWidth="true"
+                                         Class="mb-2">
+                                    Install Package
+                                </MudButton>
+                                
+                                <MudSelect T="string" 
+                                         @bind-Value="@_selectedVersion"
+                                         Label="Version"
+                                         Variant="Variant.Outlined"
+                                         Dense="true"
+                                         FullWidth="true">
+                                    @foreach (var version in GetAvailableVersions())
+                                    {
+                                        <MudSelectItem Value="@version.Version">
+                                            @version.Version
+                                            @if (version.IsLatest) { <span> (Latest)</span> }
+                                            @if (version.IsPrerelease) { <span> (Pre-release)</span> }
+                                        </MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </div>
+
+                            <div class="secondary-actions d-flex gap-2">
+                                <MudButton Color="@(_package.IsStarred ? Color.Warning : Color.Default)" 
+                                         Variant="Variant.Outlined"
+                                         StartIcon="@(_package.IsStarred ? Icons.Material.Filled.Star : Icons.Material.Outlined.Star)"
+                                         @onclick="ToggleStar"
+                                         FullWidth="true">
+                                    @(_package.IsStarred ? "Starred" : "Star")
+                                </MudButton>
+                                
+                                <MudButton Color="Color.Default" 
+                                         Variant="Variant.Outlined"
+                                         StartIcon="@Icons.Material.Filled.BugReport"
+                                         @onclick="ReportIssue"
+                                         FullWidth="true">
+                                    Report
+                                </MudButton>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Installation Command -->
+                <MudPaper Class="installation-command pa-4 mb-4" Elevation="1">
+                    <div class="d-flex justify-space-between align-center">
+                        <div class="command-section flex-grow-1">
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-1">Installation Command</MudText>
+                            <MudText Typo="Typo.body1" Class="command-text">
+                                mcpm install @_package.Publisher.Name/@_package.Name@(string.IsNullOrEmpty(_selectedVersion) ? "" : $"@{_selectedVersion}")
+                            </MudText>
+                        </div>
+                        <MudIconButton Icon="@Icons.Material.Filled.ContentCopy"
+                                     Color="Color.Primary"
+                                     @onclick="CopyInstallCommand"
+                                     Title="Copy to clipboard" />
+                    </div>
+                </MudPaper>
+            </div>
+        </HeaderContent>
+
+        <MainContent>
+            <!-- Package Tabs -->
+            <MudTabs Elevation="1" Rounded="true" Centered="false" Color="Color.Primary" Class="package-tabs">
+                <MudTabPanel Text="Overview" Icon="@Icons.Material.Filled.Info">
+                    <div class="overview-content">
+                        <!-- README Content -->
+                        <section class="readme-section mb-6">
+                            <MudText Typo="Typo.h6" Class="mb-3">📖 Documentation</MudText>
+                            <MudPaper Class="pa-4" Elevation="1">
+                                <div class="readme-content">
+                                    @((MarkupString)GetReadmeContent())
+                                </div>
+                            </MudPaper>
+                        </section>
+
+                        <!-- Package Statistics -->
+                        <section class="statistics-section mb-6">
+                            <MudText Typo="Typo.h6" Class="mb-3">📊 Package Statistics</MudText>
+                            <MudGrid Spacing="3">
+                                <MudItem xs="12" md="8">
+                                    <AnalyticsChart Title="Download Trends"
+                                                   Subtitle="Downloads over the last 90 days"
+                                                   ChartType="Components.UI.Models.ChartType.Line"
+                                                   ChartSeries="@ChartSeriesConverter.ToMudBlazor(GetDownloadTrendData())"
+                                                   XAxisLabels="@GetTimeLabels()"
+                                                   ShowTimeRangeSelector="true"
+                                                   ShowDataTable="false"
+                                                   ShowSummary="true"
+                                                   Height="300" />
+                                </MudItem>
+                                
+                                <MudItem xs="12" md="4">
+                                    <MudPaper Class="pa-4 h-100">
+                                        <MudText Typo="Typo.h6" Class="mb-4">Key Metrics</MudText>
+                                        
+                                        <div class="metric-item mb-3">
+                                            <div class="d-flex justify-space-between align-center">
+                                                <MudText Typo="Typo.body2">Total Downloads</MudText>
+                                                <MudText Typo="Typo.h6" Color="Color.Primary">@FormatDownloads(GetTotalDownloads())</MudText>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="metric-item mb-3">
+                                            <div class="d-flex justify-space-between align-center">
+                                                <MudText Typo="Typo.body2">GitHub Stars</MudText>
+                                                <MudText Typo="Typo.h6" Color="Color.Warning">@GetGitHubStars()</MudText>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="metric-item mb-3">
+                                            <div class="d-flex justify-space-between align-center">
+                                                <MudText Typo="Typo.body2">Dependents</MudText>
+                                                <MudText Typo="Typo.h6" Color="Color.Success">@GetDependentCount()</MudText>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="metric-item">
+                                            <div class="d-flex justify-space-between align-center">
+                                                <MudText Typo="Typo.body2">Last Scan</MudText>
+                                                <MudText Typo="Typo.body2" Color="Color.Secondary">@FormatLastUpdated(GetLastScanDate())</MudText>
+                                            </div>
+                                        </div>
+                                    </MudPaper>
+                                </MudItem>
+                            </MudGrid>
+                        </section>
+
+                        <!-- Related Packages -->
+                        <section class="related-packages-section">
+                            <MudText Typo="Typo.h6" Class="mb-3">🔗 Related Packages</MudText>
+                            <MudGrid Spacing="3">
+                                @foreach (var relatedPackage in GetRelatedPackages())
+                                {
+                                    <MudItem xs="12" sm="6" md="4">
+                                        <PackageCard Package="@relatedPackage" 
+                                                   OnInstallClick="@HandleInstall"
+                                                   OnDetailsClick="@HandleDetails"
+                                                   OnStarClick="@HandleStar"
+                                                   OnShareClick="@HandleShare"
+                                                   OnMoreClick="@HandleMore" />
+                                    </MudItem>
+                                }
+                            </MudGrid>
+                        </section>
+                    </div>
+                </MudTabPanel>
+
+                <MudTabPanel Text="Security" Icon="@Icons.Material.Filled.Security">
+                    <SecurityVisualization SecurityReport="@_package.SecurityReport"
+                                         SecurityHistory="@GetSecurityHistory()"
+                                         OnDownloadSecurityReport="@DownloadSecurityReport"
+                                         OnRequestNewScan="@RequestNewScan" />
+                </MudTabPanel>
+
+                <MudTabPanel Text="Installation" Icon="@Icons.Material.Filled.Download">
+                    <InstallationInstructions PackageName="@_package.Name"
+                                            PublisherName="@_package.Publisher.Name"
+                                            AvailableVersions="@GetAvailableVersions()"
+                                            OnInstallPackage="@InstallPackage"
+                                            DocumentationUrl="@GetDocumentationUrl()"
+                                            IssuesUrl="@GetIssuesUrl()"
+                                            CommunityUrl="@GetCommunityUrl()"
+                                            SupportUrl="@GetSupportUrl()" />
+                </MudTabPanel>
+
+                <MudTabPanel Text="Manifest" Icon="@Icons.Material.Filled.Description">
+                    <ManifestVisualization Manifest="@GetPackageManifest()"
+                                         OnViewToolDetails="@ShowToolDetails"
+                                         OnTestTool="@TestTool"
+                                         OnViewResource="@ViewResource"
+                                         OnDownloadResource="@DownloadResource"
+                                         OnViewPromptDetails="@ShowPromptDetails"
+                                         OnTryPrompt="@TryPrompt"
+                                         OnViewRawManifest="@ViewRawManifest"
+                                         OnDownloadManifest="@DownloadManifest" />
+                </MudTabPanel>
+
+                <MudTabPanel Text="Security (Old)" Icon="@Icons.Material.Filled.Security" Style="display: none;">
+                    <div class="security-content">
+                        <!-- Security Overview -->
+                        <section class="security-overview mb-6">
+                            <div class="d-flex justify-space-between align-center mb-4">
+                                <MudText Typo="Typo.h6">🔒 Security Analysis Report</MudText>
+                                <div class="d-flex gap-2">
+                                    <MudButton Color="Color.Primary" 
+                                             Variant="Variant.Outlined"
+                                             StartIcon="@Icons.Material.Filled.Download"
+                                             @onclick="DownloadSecurityReport">
+                                        Download Report
+                                    </MudButton>
+                                    <MudButton Color="Color.Secondary" 
+                                             Variant="Variant.Outlined"
+                                             StartIcon="@Icons.Material.Filled.Refresh"
+                                             @onclick="RequestNewScan">
+                                        Request New Scan
+                                    </MudButton>
+                                </div>
+                            </div>
+
+                            <!-- Security Grade Breakdown -->
+                            <MudGrid Spacing="4">
+                                <MudItem xs="12" md="8">
+                                    <MudPaper Class="pa-4" Elevation="1">
+                                        <div class="security-grade-breakdown">
+                                            <div class="overall-grade mb-4">
+                                                <div class="d-flex align-center justify-space-between">
+                                                    <div>
+                                                        <MudText Typo="Typo.h5" Color="Color.Primary">
+                                                            Overall Grade: @_package.SecurityGrade
+                                                        </MudText>
+                                                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                                            Score: @_package.SecurityScore.ToString("F1")/10.0
+                                                        </MudText>
+                                                    </div>
+                                                    <SecurityGradeBadge Grade="@_package.SecurityGrade" 
+                                                                      Score="@_package.SecurityScore"
+                                                                      ShowScore="true" />
+                                                </div>
+                                                
+                                                <MudProgressLinear Value="@(_package.SecurityScore * 10)" 
+                                                                 Color="@GetSecurityColor()"
+                                                                 Size="Size.Large"
+                                                                 Class="mt-2" />
+                                            </div>
+
+                                            <!-- Security Categories -->
+                                            <div class="security-categories">
+                                                @foreach (var category in GetSecurityCategories())
+                                                {
+                                                    <div class="security-category mb-3">
+                                                        <div class="d-flex justify-space-between align-center mb-1">
+                                                            <MudText Typo="Typo.body1">@category.Name</MudText>
+                                                            <MudText Typo="Typo.body2" Color="@GetGradeColor(category.Grade)">
+                                                                @category.Grade (@category.Score.ToString("F1")/10)
+                                                            </MudText>
+                                                        </div>
+                                                        <MudProgressLinear Value="@(category.Score * 10)" 
+                                                                         Color="@GetGradeColor(category.Grade)"
+                                                                         Size="Size.Small" />
+                                                        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-1">
+                                                            @category.Description
+                                                        </MudText>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </MudPaper>
+                                </MudItem>
+                                
+                                <MudItem xs="12" md="4">
+                                    <MudPaper Class="pa-4 h-100" Elevation="1">
+                                        <MudText Typo="Typo.h6" Class="mb-3">🛡️ Security Features</MudText>
+                                        
+                                        @foreach (var feature in GetSecurityFeatures())
+                                        {
+                                            <div class="security-feature d-flex align-center mb-2">
+                                                <MudIcon Icon="@(feature.IsSupported ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.Cancel)"
+                                                       Color="@(feature.IsSupported ? Color.Success : Color.Error)"
+                                                       Size="Size.Small"
+                                                       Class="mr-2" />
+                                                <MudText Typo="Typo.body2">@feature.Name</MudText>
+                                            </div>
+                                        }
+                                    </MudPaper>
+                                </MudItem>
+                            </MudGrid>
+                        </section>
+
+                        <!-- Vulnerability Information -->
+                        <section class="vulnerability-section mb-6">
+                            <MudText Typo="Typo.h6" Class="mb-3">🔍 Vulnerability Assessment</MudText>
+                            
+                            @if (GetVulnerabilities().Any())
+                            {
+                                <MudAlert Severity="Severity.Warning" Class="mb-3">
+                                    <MudText>@GetVulnerabilities().Count vulnerability(s) found. Review details below.</MudText>
+                                </MudAlert>
+                                
+                                @foreach (var vulnerability in GetVulnerabilities())
+                                {
+                                    <MudExpansionPanels MultiExpansion="true" Class="mb-2">
+                                        <MudExpansionPanel>
+                                            <TitleContent>
+                                                <div class="d-flex align-center">
+                                                    <MudIcon Icon="@GetVulnerabilityIcon(vulnerability.Severity)" 
+                                                           Color="@GetVulnerabilityColor(vulnerability.Severity)"
+                                                           Class="mr-3" />
+                                                    <MudText>@vulnerability.Title</MudText>
+                                                    <MudSpacer />
+                                                    <MudChip T="string" 
+                                                           Color="@GetVulnerabilityColor(vulnerability.Severity)"
+                                                           Size="Size.Small">
+                                                        @vulnerability.Severity
+                                                    </MudChip>
+                                                </div>
+                                            </TitleContent>
+                                            <ChildContent>
+                                                <div class="vulnerability-details">
+                                                    <MudText Typo="Typo.body2" Class="mb-2">@vulnerability.Description</MudText>
+                                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                        CVE: @vulnerability.CveId | CVSS Score: @vulnerability.CvssScore
+                                                    </MudText>
+                                                </div>
+                                            </ChildContent>
+                                        </MudExpansionPanel>
+                                    </MudExpansionPanels>
+                                }
+                            }
+                            else
+                            {
+                                <MudAlert Severity="Severity.Success">
+                                    <MudText>No known vulnerabilities found in this package or its dependencies.</MudText>
+                                </MudAlert>
+                            }
+                        </section>
+
+                        <!-- Security History -->
+                        <section class="security-history-section">
+                            <MudText Typo="Typo.h6" Class="mb-3">📈 Security Score History</MudText>
+                            <AnalyticsChart Title="Security Score Trend"
+                                           Subtitle="Security score over time"
+                                           ChartType="Components.UI.Models.ChartType.Line"
+                                           ChartSeries="@ChartSeriesConverter.ToMudBlazor(GetSecurityTrendData())"
+                                           XAxisLabels="@GetSecurityTimeLabels()"
+                                           ShowTimeRangeSelector="false"
+                                           ShowDataTable="false"
+                                           ShowSummary="false"
+                                           Height="250" />
+                        </section>
+                    </div>
+                </MudTabPanel>
+
+                <MudTabPanel Text="Versions" Icon="@Icons.Material.Filled.History">
+                    <VersionComparison Versions="@GetVersionHistory()"
+                                     OnInstallVersion="@((string version) => HandleInstallVersion(version))" />
+                </MudTabPanel>
+
+                <MudTabPanel Text="Versions (Old)" Icon="@Icons.Material.Filled.History" Style="display: none;">
+                    <div class="versions-content">
+                        <!-- Version History -->
+                        <section class="version-history mb-6">
+                            <div class="d-flex justify-space-between align-center mb-4">
+                                <MudText Typo="Typo.h6">📦 Version History</MudText>
+                                <MudButton Color="Color.Primary" 
+                                         Variant="Variant.Outlined"
+                                         StartIcon="@Icons.Material.Filled.Notifications"
+                                         @onclick="SubscribeToUpdates">
+                                    Subscribe to Updates
+                                </MudButton>
+                            </div>
+
+                            <div class="version-list">
+                                @foreach (var version in GetVersionHistory())
+                                {
+                                    <MudPaper Class="version-item pa-4 mb-3" Elevation="1">
+                                        <div class="d-flex justify-space-between align-start">
+                                            <div class="version-info flex-grow-1">
+                                                <div class="d-flex align-center mb-2">
+                                                    <MudText Typo="Typo.h6" Class="mr-3">v@version.Version</MudText>
+                                                    @if (version.IsLatest)
+                                                    {
+                                                        <MudChip T="string" Color="Color.Success" Size="Size.Small">Latest</MudChip>
+                                                    }
+                                                    @if (version.IsPrerelease)
+                                                    {
+                                                        <MudChip T="string" Color="Color.Warning" Size="Size.Small" Class="ml-1">Pre-release</MudChip>
+                                                    }
+                                                </div>
+                                                
+                                                <MudText Typo="Typo.body2" Class="mb-2">@version.Description</MudText>
+                                                
+                                                <div class="version-metadata d-flex gap-4">
+                                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                        Released @FormatLastUpdated(version.ReleaseDate)
+                                                    </MudText>
+                                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                        @FormatDownloads(version.Downloads) downloads
+                                                    </MudText>
+                                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                        Security: @version.SecurityGrade
+                                                    </MudText>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="version-actions">
+                                                <MudButton Color="Color.Primary" 
+                                                         Variant="Variant.Outlined"
+                                                         Size="Size.Small"
+                                                         @onclick="@(() => SelectVersion(version.Version))">
+                                                    Select
+                                                </MudButton>
+                                            </div>
+                                        </div>
+                                        
+                                        @if (version.Changes?.Any() == true)
+                                        {
+                                            <MudCollapse Expanded="false">
+                                                <div class="version-changes mt-3">
+                                                    <MudText Typo="Typo.subtitle2" Class="mb-2">Changes in this version:</MudText>
+                                                    <ul class="change-list">
+                                                        @foreach (var change in version.Changes)
+                                                        {
+                                                            <li>
+                                                                <MudText Typo="Typo.body2">@change</MudText>
+                                                            </li>
+                                                        }
+                                                    </ul>
+                                                </div>
+                                            </MudCollapse>
+                                        }
+                                    </MudPaper>
+                                }
+                            </div>
+                        </section>
+                    </div>
+                </MudTabPanel>
+
+                <MudTabPanel Text="Dependencies" Icon="@Icons.Material.Filled.AccountTree">
+                    <div class="dependencies-content">
+                        <!-- Dependencies List -->
+                        <section class="dependencies-section mb-6">
+                            <MudText Typo="Typo.h6" Class="mb-3">🔗 Dependencies</MudText>
+                            
+                            @if (GetDependencies().Any())
+                            {
+                                <MudTable Items="@GetDependencies()" Hover="true" Striped="true">
+                                    <HeaderContent>
+                                        <MudTh>Package</MudTh>
+                                        <MudTh>Version</MudTh>
+                                        <MudTh>Security</MudTh>
+                                        <MudTh>License</MudTh>
+                                        <MudTh>Actions</MudTh>
+                                    </HeaderContent>
+                                    <RowTemplate>
+                                        <MudTd DataLabel="Package">
+                                            <div class="d-flex align-center">
+                                                <MudText>@context.Name</MudText>
+                                                @if (context.IsOutdated)
+                                                {
+                                                    <MudIcon Icon="@Icons.Material.Filled.Warning" 
+                                                           Color="Color.Warning" 
+                                                           Size="Size.Small" 
+                                                           Class="ml-2"
+                                                           Title="Outdated version" />
+                                                }
+                                            </div>
+                                        </MudTd>
+                                        <MudTd DataLabel="Version">@context.Version</MudTd>
+                                        <MudTd DataLabel="Security">
+                                            <SecurityGradeBadge Grade="@context.SecurityGrade" 
+                                                              Score="@context.SecurityScore"
+                                                              ShowScore="false" />
+                                        </MudTd>
+                                        <MudTd DataLabel="License">@context.License</MudTd>
+                                        <MudTd DataLabel="Actions">
+                                            <MudIconButton Icon="@Icons.Material.Filled.OpenInNew"
+                                                         Color="Color.Primary"
+                                                         Size="Size.Small"
+                                                         @onclick="@(() => ViewDependency(context))"
+                                                         Title="View dependency" />
+                                        </MudTd>
+                                    </RowTemplate>
+                                </MudTable>
+                            }
+                            else
+                            {
+                                <MudAlert Severity="Severity.Info">
+                                    <MudText>This package has no external dependencies.</MudText>
+                                </MudAlert>
+                            }
+                        </section>
+
+                        <!-- Dependents -->
+                        <section class="dependents-section">
+                            <MudText Typo="Typo.h6" Class="mb-3">📊 Packages That Depend On This</MudText>
+                            
+                            @if (GetDependents().Any())
+                            {
+                                <MudGrid Spacing="3">
+                                    @foreach (var dependent in GetDependents())
+                                    {
+                                        <MudItem xs="12" sm="6" md="4">
+                                            <MudCard Elevation="1">
+                                                <MudCardContent>
+                                                    <MudText Typo="Typo.h6" Class="mb-1">@dependent.Name</MudText>
+                                                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-2">
+                                                        @dependent.Description
+                                                    </MudText>
+                                                    <div class="d-flex justify-space-between align-center">
+                                                        <MudText Typo="Typo.caption">@FormatDownloads(dependent.WeeklyDownloads)/week</MudText>
+                                                        <MudButton Color="Color.Primary" 
+                                                                 Variant="Variant.Text"
+                                                                 Size="Size.Small"
+                                                                 @onclick="@(() => ViewPackage(dependent))">
+                                                            View
+                                                        </MudButton>
+                                                    </div>
+                                                </MudCardContent>
+                                            </MudCard>
+                                        </MudItem>
+                                    }
+                                </MudGrid>
+                            }
+                            else
+                            {
+                                <MudAlert Severity="Severity.Info">
+                                    <MudText>No packages currently depend on this package.</MudText>
+                                </MudAlert>
+                            }
+                        </section>
+                    </div>
+                </MudTabPanel>
+            </MudTabs>
+        </MainContent>
+
+        <SidebarContent>
+            <!-- Package Info Sidebar -->
+            <div class="package-sidebar">
+                <!-- Installation Instructions -->
+                <MudPaper Class="pa-4 mb-4">
+                    <MudText Typo="Typo.h6" Class="mb-3">🚀 Quick Install</MudText>
+                    
+                    <MudTabs Elevation="0" Rounded="false" Centered="false" Color="Color.Primary">
+                        <MudTabPanel Text="CLI">
+                            <div class="install-method">
+                                <MudTextField Value="@GetInstallCommand()"
+                                            Label="Command Line"
+                                            Variant="Variant.Outlined"
+                                            ReadOnly="true"
+                                            Adornment="Adornment.End"
+                                            AdornmentIcon="@Icons.Material.Filled.ContentCopy"
+                                            OnAdornmentClick="CopyInstallCommand" />
+                            </div>
+                        </MudTabPanel>
+                        <MudTabPanel Text="Docker">
+                            <div class="install-method">
+                                <MudTextField Value="@GetDockerCommand()"
+                                            Label="Docker"
+                                            Variant="Variant.Outlined"
+                                            ReadOnly="true"
+                                            Adornment="Adornment.End"
+                                            AdornmentIcon="@Icons.Material.Filled.ContentCopy"
+                                            OnAdornmentClick="CopyDockerCommand" />
+                            </div>
+                        </MudTabPanel>
+                    </MudTabs>
+                </MudPaper>
+
+                <!-- Package Links -->
+                <MudPaper Class="pa-4 mb-4">
+                    <MudText Typo="Typo.h6" Class="mb-3">🔗 Links</MudText>
+                    
+                    <div class="package-links">
+                        <MudButton Color="Color.Primary" 
+                                 Variant="Variant.Text"
+                                 StartIcon="@Icons.Material.Filled.Code"
+                                 FullWidth="true"
+                                 @onclick="@(() => OpenExternalLink(GetRepositoryUrl()))"
+                                 Class="mb-2 justify-start">
+                            Source Code
+                        </MudButton>
+                        
+                        <MudButton Color="Color.Primary" 
+                                 Variant="Variant.Text"
+                                 StartIcon="@Icons.Material.Filled.Description"
+                                 FullWidth="true"
+                                 @onclick="@(() => OpenExternalLink(GetDocumentationUrl()))"
+                                 Class="mb-2 justify-start">
+                            Documentation
+                        </MudButton>
+                        
+                        <MudButton Color="Color.Primary" 
+                                 Variant="Variant.Text"
+                                 StartIcon="@Icons.Material.Filled.BugReport"
+                                 FullWidth="true"
+                                 @onclick="@(() => OpenExternalLink(GetIssuesUrl()))"
+                                 Class="mb-2 justify-start">
+                            Report Issue
+                        </MudButton>
+                        
+                        <MudButton Color="Color.Primary" 
+                                 Variant="Variant.Text"
+                                 StartIcon="@Icons.Material.Filled.Gavel"
+                                 FullWidth="true"
+                                 @onclick="@(() => OpenExternalLink(GetLicenseUrl()))"
+                                 Class="justify-start">
+                            License
+                        </MudButton>
+                    </div>
+                </MudPaper>
+
+                <!-- Publisher Profile -->
+                <MudPaper Class="pa-4 mb-4">
+                    <div class="d-flex justify-space-between align-center mb-3">
+                        <MudText Typo="Typo.h6">👤 Publisher</MudText>
+                        <TrustTierIndicator Tier="@_package.TrustTier" ShowProgressIndicator="false" />
+                    </div>
+                    
+                    <div class="publisher-profile">
+                        <div class="d-flex align-center mb-3">
+                            <MudAvatar Size="Size.Medium" Class="mr-3">
+                                @_package.Publisher.DisplayName?.Substring(0, 1).ToUpper()
+                            </MudAvatar>
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-center">
+                                    <MudText Typo="Typo.subtitle1">@_package.Publisher.DisplayName</MudText>
+                                    @if (_package.Publisher.IsVerified)
+                                    {
+                                        <MudIcon Icon="@Icons.Material.Filled.Verified" 
+                                               Color="Color.Success" 
+                                               Size="Size.Small" 
+                                               Class="ml-2" />
+                                    }
+                                </div>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">@(_package.Publisher.Name)</MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">@_package.Publisher.Type Publisher</MudText>
+                            </div>
+                        </div>
+
+                        <!-- Publisher Contact -->
+                        <div class="publisher-contact mb-3">
+                            <MudText Typo="Typo.subtitle2" Class="mb-2">Contact Information</MudText>
+                            <div class="contact-links">
+                                <MudButton Color="Color.Primary" 
+                                         Variant="Variant.Text"
+                                         StartIcon="@Icons.Material.Filled.Email"
+                                         Size="Size.Small"
+                                         @onclick="@(() => OpenExternalLink(GetPublisherEmailUrl()))"
+                                         Class="mb-1 justify-start"
+                                         FullWidth="true">
+                                    Contact Publisher
+                                </MudButton>
+                                <MudButton Color="Color.Primary" 
+                                         Variant="Variant.Text"
+                                         StartIcon="@Icons.Material.Filled.Language"
+                                         Size="Size.Small"
+                                         @onclick="@(() => OpenExternalLink(GetPublisherWebsiteUrl()))"
+                                         Class="mb-1 justify-start"
+                                         FullWidth="true">
+                                    Visit Website
+                                </MudButton>
+                                <MudButton Color="Color.Primary" 
+                                         Variant="Variant.Text"
+                                         StartIcon="@Icons.Material.Filled.Forum"
+                                         Size="Size.Small"
+                                         @onclick="@(() => OpenExternalLink(GetPublisherSupportUrl()))"
+                                         Class="justify-start"
+                                         FullWidth="true">
+                                    Get Support
+                                </MudButton>
+                            </div>
+                        </div>
+
+                        <!-- Publisher Stats -->
+                        <div class="publisher-stats">
+                            <MudText Typo="Typo.subtitle2" Class="mb-2">Publisher Statistics</MudText>
+                            <div class="stat-item d-flex justify-space-between mb-1">
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">Total Packages</MudText>
+                                <MudText Typo="Typo.caption">@GetPublisherPackageCount()</MudText>
+                            </div>
+                            <div class="stat-item d-flex justify-space-between mb-1">
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">Member Since</MudText>
+                                <MudText Typo="Typo.caption">@GetPublisherMemberSince()</MudText>
+                            </div>
+                            <div class="stat-item d-flex justify-space-between">
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">Combined Downloads</MudText>
+                                <MudText Typo="Typo.caption">@FormatDownloads(GetPublisherTotalDownloads())</MudText>
+                            </div>
+                        </div>
+                    </div>
+                </MudPaper>
+
+                <!-- Maintainers -->
+                <MudPaper Class="pa-4 mb-4">
+                    <MudText Typo="Typo.h6" Class="mb-3">👥 Maintainers</MudText>
+                    
+                    @foreach (var maintainer in GetMaintainers())
+                    {
+                        <div class="maintainer d-flex align-center mb-3">
+                            <MudAvatar Size="Size.Small" Class="mr-3">
+                                @maintainer.Name.Substring(0, 1).ToUpper()
+                            </MudAvatar>
+                            <div class="flex-grow-1">
+                                <MudText Typo="Typo.body2">@maintainer.Name</MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">@maintainer.Role</MudText>
+                            </div>
+                            @if (!string.IsNullOrEmpty(maintainer.ContactUrl))
+                            {
+                                <MudIconButton Icon="@Icons.Material.Filled.ContactMail"
+                                             Color="Color.Primary"
+                                             Size="Size.Small"
+                                             @onclick="@(() => OpenExternalLink(maintainer.ContactUrl))"
+                                             Title="Contact maintainer" />
+                            }
+                        </div>
+                    }
+                </MudPaper>
+
+                <!-- Package Statistics -->
+                <MudPaper Class="pa-4">
+                    <MudText Typo="Typo.h6" Class="mb-3">📊 Statistics</MudText>
+                    
+                    <div class="package-stats">
+                        <div class="stat-item d-flex justify-space-between mb-2">
+                            <MudText Typo="Typo.body2">Weekly Downloads</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Primary">@FormatDownloads(_package.WeeklyDownloads)</MudText>
+                        </div>
+                        
+                        <div class="stat-item d-flex justify-space-between mb-2">
+                            <MudText Typo="Typo.body2">Total Downloads</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Primary">@FormatDownloads(GetTotalDownloads())</MudText>
+                        </div>
+                        
+                        <div class="stat-item d-flex justify-space-between mb-2">
+                            <MudText Typo="Typo.body2">Stars</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Warning">@GetGitHubStars()</MudText>
+                        </div>
+                        
+                        <div class="stat-item d-flex justify-space-between mb-2">
+                            <MudText Typo="Typo.body2">Forks</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Info">@GetGitHubForks()</MudText>
+                        </div>
+                        
+                        <div class="stat-item d-flex justify-space-between">
+                            <MudText Typo="Typo.body2">Package Size</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">@GetPackageSize()</MudText>
+                        </div>
+                    </div>
+                </MudPaper>
+            </div>
+        </SidebarContent>
+    </ResponsiveContainer>
+}
+else if (_isLoading)
+{
+    <!-- Loading State -->
+    <div class="package-loading d-flex justify-center align-center" style="min-height: 50vh;">
+        <div class="text-center">
+            <MudProgressCircular Size="Size.Large" Indeterminate="true" Class="mb-4" />
+            <MudText Typo="Typo.h6">Loading package details...</MudText>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Package Not Found -->
+    <div class="package-not-found d-flex justify-center align-center" style="min-height: 50vh;">
+        <div class="text-center">
+            <MudIcon Icon="@Icons.Material.Filled.Search" 
+                   Size="Size.Large" 
+                   Color="Color.Secondary" 
+                   Style="font-size: 4rem;" 
+                   Class="mb-4" />
+            <MudText Typo="Typo.h4" Color="Color.Secondary" Class="mb-2">
+                Package Not Found
+            </MudText>
+            <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-4">
+                The package "@PublisherName/@PackageName" could not be found.
+            </MudText>
+            <MudButton Color="Color.Primary" 
+                     Variant="Variant.Filled"
+                     StartIcon="@Icons.Material.Filled.Search"
+                     @onclick="@(() => Navigation.NavigateTo("/search"))">
+                Search Packages
+            </MudButton>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string PublisherName { get; set; } = "";
+    [Parameter] public string PackageName { get; set; } = "";
+    [Parameter] public string? Version { get; set; }
+
+    private PackageInfo? _package;
+    private bool _isLoading = true;
+    private string? _selectedVersion;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPackageDetails();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_package?.Name != PackageName || _package?.Publisher.Name != PublisherName)
+        {
+            await LoadPackageDetails();
+        }
+    }
+
+    private async Task LoadPackageDetails()
+    {
+        _isLoading = true;
+        
+        try
+        {
+            // Call the real API to get package details
+            var result = await ApiClient.GetPackageByNameAsync(PublisherName ?? "", PackageName ?? "", Version);
+            
+            if (result.IsSuccess && result.Package != null)
+            {
+                _package = ConvertApiPackageDetailsToPackageInfo(result.Package);
+                _selectedVersion = Version ?? _package?.LatestVersion;
+            }
+            else
+            {
+                // Package not found or error, show 404 or fallback to mock data
+                Console.WriteLine($"Package not found: {PublisherName}/{PackageName}");
+                _package = GenerateMockPackageDetails();
+                _selectedVersion = Version ?? _package?.LatestVersion;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading package details: {ex.Message}");
+            // Fallback to mock data
+            _package = GenerateMockPackageDetails();
+            _selectedVersion = Version ?? _package?.LatestVersion;
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    // Event Handlers
+    private async Task InstallPackage()
+    {
+        // Implementation for package installation
+        await Task.CompletedTask;
+    }
+
+    private async Task ToggleStar()
+    {
+        if (_package != null)
+        {
+            _package.IsStarred = !_package.IsStarred;
+            StateHasChanged();
+        }
+        await Task.CompletedTask;
+    }
+
+    private async Task SharePackage()
+    {
+        await JSRuntime.InvokeVoidAsync("navigator.share", new
+        {
+            title = $"{_package?.Name} - MCP Hub",
+            text = _package?.Description,
+            url = Navigation.Uri
+        });
+    }
+
+    private async Task CopyInstallCommand()
+    {
+        var command = GetInstallCommand();
+        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", command);
+    }
+
+    private async Task CopyDockerCommand()
+    {
+        var command = GetDockerCommand();
+        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", command);
+    }
+
+    private void SearchByTag(string tag)
+    {
+        Navigation.NavigateTo($"/search?tag={Uri.EscapeDataString(tag)}");
+    }
+
+    private void SelectVersion(string version)
+    {
+        _selectedVersion = version;
+        Navigation.NavigateTo($"/package/{PublisherName}/{PackageName}/{version}");
+    }
+
+    private async Task ShowSecurityModal()
+    {
+        // Implementation for showing security modal
+        await Task.CompletedTask;
+    }
+
+    private async Task ShowTrustModal()
+    {
+        // Implementation for showing trust modal
+        await Task.CompletedTask;
+    }
+
+    private async Task ReportIssue()
+    {
+        // Implementation for reporting issues
+        await Task.CompletedTask;
+    }
+
+    private async Task DownloadSecurityReport()
+    {
+        // Implementation for downloading security report
+        await Task.CompletedTask;
+    }
+
+    private async Task RequestNewScan()
+    {
+        // Implementation for requesting new security scan
+        await Task.CompletedTask;
+    }
+
+    private async Task SubscribeToUpdates()
+    {
+        // Implementation for subscribing to updates
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleInstall(PackageInfo package)
+    {
+        Navigation.NavigateTo($"/package/{package.Publisher.Name}/{package.Name}");
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleDetails(PackageInfo package)
+    {
+        Navigation.NavigateTo($"/package/{package.Publisher.Name}/{package.Name}");
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleStar(PackageInfo package)
+    {
+        package.IsStarred = !package.IsStarred;
+        StateHasChanged();
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleShare(PackageInfo package)
+    {
+        // Implementation for package sharing
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleMore(PackageInfo package)
+    {
+        // Implementation for more options
+        await Task.CompletedTask;
+    }
+
+    private void ViewDependency(DependencyInfo dependency)
+    {
+        Navigation.NavigateTo($"/package/{dependency.Publisher}/{dependency.Name}");
+    }
+
+    private void ViewPackage(PackageInfo package)
+    {
+        Navigation.NavigateTo($"/package/{package.Publisher.Name}/{package.Name}");
+    }
+
+    private async Task OpenExternalLink(string url)
+    {
+        await JSRuntime.InvokeVoidAsync("window.open", url, "_blank");
+    }
+
+    // Helper Methods
+    private List<BreadcrumbItem> GetBreadcrumbs()
+    {
+        return new List<BreadcrumbItem>
+        {
+            new("Packages", "/search"),
+            new(PublisherName, $"/publisher/{PublisherName}"),
+            new(PackageName, null, disabled: true)
+        };
+    }
+
+    private string GetInstallCommand()
+    {
+        var versionPart = string.IsNullOrEmpty(_selectedVersion) ? "" : $"@{_selectedVersion}";
+        return $"mcpm install {PublisherName}/{PackageName}{versionPart}";
+    }
+
+    private string GetDockerCommand()
+    {
+        var versionPart = string.IsNullOrEmpty(_selectedVersion) ? "latest" : _selectedVersion;
+        return $"docker run mcphub/{PublisherName}-{PackageName}:{versionPart}";
+    }
+
+    private string FormatDownloads(long downloads)
+    {
+        return downloads switch
+        {
+            var d when d >= 1000000 => $"{downloads / 1000000.0:F1}M",
+            var d when d >= 1000 => $"{downloads / 1000.0:F1}K",
+            _ => downloads.ToString()
+        };
+    }
+
+    private string FormatLastUpdated(DateTime lastUpdated)
+    {
+        var timeSpan = DateTime.UtcNow - lastUpdated;
+        return timeSpan.TotalDays switch
+        {
+            var days when days < 1 => "today",
+            var days when days < 2 => "yesterday",
+            var days when days < 7 => $"{(int)timeSpan.TotalDays} days ago",
+            var days when days < 30 => $"{(int)(timeSpan.TotalDays / 7)} weeks ago",
+            var days when days < 365 => $"{(int)(timeSpan.TotalDays / 30)} months ago",
+            _ => $"{(int)(timeSpan.TotalDays / 365)} years ago"
+        };
+    }
+
+    // Mock data generation methods
+    private PackageInfo GenerateMockPackageDetails()
+    {
+        var random = new Random();
+        return new PackageInfo
+        {
+            Name = PackageName,
+            LatestVersion = "2.1.0",
+            Description = "Advanced AI-powered package with comprehensive features for modern applications. Includes machine learning capabilities, natural language processing, and enterprise-grade security.",
+            Publisher = new PublisherInfo 
+            { 
+                Name = PublisherName,
+                DisplayName = $"{PublisherName.Replace("-", " ").Replace("_", " ")} Inc",
+                Type = PublisherType.Organization,
+                IsVerified = true
+            },
+            SecurityGrade = "A+",
+            SecurityScore = 9.4,
+            TrustTier = TrustTier.Enterprise,
+            WeeklyDownloads = 45230,
+            Rating = 4.8,
+            LastUpdated = DateTime.UtcNow.AddDays(-3),
+            Tags = new List<string> { "AI", "ML", "Enterprise", "Security", "Analytics" },
+            IsTrending = true,
+            IsStarred = false,
+            SecurityReport = new SecurityScanResult(
+                status: SecurityScanStatus.Passed,
+                vulnerabilities: new List<SecurityVulnerability>(),
+                scannerVersion: "1.0.0"
+            ),
+            TrustProgress = new TrustTierProgress()
+        };
+    }
+
+    private string GetReadmeContent()
+    {
+        return $@"
+<h2>🚀 Getting Started</h2>
+<p>This package provides advanced AI capabilities for your applications with enterprise-grade security and performance.</p>
+
+<h3>Installation</h3>
+<pre><code>mcpm install {PublisherName}/{PackageName}</code></pre>
+
+<h3>Features</h3>
+<ul>
+    <li>🤖 Advanced AI models</li>
+    <li>🔒 Enterprise security</li>
+    <li>📊 Real-time analytics</li>
+    <li>⚡ High performance</li>
+    <li>🌐 Multi-platform support</li>
+</ul>
+
+<h3>Quick Example</h3>
+<pre><code>
+const package = require('{PackageName}');
+
+// Initialize the AI service
+const ai = new package.AIService({{
+    apiKey: 'your-api-key',
+    model: 'advanced-v2'
+}});
+
+// Process data
+const result = await ai.process('your input data');
+console.log(result);
+</code></pre>
+
+<h3>Configuration</h3>
+<p>The package supports various configuration options for different use cases. See the documentation for detailed configuration examples.</p>
+        ";
+    }
+
+    private List<VersionInfo> GetAvailableVersions()
+    {
+        return new List<VersionInfo>
+        {
+            new() { Version = "2.1.0", IsLatest = true, IsPrerelease = false },
+            new() { Version = "2.1.0-beta.2", IsLatest = false, IsPrerelease = true },
+            new() { Version = "2.0.5", IsLatest = false, IsPrerelease = false },
+            new() { Version = "2.0.4", IsLatest = false, IsPrerelease = false },
+            new() { Version = "1.9.8", IsLatest = false, IsPrerelease = false }
+        };
+    }
+
+    private List<VersionInfo> GetVersionHistory()
+    {
+        return new List<VersionInfo>
+        {
+            new() 
+            { 
+                Version = "2.1.0", 
+                IsLatest = true, 
+                IsPrerelease = false,
+                ReleaseDate = DateTime.UtcNow.AddDays(-3),
+                Downloads = 15420,
+                SecurityGrade = "A+",
+                Description = "Major release with enhanced AI capabilities and improved security",
+                Changes = new[] { "Added new ML models", "Improved performance by 40%", "Enhanced security features", "Bug fixes and improvements" }
+            },
+            new() 
+            { 
+                Version = "2.0.5", 
+                IsLatest = false, 
+                IsPrerelease = false,
+                ReleaseDate = DateTime.UtcNow.AddDays(-28),
+                Downloads = 42830,
+                SecurityGrade = "A",
+                Description = "Stability improvements and bug fixes",
+                Changes = new[] { "Fixed memory leak in AI processing", "Updated dependencies", "Improved error handling" }
+            },
+            new() 
+            { 
+                Version = "2.0.4", 
+                IsLatest = false, 
+                IsPrerelease = false,
+                ReleaseDate = DateTime.UtcNow.AddDays(-45),
+                Downloads = 38920,
+                SecurityGrade = "A",
+                Description = "Security updates and performance optimizations",
+                Changes = new[] { "Security patches", "Performance improvements", "Updated documentation" }
+            }
+        };
+    }
+
+    private List<DependencyInfo> GetDependencies()
+    {
+        return new List<DependencyInfo>
+        {
+            new() { Name = "core-utilities", Version = "1.2.3", SecurityGrade = "A+", SecurityScore = 9.6, License = "MIT", IsOutdated = false, Publisher = "core-team" },
+            new() { Name = "ml-framework", Version = "2.1.0", SecurityGrade = "A", SecurityScore = 9.2, License = "Apache-2.0", IsOutdated = false, Publisher = "ml-org" },
+            new() { Name = "data-processor", Version = "1.8.2", SecurityGrade = "B+", SecurityScore = 8.8, License = "MIT", IsOutdated = true, Publisher = "data-team" }
+        };
+    }
+
+    private List<PackageInfo> GetDependents()
+    {
+        return new List<PackageInfo>
+        {
+            new() { Name = "web-app-builder", LatestVersion = "1.0.0", Description = "Build modern web applications", WeeklyDownloads = 8500, Publisher = new PublisherInfo { Name = "web-team" } },
+            new() { Name = "api-gateway", LatestVersion = "2.1.0", Description = "Enterprise API gateway solution", WeeklyDownloads = 12000, Publisher = new PublisherInfo { Name = "api-team" } },
+            new() { Name = "data-pipeline", LatestVersion = "1.5.2", Description = "Scalable data processing pipeline", WeeklyDownloads = 6700, Publisher = new PublisherInfo { Name = "pipeline-team" } }
+        };
+    }
+
+    private List<PackageInfo> GetRelatedPackages()
+    {
+        var random = new Random();
+        var packages = new List<PackageInfo>();
+        
+        var relatedNames = new[] { "ai-companion", "ml-enhanced", "smart-processor", "intelligent-analyzer" };
+        
+        for (int i = 0; i < 3; i++)
+        {
+            packages.Add(new PackageInfo
+            {
+                Name = relatedNames[i],
+                LatestVersion = $"{random.Next(1, 3)}.{random.Next(0, 5)}.{random.Next(0, 10)}",
+                Description = $"Related package that complements {PackageName} with additional features.",
+                Publisher = new PublisherInfo { Name = $"related-{i + 1}", DisplayName = $"Related Publisher {i + 1}", IsVerified = true },
+                SecurityGrade = new[] { "A+", "A", "B+" }[random.Next(3)],
+                SecurityScore = random.NextDouble() * 2 + 8,
+                TrustTier = (TrustTier)random.Next(3),
+                WeeklyDownloads = random.Next(5000, 25000),
+                Rating = random.NextDouble() * 1.5 + 3.5,
+                LastUpdated = DateTime.UtcNow.AddDays(-random.Next(1, 30)),
+                Tags = new List<string> { "AI", "Related", "Utility" },
+                IsTrending = false,
+                IsStarred = false
+            });
+        }
+        
+        return packages;
+    }
+
+    private List<Components.UI.Models.ChartSeries> GetDownloadTrendData()
+    {
+        var random = new Random();
+        var data = new double[30];
+        var baseValue = 1500;
+        
+        for (int i = 0; i < 30; i++)
+        {
+            baseValue += random.Next(-200, 300);
+            data[i] = Math.Max(500, baseValue);
+        }
+
+        return new List<Components.UI.Models.ChartSeries>
+        {
+            new() { Name = "Daily Downloads", Data = data }
+        };
+    }
+
+    private string[] GetTimeLabels()
+    {
+        var labels = new string[30];
+        var now = DateTime.Now;
+        
+        for (int i = 29; i >= 0; i--)
+        {
+            labels[29 - i] = now.AddDays(-i).ToString("MMM dd");
+        }
+        
+        return labels;
+    }
+
+    private List<Components.UI.Models.ChartSeries> GetSecurityTrendData()
+    {
+        var data = new double[] { 8.5, 8.7, 8.9, 9.1, 9.2, 9.4, 9.4, 9.4 };
+        return new List<Components.UI.Models.ChartSeries>
+        {
+            new() { Name = "Security Score", Data = data }
+        };
+    }
+
+    private string[] GetSecurityTimeLabels()
+    {
+        return new[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug" };
+    }
+
+    private List<SecurityCategory> GetSecurityCategories()
+    {
+        return new List<SecurityCategory>
+        {
+            new() { Name = "Static Analysis", Grade = "A+", Score = 9.8, Description = "Code quality and security patterns analysis" },
+            new() { Name = "Dependency Check", Grade = "A", Score = 9.2, Description = "Third-party dependency vulnerability scanning" },
+            new() { Name = "Dynamic Analysis", Grade = "A+", Score = 9.6, Description = "Runtime behavior and security testing" },
+            new() { Name = "License Compliance", Grade = "A+", Score = 9.9, Description = "Software license compatibility validation" }
+        };
+    }
+
+    private List<SecurityFeature> GetSecurityFeatures()
+    {
+        return new List<SecurityFeature>
+        {
+            new() { Name = "Code Signing", IsSupported = true },
+            new() { Name = "Malware Scanning", IsSupported = true },
+            new() { Name = "Vulnerability Database", IsSupported = true },
+            new() { Name = "Supply Chain Verification", IsSupported = true },
+            new() { Name = "Automated Updates", IsSupported = false },
+            new() { Name = "Runtime Protection", IsSupported = true }
+        };
+    }
+
+    private List<VulnerabilityInfo> GetVulnerabilities()
+    {
+        // Return empty list for A+ packages
+        return new List<VulnerabilityInfo>();
+    }
+
+    private List<MaintainerInfo> GetMaintainers()
+    {
+        return new List<MaintainerInfo>
+        {
+            new() { Name = "John Smith", Role = "Lead Maintainer", ContactUrl = "mailto:john@example.com" },
+            new() { Name = "Sarah Johnson", Role = "Security Expert", ContactUrl = "mailto:sarah@example.com" },
+            new() { Name = "Mike Chen", Role = "Developer", ContactUrl = "mailto:mike@example.com" }
+        };
+    }
+
+    private long GetTotalDownloads() => _package?.WeeklyDownloads * 52 ?? 0;
+    private int GetGitHubStars() => 1247;
+    private int GetGitHubForks() => 89;
+    private int GetReviewCount() => 234;
+    private string GetPackageSize() => "2.4 MB";
+    private DateTime GetLastScanDate() => DateTime.UtcNow.AddHours(-6);
+    private string GetRepositoryUrl() => $"https://github.com/{PublisherName}/{PackageName}";
+    private string GetDocumentationUrl() => $"https://docs.{PublisherName}.com/{PackageName}";
+    private string GetIssuesUrl() => $"https://github.com/{PublisherName}/{PackageName}/issues";
+    private string GetLicenseUrl() => $"https://github.com/{PublisherName}/{PackageName}/blob/main/LICENSE";
+
+    private Color GetSecurityColor()
+    {
+        return _package?.SecurityGrade switch
+        {
+            "A+" or "A" => Color.Success,
+            "B+" or "B" => Color.Warning,
+            _ => Color.Error
+        };
+    }
+
+    private Color GetGradeColor(string grade)
+    {
+        return grade switch
+        {
+            "A+" or "A" => Color.Success,
+            "B+" or "B" => Color.Warning,
+            _ => Color.Error
+        };
+    }
+
+    private string GetVulnerabilityIcon(string severity)
+    {
+        return severity switch
+        {
+            "Critical" => Icons.Material.Filled.Dangerous,
+            "High" => Icons.Material.Filled.Error,
+            "Medium" => Icons.Material.Filled.Warning,
+            _ => Icons.Material.Filled.Info
+        };
+    }
+
+    private Color GetVulnerabilityColor(string severity)
+    {
+        return severity switch
+        {
+            "Critical" => Color.Error,
+            "High" => Color.Error,
+            "Medium" => Color.Warning,
+            _ => Color.Info
+        };
+    }
+
+    private PackageInfo ConvertApiPackageDetailsToPackageInfo(PackageDetails apiPackage)
+    {
+        return new PackageInfo
+        {
+            Id = apiPackage.Id,
+            Name = apiPackage.Name,
+            Description = apiPackage.Description,
+            LatestVersion = apiPackage.Version,
+            Publisher = new PublisherInfo
+            {
+                Name = apiPackage.Publisher.ToLower().Replace(" ", "-"),
+                DisplayName = apiPackage.Publisher,
+                IsVerified = apiPackage.TrustTier != "unverified"
+            },
+            SecurityGrade = apiPackage.SecurityGrade,
+            SecurityScore = CalculateSecurityScore(apiPackage.SecurityGrade),
+            TrustTier = ConvertTrustTier(apiPackage.TrustTier),
+            WeeklyDownloads = apiPackage.DownloadCount,
+            Rating = apiPackage.Rating,
+            RatingCount = apiPackage.RatingCount,
+            Tags = apiPackage.Tags,
+            License = apiPackage.License,
+            LastUpdated = apiPackage.LastUpdated,
+            CreatedAt = apiPackage.CreatedAt,
+            RepositoryUrl = apiPackage.Repository,
+            DocumentationUrl = apiPackage.Documentation,
+            // Convert additional API fields to PackageInfo properties
+            Dependencies = apiPackage.Dependencies?.Select(dep => new DependencyInfo 
+            { 
+                Name = dep, 
+                Version = "latest",
+                SecurityGrade = "Unknown",
+                SecurityScore = 0,
+                License = "Unknown",
+                Publisher = "Unknown"
+            }).ToList() ?? new List<DependencyInfo>(),
+            Versions = apiPackage.Versions?.Select(v => new VersionInfo
+            {
+                Version = v.Version,
+                IsLatest = v.IsLatest,
+                IsPrerelease = v.IsPrerelease,
+                ReleaseDate = v.ReleaseDate,
+                SecurityGrade = v.SecurityGrade,
+                Changes = v.Changes.ToArray()
+            }).ToList() ?? new List<VersionInfo>(),
+            ReadmeContent = apiPackage.ReadmeContent ?? "",
+            InstallCommand = apiPackage.InstallCommand ?? $"mcpm install {apiPackage.Name}"
+        };
+    }
+
+    private double CalculateSecurityScore(string securityGrade)
+    {
+        return securityGrade.ToUpper() switch
+        {
+            "A+" => 10.0,
+            "A" => 9.0,
+            "B+" => 8.5,
+            "B" => 8.0,
+            "C+" => 7.5,
+            "C" => 7.0,
+            "D" => 6.0,
+            "F" => 4.0,
+            _ => 5.0
+        };
+    }
+
+    private TrustTier ConvertTrustTier(string trustTier)
+    {
+        return trustTier.ToLower() switch
+        {
+            "enterprise" => TrustTier.Enterprise,
+            "trusted" => TrustTier.CommunityTrusted,
+            "verified" => TrustTier.Verified,
+            "unverified" => TrustTier.Unverified,
+            _ => TrustTier.Unverified
+        };
+    }
+
+    // New component support methods
+    private List<SecurityScanHistory> GetSecurityHistory()
+    {
+        // Mock security history data
+        return new List<SecurityScanHistory>
+        {
+            new() { ScanDate = DateTime.UtcNow.AddDays(-7), Grade = "A+", Score = 9.4, Duration = TimeSpan.FromMinutes(3.5), Changes = new List<string> { "Updated dependency security analysis", "Improved static code analysis" } },
+            new() { ScanDate = DateTime.UtcNow.AddDays(-14), Grade = "A", Score = 9.2, Duration = TimeSpan.FromMinutes(4.1), Changes = new List<string> { "Fixed dependency vulnerability", "Enhanced malware scanning" } },
+            new() { ScanDate = DateTime.UtcNow.AddDays(-30), Grade = "A", Score = 9.0, Duration = TimeSpan.FromMinutes(3.8), Changes = new List<string> { "Initial security scan" } }
+        };
+    }
+
+    private MCPManifest? GetPackageManifest()
+    {
+        // Generate mock manifest based on package
+        return new MCPManifest
+        {
+            Info = new MCPManifest.ServerInfo
+            {
+                Name = _package?.Name ?? "unknown",
+                Version = _package?.LatestVersion ?? "1.0.0",
+                Description = _package?.Description ?? "MCP Server package"
+            },
+            Capabilities = new MCPManifest.ServerCapabilities
+            {
+                Tools = true,
+                Resources = true,
+                Prompts = true,
+                Logging = true
+            },
+            Tools = new List<MCPTool>
+            {
+                new() { Name = "process_data", Description = "Process and analyze data using AI models", InputSchema = new {} },
+                new() { Name = "generate_report", Description = "Generate detailed reports from processed data", InputSchema = new {} },
+                new() { Name = "validate_input", Description = "Validate input data against schema", InputSchema = new {} }
+            },
+            Resources = new List<MCPResource>
+            {
+                new() { Uri = "file://templates/*", Name = "Templates", Description = "Report and document templates", MimeType = "text/html" },
+                new() { Uri = "file://schemas/*", Name = "Schemas", Description = "Data validation schemas", MimeType = "application/json" }
+            },
+            Prompts = new List<MCPPrompt>
+            {
+                new() 
+                { 
+                    Name = "analyze_data", 
+                    Description = "Analyze and summarize data patterns",
+                    Arguments = new List<MCPPromptArgument>
+                    {
+                        new() { Name = "data", Required = true },
+                        new() { Name = "format", Required = false }
+                    }
+                },
+                new() 
+                { 
+                    Name = "generate_summary", 
+                    Description = "Generate executive summary from analysis",
+                    Arguments = new List<MCPPromptArgument>
+                    {
+                        new() { Name = "analysis_result", Required = true }
+                    }
+                }
+            }
+        };
+    }
+
+    private async Task ShowToolDetails(MCPTool tool)
+    {
+        // Implementation for showing tool details modal
+        await Task.CompletedTask;
+    }
+
+    private async Task TestTool(MCPTool tool)
+    {
+        // Implementation for testing tool functionality
+        await Task.CompletedTask;
+    }
+
+    private async Task ViewResource(MCPResource resource)
+    {
+        // Implementation for viewing resource
+        await Task.CompletedTask;
+    }
+
+    private async Task DownloadResource(MCPResource resource)
+    {
+        // Implementation for downloading resource
+        await Task.CompletedTask;
+    }
+
+    private async Task ShowPromptDetails(MCPPrompt prompt)
+    {
+        // Implementation for showing prompt details modal
+        await Task.CompletedTask;
+    }
+
+    private async Task TryPrompt(MCPPrompt prompt)
+    {
+        // Implementation for testing prompt
+        await Task.CompletedTask;
+    }
+
+    private async Task ViewRawManifest()
+    {
+        // Implementation for viewing raw manifest JSON
+        await Task.CompletedTask;
+    }
+
+    private async Task DownloadManifest()
+    {
+        // Implementation for downloading manifest file
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleInstallVersion(VersionInfo version)
+    {
+        _selectedVersion = version.Version;
+        await InstallPackage();
+    }
+
+    private string GetCommunityUrl() => $"https://community.{_package?.Publisher.Name}.com";
+    private string GetSupportUrl() => $"https://support.{_package?.Publisher.Name}.com";
+
+    // Publisher profile helper methods
+    private string GetPublisherEmailUrl() => $"mailto:support@{_package?.Publisher.Name}.com";
+    private string GetPublisherWebsiteUrl() => $"https://{_package?.Publisher.Name}.com";
+    private string GetPublisherSupportUrl() => $"https://support.{_package?.Publisher.Name}.com";
+    private int GetPublisherPackageCount() => 15; // Mock data
+    private string GetPublisherMemberSince() => "Jan 2023"; // Mock data
+    private long GetPublisherTotalDownloads() => 2456789; // Mock data
+
+    // Helper classes for SecurityVisualization
+    public class SecurityScanHistory
+    {
+        public DateTime ScanDate { get; set; }
+        public string Grade { get; set; } = "";
+        public double Score { get; set; }
+        public TimeSpan Duration { get; set; }
+        public List<string> Changes { get; set; } = new();
+    }
+
+    // Helper classes
+    public class VersionInfo
+    {
+        public string Version { get; set; } = "";
+        public bool IsLatest { get; set; }
+        public bool IsPrerelease { get; set; }
+        public DateTime ReleaseDate { get; set; }
+        public long Downloads { get; set; }
+        public string SecurityGrade { get; set; } = "";
+        public string Description { get; set; } = "";
+        public string[] Changes { get; set; } = Array.Empty<string>();
+    }
+
+    public class DependencyInfo
+    {
+        public string Name { get; set; } = "";
+        public string Version { get; set; } = "";
+        public string SecurityGrade { get; set; } = "";
+        public double SecurityScore { get; set; }
+        public string License { get; set; } = "";
+        public bool IsOutdated { get; set; }
+        public string Publisher { get; set; } = "";
+    }
+
+    public class SecurityCategory
+    {
+        public string Name { get; set; } = "";
+        public string Grade { get; set; } = "";
+        public double Score { get; set; }
+        public string Description { get; set; } = "";
+    }
+
+    public class SecurityFeature
+    {
+        public string Name { get; set; } = "";
+        public bool IsSupported { get; set; }
+    }
+
+    public class VulnerabilityInfo
+    {
+        public string Title { get; set; } = "";
+        public string Description { get; set; } = "";
+        public string Severity { get; set; } = "";
+        public string CveId { get; set; } = "";
+        public double CvssScore { get; set; }
+    }
+
+    public class MaintainerInfo
+    {
+        public string Name { get; set; } = "";
+        public string Role { get; set; } = "";
+        public string ContactUrl { get; set; } = "";
+    }
+}

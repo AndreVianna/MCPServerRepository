@@ -6,8 +6,7 @@ namespace MCPHub.Domain.Events;
 /// <summary>
 /// Event raised when a package reaches a trust tier progression threshold
 /// </summary>
-public record TrustTierThresholdReachedEvent : BaseMessage
-{
+public record TrustTierThresholdReachedEvent : BaseMessage {
     /// <summary>
     /// Gets or sets the package identifier
     /// </summary>
@@ -92,8 +91,7 @@ public record TrustTierThresholdReachedEvent : BaseMessage
 /// <summary>
 /// Represents the type of trust tier threshold that was reached
 /// </summary>
-public enum ThresholdType
-{
+public enum ThresholdType {
     /// <summary>
     /// Package has met criteria for promotion to next tier
     /// </summary>

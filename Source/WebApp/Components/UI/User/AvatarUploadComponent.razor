@@ -1,0 +1,377 @@
+@using MCPHub.Domain.Contracts.Requests
+@inject IUserProfileService ProfileService
+@inject ISnackbar Snackbar
+@inject IJSRuntime JSRuntime
+
+<MudGrid Spacing="4">
+    <MudItem xs="12">
+        <div class="text-center mb-4">
+            <MudText Typo="Typo.body1">
+                Upload a new profile picture. Recommended size is 400x400 pixels.
+            </MudText>
+        </div>
+    </MudItem>
+
+    <!-- File Upload Area -->
+    <MudItem xs="12">
+        <MudPaper Elevation="0" 
+                 Class="@GetDropZoneClass()" 
+                 Style="min-height: 200px; border: 2px dashed var(--mud-palette-lines-default); transition: all 0.3s ease;"
+                 @ondragover="@HandleDragOver"
+                 @ondragenter="@HandleDragEnter"
+                 @ondragleave="@HandleDragLeave"
+                 @ondrop="@HandleDrop">
+            <div class="d-flex flex-column align-center justify-center" style="min-height: 200px;">
+                @if (!string.IsNullOrEmpty(_previewImageUrl))
+                {
+                    <MudAvatar Size="Size.Large" Style="width: 150px; height: 150px; margin-bottom: 1rem;">
+                        <MudImage Src="@_previewImageUrl" Alt="Preview" />
+                    </MudAvatar>
+                    <MudButton Variant="Variant.Text" 
+                              Color="Color.Secondary" 
+                              StartIcon="@Icons.Material.Filled.Delete"
+                              OnClick="@ClearPreview">
+                        Remove Preview
+                    </MudButton>
+                }
+                else
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.CloudUpload" 
+                            Size="Size.Large" 
+                            Color="Color.Secondary" 
+                            Class="mb-4" />
+                    <MudText Typo="Typo.h6" Color="Color.Secondary" Class="mb-2">
+                        Drag and drop your image here
+                    </MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+                        or click to browse files
+                    </MudText>
+                    <MudButton Variant="Variant.Outlined" 
+                              Color="Color.Primary"
+                              StartIcon="@Icons.Material.Filled.PhotoLibrary"
+                              OnClick="@OpenFileDialog">
+                        Choose File
+                    </MudButton>
+                }
+            </div>
+        </MudPaper>
+    </MudItem>
+
+    <!-- Image Cropping Area (shown when image is loaded) -->
+    @if (!string.IsNullOrEmpty(_previewImageUrl))
+    {
+        <MudItem xs="12">
+            <MudText Typo="Typo.h6" Class="mb-4">Crop Your Image</MudText>
+            
+            <div class="image-crop-container mb-4" style="max-width: 400px; margin: 0 auto;">
+                <div id="cropContainer" style="position: relative; width: 100%; height: 300px; overflow: hidden; border: 2px solid var(--mud-palette-lines-default);">
+                    <img id="cropImage" 
+                         src="@_previewImageUrl" 
+                         style="max-width: 100%; max-height: 100%; object-fit: contain;"
+                         @onload="@InitializeCropper" />
+                </div>
+            </div>
+
+            <div class="d-flex justify-center gap-2 mb-4">
+                <MudButton Variant="Variant.Text" 
+                          Size="Size.Small"
+                          StartIcon="@Icons.Material.Filled.ZoomIn"
+                          OnClick="@(() => ZoomCropper(0.1))">
+                    Zoom In
+                </MudButton>
+                <MudButton Variant="Variant.Text" 
+                          Size="Size.Small"
+                          StartIcon="@Icons.Material.Filled.ZoomOut"
+                          OnClick="@(() => ZoomCropper(-0.1))">
+                    Zoom Out
+                </MudButton>
+                <MudButton Variant="Variant.Text" 
+                          Size="Size.Small"
+                          StartIcon="@Icons.Material.Filled.RotateLeft"
+                          OnClick="@(() => RotateCropper(-90))">
+                    Rotate Left
+                </MudButton>
+                <MudButton Variant="Variant.Text" 
+                          Size="Size.Small"
+                          StartIcon="@Icons.Material.Filled.RotateRight"
+                          OnClick="@(() => RotateCropper(90))">
+                    Rotate Right
+                </MudButton>
+            </div>
+        </MudItem>
+    }
+
+    <!-- Action Buttons -->
+    <MudItem xs="12">
+        <div class="d-flex justify-end gap-2">
+            <MudButton Variant="Variant.Text" 
+                      Color="Color.Secondary"
+                      OnClick="@ClearAll">
+                Cancel
+            </MudButton>
+            
+            <MudButton Variant="Variant.Filled" 
+                      Color="Color.Primary"
+                      Disabled="@(_isUploading || string.IsNullOrEmpty(_previewImageUrl))"
+                      StartIcon="@(_isUploading ? null : Icons.Material.Filled.CloudUpload)"
+                      OnClick="@HandleUpload">
+                @if (_isUploading)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                    <span class="ml-2">Uploading...</span>
+                }
+                else
+                {
+                    <span>Upload Avatar</span>
+                }
+            </MudButton>
+        </div>
+    </MudItem>
+</MudGrid>
+
+<!-- Hidden File Input -->
+<InputFile id="avatarFileInput" 
+           OnChange="@HandleFileSelected" 
+           accept="image/*" 
+           style="display: none;" />
+
+@code {
+    [Parameter] public EventCallback<string> OnAvatarUploaded { get; set; }
+
+    private string? _previewImageUrl;
+    private byte[]? _imageData;
+    private string _fileExtension = string.Empty;
+    private bool _isDragOver = false;
+    private bool _isUploading = false;
+    private bool _cropperInitialized = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Initialize any required JavaScript for image cropping
+            await JSRuntime.InvokeVoidAsync("initializeAvatarUpload");
+        }
+    }
+
+    private async Task OpenFileDialog()
+    {
+        await JSRuntime.InvokeVoidAsync("document.getElementById('avatarFileInput').click");
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file == null) return;
+
+        // Validate file type
+        if (!file.ContentType.StartsWith("image/"))
+        {
+            Snackbar.Add("Please select a valid image file.", Severity.Error);
+            return;
+        }
+
+        // Validate file size (5MB limit)
+        if (file.Size > 5 * 1024 * 1024)
+        {
+            Snackbar.Add("Image size must be less than 5MB.", Severity.Error);
+            return;
+        }
+
+        try
+        {
+            // Read file data
+            using var stream = file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024);
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            _imageData = memoryStream.ToArray();
+
+            // Get file extension
+            _fileExtension = Path.GetExtension(file.Name).ToLower();
+
+            // Create preview URL
+            var base64 = Convert.ToBase64String(_imageData);
+            _previewImageUrl = $"data:{file.ContentType};base64,{base64}";
+
+            StateHasChanged();
+
+            // Initialize cropper after image loads
+            await Task.Delay(100);
+            await InitializeCropper();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading image: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task InitializeCropper()
+    {
+        if (!string.IsNullOrEmpty(_previewImageUrl) && !_cropperInitialized)
+        {
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("initializeCropper", "cropImage");
+                _cropperInitialized = true;
+            }
+            catch (Exception ex)
+            {
+                // Cropper library might not be available, continue without it
+                Console.WriteLine($"Cropper initialization failed: {ex.Message}");
+            }
+        }
+    }
+
+    private async Task ZoomCropper(double delta)
+    {
+        if (_cropperInitialized)
+        {
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("zoomCropper", delta);
+            }
+            catch { }
+        }
+    }
+
+    private async Task RotateCropper(double degrees)
+    {
+        if (_cropperInitialized)
+        {
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("rotateCropper", degrees);
+            }
+            catch { }
+        }
+    }
+
+    private async Task HandleUpload()
+    {
+        if (_imageData == null || string.IsNullOrEmpty(_fileExtension))
+        {
+            Snackbar.Add("Please select an image first.", Severity.Warning);
+            return;
+        }
+
+        _isUploading = true;
+        try
+        {
+            // Get crop data if cropper is initialized
+            double[]? cropCoordinates = null;
+            if (_cropperInitialized)
+            {
+                try
+                {
+                    cropCoordinates = await JSRuntime.InvokeAsync<double[]>("getCropData");
+                }
+                catch { }
+            }
+
+            var request = new UpdateAvatarRequest
+            {
+                ImageData = _imageData,
+                FileExtension = _fileExtension,
+                CropCoordinates = cropCoordinates
+            };
+
+            var result = await ProfileService.UpdateAvatarAsync(request);
+            
+            if (result.IsSuccess && !string.IsNullOrEmpty(result.AvatarUrl))
+            {
+                Snackbar.Add("Avatar uploaded successfully!", Severity.Success);
+                await OnAvatarUploaded.InvokeAsync(result.AvatarUrl);
+                ClearAll();
+            }
+            else
+            {
+                Snackbar.Add($"Failed to upload avatar: {result.ErrorMessage}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error uploading avatar: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isUploading = false;
+        }
+    }
+
+    private async Task HandleDragOver(DragEventArgs e)
+    {
+        // DragEventArgs doesn't have PreventDefault in Blazor
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleDragEnter(DragEventArgs e)
+    {
+        _isDragOver = true;
+        StateHasChanged();
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleDragLeave(DragEventArgs e)
+    {
+        _isDragOver = false;
+        StateHasChanged();
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleDrop(DragEventArgs e)
+    {
+        _isDragOver = false;
+
+        // Note: File drop handling would require additional JavaScript integration
+        // This is a placeholder for the UI behavior
+        StateHasChanged();
+    }
+
+    private void ClearPreview()
+    {
+        _previewImageUrl = null;
+        _cropperInitialized = false;
+        StateHasChanged();
+    }
+
+    private void ClearAll()
+    {
+        _previewImageUrl = null;
+        _imageData = null;
+        _fileExtension = string.Empty;
+        _cropperInitialized = false;
+        StateHasChanged();
+    }
+
+    private string GetDropZoneClass()
+    {
+        var baseClass = "drop-zone";
+        if (_isDragOver)
+        {
+            baseClass += " drag-over";
+        }
+        return baseClass;
+    }
+}
+
+<style>
+    .drop-zone {
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .drop-zone:hover, .drop-zone.drag-over {
+        border-color: var(--mud-palette-primary) !important;
+        background-color: rgba(var(--mud-palette-primary-rgb), 0.04);
+    }
+
+    .image-crop-container {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    #cropContainer {
+        border-radius: 8px;
+        background: #f5f5f5;
+    }
+</style>

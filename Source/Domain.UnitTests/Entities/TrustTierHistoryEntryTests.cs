@@ -1,4 +1,5 @@
 using FluentAssertions;
+
 using MCPHub.Domain.Contracts.Responses;
 using MCPHub.Domain.Entities;
 
@@ -7,11 +8,9 @@ namespace MCPHub.Domain.UnitTests.Entities;
 /// <summary>
 /// Unit tests for the TrustTierHistoryEntry entity
 /// </summary>
-public class TrustTierHistoryEntryTests
-{
+public class TrustTierHistoryEntryTests {
     [Fact]
-    public void Constructor_ShouldCreateValidHistoryEntry_WhenValidParametersProvided()
-    {
+    public void Constructor_ShouldCreateValidHistoryEntry_WhenValidParametersProvided() {
         // Arrange
         var packageId = Guid.CreateVersion7();
         var fromTier = TrustTier.Unverified;
@@ -56,8 +55,7 @@ public class TrustTierHistoryEntryTests
     }
 
     [Fact]
-    public void Constructor_ShouldThrowArgumentException_WhenReasonIsNullOrWhiteSpace()
-    {
+    public void Constructor_ShouldThrowArgumentException_WhenReasonIsNullOrWhiteSpace() {
         // Arrange
         var packageId = Guid.CreateVersion7();
         var fromTier = TrustTier.Unverified;
@@ -76,8 +74,7 @@ public class TrustTierHistoryEntryTests
     }
 
     [Fact]
-    public void IsPromotion_ShouldReturnTrue_WhenToTierIsHigherThanFromTier()
-    {
+    public void IsPromotion_ShouldReturnTrue_WhenToTierIsHigherThanFromTier() {
         // Arrange
         var historyEntry = new TrustTierHistoryEntry(
             Guid.CreateVersion7(),
@@ -92,8 +89,7 @@ public class TrustTierHistoryEntryTests
     }
 
     [Fact]
-    public void IsDemotion_ShouldReturnTrue_WhenToTierIsLowerThanFromTier()
-    {
+    public void IsDemotion_ShouldReturnTrue_WhenToTierIsLowerThanFromTier() {
         // Arrange
         var historyEntry = new TrustTierHistoryEntry(
             Guid.CreateVersion7(),
@@ -108,8 +104,7 @@ public class TrustTierHistoryEntryTests
     }
 
     [Fact]
-    public void ChangeMagnitude_ShouldReturnCorrectAbsoluteDifference()
-    {
+    public void ChangeMagnitude_ShouldReturnCorrectAbsoluteDifference() {
         // Arrange
         var historyEntry = new TrustTierHistoryEntry(
             Guid.CreateVersion7(),
@@ -123,8 +118,7 @@ public class TrustTierHistoryEntryTests
     }
 
     [Fact]
-    public void UpdateMetadata_ShouldAddOrUpdateMetadata_WhenValidMetadataProvided()
-    {
+    public void UpdateMetadata_ShouldAddOrUpdateMetadata_WhenValidMetadataProvided() {
         // Arrange
         var historyEntry = new TrustTierHistoryEntry(
             Guid.CreateVersion7(),
@@ -155,8 +149,7 @@ public class TrustTierHistoryEntryTests
     }
 
     [Fact]
-    public void UpdateMetadata_ShouldThrowArgumentNullException_WhenMetadataIsNull()
-    {
+    public void UpdateMetadata_ShouldThrowArgumentNullException_WhenMetadataIsNull() {
         // Arrange
         var historyEntry = new TrustTierHistoryEntry(
             Guid.CreateVersion7(),
@@ -183,15 +176,14 @@ public class TrustTierHistoryEntryTests
         TrustTier fromTier,
         TrustTier toTier,
         bool expectedIsPromotion,
-        bool expectedIsDemotion)
-    {
+        bool expectedIsDemotion) {
         // Arrange
         var historyEntry = new TrustTierHistoryEntry(
             Guid.CreateVersion7(),
             fromTier,
             toTier,
             "Tier transition test",
-            expectedIsPromotion ? TierChangeType.Promotion : 
+            expectedIsPromotion ? TierChangeType.Promotion :
             expectedIsDemotion ? TierChangeType.Demotion : TierChangeType.AutomaticRecalculation);
 
         // Act & Assert

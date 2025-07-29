@@ -46,7 +46,7 @@ public class PackagesController(IPackageService packageService, ILogger<Packages
         try {
             _logger.LogInformation("Getting package with ID: {PackageId}", id);
             var package = await _packageService.GetPackageByIdAsync(id, cancellationToken);
-            
+
             if (package == null) {
                 _logger.LogWarning("Package with ID {PackageId} not found", id);
                 return NotFound($"Package with ID {id} not found");
@@ -72,7 +72,7 @@ public class PackagesController(IPackageService packageService, ILogger<Packages
         try {
             _logger.LogInformation("Getting package with name: {PackageName}", name);
             var package = await _packageService.GetPackageByNameAsync(name, cancellationToken);
-            
+
             if (package == null) {
                 _logger.LogWarning("Package with name {PackageName} not found", name);
                 return NotFound($"Package with name '{name}' not found");
@@ -121,14 +121,14 @@ public class PackagesController(IPackageService packageService, ILogger<Packages
     [HttpGet("search")]
     [AllowAnonymous]
     public async Task<IActionResult> SearchPackages(
-        [FromQuery] string query, 
-        [FromQuery] int pageSize = 20, 
-        [FromQuery] int pageIndex = 0, 
+        [FromQuery] string query,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] int pageIndex = 0,
         CancellationToken cancellationToken = default) {
         try {
-            _logger.LogInformation("Searching packages with query: {Query}, PageSize: {PageSize}, PageIndex: {PageIndex}", 
+            _logger.LogInformation("Searching packages with query: {Query}, PageSize: {PageSize}, PageIndex: {PageIndex}",
                 query, pageSize, pageIndex);
-            
+
             var packages = await _packageService.SearchPackagesAsync(query, pageSize, pageIndex, cancellationToken);
             return Ok(packages);
         }
@@ -166,13 +166,13 @@ public class PackagesController(IPackageService packageService, ILogger<Packages
         [FromQuery] SortDirection sortDirection = SortDirection.Ascending,
         CancellationToken cancellationToken = default) {
         try {
-            _logger.LogInformation("Advanced search: Query={Query}, Categories={Categories}, TrustTier={TrustTier}, Page={Page}, PageSize={PageSize}, SortBy={SortBy}, SortDirection={SortDirection}", 
+            _logger.LogInformation("Advanced search: Query={Query}, Categories={Categories}, TrustTier={TrustTier}, Page={Page}, PageSize={PageSize}, SortBy={SortBy}, SortDirection={SortDirection}",
                 q, categories, trustTier, page, pageSize, sortBy, sortDirection);
 
             var searchRequest = new SearchRequest {
                 Query = q ?? string.Empty,
-                Categories = string.IsNullOrWhiteSpace(categories) 
-                    ? null 
+                Categories = string.IsNullOrWhiteSpace(categories)
+                    ? null
                     : categories.Split(',', StringSplitOptions.RemoveEmptyEntries)
                                .Select(c => c.Trim())
                                .Where(c => !string.IsNullOrWhiteSpace(c)),
@@ -184,7 +184,7 @@ public class PackagesController(IPackageService packageService, ILogger<Packages
             };
 
             var searchResult = await _packageService.SearchPackagesAsync(searchRequest, cancellationToken);
-            
+
             // Add pagination headers
             Response.Headers["X-Total-Count"] = searchResult.TotalCount.ToString();
             Response.Headers["X-Page"] = searchResult.Page.ToString();
@@ -216,7 +216,7 @@ public class PackagesController(IPackageService packageService, ILogger<Packages
         try {
             _logger.LogInformation("Creating new package: {PackageName}", package?.Name ?? "Unknown");
             var createdPackage = await _packageService.CreatePackageAsync(package!, cancellationToken);
-            
+
             _logger.LogInformation("Package created successfully with ID: {PackageId}", createdPackage.Id);
             return CreatedAtAction(nameof(GetPackageById), new { id = createdPackage.Id }, createdPackage);
         }
@@ -248,7 +248,7 @@ public class PackagesController(IPackageService packageService, ILogger<Packages
 
             _logger.LogInformation("Updating package: {PackageId}", id);
             var updatedPackage = await _packageService.UpdatePackageAsync(package, cancellationToken);
-            
+
             _logger.LogInformation("Package updated successfully: {PackageId}", updatedPackage.Id);
             return Ok(updatedPackage);
         }
@@ -274,7 +274,7 @@ public class PackagesController(IPackageService packageService, ILogger<Packages
         try {
             _logger.LogInformation("Deleting package: {PackageId}", id);
             var deleted = await _packageService.DeletePackageAsync(id, cancellationToken);
-            
+
             if (!deleted) {
                 _logger.LogWarning("Package with ID {PackageId} not found for deletion", id);
                 return NotFound($"Package with ID {id} not found");

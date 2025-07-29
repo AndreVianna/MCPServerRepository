@@ -3,8 +3,7 @@ namespace MCPHub.Domain.Contracts.Responses;
 /// <summary>
 /// Result model for package download operations
 /// </summary>
-public record DownloadResult
-{
+public record DownloadResult {
     /// <summary>
     /// Gets or sets whether the download request was successful
     /// </summary>
@@ -43,29 +42,21 @@ public record DownloadResult
     /// <param name="downloadId">Download tracking ID</param>
     /// <param name="metadata">Additional metadata</param>
     /// <returns>Successful download result</returns>
-    public static DownloadResult CreateSuccess(string downloadUrl, DateTimeOffset expiresAt, Guid downloadId, Dictionary<string, object>? metadata = null)
-    {
-        return new DownloadResult
-        {
-            Success = true,
-            DownloadUrl = downloadUrl,
-            ExpiresAt = expiresAt,
-            DownloadId = downloadId,
-            Metadata = metadata
-        };
-    }
+    public static DownloadResult CreateSuccess(string downloadUrl, DateTimeOffset expiresAt, Guid downloadId, Dictionary<string, object>? metadata = null) => new DownloadResult {
+        Success = true,
+        DownloadUrl = downloadUrl,
+        ExpiresAt = expiresAt,
+        DownloadId = downloadId,
+        Metadata = metadata
+    };
 
     /// <summary>
     /// Creates a failed download result
     /// </summary>
     /// <param name="errorMessage">Error description</param>
     /// <returns>Failed download result</returns>
-    public static DownloadResult CreateFailure(string errorMessage)
-    {
-        return new DownloadResult
-        {
-            Success = false,
-            ErrorMessage = errorMessage
-        };
-    }
+    public static DownloadResult CreateFailure(string errorMessage) => new DownloadResult {
+        Success = false,
+        ErrorMessage = errorMessage
+    };
 }

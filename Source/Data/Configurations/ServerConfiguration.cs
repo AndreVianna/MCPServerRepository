@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
-using MCPHub.Domain.Entities;
+
 using MCPHub.Domain.Common;
+using MCPHub.Domain.Entities;
 
 namespace MCPHub.Data.Configurations;
 
@@ -25,7 +26,6 @@ public class ServerConfiguration : IEntityTypeConfiguration<Server> {
         builder.Property(s => s.License)
             .HasMaxLength(100);
 
-
         builder.Property(s => s.Status)
             .IsRequired();
 
@@ -43,7 +43,6 @@ public class ServerConfiguration : IEntityTypeConfiguration<Server> {
             .IsUnique();
 
         builder.HasIndex(s => s.PublisherId);
-
 
         builder.HasIndex(s => s.Status);
 

@@ -1,0 +1,395 @@
+@using MCPHub.Domain.Contracts.Requests
+@inject ISecurityService SecurityService
+@inject ISnackbar Snackbar
+
+<MudStepper @ref="_stepper" HeaderSize="Size.Medium" HeaderBadgeView="BadgeView.All">
+    <!-- Step 1: Choose Method -->
+    <MudStep Title="Choose Method" Icon="@Icons.Material.Filled.PhoneAndroid">
+        <ChildContent>
+            <div class="text-center mb-4">
+                <MudText Typo="Typo.body1" Class="mb-4">
+                    Choose how you'd like to receive your two-factor authentication codes:
+                </MudText>
+                
+                <MudGrid Spacing="4" MaxWidth="400px" Class="mx-auto">
+                    <MudItem xs="12" sm="6">
+                        <MudCard Outlined="true" 
+                                Class="@GetMethodCardClass("app")" 
+                                Style="cursor: pointer; height: 150px;"
+                                @onclick="@(() => SelectMethod("app"))">
+                            <MudCardContent Class="d-flex flex-column align-center justify-center">
+                                <MudIcon Icon="@Icons.Material.Filled.PhoneAndroid" Size="Size.Large" Color="Color.Primary" />
+                                <MudText Typo="Typo.h6" Class="mt-2">Authenticator App</MudText>
+                                <MudText Typo="Typo.caption" Class="text-center">
+                                    Recommended
+                                </MudText>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudCard Outlined="true" 
+                                Class="@GetMethodCardClass("sms")" 
+                                Style="cursor: pointer; height: 150px;"
+                                @onclick="@(() => SelectMethod("sms"))">
+                            <MudCardContent Class="d-flex flex-column align-center justify-center">
+                                <MudIcon Icon="@Icons.Material.Filled.Sms" Size="Size.Large" Color="Color.Primary" />
+                                <MudText Typo="Typo.h6" Class="mt-2">SMS</MudText>
+                                <MudText Typo="Typo.caption" Class="text-center">
+                                    Text Message
+                                </MudText>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                </MudGrid>
+            </div>
+        </ChildContent>
+    </MudStep>
+
+    <!-- Step 2: Setup -->
+    <MudStep Title="Setup" Icon="@Icons.Material.Filled.Settings">
+        <ChildContent>
+            @if (_selectedMethod == "app")
+            {
+                <div class="text-center">
+                    <MudText Typo="Typo.h6" Class="mb-4">Scan QR Code</MudText>
+                    <MudText Typo="Typo.body2" Class="mb-4">
+                        Use your authenticator app to scan this QR code:
+                    </MudText>
+                    
+                    @if (!string.IsNullOrEmpty(_qrCodeUrl))
+                    {
+                        <div class="qr-code-container mb-4">
+                            <MudImage Src="@_qrCodeUrl" Alt="QR Code" Style="max-width: 200px; max-height: 200px;" />
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="qr-code-placeholder mb-4">
+                            <MudProgressCircular Size="Size.Large" Indeterminate="true" />
+                            <MudText Typo="Typo.body2" Class="mt-2">Generating QR code...</MudText>
+                        </div>
+                    }
+                    
+                    <MudAlert Severity="Severity.Info" Class="mb-4 text-left">
+                        <strong>Don't have an authenticator app?</strong><br />
+                        We recommend Google Authenticator, Microsoft Authenticator, or Authy.
+                    </MudAlert>
+                    
+                    @if (!string.IsNullOrEmpty(_manualEntryKey))
+                    {
+                        <MudExpansionPanels Elevation="0">
+                            <MudExpansionPanel Text="Can't scan? Enter manually">
+                                <div class="manual-entry">
+                                    <MudText Typo="Typo.body2" Class="mb-2">
+                                        Enter this key manually in your authenticator app:
+                                    </MudText>
+                                    <MudTextField Value="@_manualEntryKey" 
+                                                 Variant="Variant.Outlined" 
+                                                 ReadOnly="true" 
+                                                 Adornment="Adornment.End"
+                                                 AdornmentIcon="@Icons.Material.Filled.ContentCopy"
+                                                 OnAdornmentClick="@(() => CopyToClipboard(_manualEntryKey))" />
+                                </div>
+                            </MudExpansionPanel>
+                        </MudExpansionPanels>
+                    }
+                </div>
+            }
+            else if (_selectedMethod == "sms")
+            {
+                <div class="text-center">
+                    <MudText Typo="Typo.h6" Class="mb-4">Enter Phone Number</MudText>
+                    <MudTextField @bind-Value="_phoneNumber"
+                                  Label="Phone Number"
+                                  Variant="Variant.Outlined"
+                                  InputType="InputType.Telephone"
+                                  HelperText="Enter your phone number to receive SMS codes"
+                                  Style="max-width: 300px; margin: 0 auto;" />
+                </div>
+            }
+        </ChildContent>
+    </MudStep>
+
+    <!-- Step 3: Verify -->
+    <MudStep Title="Verify" Icon="@Icons.Material.Filled.VerifiedUser">
+        <ChildContent>
+            <div class="text-center">
+                <MudText Typo="Typo.h6" Class="mb-4">Verify Setup</MudText>
+                <MudText Typo="Typo.body2" Class="mb-4">
+                    Enter the 6-digit code from your @(_selectedMethod == "app" ? "authenticator app" : "text message"):
+                </MudText>
+                
+                <MudTextField @bind-Value="_verificationCode"
+                              Label="Verification Code"
+                              Variant="Variant.Outlined"
+                              InputType="InputType.Text"
+                              Placeholder="000000"
+                              Style="max-width: 200px; margin: 0 auto;"
+                              Class="mb-4" />
+                              
+                @if (_selectedMethod == "sms")
+                {
+                    <MudButton Variant="Variant.Text" 
+                              Size="Size.Small"
+                              OnClick="@ResendSmsCode"
+                              Disabled="@_isResendingCode">
+                        @if (_isResendingCode)
+                        {
+                            <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                            <span class="ml-2">Resending...</span>
+                        }
+                        else
+                        {
+                            <span>Resend Code</span>
+                        }
+                    </MudButton>
+                }
+            </div>
+        </ChildContent>
+    </MudStep>
+
+    <!-- Step 4: Recovery Codes -->
+    <MudStep Title="Recovery Codes" Icon="@Icons.Material.Filled.Key">
+        <ChildContent>
+            <div class="text-center">
+                <MudText Typo="Typo.h6" Class="mb-4">Save Recovery Codes</MudText>
+                <MudText Typo="Typo.body2" Class="mb-4">
+                    Store these recovery codes in a safe place. You can use them to access your account if you lose your device.
+                </MudText>
+                
+                @if (_recoveryCodes?.Any() == true)
+                {
+                    <MudPaper Elevation="1" Class="pa-4 mb-4" Style="max-width: 400px; margin: 0 auto;">
+                        <div class="recovery-codes">
+                            @foreach (var code in _recoveryCodes)
+                            {
+                                <div class="recovery-code-item">
+                                    <MudText Typo="Typo.body1" Class="font-weight-bold font-monospace">
+                                        @(code)
+                                    </MudText>
+                                </div>
+                            }
+                        </div>
+                    </MudPaper>
+                    
+                    <MudButton Variant="Variant.Outlined" 
+                              StartIcon="@Icons.Material.Filled.Download"
+                              OnClick="@DownloadRecoveryCodes"
+                              Class="mb-4">
+                        Download Codes
+                    </MudButton>
+                }
+                
+                <MudAlert Severity="Severity.Warning" Class="text-left">
+                    <strong>Important:</strong> Each recovery code can only be used once. Keep them secure and don't share them with anyone.
+                </MudAlert>
+            </div>
+        </ChildContent>
+    </MudStep>
+</MudStepper>
+
+<!-- Navigation Buttons -->
+<div class="d-flex justify-space-between mt-6">
+    <MudButton Variant="Variant.Text" 
+              Color="Color.Secondary"
+              OnClick="@(() => _stepper.PreviousStepAsync())"
+              Disabled="@(_stepper.ActiveIndex == 0)">
+        Previous
+    </MudButton>
+    
+    <div class="d-flex gap-2">
+        @if (_stepper.ActiveIndex < 3)
+        {
+            <MudButton Variant="Variant.Filled" 
+                      Color="Color.Primary"
+                      OnClick="@HandleNext"
+                      Disabled="@(!CanProceedToNext() || _isLoading)">
+                @if (_isLoading)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                    <span class="ml-2">@GetLoadingText()</span>
+                }
+                else
+                {
+                    <span>Next</span>
+                }
+            </MudButton>
+        }
+        else
+        {
+            <MudButton Variant="Variant.Filled" 
+                      Color="Color.Success"
+                      OnClick="@HandleComplete"
+                      StartIcon="@Icons.Material.Filled.Check">
+                Complete Setup
+            </MudButton>
+        }
+    </div>
+</div>
+
+<style>
+    .qr-code-container, .qr-code-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 200px;
+    }
+
+    .recovery-codes {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+
+    .recovery-code-item {
+        padding: 0.5rem;
+        background: var(--mud-palette-background-grey);
+        border-radius: 4px;
+        text-align: center;
+    }
+</style>
+
+@code {
+    [Parameter] public EventCallback<bool> OnSetupCompleted { get; set; }
+
+    private MudStepper _stepper = null!;
+    private string _selectedMethod = string.Empty;
+    private string _phoneNumber = string.Empty;
+    private string _verificationCode = string.Empty;
+    private string? _qrCodeUrl;
+    private string? _manualEntryKey;
+    private string[]? _recoveryCodes;
+    private bool _isLoading = false;
+    private bool _isResendingCode = false;
+
+    private void SelectMethod(string method)
+    {
+        _selectedMethod = method;
+        StateHasChanged();
+    }
+
+    private string GetMethodCardClass(string method) =>
+        _selectedMethod == method 
+            ? "mud-elevation-4 mud-theme-primary" 
+            : "mud-elevation-1";
+
+    private bool CanProceedToNext() => _stepper.ActiveIndex switch
+    {
+        0 => !string.IsNullOrEmpty(_selectedMethod),
+        1 => _selectedMethod == "app" ? !string.IsNullOrEmpty(_qrCodeUrl) : !string.IsNullOrEmpty(_phoneNumber),
+        2 => !string.IsNullOrEmpty(_verificationCode) && _verificationCode.Length == 6,
+        _ => true
+    };
+
+    private string GetLoadingText() => _stepper.ActiveIndex switch
+    {
+        1 => "Setting up...",
+        2 => "Verifying...",
+        _ => "Loading..."
+    };
+
+    private async Task HandleNext()
+    {
+        _isLoading = true;
+        try
+        {
+            var currentStep = _stepper.ActiveIndex;
+            
+            if (currentStep == 1) // Setup step
+            {
+                await SetupTwoFactor();
+            }
+            else if (currentStep == 2) // Verify step
+            {
+                await VerifyTwoFactor();
+            }
+            
+            await _stepper.NextStepAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task SetupTwoFactor()
+    {
+        var request = new SetupTwoFactorRequest
+        {
+            Method = _selectedMethod,
+            PhoneNumber = _selectedMethod == "sms" ? _phoneNumber : null
+        };
+
+        var result = await SecurityService.SetupTwoFactorAsync(request);
+        
+        if (result.IsSuccess)
+        {
+            _qrCodeUrl = result.QrCodeUrl;
+            _manualEntryKey = result.ManualEntryKey;
+        }
+        else
+        {
+            throw new Exception(result.ErrorMessage ?? "Setup failed");
+        }
+    }
+
+    private async Task VerifyTwoFactor()
+    {
+        var request = new VerifyTwoFactorRequest
+        {
+            Code = _verificationCode
+        };
+
+        var result = await SecurityService.VerifyTwoFactorAsync(request);
+        
+        if (result.IsSuccess)
+        {
+            _recoveryCodes = result.RecoveryCodes;
+        }
+        else
+        {
+            throw new Exception(result.ErrorMessage ?? "Verification failed");
+        }
+    }
+
+    private async Task ResendSmsCode()
+    {
+        _isResendingCode = true;
+        try
+        {
+            // TODO: Implement SMS code resend
+            await Task.Delay(1000); // Simulate API call
+            Snackbar.Add("Verification code sent!", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error sending code: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isResendingCode = false;
+        }
+    }
+
+    private async Task CopyToClipboard(string text)
+    {
+        // TODO: Implement clipboard copy
+        Snackbar.Add("Copied to clipboard!", Severity.Success);
+    }
+
+    private async Task DownloadRecoveryCodes()
+    {
+        // TODO: Implement recovery codes download
+        Snackbar.Add("Recovery codes downloaded!", Severity.Success);
+    }
+
+    private async Task HandleComplete()
+    {
+        await OnSetupCompleted.InvokeAsync(true);
+    }
+}

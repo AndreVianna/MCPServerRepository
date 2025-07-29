@@ -3,8 +3,7 @@ namespace MCPHub.Domain.Contracts.Responses;
 /// <summary>
 /// Statistics model for package download analytics
 /// </summary>
-public record PackageDownloadStats
-{
+public record PackageDownloadStats {
     /// <summary>
     /// Gets or sets the total number of downloads for the package
     /// </summary>
@@ -55,18 +54,14 @@ public record PackageDownloadStats
     /// </summary>
     /// <param name="packageId">Package identifier</param>
     /// <returns>Empty download stats</returns>
-    public static PackageDownloadStats Empty(Guid packageId)
-    {
-        return new PackageDownloadStats
-        {
-            PackageId = packageId,
-            TotalDownloads = 0,
-            UniqueDownloads = 0,
-            DownloadsLast30Days = 0,
-            DownloadsByVersion = new Dictionary<string, int>(),
-            DownloadsByMethod = new Dictionary<string, int>(),
-            DownloadsByDay = new Dictionary<string, int>(),
-            GeneratedAt = DateTimeOffset.UtcNow
-        };
-    }
+    public static PackageDownloadStats Empty(Guid packageId) => new PackageDownloadStats {
+        PackageId = packageId,
+        TotalDownloads = 0,
+        UniqueDownloads = 0,
+        DownloadsLast30Days = 0,
+        DownloadsByVersion = new Dictionary<string, int>(),
+        DownloadsByMethod = new Dictionary<string, int>(),
+        DownloadsByDay = new Dictionary<string, int>(),
+        GeneratedAt = DateTimeOffset.UtcNow
+    };
 }

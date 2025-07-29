@@ -5,8 +5,7 @@ namespace MCPHub.Domain.Events;
 /// <summary>
 /// Domain event triggered when a package is downloaded
 /// </summary>
-public record PackageDownloadedEvent : BaseMessage
-{
+public record PackageDownloadedEvent : BaseMessage {
     /// <summary>
     /// Gets or sets the download tracking identifier
     /// </summary>
@@ -88,10 +87,7 @@ public record PackageDownloadedEvent : BaseMessage
         DateTimeOffset downloadedAt,
         Guid? userId = null,
         string? clientVersion = null,
-        Dictionary<string, object>? metadata = null)
-    {
-        return new PackageDownloadedEvent
-        {
+        Dictionary<string, object>? metadata = null) => new PackageDownloadedEvent {
             DownloadId = downloadId,
             PackageId = packageId,
             PackageName = packageName,
@@ -104,5 +100,4 @@ public record PackageDownloadedEvent : BaseMessage
             ClientVersion = clientVersion,
             Metadata = metadata
         };
-    }
 }

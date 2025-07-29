@@ -1,10 +1,12 @@
+using Asp.Versioning;
+
 using MCPHub.Common.Messaging;
 using MCPHub.Domain.Commands;
-using MCPHub.Domain.Events;
 using MCPHub.Domain.Contracts.Requests;
 using MCPHub.Domain.Contracts.Responses;
+using MCPHub.Domain.Events;
+
 using Microsoft.AspNetCore.Mvc;
-using Asp.Versioning;
 
 namespace MCPHub.PublicApi.Controllers.V1;
 
@@ -15,8 +17,7 @@ namespace MCPHub.PublicApi.Controllers.V1;
 [ApiController]
 [ApiVersion("1.0")]
 [Route("api/v{version:apiVersion}/servers")]
-public class ServersV1Controller(IMessagePublisher messagePublisher, ILogger<ServersV1Controller> logger) : BaseApiV1Controller(logger)
-{
+public class ServersV1Controller(IMessagePublisher messagePublisher, ILogger<ServersV1Controller> logger) : BaseApiV1Controller(logger) {
     private readonly IMessagePublisher _messagePublisher = messagePublisher;
 
     /// <summary>
@@ -29,8 +30,7 @@ public class ServersV1Controller(IMessagePublisher messagePublisher, ILogger<Ser
     [ProducesResponseType(typeof(object), 201)]
     [ProducesResponseType(typeof(object), 400)]
     [ProducesResponseType(typeof(object), 500)]
-    public Task<IActionResult> RegisterServer([FromBody] RegisterServerRequest request, CancellationToken cancellationToken)
-    {
+    public Task<IActionResult> RegisterServer([FromBody] RegisterServerRequest request, CancellationToken cancellationToken) {
         Logger.LogInformation("Server registration endpoint called (not yet implemented)");
         return Task.FromResult<IActionResult>(CreateErrorResponse(
             "Server registration will be implemented when persistence layer is available", 501));
@@ -44,8 +44,7 @@ public class ServersV1Controller(IMessagePublisher messagePublisher, ILogger<Ser
     [HttpGet]
     [ProducesResponseType(typeof(object), 200)]
     [ProducesResponseType(typeof(object), 500)]
-    public Task<IActionResult> GetServers(CancellationToken cancellationToken)
-    {
+    public Task<IActionResult> GetServers(CancellationToken cancellationToken) {
         Logger.LogInformation("Get servers endpoint called (not yet implemented)");
         return Task.FromResult<IActionResult>(CreateErrorResponse(
             "Server listing will be implemented when persistence layer is available", 501));
@@ -61,8 +60,7 @@ public class ServersV1Controller(IMessagePublisher messagePublisher, ILogger<Ser
     [ProducesResponseType(typeof(object), 200)]
     [ProducesResponseType(typeof(object), 404)]
     [ProducesResponseType(typeof(object), 500)]
-    public Task<IActionResult> GetServer(string serverId, CancellationToken cancellationToken)
-    {
+    public Task<IActionResult> GetServer(string serverId, CancellationToken cancellationToken) {
         Logger.LogInformation("Get server endpoint called for ID: {ServerId} (not yet implemented)", serverId);
         return Task.FromResult<IActionResult>(CreateErrorResponse(
             "Server retrieval will be implemented when persistence layer is available", 501));
@@ -80,8 +78,7 @@ public class ServersV1Controller(IMessagePublisher messagePublisher, ILogger<Ser
     [ProducesResponseType(typeof(object), 400)]
     [ProducesResponseType(typeof(object), 404)]
     [ProducesResponseType(typeof(object), 500)]
-    public Task<IActionResult> ScanServer(string serverId, [FromBody] ScanServerRequest request, CancellationToken cancellationToken)
-    {
+    public Task<IActionResult> ScanServer(string serverId, [FromBody] ScanServerRequest request, CancellationToken cancellationToken) {
         Logger.LogInformation("Server scan endpoint called for ID: {ServerId} (not yet implemented)", serverId);
         return Task.FromResult<IActionResult>(CreateErrorResponse(
             "Manual security scanning will be implemented when security service integration is available", 501));
@@ -99,8 +96,7 @@ public class ServersV1Controller(IMessagePublisher messagePublisher, ILogger<Ser
     [ProducesResponseType(typeof(object), 400)]
     [ProducesResponseType(typeof(object), 404)]
     [ProducesResponseType(typeof(object), 500)]
-    public Task<IActionResult> IndexServer(string serverId, [FromBody] IndexServerRequest request, CancellationToken cancellationToken)
-    {
+    public Task<IActionResult> IndexServer(string serverId, [FromBody] IndexServerRequest request, CancellationToken cancellationToken) {
         Logger.LogInformation("Server index endpoint called for ID: {ServerId} (not yet implemented)", serverId);
         return Task.FromResult<IActionResult>(CreateErrorResponse(
             "Manual indexing will be implemented when search service integration is available", 501));
@@ -119,8 +115,7 @@ public class ServersV1Controller(IMessagePublisher messagePublisher, ILogger<Ser
     [ProducesResponseType(typeof(object), 400)]
     [ProducesResponseType(typeof(object), 404)]
     [ProducesResponseType(typeof(object), 500)]
-    public Task<IActionResult> UpdateServer(string serverId, [FromBody] object request, CancellationToken cancellationToken)
-    {
+    public Task<IActionResult> UpdateServer(string serverId, [FromBody] object request, CancellationToken cancellationToken) {
         Logger.LogInformation("Server update endpoint called for ID: {ServerId} (not yet implemented)", serverId);
         return Task.FromResult<IActionResult>(CreateErrorResponse(
             "Server updates will be implemented when persistence layer is available", 501));
@@ -138,8 +133,7 @@ public class ServersV1Controller(IMessagePublisher messagePublisher, ILogger<Ser
     [ProducesResponseType(typeof(object), 400)]
     [ProducesResponseType(typeof(object), 404)]
     [ProducesResponseType(typeof(object), 500)]
-    public Task<IActionResult> DeleteServer(string serverId, CancellationToken cancellationToken)
-    {
+    public Task<IActionResult> DeleteServer(string serverId, CancellationToken cancellationToken) {
         Logger.LogInformation("Server delete endpoint called for ID: {ServerId} (not yet implemented)", serverId);
         return Task.FromResult<IActionResult>(CreateErrorResponse(
             "Server deletion will be implemented when persistence layer is available", 501));

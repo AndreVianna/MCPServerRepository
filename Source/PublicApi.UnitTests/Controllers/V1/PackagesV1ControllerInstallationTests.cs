@@ -2,8 +2,10 @@ using MCPHub.Domain.Contracts.Requests;
 using MCPHub.Domain.Contracts.Services;
 using MCPHub.Domain.Entities;
 using MCPHub.PublicApi.Controllers.V1;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+
 using NSubstitute;
 
 namespace MCPHub.PublicApi.UnitTests.Controllers.V1;
@@ -11,35 +13,37 @@ namespace MCPHub.PublicApi.UnitTests.Controllers.V1;
 /// <summary>
 /// Unit tests for PackagesV1Controller installation tracking endpoints
 /// </summary>
-public class PackagesV1ControllerInstallationTests
-{
+public class PackagesV1ControllerInstallationTests {
     private readonly IPackageService _packageService;
     private readonly IPackagePublishingService _packagePublishingService;
     private readonly IPackageInstallationService _packageInstallationService;
+    private readonly ISecurityScanService _securityScanService;
+    private readonly ITrustTierCalculationService _trustTierCalculationService;
     private readonly ILogger<PackagesV1Controller> _logger;
     private readonly PackagesV1Controller _controller;
 
-    public PackagesV1ControllerInstallationTests()
-    {
+    public PackagesV1ControllerInstallationTests() {
         _packageService = Substitute.For<IPackageService>();
         _packagePublishingService = Substitute.For<IPackagePublishingService>();
         _packageInstallationService = Substitute.For<IPackageInstallationService>();
+        _securityScanService = Substitute.For<ISecurityScanService>();
+        _trustTierCalculationService = Substitute.For<ITrustTierCalculationService>();
         _logger = Substitute.For<ILogger<PackagesV1Controller>>();
         _controller = new PackagesV1Controller(
             _packageService,
             _packagePublishingService,
             _packageInstallationService,
+            _securityScanService,
+            _trustTierCalculationService,
             _logger);
     }
 
     [Fact]
-    public async Task RecordDownload_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task RecordDownload_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         const string packageName = "test-package";
         const string version = "1.0.0";
-        var request = new DownloadRequest
-        {
+        var request = new DownloadRequest {
             UserAgent = "Test Client",
             DownloadMethod = "CLI"
         };
@@ -50,13 +54,11 @@ public class PackagesV1ControllerInstallationTests
     }
 
     [Fact]
-    public async Task RecordInstallation_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task RecordInstallation_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         const string packageName = "test-package";
         const string version = "1.0.0";
-        var request = new InstallationRequest
-        {
+        var request = new InstallationRequest {
             InstallationPath = "/path/to/install",
             ClientVersion = "1.0.0"
         };
@@ -67,8 +69,7 @@ public class PackagesV1ControllerInstallationTests
     }
 
     [Fact]
-    public async Task UpdateInstallationStatus_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task UpdateInstallationStatus_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var installationId = Guid.NewGuid();
         var statusUpdate = new { };
@@ -79,16 +80,13 @@ public class PackagesV1ControllerInstallationTests
     }
 
     [Fact]
-    public async Task GetUserInstallations_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetUserInstallations_WhenCalled_ThrowsNotImplementedException() =>
         // Arrange & Act & Assert
         await Assert.ThrowsAsync<NotImplementedException>(() =>
             _controller.GetUserInstallations(false, CancellationToken.None));
-    }
 
     [Fact]
-    public async Task GetPackageDownloadStats_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetPackageDownloadStats_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         const string packageName = "test-package";
 
@@ -98,8 +96,7 @@ public class PackagesV1ControllerInstallationTests
     }
 
     [Fact]
-    public async Task GetInstallation_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetInstallation_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var installationId = Guid.NewGuid();
 

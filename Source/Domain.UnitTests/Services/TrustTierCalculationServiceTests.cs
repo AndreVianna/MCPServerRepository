@@ -1,18 +1,20 @@
+using FluentAssertions;
+
 using MCPHub.Domain.Contracts.Services;
 using MCPHub.Domain.Entities;
 using MCPHub.Domain.Repositories;
 using MCPHub.Domain.Services;
+
 using Microsoft.Extensions.Logging;
+
 using Moq;
-using FluentAssertions;
 
 namespace MCPHub.Domain.UnitTests.Services;
 
 /// <summary>
 /// Unit tests for the TrustTierCalculationService
 /// </summary>
-public class TrustTierCalculationServiceTests
-{
+public class TrustTierCalculationServiceTests {
     private readonly Mock<IPackageRepository> _mockPackageRepository;
     private readonly Mock<IPackageDownloadRepository> _mockDownloadRepository;
     private readonly Mock<IPackageInstallationRepository> _mockInstallationRepository;
@@ -23,8 +25,7 @@ public class TrustTierCalculationServiceTests
     private readonly Mock<ILogger<TrustTierCalculationService>> _mockLogger;
     private readonly ITrustTierCalculationService _service;
 
-    public TrustTierCalculationServiceTests()
-    {
+    public TrustTierCalculationServiceTests() {
         _mockPackageRepository = new Mock<IPackageRepository>();
         _mockDownloadRepository = new Mock<IPackageDownloadRepository>();
         _mockInstallationRepository = new Mock<IPackageInstallationRepository>();
@@ -46,8 +47,7 @@ public class TrustTierCalculationServiceTests
     }
 
     [Fact]
-    public void Constructor_ShouldThrowArgumentNullException_WhenPackageRepositoryIsNull()
-    {
+    public void Constructor_ShouldThrowArgumentNullException_WhenPackageRepositoryIsNull() {
         // Act & Assert
         var act = () => new TrustTierCalculationService(
             null!,
@@ -64,8 +64,7 @@ public class TrustTierCalculationServiceTests
     }
 
     [Fact]
-    public void Constructor_ShouldThrowArgumentNullException_WhenDownloadRepositoryIsNull()
-    {
+    public void Constructor_ShouldThrowArgumentNullException_WhenDownloadRepositoryIsNull() {
         // Act & Assert
         var act = () => new TrustTierCalculationService(
             _mockPackageRepository.Object,
@@ -82,8 +81,7 @@ public class TrustTierCalculationServiceTests
     }
 
     [Fact]
-    public void Constructor_ShouldThrowArgumentNullException_WhenInstallationRepositoryIsNull()
-    {
+    public void Constructor_ShouldThrowArgumentNullException_WhenInstallationRepositoryIsNull() {
         // Act & Assert
         var act = () => new TrustTierCalculationService(
             _mockPackageRepository.Object,
@@ -100,8 +98,7 @@ public class TrustTierCalculationServiceTests
     }
 
     [Fact]
-    public void Constructor_ShouldThrowArgumentNullException_WhenSecurityScanRepositoryIsNull()
-    {
+    public void Constructor_ShouldThrowArgumentNullException_WhenSecurityScanRepositoryIsNull() {
         // Act & Assert
         var act = () => new TrustTierCalculationService(
             _mockPackageRepository.Object,
@@ -118,8 +115,7 @@ public class TrustTierCalculationServiceTests
     }
 
     [Fact]
-    public void Constructor_ShouldThrowArgumentNullException_WhenPublisherRepositoryIsNull()
-    {
+    public void Constructor_ShouldThrowArgumentNullException_WhenPublisherRepositoryIsNull() {
         // Act & Assert
         var act = () => new TrustTierCalculationService(
             _mockPackageRepository.Object,
@@ -136,8 +132,7 @@ public class TrustTierCalculationServiceTests
     }
 
     [Fact]
-    public void Constructor_ShouldThrowArgumentNullException_WhenTrustTierHistoryRepositoryIsNull()
-    {
+    public void Constructor_ShouldThrowArgumentNullException_WhenTrustTierHistoryRepositoryIsNull() {
         // Act & Assert
         var act = () => new TrustTierCalculationService(
             _mockPackageRepository.Object,
@@ -154,8 +149,7 @@ public class TrustTierCalculationServiceTests
     }
 
     [Fact]
-    public void Constructor_ShouldThrowArgumentNullException_WhenUnitOfWorkIsNull()
-    {
+    public void Constructor_ShouldThrowArgumentNullException_WhenUnitOfWorkIsNull() {
         // Act & Assert
         var act = () => new TrustTierCalculationService(
             _mockPackageRepository.Object,
@@ -172,8 +166,7 @@ public class TrustTierCalculationServiceTests
     }
 
     [Fact]
-    public void Constructor_ShouldThrowArgumentNullException_WhenLoggerIsNull()
-    {
+    public void Constructor_ShouldThrowArgumentNullException_WhenLoggerIsNull() {
         // Act & Assert
         var act = () => new TrustTierCalculationService(
             _mockPackageRepository.Object,
@@ -190,8 +183,7 @@ public class TrustTierCalculationServiceTests
     }
 
     [Fact]
-    public async Task CalculatePackageTrustTierAsync_ShouldThrowNotImplementedException()
-    {
+    public async Task CalculatePackageTrustTierAsync_ShouldThrowNotImplementedException() {
         // Arrange
         var packageId = Guid.CreateVersion7();
 
@@ -202,8 +194,7 @@ public class TrustTierCalculationServiceTests
     }
 
     [Fact]
-    public async Task GetTrustTierAssessmentAsync_ShouldThrowNotImplementedException()
-    {
+    public async Task GetTrustTierAssessmentAsync_ShouldThrowNotImplementedException() {
         // Arrange
         var packageId = Guid.CreateVersion7();
 
@@ -214,8 +205,7 @@ public class TrustTierCalculationServiceTests
     }
 
     [Fact]
-    public async Task UpdatePackageTrustTierAsync_ShouldThrowNotImplementedException()
-    {
+    public async Task UpdatePackageTrustTierAsync_ShouldThrowNotImplementedException() {
         // Arrange
         var packageId = Guid.CreateVersion7();
         var newTier = TrustTier.CommunityTrusted;
@@ -228,8 +218,7 @@ public class TrustTierCalculationServiceTests
     }
 
     [Fact]
-    public async Task GetTrustTierHistoryAsync_ShouldThrowNotImplementedException()
-    {
+    public async Task GetTrustTierHistoryAsync_ShouldThrowNotImplementedException() {
         // Arrange
         var packageId = Guid.CreateVersion7();
 
@@ -240,17 +229,14 @@ public class TrustTierCalculationServiceTests
     }
 
     [Fact]
-    public async Task GetTrustTierStatisticsAsync_ShouldThrowNotImplementedException()
-    {
+    public async Task GetTrustTierStatisticsAsync_ShouldThrowNotImplementedException() =>
         // Act & Assert
         await _service.Invoking(s => s.GetTrustTierStatisticsAsync())
             .Should().ThrowAsync<NotImplementedException>()
             .WithMessage("Trust tier statistics calculation logic will be implemented when first consumer requires it");
-    }
 
     [Fact]
-    public async Task BatchRecalculateTrustTiersAsync_ShouldThrowNotImplementedException()
-    {
+    public async Task BatchRecalculateTrustTiersAsync_ShouldThrowNotImplementedException() {
         // Arrange
         var packageIds = new[] { Guid.CreateVersion7(), Guid.CreateVersion7() };
 
@@ -261,17 +247,14 @@ public class TrustTierCalculationServiceTests
     }
 
     [Fact]
-    public async Task RecalculateAllTrustTiersAsync_ShouldThrowNotImplementedException()
-    {
+    public async Task RecalculateAllTrustTiersAsync_ShouldThrowNotImplementedException() =>
         // Act & Assert
         await _service.Invoking(s => s.RecalculateAllTrustTiersAsync())
             .Should().ThrowAsync<NotImplementedException>()
             .WithMessage("Full trust tier recalculation logic will be implemented when first consumer requires it");
-    }
 
     [Fact]
-    public async Task ValidateTrustTierEligibilityAsync_ShouldThrowNotImplementedException()
-    {
+    public async Task ValidateTrustTierEligibilityAsync_ShouldThrowNotImplementedException() {
         // Arrange
         var packageId = Guid.CreateVersion7();
         var targetTier = TrustTier.Verified;
@@ -283,26 +266,21 @@ public class TrustTierCalculationServiceTests
     }
 
     [Fact]
-    public async Task GetEligibleForPromotionAsync_ShouldThrowNotImplementedException()
-    {
+    public async Task GetEligibleForPromotionAsync_ShouldThrowNotImplementedException() =>
         // Act & Assert
         await _service.Invoking(s => s.GetEligibleForPromotionAsync())
             .Should().ThrowAsync<NotImplementedException>()
             .WithMessage("Promotion eligibility logic will be implemented when first consumer requires it");
-    }
 
     [Fact]
-    public async Task GetAtRiskForDemotionAsync_ShouldThrowNotImplementedException()
-    {
+    public async Task GetAtRiskForDemotionAsync_ShouldThrowNotImplementedException() =>
         // Act & Assert
         await _service.Invoking(s => s.GetAtRiskForDemotionAsync())
             .Should().ThrowAsync<NotImplementedException>()
             .WithMessage("Demotion risk assessment logic will be implemented when first consumer requires it");
-    }
 
     [Fact]
-    public async Task EmergencyDemotePackagesAsync_ShouldThrowNotImplementedException()
-    {
+    public async Task EmergencyDemotePackagesAsync_ShouldThrowNotImplementedException() {
         // Arrange
         var packageIds = new[] { Guid.CreateVersion7() };
         var reason = "Critical security issue";

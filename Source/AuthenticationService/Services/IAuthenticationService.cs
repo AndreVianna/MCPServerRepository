@@ -1,6 +1,6 @@
-using MCPHub.Domain.Entities;
 using MCPHub.Domain.Contracts.Requests;
 using MCPHub.Domain.Contracts.Responses;
+using MCPHub.Domain.Entities;
 
 namespace MCPHub.AuthenticationService.Services;
 
@@ -41,4 +41,3 @@ public interface IAuthenticationService {
     /// <returns>Logout result</returns>
     Task<LogoutResult> LogoutAsync(Guid userId, CancellationToken cancellationToken = default);
 }
-

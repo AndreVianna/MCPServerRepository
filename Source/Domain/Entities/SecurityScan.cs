@@ -10,15 +10,15 @@ namespace MCPHub.Domain.Entities;
 /// </summary>
 public class SecurityScan : BaseEntity {
     public Guid VersionId { get; set; }
-    
+
     // Server-specific properties (nullable for package scans)
     public Guid? ServerVersionId { get; set; }
     public ServerVersion? ServerVersion { get; set; }
-    
+
     // Package-specific properties (nullable for server scans)
     public Guid? PackageVersionId { get; set; }
     public PackageVersion? PackageVersion { get; set; }
-    
+
     // Common scan properties
     public ScanType ScanType { get; set; }
     public DateTime ScanStartedAt { get; set; }
@@ -31,7 +31,7 @@ public class SecurityScan : BaseEntity {
     [MaxLength(32)]
     public string ScannerVersion { get; set; } = string.Empty;
     public Dictionary<string, object> Metadata { get; set; } = [];
-    
+
     /// <summary>
     /// Type of entity being scanned (Server or Package)
     /// </summary>
@@ -64,7 +64,7 @@ public class SecurityScan : BaseEntity {
             DateTime = DateTimeOffset.UtcNow
         });
     }
-    
+
     /// <summary>
     /// Creates a security scan for a package version
     /// </summary>
@@ -120,4 +120,3 @@ public class SecurityScan : BaseEntity {
 
     public void AddMetadata(string key, object value) => Metadata[key] = value;
 }
-

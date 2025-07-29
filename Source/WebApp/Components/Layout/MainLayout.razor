@@ -1,23 +1,104 @@
-﻿@inherits LayoutComponentBase
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@inherits LayoutComponentBase
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject IJSRuntime JSRuntime
 
-<div class="page">
-    <div class="sidebar">
+<MudLayout>
+    <MudAppBar Elevation="1" Class="mud-theme-primary">
+        <MudIconButton Icon="Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        <MudLink Href="/" Underline="Underline.None" Class="d-flex align-center">
+            <MudIcon Icon="@Icons.Material.Filled.Security" Color="Color.Inherit" Style="margin-right: 8px;" />
+            <MudText Typo="Typo.h6" Color="Color.Inherit" Class="mud-width-full">
+                MCP Hub
+            </MudText>
+        </MudLink>
+        <MudSpacer />
+        
+        <AuthorizeView>
+            <Authorized>
+                <MudMenu Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+                    <MudMenuItem OnClick="@GoToProfile">
+                        <div class="d-flex align-center">
+                            <MudIcon Icon="@Icons.Material.Filled.Person" Class="mr-2" />
+                            Profile
+                        </div>
+                    </MudMenuItem>
+                    <MudMenuItem OnClick="@GoToSettings">
+                        <div class="d-flex align-center">
+                            <MudIcon Icon="@Icons.Material.Filled.Settings" Class="mr-2" />
+                            Settings
+                        </div>
+                    </MudMenuItem>
+                    <MudDivider />
+                    <MudMenuItem OnClick="@Logout">
+                        <div class="d-flex align-center">
+                            <MudIcon Icon="@Icons.Material.Filled.Logout" Class="mr-2" />
+                            Logout
+                        </div>
+                    </MudMenuItem>
+                </MudMenu>
+            </Authorized>
+            <NotAuthorized>
+                <MudButton Href="/login" Color="Color.Inherit" Variant="Variant.Text" StartIcon="@Icons.Material.Filled.Login">
+                    Login
+                </MudButton>
+                <MudButton Href="/register" Color="Color.Inherit" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.PersonAdd" Class="ml-2">
+                    Register
+                </MudButton>
+            </NotAuthorized>
+        </AuthorizeView>
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Never" Elevation="2" Variant="@DrawerVariant.Responsive" Class="mud-theme-drawer">
         <NavMenu />
-    </div>
+    </MudDrawer>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4 px-4">
             @Body
-        </article>
-    </main>
-</div>
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
 
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
-</div>
+@code {
+    private bool _drawerOpen = true;
+
+    private void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    private void GoToProfile()
+    {
+        // Navigate to profile page - will be implemented in phase 2
+        Snackbar.Add("Profile page coming soon!", Severity.Info);
+    }
+
+    private void GoToSettings()
+    {
+        // Navigate to settings page - will be implemented in phase 2
+        Snackbar.Add("Settings page coming soon!", Severity.Info);
+    }
+
+    private async Task Logout()
+    {
+        // Implement logout functionality
+        var authService = ServiceProvider.GetService<IAuthenticationService>();
+        if (authService != null)
+        {
+            var result = await authService.LogoutAsync();
+            if (result.IsSuccess)
+            {
+                Snackbar.Add("Logged out successfully", Severity.Success);
+                await JSRuntime.InvokeVoidAsync("location.href", "/");
+            }
+            else
+            {
+                Snackbar.Add("Logout failed: " + result.ErrorMessage, Severity.Error);
+            }
+        }
+    }
+
+    [Inject] private IServiceProvider ServiceProvider { get; set; } = default!;
+}

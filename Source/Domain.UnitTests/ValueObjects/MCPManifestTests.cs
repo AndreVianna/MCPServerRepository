@@ -5,17 +5,13 @@ namespace MCPHub.Domain.UnitTests.ValueObjects;
 /// <summary>
 /// Unit tests for MCPManifest value object
 /// </summary>
-[TestClass]
-public class MCPManifestTests
-{
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("MCPManifest")]
-    public void Validate_WithValidManifest_ShouldReturnSuccess()
-    {
+public class MCPManifestTests {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "MCPManifest")]
+    public void Validate_WithValidManifest_ShouldReturnSuccess() {
         // Arrange
-        var manifest = new MCPManifest
-        {
+        var manifest = new MCPManifest {
             Name = "test-package",
             Version = "1.0.0",
             Description = "A test MCP package",
@@ -23,13 +19,12 @@ public class MCPManifestTests
             License = "MIT",
             Homepage = "https://example.com",
             Repository = "https://github.com/test/package",
-            Capabilities = new MCPCapabilities
-            {
+            Capabilities = new MCPCapabilities {
                 Tools = [
-                    new MCPTool 
-                    { 
-                        Name = "test-tool", 
-                        Description = "A test tool" 
+                    new MCPTool
+                    {
+                        Name = "test-tool",
+                        Description = "A test tool"
                     }
                 ]
             }
@@ -39,19 +34,17 @@ public class MCPManifestTests
         var result = manifest.Validate();
 
         // Assert
-        Assert.IsTrue(result.IsValid);
-        Assert.AreEqual(0, result.Errors.Count);
-        Assert.AreEqual("manifest", result.Context);
+        Assert.True(result.IsValid);
+        Assert.Equal(0, result.Errors.Count);
+        Assert.Equal("manifest", result.Context);
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("MCPManifest")]
-    public void Validate_WithMissingRequiredFields_ShouldReturnErrors()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "MCPManifest")]
+    public void Validate_WithMissingRequiredFields_ShouldReturnErrors() {
         // Arrange
-        var manifest = new MCPManifest
-        {
+        var manifest = new MCPManifest {
             // Missing name, version, description, license, author
         };
 
@@ -59,22 +52,20 @@ public class MCPManifestTests
         var result = manifest.Validate();
 
         // Assert
-        Assert.IsFalse(result.IsValid);
-        Assert.IsTrue(result.Errors.Count >= 4); // name, version, description, license, author
-        Assert.IsTrue(result.Errors.Any(e => e.Contains("name")));
-        Assert.IsTrue(result.Errors.Any(e => e.Contains("version")));
-        Assert.IsTrue(result.Errors.Any(e => e.Contains("description")));
-        Assert.IsTrue(result.Errors.Any(e => e.Contains("license")));
+        Assert.False(result.IsValid);
+        Assert.True(result.Errors.Count >= 4); // name, version, description, license, author
+        Assert.True(result.Errors.Any(e => e.Contains("name")));
+        Assert.True(result.Errors.Any(e => e.Contains("version")));
+        Assert.True(result.Errors.Any(e => e.Contains("description")));
+        Assert.True(result.Errors.Any(e => e.Contains("license")));
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("MCPManifest")]
-    public void Validate_WithInvalidPackageName_ShouldReturnError()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "MCPManifest")]
+    public void Validate_WithInvalidPackageName_ShouldReturnError() {
         // Arrange
-        var manifest = new MCPManifest
-        {
+        var manifest = new MCPManifest {
             Name = "Invalid-Package-Name-With-Capitals",
             Version = "1.0.0",
             Description = "Test package",
@@ -86,18 +77,16 @@ public class MCPManifestTests
         var result = manifest.Validate();
 
         // Assert
-        Assert.IsFalse(result.IsValid);
-        Assert.IsTrue(result.Errors.Any(e => e.Contains("Package name")));
+        Assert.False(result.IsValid);
+        Assert.True(result.Errors.Any(e => e.Contains("Package name")));
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("MCPManifest")]
-    public void Validate_WithValidNamespacedPackageName_ShouldReturnSuccess()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "MCPManifest")]
+    public void Validate_WithValidNamespacedPackageName_ShouldReturnSuccess() {
         // Arrange
-        var manifest = new MCPManifest
-        {
+        var manifest = new MCPManifest {
             Name = "@namespace/package-name",
             Version = "1.0.0",
             Description = "Test package",
@@ -109,18 +98,16 @@ public class MCPManifestTests
         var result = manifest.Validate();
 
         // Assert
-        Assert.IsTrue(result.IsValid);
-        Assert.AreEqual(0, result.Errors.Count);
+        Assert.True(result.IsValid);
+        Assert.Equal(0, result.Errors.Count);
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("MCPManifest")]
-    public void Validate_WithInvalidSemanticVersion_ShouldReturnError()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "MCPManifest")]
+    public void Validate_WithInvalidSemanticVersion_ShouldReturnError() {
         // Arrange
-        var manifest = new MCPManifest
-        {
+        var manifest = new MCPManifest {
             Name = "test-package",
             Version = "invalid-version",
             Description = "Test package",
@@ -132,22 +119,19 @@ public class MCPManifestTests
         var result = manifest.Validate();
 
         // Assert
-        Assert.IsFalse(result.IsValid);
-        Assert.IsTrue(result.Errors.Any(e => e.Contains("semantic versioning")));
+        Assert.False(result.IsValid);
+        Assert.True(result.Errors.Any(e => e.Contains("semantic versioning")));
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("MCPManifest")]
-    public void Validate_WithValidSemanticVersions_ShouldReturnSuccess()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "MCPManifest")]
+    public void Validate_WithValidSemanticVersions_ShouldReturnSuccess() {
         // Arrange
         var versions = new[] { "1.0.0", "1.2.3", "2.0.0-beta.1", "1.0.0-alpha.1" };
 
-        foreach (var version in versions)
-        {
-            var manifest = new MCPManifest
-            {
+        foreach (var version in versions) {
+            var manifest = new MCPManifest {
                 Name = "test-package",
                 Version = version,
                 Description = "Test package",
@@ -159,18 +143,16 @@ public class MCPManifestTests
             var result = manifest.Validate();
 
             // Assert
-            Assert.IsTrue(result.IsValid, $"Version {version} should be valid");
+            Assert.True(result.IsValid, $"Version {version} should be valid");
         }
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("MCPManifest")]
-    public void Validate_WithInvalidUrls_ShouldReturnErrors()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "MCPManifest")]
+    public void Validate_WithInvalidUrls_ShouldReturnErrors() {
         // Arrange
-        var manifest = new MCPManifest
-        {
+        var manifest = new MCPManifest {
             Name = "test-package",
             Version = "1.0.0",
             Description = "Test package",
@@ -185,21 +167,19 @@ public class MCPManifestTests
         var result = manifest.Validate();
 
         // Assert
-        Assert.IsFalse(result.IsValid);
-        Assert.IsTrue(result.Errors.Count >= 3); // homepage, repository, bugs
-        Assert.IsTrue(result.Errors.Any(e => e.Contains("Homepage")));
-        Assert.IsTrue(result.Errors.Any(e => e.Contains("Repository")));
-        Assert.IsTrue(result.Errors.Any(e => e.Contains("Bugs")));
+        Assert.False(result.IsValid);
+        Assert.True(result.Errors.Count >= 3); // homepage, repository, bugs
+        Assert.True(result.Errors.Any(e => e.Contains("Homepage")));
+        Assert.True(result.Errors.Any(e => e.Contains("Repository")));
+        Assert.True(result.Errors.Any(e => e.Contains("Bugs")));
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("MCPManifest")]
-    public void Validate_WithNoCapabilities_ShouldReturnWarning()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "MCPManifest")]
+    public void Validate_WithNoCapabilities_ShouldReturnWarning() {
         // Arrange
-        var manifest = new MCPManifest
-        {
+        var manifest = new MCPManifest {
             Name = "test-package",
             Version = "1.0.0",
             Description = "Test package",
@@ -212,19 +192,17 @@ public class MCPManifestTests
         var result = manifest.Validate();
 
         // Assert
-        Assert.IsTrue(result.IsValid); // Should still be valid
-        Assert.IsTrue(result.Warnings.Count > 0);
-        Assert.IsTrue(result.Warnings.Any(w => w.Contains("capability")));
+        Assert.True(result.IsValid); // Should still be valid
+        Assert.True(result.Warnings.Count > 0);
+        Assert.True(result.Warnings.Any(w => w.Contains("capability")));
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("MCPManifest")]
-    public void Validate_WithMissingAuthorName_ShouldReturnError()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "MCPManifest")]
+    public void Validate_WithMissingAuthorName_ShouldReturnError() {
         // Arrange
-        var manifest = new MCPManifest
-        {
+        var manifest = new MCPManifest {
             Name = "test-package",
             Version = "1.0.0",
             Description = "Test package",
@@ -236,22 +214,19 @@ public class MCPManifestTests
         var result = manifest.Validate();
 
         // Assert
-        Assert.IsFalse(result.IsValid);
-        Assert.IsTrue(result.Errors.Any(e => e.Contains("Author name")));
+        Assert.False(result.IsValid);
+        Assert.True(result.Errors.Any(e => e.Contains("Author name")));
     }
 }
 
 /// <summary>
 /// Unit tests for MCPCapabilities
 /// </summary>
-[TestClass]
-public class MCPCapabilitiesTests
-{
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("MCPCapabilities")]
-    public void HasAnyCapability_WithNoCapabilities_ShouldReturnFalse()
-    {
+public class MCPCapabilitiesTests {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "MCPCapabilities")]
+    public void HasAnyCapability_WithNoCapabilities_ShouldReturnFalse() {
         // Arrange
         var capabilities = new MCPCapabilities();
 
@@ -259,17 +234,15 @@ public class MCPCapabilitiesTests
         var result = capabilities.HasAnyCapability();
 
         // Assert
-        Assert.IsFalse(result);
+        Assert.False(result);
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("MCPCapabilities")]
-    public void HasAnyCapability_WithTools_ShouldReturnTrue()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "MCPCapabilities")]
+    public void HasAnyCapability_WithTools_ShouldReturnTrue() {
         // Arrange
-        var capabilities = new MCPCapabilities
-        {
+        var capabilities = new MCPCapabilities {
             Tools = [new MCPTool { Name = "test-tool", Description = "Test" }]
         };
 
@@ -277,17 +250,15 @@ public class MCPCapabilitiesTests
         var result = capabilities.HasAnyCapability();
 
         // Assert
-        Assert.IsTrue(result);
+        Assert.True(result);
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("MCPCapabilities")]
-    public void HasAnyCapability_WithResources_ShouldReturnTrue()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "MCPCapabilities")]
+    public void HasAnyCapability_WithResources_ShouldReturnTrue() {
         // Arrange
-        var capabilities = new MCPCapabilities
-        {
+        var capabilities = new MCPCapabilities {
             Resources = [new MCPResource { Uri = "test://resource", Name = "test-resource", Description = "Test" }]
         };
 
@@ -295,17 +266,15 @@ public class MCPCapabilitiesTests
         var result = capabilities.HasAnyCapability();
 
         // Assert
-        Assert.IsTrue(result);
+        Assert.True(result);
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("MCPCapabilities")]
-    public void HasAnyCapability_WithPrompts_ShouldReturnTrue()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "MCPCapabilities")]
+    public void HasAnyCapability_WithPrompts_ShouldReturnTrue() {
         // Arrange
-        var capabilities = new MCPCapabilities
-        {
+        var capabilities = new MCPCapabilities {
             Prompts = [new MCPPrompt { Name = "test-prompt", Description = "Test" }]
         };
 
@@ -313,6 +282,6 @@ public class MCPCapabilitiesTests
         var result = capabilities.HasAnyCapability();
 
         // Assert
-        Assert.IsTrue(result);
+        Assert.True(result);
     }
 }

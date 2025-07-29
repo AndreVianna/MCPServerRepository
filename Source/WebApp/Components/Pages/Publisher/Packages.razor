@@ -1,0 +1,453 @@
+@page "/publisher/packages"
+@using MCPHub.WebApp.Services
+@using MCPHub.WebApp.Components.UI.Layout
+@using MCPHub.WebApp.Components.UI.Packages
+@using MCPHub.WebApp.Components.UI.Search
+@using MCPHub.Domain.Entities
+@using MudBlazor
+@using Microsoft.AspNetCore.Authorization
+@inject IPackageManagementService PackageService
+@inject ISnackbar Snackbar
+@inject ILogger<Packages> Logger
+@inject NavigationManager Navigation
+@attribute [Authorize]
+
+<PageTitle>My Packages - MCP Hub</PageTitle>
+
+<ResponsiveContainer MaxWidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
+    <HeaderContent>
+        <div class="packages-header">
+            <div class="header-title mb-4">
+                <MudText Typo="Typo.h4">📦 My Packages</MudText>
+                <MudText Typo="Typo.body1" Color="Color.Secondary">
+                    Manage and monitor your published MCP packages
+                </MudText>
+            </div>
+
+            <div class="header-actions d-flex justify-space-between align-center flex-wrap gap-3">
+                <div class="search-and-filters d-flex align-center gap-3">
+                    <MudTextField @bind-Value="@_searchQuery"
+                                  Placeholder="Search packages..."
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="Icons.Material.Filled.Search"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Style="min-width: 300px;"
+                                  OnKeyPress="HandleSearchKeyPress"
+                                  Clearable="true" />
+
+                    <MudSelect @bind-Value="@_selectedStatus"
+                               Label="Status"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               Style="min-width: 150px;"
+                               T="PackageStatus?"
+                               ToStringFunc="@(status => status?.ToString() ?? "All Statuses")"
+                               Clearable="true">
+                        <MudSelectItem Value="@((PackageStatus?)null)">All Statuses</MudSelectItem>
+                        @foreach (PackageStatus status in Enum.GetValues<PackageStatus>())
+                        {
+                            <MudSelectItem Value="@status">@status</MudSelectItem>
+                        }
+                    </MudSelect>
+
+                    <MudSelect @bind-Value="@_sortBy"
+                               Label="Sort by"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               Style="min-width: 150px;">
+                        <MudSelectItem Value="@("updated")">Last Updated</MudSelectItem>
+                        <MudSelectItem Value="@("created")">Created Date</MudSelectItem>
+                        <MudSelectItem Value="@("name")">Name</MudSelectItem>
+                        <MudSelectItem Value="@("downloads")">Downloads</MudSelectItem>
+                        <MudSelectItem Value="@("rating")">Rating</MudSelectItem>
+                    </MudSelect>
+
+                    <MudIconButton Icon="@(_sortDirection == MCPHub.Domain.Entities.SortDirection.Ascending ? Icons.Material.Filled.ArrowUpward : Icons.Material.Filled.ArrowDownward)"
+                                   Color="Color.Primary"
+                                   Size="Size.Medium"
+                                   Title="@(_sortDirection == MCPHub.Domain.Entities.SortDirection.Ascending ? "Sort Descending" : "Sort Ascending")"
+                                   @onclick="ToggleSortDirection" />
+                </div>
+
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="Icons.Material.Filled.Add"
+                           Size="Size.Large"
+                           Href="/publisher/packages/publish">
+                    Publish Package
+                </MudButton>
+            </div>
+        </div>
+    </HeaderContent>
+
+    <MainContent>
+        @if (_isLoading)
+        {
+            <div class="packages-loading">
+                <MudGrid Spacing="3">
+                    @for (int i = 0; i < 6; i++)
+                    {
+                        <MudItem xs="12">
+                            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="200px" />
+                        </MudItem>
+                    }
+                </MudGrid>
+            </div>
+        }
+        else if (_packages?.Any() == true)
+        {
+            <div class="packages-list">
+                <MudGrid Spacing="3">
+                    @foreach (var package in _packages)
+                    {
+                        <MudItem xs="12">
+                            <PublisherPackageCard Package="package"
+                                                  OnEditClick="HandleEditPackage"
+                                                  OnAnalyticsClick="HandleViewAnalytics"
+                                                  OnSecurityClick="HandleViewSecurity"
+                                                  OnDeleteClick="HandleDeletePackage"
+                                                  OnManageVersionsClick="HandleManageVersions"
+                                                  Class="mb-3" />
+                        </MudItem>
+                    }
+                </MudGrid>
+
+                @if (_packageResult != null && _packageResult.TotalPages > 1)
+                {
+                    <div class="packages-pagination d-flex justify-center mt-6">
+                        <MudPagination Count="@_packageResult.TotalPages"
+                                       Selected="@_packageResult.PageNumber"
+                                       SelectedChanged="OnPageChanged"
+                                       ShowFirstButton="true"
+                                       ShowLastButton="true"
+                                       Color="Color.Primary"
+                                       Size="Size.Large" />
+                    </div>
+                }
+            </div>
+        }
+        else if (!_isLoading && _hasSearched)
+        {
+            <div class="no-packages-found text-center pa-8">
+                <MudIcon Icon="Icons.Material.Outlined.SearchOff" 
+                         Size="Size.Large" 
+                         Color="Color.Secondary" />
+                <MudText Typo="Typo.h6" Color="Color.Secondary" Class="mt-4 mb-2">
+                    No packages found
+                </MudText>
+                <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-4">
+                    @GetNoResultsMessage()
+                </MudText>
+                <MudButton Variant="Variant.Text" 
+                           Color="Color.Primary"
+                           @onclick="ClearFilters">
+                    Clear filters
+                </MudButton>
+            </div>
+        }
+        else
+        {
+            <div class="no-packages text-center pa-8">
+                <MudIcon Icon="Icons.Material.Outlined.Inventory" 
+                         Size="Size.Large" 
+                         Color="Color.Secondary" />
+                <MudText Typo="Typo.h6" Color="Color.Secondary" Class="mt-4 mb-2">
+                    No packages published yet
+                </MudText>
+                <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-4">
+                    Start by publishing your first MCP package to the registry
+                </MudText>
+                <MudButton Variant="Variant.Filled" 
+                           Color="Color.Primary"
+                           StartIcon="Icons.Material.Filled.Add"
+                           Size="Size.Large"
+                           Href="/publisher/packages/publish">
+                    Publish Your First Package
+                </MudButton>
+            </div>
+        }
+    </MainContent>
+</ResponsiveContainer>
+
+@code {
+    private PackageListResult? _packageResult;
+    private IEnumerable<PackageListItem>? _packages => _packageResult?.Packages;
+    
+    private bool _isLoading = true;
+    private bool _hasSearched = false;
+    
+    private string _searchQuery = string.Empty;
+    private PackageStatus? _selectedStatus;
+    private string _sortBy = "updated";
+    private Domain.Entities.SortDirection _sortDirection = Domain.Entities.SortDirection.Descending;
+    
+    private int _currentPage = 1;
+    private const int PageSize = 20;
+    
+    private Guid _publisherId = Guid.NewGuid(); // TODO: Get from authentication context
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPackagesAsync();
+    }
+
+    private async Task LoadPackagesAsync()
+    {
+        try
+        {
+            _isLoading = true;
+            StateHasChanged();
+
+            _packageResult = await PackageService.GetPublisherPackagesAsync(
+                _publisherId,
+                string.IsNullOrWhiteSpace(_searchQuery) ? null : _searchQuery,
+                _selectedStatus,
+                _sortBy,
+                _sortDirection,
+                _currentPage,
+                PageSize);
+
+            _hasSearched = true;
+        }
+        catch (NotImplementedException)
+        {
+            // Create mock data for development
+            var mockPackages = GenerateMockPackages();
+            
+            _packageResult = new PackageListResult
+            {
+                Packages = mockPackages.Skip((_currentPage - 1) * PageSize).Take(PageSize),
+                TotalCount = mockPackages.Count(),
+                PageNumber = _currentPage,
+                PageSize = PageSize,
+                TotalPages = (int)Math.Ceiling(mockPackages.Count() / (double)PageSize),
+                HasNextPage = _currentPage < (int)Math.Ceiling(mockPackages.Count() / (double)PageSize),
+                HasPreviousPage = _currentPage > 1
+            };
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading packages");
+            Snackbar.Add("Failed to load packages", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private IEnumerable<PackageListItem> GenerateMockPackages()
+    {
+        var packages = new List<PackageListItem>
+        {
+            new() { Id = Guid.NewGuid(), Name = "@ai/claude-tools", Description = "Advanced Claude AI integration toolkit", LatestVersion = "2.1.4", Status = PackageStatus.Published, WeeklyDownloads = 45200, Rating = 4.9, SecurityGrade = "A+", TrustTier = TrustTier.Enterprise, LastUpdated = DateTime.UtcNow.AddHours(-2), CreatedAt = DateTime.UtcNow.AddMonths(-6), HasActiveAlerts = false, IsTrending = true, GrowthPercentage = 23.5, Tags = new[] { "ai", "claude", "tools", "enterprise" } },
+            new() { Id = Guid.NewGuid(), Name = "@tools/web-scraper", Description = "Professional web scraping and browser automation", LatestVersion = "1.8.2", Status = PackageStatus.Published, WeeklyDownloads = 34100, Rating = 4.7, SecurityGrade = "A", TrustTier = TrustTier.CommunityTrusted, LastUpdated = DateTime.UtcNow.AddDays(-1), CreatedAt = DateTime.UtcNow.AddMonths(-4), HasActiveAlerts = false, IsTrending = true, GrowthPercentage = 45.0, Tags = new[] { "web", "scraping", "automation" } },
+            new() { Id = Guid.NewGuid(), Name = "@data/processor", Description = "High-performance data processing and transformation", LatestVersion = "3.0.1", Status = PackageStatus.Published, WeeklyDownloads = 28700, Rating = 4.8, SecurityGrade = "A+", TrustTier = TrustTier.Enterprise, LastUpdated = DateTime.UtcNow.AddDays(-3), CreatedAt = DateTime.UtcNow.AddMonths(-8), HasActiveAlerts = true, ActiveAlertCount = 1, GrowthPercentage = 12.0, Tags = new[] { "data", "processing", "etl" } },
+            new() { Id = Guid.NewGuid(), Name = "@ai/gpt-connector", Description = "OpenAI GPT integration and prompt management", LatestVersion = "2.3.0", Status = PackageStatus.Published, WeeklyDownloads = 22300, Rating = 4.6, SecurityGrade = "A", TrustTier = TrustTier.CommunityTrusted, LastUpdated = DateTime.UtcNow.AddDays(-5), CreatedAt = DateTime.UtcNow.AddMonths(-3), HasActiveAlerts = false, GrowthPercentage = 8.0, Tags = new[] { "ai", "gpt", "openai" } },
+            new() { Id = Guid.NewGuid(), Name = "@utils/file-handler", Description = "Advanced file management and organization utilities", LatestVersion = "1.5.3", Status = PackageStatus.Published, WeeklyDownloads = 18900, Rating = 4.4, SecurityGrade = "B+", TrustTier = TrustTier.Verified, LastUpdated = DateTime.UtcNow.AddDays(-7), CreatedAt = DateTime.UtcNow.AddMonths(-2), HasActiveAlerts = false, GrowthPercentage = -2.0, Tags = new[] { "utilities", "files", "organization" } },
+            new() { Id = Guid.NewGuid(), Name = "@dev/code-analyzer", Description = "Static code analysis and quality metrics", LatestVersion = "0.9.1", Status = PackageStatus.Draft, WeeklyDownloads = 0, Rating = 0.0, SecurityGrade = "B", TrustTier = TrustTier.Verified, LastUpdated = DateTime.UtcNow.AddDays(-2), CreatedAt = DateTime.UtcNow.AddDays(-10), HasActiveAlerts = false, GrowthPercentage = 0.0, Tags = new[] { "development", "analysis", "quality" } }
+        };
+
+        // Apply filters
+        if (!string.IsNullOrWhiteSpace(_searchQuery))
+        {
+            packages = packages.Where(p => 
+                p.Name.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                p.Description.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase) ||
+                p.Tags.Any(t => t.Contains(_searchQuery, StringComparison.OrdinalIgnoreCase))).ToList();
+        }
+
+        if (_selectedStatus.HasValue)
+        {
+            packages = packages.Where(p => p.Status == _selectedStatus.Value).ToList();
+        }
+
+        // Apply sorting
+        packages = _sortBy switch
+        {
+            "name" => _sortDirection == MCPHub.Domain.Entities.SortDirection.Ascending 
+                ? packages.OrderBy(p => p.Name).ToList()
+                : packages.OrderByDescending(p => p.Name).ToList(),
+            "created" => _sortDirection == MCPHub.Domain.Entities.SortDirection.Ascending 
+                ? packages.OrderBy(p => p.CreatedAt).ToList()
+                : packages.OrderByDescending(p => p.CreatedAt).ToList(),
+            "downloads" => _sortDirection == MCPHub.Domain.Entities.SortDirection.Ascending 
+                ? packages.OrderBy(p => p.WeeklyDownloads).ToList()
+                : packages.OrderByDescending(p => p.WeeklyDownloads).ToList(),
+            "rating" => _sortDirection == MCPHub.Domain.Entities.SortDirection.Ascending 
+                ? packages.OrderBy(p => p.Rating).ToList()
+                : packages.OrderByDescending(p => p.Rating).ToList(),
+            _ => _sortDirection == MCPHub.Domain.Entities.SortDirection.Ascending 
+                ? packages.OrderBy(p => p.LastUpdated).ToList()
+                : packages.OrderByDescending(p => p.LastUpdated).ToList()
+        };
+
+        return packages;
+    }
+
+    private async Task HandleSearchKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            _currentPage = 1; // Reset to first page when searching
+            await LoadPackagesAsync();
+        }
+    }
+
+    private async Task OnPageChanged(int page)
+    {
+        _currentPage = page;
+        await LoadPackagesAsync();
+    }
+
+    private async Task ToggleSortDirection()
+    {
+        _sortDirection = _sortDirection == MCPHub.Domain.Entities.SortDirection.Ascending 
+            ? MCPHub.Domain.Entities.SortDirection.Descending 
+            : MCPHub.Domain.Entities.SortDirection.Ascending;
+        await LoadPackagesAsync();
+    }
+
+    private async Task ClearFilters()
+    {
+        _searchQuery = string.Empty;
+        _selectedStatus = null;
+        _sortBy = "updated";
+        _sortDirection = MCPHub.Domain.Entities.SortDirection.Descending;
+        _currentPage = 1;
+        await LoadPackagesAsync();
+    }
+
+    private string GetNoResultsMessage()
+    {
+        if (!string.IsNullOrWhiteSpace(_searchQuery) && _selectedStatus.HasValue)
+        {
+            return $"No packages found matching \"{_searchQuery}\" with status {_selectedStatus}";
+        }
+        else if (!string.IsNullOrWhiteSpace(_searchQuery))
+        {
+            return $"No packages found matching \"{_searchQuery}\"";
+        }
+        else if (_selectedStatus.HasValue)
+        {
+            return $"No packages found with status {_selectedStatus}";
+        }
+        
+        return "No packages match the current filters";
+    }
+
+    private void HandleEditPackage(PackageListItem package)
+    {
+        Navigation.NavigateTo($"/publisher/packages/{package.Id}/edit");
+    }
+
+    private void HandleViewAnalytics(PackageListItem package)
+    {
+        Navigation.NavigateTo($"/publisher/packages/{package.Id}/analytics");
+    }
+
+    private void HandleViewSecurity(PackageListItem package)
+    {
+        Navigation.NavigateTo($"/publisher/packages/{package.Id}/security");
+    }
+
+    private async Task HandleDeletePackage(PackageListItem package)
+    {
+        var confirmed = await ShowDeleteConfirmation(package);
+        if (confirmed)
+        {
+            try
+            {
+                // TODO: Implement package deletion
+                Snackbar.Add($"Package {package.Name} deletion initiated", Severity.Success);
+                await LoadPackagesAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error deleting package {PackageId}", package.Id);
+                Snackbar.Add("Failed to delete package", Severity.Error);
+            }
+        }
+    }
+
+    private void HandleManageVersions(PackageListItem package)
+    {
+        Navigation.NavigateTo($"/publisher/packages/{package.Id}/versions");
+    }
+
+    private async Task<bool> ShowDeleteConfirmation(PackageListItem package)
+    {
+        // TODO: Implement confirmation dialog
+        return false;
+    }
+}
+
+<style>
+.packages-header {
+    margin-bottom: 24px;
+}
+
+.header-title h4 {
+    margin-bottom: 8px;
+}
+
+.search-and-filters {
+    flex-wrap: wrap;
+}
+
+.packages-loading,
+.packages-list {
+    width: 100%;
+}
+
+.no-packages,
+.no-packages-found {
+    background-color: var(--mud-palette-background-grey);
+    border-radius: 12px;
+    border: 2px dashed var(--mud-palette-divider);
+}
+
+.packages-pagination {
+    margin-top: 32px;
+}
+
+/* Responsive adjustments */
+@@media (max-width: 768px) {
+    .header-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+    }
+    
+    .search-and-filters {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .search-and-filters .mud-textfield,
+    .search-and-filters .mud-select {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .header-actions .mud-button {
+        width: 100%;
+    }
+}
+
+@@media (max-width: 480px) {
+    .packages-header {
+        margin-bottom: 16px;
+    }
+    
+    .header-title h4 {
+        font-size: 1.5rem;
+    }
+    
+    .search-and-filters {
+        gap: 8px;
+    }
+}
+</style>

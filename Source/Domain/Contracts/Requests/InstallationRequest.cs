@@ -5,8 +5,7 @@ namespace MCPHub.Domain.Contracts.Requests;
 /// <summary>
 /// Request model for recording package installations
 /// </summary>
-public record InstallationRequest
-{
+public record InstallationRequest {
     /// <summary>
     /// Gets or sets the installation path where the package will be installed
     /// </summary>
@@ -30,8 +29,7 @@ public record InstallationRequest
     /// Validates the installation request
     /// </summary>
     /// <returns>True if valid, false otherwise</returns>
-    public bool IsValid()
-    {
+    public bool IsValid() {
         // Validate installation path is not empty and doesn't contain invalid characters
         if (string.IsNullOrWhiteSpace(InstallationPath))
             return false;

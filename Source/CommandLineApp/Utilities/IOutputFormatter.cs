@@ -5,8 +5,7 @@ namespace MCPHub.CommandLineApp.Utilities;
 /// <summary>
 /// Interface for formatting and displaying output in the CLI
 /// </summary>
-public interface IOutputFormatter
-{
+public interface IOutputFormatter {
     /// <summary>
     /// Writes a success message
     /// </summary>
@@ -89,6 +88,18 @@ public interface IOutputFormatter
     /// Writes a blank line
     /// </summary>
     void WriteLine();
+
+    /// <summary>
+    /// Writes a section header
+    /// </summary>
+    /// <param name="header">Header text</param>
+    void WriteHeader(string header);
+
+    /// <summary>
+    /// Writes a subsection header
+    /// </summary>
+    /// <param name="subHeader">Sub-header text</param>
+    void WriteSubHeader(string subHeader);
 
     /// <summary>
     /// Gets the trust tier color for display

@@ -1,0 +1,1024 @@
+@page "/browse"
+@page "/browse/{categorySlug?}"
+@inject IApiClientService ApiClient
+@inject NavigationManager Navigation
+@using MCPHub.WebApp.Components.UI.Search
+@using MCPHub.WebApp.Components.UI.Packages
+@using MCPHub.WebApp.Components.UI.Layout
+@using MCPHub.WebApp.Components.UI.Models
+@using MCPHub.WebApp.Components.UI.Analytics
+@using MCPHub.WebApp.Services
+@using MCPHub.Domain.Entities
+
+<PageTitle>Browse Packages - MCP Hub</PageTitle>
+
+<ResponsiveContainer MaxWidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
+    <HeaderContent>
+        <div class="browse-header">
+            <MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-2">
+                Discover MCP Packages
+            </MudText>
+            <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-4">
+                Explore curated collections of AI tools, data processors, and automation servers
+            </MudText>
+            
+            <!-- Quick Search -->
+            <EnhancedSearchBar Placeholder="Quick search..."
+                             EnableVoiceSearch="false"
+                             EnableAdvancedSearch="false"
+                             Size="@SearchBarSize.Medium"
+                             OnSearch="@HandleQuickSearch"
+                             Class="browse-quick-search" />
+        </div>
+    </HeaderContent>
+
+    <MainContent>
+        @if (string.IsNullOrEmpty(CategorySlug))
+        {
+            <!-- Main Browse View -->
+            <div class="browse-main">
+                <!-- Featured Collections -->
+                <section class="featured-collections mb-8">
+                    <div class="d-flex justify-space-between align-center mb-4">
+                        <MudText Typo="Typo.h5" Color="Color.Primary">
+                            🌟 Featured Collections
+                        </MudText>
+                        <MudButton Color="Color.Primary" 
+                                 Variant="Variant.Text"
+                                 EndIcon="@Icons.Material.Filled.ArrowForward"
+                                 @onclick="@(() => Navigation.NavigateTo("/collections"))">
+                            View All Collections
+                        </MudButton>
+                    </div>
+                    
+                    <MudGrid Spacing="4">
+                        @foreach (var collection in GetFeaturedCollections())
+                        {
+                            <MudItem xs="12" md="6" lg="4">
+                                <MudCard Class="featured-collection-card h-100" Elevation="3">
+                                    <MudCardHeader>
+                                        <CardHeaderContent>
+                                            <div class="d-flex align-center">
+                                                <MudIcon Icon="@collection.Icon" 
+                                                       Color="Color.Primary" 
+                                                       Class="mr-3" 
+                                                       Style="font-size: 2rem;" />
+                                                <div>
+                                                    <MudText Typo="Typo.h6">@collection.Name</MudText>
+                                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                        @collection.PackageCount packages
+                                                    </MudText>
+                                                </div>
+                                            </div>
+                                        </CardHeaderContent>
+                                    </MudCardHeader>
+                                    <MudCardContent>
+                                        <MudText Typo="Typo.body2" Class="mb-3">
+                                            @collection.Description
+                                        </MudText>
+                                        
+                                        <div class="collection-tags">
+                                            @foreach (var tag in collection.Tags.Take(3))
+                                            {
+                                                <MudChip T="string" 
+                                                       Size="MudBlazor.Size.Small" 
+                                                       Color="Color.Primary" 
+                                                       Variant="Variant.Outlined"
+                                                       Class="mr-1 mb-1">
+                                                    @tag
+                                                </MudChip>
+                                            }
+                                            @if (collection.Tags.Length > 3)
+                                            {
+                                                <MudChip T="string" 
+                                                       Size="MudBlazor.Size.Small" 
+                                                       Color="Color.Default" 
+                                                       Variant="Variant.Text"
+                                                       Class="mr-1 mb-1">
+                                                    +@(collection.Tags.Length - 3) more
+                                                </MudChip>
+                                            }
+                                        </div>
+                                    </MudCardContent>
+                                    <MudCardActions>
+                                        <MudButton Color="Color.Primary" 
+                                                 Variant="Variant.Filled"
+                                                 StartIcon="@Icons.Material.Filled.Explore"
+                                                 @onclick="@(() => ExploreCollection(collection))">
+                                            Explore
+                                        </MudButton>
+                                    </MudCardActions>
+                                </MudCard>
+                            </MudItem>
+                        }
+                    </MudGrid>
+                </section>
+
+                <!-- Trending This Week -->
+                <section class="trending-section mb-8">
+                    <div class="d-flex justify-space-between align-center mb-4">
+                        <MudText Typo="Typo.h5" Color="Color.Primary">
+                            🔥 Trending This Week
+                        </MudText>
+                        <MudButton Color="Color.Primary" 
+                                 Variant="Variant.Text"
+                                 EndIcon="@Icons.Material.Filled.ArrowForward"
+                                 @onclick="@(() => Navigation.NavigateTo("/search?sort=trending"))">
+                            View All Trending
+                        </MudButton>
+                    </div>
+                    
+                    <MudGrid Spacing="3">
+                        @foreach (var package in _trendingPackages)
+                        {
+                            <MudItem xs="12" sm="6" md="4" lg="3">
+                                <PackageCard Package="@package" 
+                                           IsFeatured="false"
+                                           ShowAIInsights="false"
+                                           OnInstallClick="@HandleInstall"
+                                           OnDetailsClick="@HandleDetails"
+                                           OnStarClick="@HandleStar"
+                                           OnShareClick="@HandleShare"
+                                           OnMoreClick="@HandleMore" />
+                            </MudItem>
+                        }
+                    </MudGrid>
+                </section>
+
+                <!-- Category Grid -->
+                <section class="categories-section mb-8">
+                    <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-4">
+                        📂 Browse by Category
+                    </MudText>
+                    
+                    <MudGrid Spacing="3">
+                        @foreach (var category in GetAllCategories())
+                        {
+                            <MudItem xs="12" sm="6" md="4" lg="3">
+                                <MudCard Class="category-card h-100" 
+                                       Elevation="2"
+                                       @onclick="@(() => BrowseCategory(category.Slug))">
+                                    <MudCardContent Class="text-center pa-6">
+                                        <MudIcon Icon="@category.Icon" 
+                                               Color="Color.Primary" 
+                                               Style="font-size: 3rem;" 
+                                               Class="mb-3" />
+                                        <MudText Typo="Typo.h6" Class="mb-2">
+                                            @category.Name
+                                        </MudText>
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-3">
+                                            @category.PackageCount packages
+                                        </MudText>
+                                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                            @category.Description
+                                        </MudText>
+                                    </MudCardContent>
+                                </MudCard>
+                            </MudItem>
+                        }
+                    </MudGrid>
+                </section>
+
+                <!-- Statistics Section -->
+                <section class="statistics-section mb-8">
+                    <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-4">
+                        📊 Platform Statistics
+                    </MudText>
+                    
+                    <MudGrid Spacing="4">
+                        <MudItem xs="12" md="8">
+                            <AnalyticsChart Title="Package Growth"
+                                           Subtitle="New packages published over time"
+                                           ChartType="Components.UI.Models.ChartType.Line"
+                                           ChartSeries="@GetPackageGrowthData()"
+                                           XAxisLabels="@GetTimeLabels()"
+                                           ShowTimeRangeSelector="false"
+                                           ShowDataTable="false"
+                                           ShowSummary="true"
+                                           Height="300" />
+                        </MudItem>
+                        
+                        <MudItem xs="12" md="4">
+                            <MudPaper Class="pa-6 h-100">
+                                <MudText Typo="Typo.h6" Class="mb-4">🏆 Top Categories</MudText>
+                                
+                                @foreach (var (category, percentage) in GetTopCategories())
+                                {
+                                    <div class="category-stat mb-3">
+                                        <div class="d-flex justify-space-between align-center mb-1">
+                                            <MudText Typo="Typo.body2">@category</MudText>
+                                            <MudText Typo="Typo.caption">@percentage%</MudText>
+                                        </div>
+                                        <MudProgressLinear Value="@percentage" 
+                                                         Color="Color.Primary" 
+                                                         Size="Size.Small" />
+                                    </div>
+                                }
+                            </MudPaper>
+                        </MudItem>
+                    </MudGrid>
+                </section>
+
+                <!-- Recently Updated -->
+                <section class="recent-updates-section">
+                    <div class="d-flex justify-space-between align-center mb-4">
+                        <MudText Typo="Typo.h5" Color="Color.Primary">
+                            ⚡ Recently Updated
+                        </MudText>
+                        <MudButton Color="Color.Primary" 
+                                 Variant="Variant.Text"
+                                 EndIcon="@Icons.Material.Filled.ArrowForward"
+                                 @onclick="@(() => Navigation.NavigateTo("/search?sort=updated"))">
+                            View All Recent
+                        </MudButton>
+                    </div>
+                    
+                    <MudGrid Spacing="3">
+                        @foreach (var package in _recentlyUpdatedPackages)
+                        {
+                            <MudItem xs="12" sm="6" md="4">
+                                <PackageCard Package="@package" 
+                                           OnInstallClick="@HandleInstall"
+                                           OnDetailsClick="@HandleDetails"
+                                           OnStarClick="@HandleStar"
+                                           OnShareClick="@HandleShare"
+                                           OnMoreClick="@HandleMore" />
+                            </MudItem>
+                        }
+                    </MudGrid>
+                </section>
+            </div>
+        }
+        else
+        {
+            <!-- Category-Specific View -->
+            <div class="category-browse">
+                @{
+                    var currentCategory = GetCategoryBySlug(CategorySlug);
+                }
+                
+                @if (currentCategory != null)
+                {
+                    <!-- Category Header -->
+                    <div class="category-header mb-6">
+                        <div class="d-flex align-center mb-3">
+                            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
+                                         Color="Color.Default"
+                                         @onclick="@(() => Navigation.NavigateTo("/browse"))"
+                                         Title="Back to browse"
+                                         Class="mr-2" />
+                            <MudIcon Icon="@currentCategory.Icon" 
+                                   Color="Color.Primary" 
+                                   Class="mr-3" 
+                                   Style="font-size: 2.5rem;" />
+                            <div>
+                                <MudText Typo="Typo.h4" Color="Color.Primary">
+                                    @currentCategory.Name
+                                </MudText>
+                                <MudText Typo="Typo.body1" Color="Color.Secondary">
+                                    @currentCategory.Description
+                                </MudText>
+                            </div>
+                        </div>
+                        
+                        <div class="category-stats d-flex gap-6 mb-4">
+                            <div class="stat-item">
+                                <MudText Typo="Typo.h6" Color="Color.Primary">@currentCategory.PackageCount</MudText>
+                                <MudText Typo="Typo.caption">Packages</MudText>
+                            </div>
+                            <div class="stat-item">
+                                <MudText Typo="Typo.h6" Color="Color.Success">@currentCategory.VerifiedCount</MudText>
+                                <MudText Typo="Typo.caption">Verified</MudText>
+                            </div>
+                            <div class="stat-item">
+                                <MudText Typo="Typo.h6" Color="Color.Warning">@FormatDownloads(currentCategory.TotalDownloads)</MudText>
+                                <MudText Typo="Typo.caption">Downloads</MudText>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category Filters -->
+                    <div class="category-filters mb-6">
+                        <MudPaper Class="pa-4">
+                            <MudGrid AlignItems="Center">
+                                <MudItem xs="12" md="3">
+                                    <MudSelect T="string" 
+                                             @bind-Value="@_categorySortOption"
+                                             Label="Sort by"
+                                             Variant="Variant.Outlined"
+                                             Dense="true"
+                                             FullWidth="true">
+                                        <MudSelectItem Value="@("popular")">Most Popular</MudSelectItem>
+                                        <MudSelectItem Value="@("recent")">Recently Added</MudSelectItem>
+                                        <MudSelectItem Value="@("updated")">Recently Updated</MudSelectItem>
+                                        <MudSelectItem Value="@("rating")">Highest Rated</MudSelectItem>
+                                        <MudSelectItem Value="@("security")">Best Security</MudSelectItem>
+                                    </MudSelect>
+                                </MudItem>
+                                
+                                <MudItem xs="12" md="3">
+                                    <MudSelect T="TrustTier?" 
+                                             @bind-Value="@_categoryTrustFilter"
+                                             Label="Trust Tier"
+                                             Variant="Variant.Outlined"
+                                             Dense="true"
+                                             FullWidth="true">
+                                        <MudSelectItem Value="@((TrustTier?)null)">All Trust Levels</MudSelectItem>
+                                        <MudSelectItem Value="@("TrustTier.Enterprise")">Enterprise</MudSelectItem>
+                                        <MudSelectItem Value="@("TrustTier.CommunityTrusted")">Community Trusted</MudSelectItem>
+                                        <MudSelectItem Value="@("TrustTier.Verified")">Verified</MudSelectItem>
+                                    </MudSelect>
+                                </MudItem>
+                                
+                                <MudItem xs="12" md="4">
+                                    <div class="filter-checkboxes d-flex gap-4">
+                                        <MudCheckBox @bind-Value="@_showFeaturedOnly" 
+                                                   Label="Featured only"
+                                                   Dense="true" />
+                                        <MudCheckBox @bind-Value="@_showTrendingOnly" 
+                                                   Label="Trending only"
+                                                   Dense="true" />
+                                    </div>
+                                </MudItem>
+                                
+                                <MudItem xs="12" md="2">
+                                    <MudToggleIconButton @bind-Toggled="@_categoryGridView"
+                                                       Icon="@Icons.Material.Filled.ViewList"
+                                                       ToggledIcon="@Icons.Material.Filled.GridView"
+                                                       Color="Color.Primary"
+                                                       Title="@(_categoryGridView ? "Switch to list view" : "Switch to grid view")"
+                                                       FullWidth="true" />
+                                </MudItem>
+                            </MudGrid>
+                        </MudPaper>
+                    </div>
+
+                    <!-- Category Packages -->
+                    <div class="category-packages">
+                        @if (_categoryGridView)
+                        {
+                            <MudGrid Spacing="3">
+                                @foreach (var package in GetCategoryPackages(currentCategory))
+                                {
+                                    <MudItem xs="12" sm="6" md="4" lg="3">
+                                        <PackageCard Package="@package" 
+                                                   OnInstallClick="@HandleInstall"
+                                                   OnDetailsClick="@HandleDetails"
+                                                   OnStarClick="@HandleStar"
+                                                   OnShareClick="@HandleShare"
+                                                   OnMoreClick="@HandleMore" />
+                                    </MudItem>
+                                }
+                            </MudGrid>
+                        }
+                        else
+                        {
+                            <div class="package-list">
+                                @foreach (var package in GetCategoryPackages(currentCategory))
+                                {
+                                    <PackageCard Package="@package" 
+                                               OnInstallClick="@HandleInstall"
+                                               OnDetailsClick="@HandleDetails"
+                                               OnStarClick="@HandleStar"
+                                               OnShareClick="@HandleShare"
+                                               OnMoreClick="@HandleMore"
+                                               Class="mb-3 package-list-item" />
+                                }
+                            </div>
+                        }
+                        
+                        <!-- Load More Button -->
+                        <div class="text-center mt-6">
+                            <MudButton Color="Color.Primary" 
+                                     Variant="Variant.Outlined"
+                                     Size="Size.Large"
+                                     StartIcon="@Icons.Material.Filled.ExpandMore"
+                                     @onclick="LoadMorePackages">
+                                Load More Packages
+                            </MudButton>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <!-- Category Not Found -->
+                    <div class="category-not-found text-center py-12">
+                        <MudIcon Icon="@Icons.Material.Filled.FolderOff" 
+                               Size="Size.Large" 
+                               Color="Color.Secondary" 
+                               Style="font-size: 4rem;" 
+                               Class="mb-4" />
+                        <MudText Typo="Typo.h5" Color="Color.Secondary" Class="mb-2">
+                            Category Not Found
+                        </MudText>
+                        <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-4">
+                            The category "@CategorySlug" does not exist or has been moved.
+                        </MudText>
+                        <MudButton Color="Color.Primary" 
+                                 Variant="Variant.Filled"
+                                 StartIcon="@Icons.Material.Filled.ArrowBack"
+                                 @onclick="@(() => Navigation.NavigateTo("/browse"))">
+                            Back to Browse
+                        </MudButton>
+                    </div>
+                }
+            </div>
+        }
+    </MainContent>
+
+    <SidebarContent>
+        @if (string.IsNullOrEmpty(CategorySlug))
+        {
+            <!-- Browse Sidebar -->
+            <div class="browse-sidebar">
+                <!-- Quick Stats -->
+                <MudPaper Class="pa-4 mb-4">
+                    <MudText Typo="Typo.h6" Class="mb-3">📈 Quick Stats</MudText>
+                    
+                    <div class="quick-stat mb-3">
+                        <div class="d-flex justify-space-between align-center">
+                            <MudText Typo="Typo.body2">Total Packages</MudText>
+                            <MudText Typo="Typo.h6" Color="Color.Primary">1,247</MudText>
+                        </div>
+                    </div>
+                    
+                    <div class="quick-stat mb-3">
+                        <div class="d-flex justify-space-between align-center">
+                            <MudText Typo="Typo.body2">Verified Publishers</MudText>
+                            <MudText Typo="Typo.h6" Color="Color.Success">342</MudText>
+                        </div>
+                    </div>
+                    
+                    <div class="quick-stat mb-3">
+                        <div class="d-flex justify-space-between align-center">
+                            <MudText Typo="Typo.body2">This Week</MudText>
+                            <MudText Typo="Typo.h6" Color="Color.Warning">+23</MudText>
+                        </div>
+                    </div>
+                    
+                    <div class="quick-stat">
+                        <div class="d-flex justify-space-between align-center">
+                            <MudText Typo="Typo.body2">Security Scans</MudText>
+                            <MudText Typo="Typo.h6" Color="Color.Info">50.2K</MudText>
+                        </div>
+                    </div>
+                </MudPaper>
+
+                <!-- Quick Actions -->
+                <MudPaper Class="pa-4 mb-4">
+                    <MudText Typo="Typo.h6" Class="mb-3">⚡ Quick Actions</MudText>
+                    
+                    <MudButton Color="Color.Primary" 
+                             Variant="Variant.Outlined"
+                             FullWidth="true"
+                             StartIcon="@Icons.Material.Filled.Publish"
+                             @onclick="@(() => Navigation.NavigateTo("/publisher/dashboard"))"
+                             Class="mb-2">
+                        Publish Package
+                    </MudButton>
+                    
+                    <MudButton Color="Color.Secondary" 
+                             Variant="Variant.Outlined"
+                             FullWidth="true"
+                             StartIcon="@Icons.Material.Filled.Collections"
+                             @onclick="@(() => Navigation.NavigateTo("/collections"))"
+                             Class="mb-2">
+                        View Collections
+                    </MudButton>
+                    
+                    <MudButton Color="Color.Info" 
+                             Variant="Variant.Outlined"
+                             FullWidth="true"
+                             StartIcon="@Icons.Material.Filled.GetApp"
+                             @onclick="@(() => Navigation.NavigateTo("/cli"))">
+                        Download CLI
+                    </MudButton>
+                </MudPaper>
+
+                <!-- Featured Publishers -->
+                <MudPaper Class="pa-4">
+                    <MudText Typo="Typo.h6" Class="mb-3">👥 Featured Publishers</MudText>
+                    
+                    @foreach (var publisher in GetFeaturedPublishers())
+                    {
+                        <div class="featured-publisher d-flex align-center mb-3">
+                            <MudAvatar Size="Size.Small" Class="mr-3">
+                                @publisher.Name.Substring(0, 1).ToUpper()
+                            </MudAvatar>
+                            <div class="flex-grow-1">
+                                <MudText Typo="Typo.body2" Class="mb-0">@publisher.DisplayName</MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">@publisher.PackageCount packages</MudText>
+                            </div>
+                            @if (publisher.IsVerified)
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.Verified" 
+                                       Color="Color.Success" 
+                                       Size="Size.Small" />
+                            }
+                        </div>
+                    }
+                </MudPaper>
+            </div>
+        }
+        else
+        {
+            <!-- Category Sidebar -->
+            <div class="category-sidebar">
+                <!-- Category Info -->
+                @{
+                    var currentCategory = GetCategoryBySlug(CategorySlug);
+                }
+                
+                @if (currentCategory != null)
+                {
+                    <MudPaper Class="pa-4 mb-4">
+                        <MudText Typo="Typo.h6" Class="mb-3">📂 Related Categories</MudText>
+                        
+                        @foreach (var related in GetRelatedCategories(currentCategory))
+                        {
+                            <MudButton Color="Color.Default" 
+                                     Variant="Variant.Text"
+                                     FullWidth="true"
+                                     StartIcon="@related.Icon"
+                                     @onclick="@(() => BrowseCategory(related.Slug))"
+                                     Class="mb-1 justify-start">
+                                @related.Name (@related.PackageCount)
+                            </MudButton>
+                        }
+                    </MudPaper>
+
+                    <!-- Top Publishers in Category -->
+                    <MudPaper Class="pa-4">
+                        <MudText Typo="Typo.h6" Class="mb-3">🏆 Top Publishers</MudText>
+                        
+                        @foreach (var publisher in GetTopPublishersInCategory(currentCategory))
+                        {
+                            <div class="top-publisher d-flex align-center justify-space-between mb-2">
+                                <div class="d-flex align-center">
+                                    <MudAvatar Size="Size.Small" Class="mr-2">
+                                        @publisher.Name.Substring(0, 1).ToUpper()
+                                    </MudAvatar>
+                                    <div>
+                                        <MudText Typo="Typo.body2">@publisher.DisplayName</MudText>
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">@publisher.PackageCount packages</MudText>
+                                    </div>
+                                </div>
+                                @if (publisher.IsVerified)
+                                {
+                                    <MudIcon Icon="@Icons.Material.Filled.Verified" 
+                                           Color="Color.Success" 
+                                           Size="Size.Small" />
+                                }
+                            </div>
+                        }
+                    </MudPaper>
+                }
+            </div>
+        }
+    </SidebarContent>
+</ResponsiveContainer>
+
+@code {
+    [Parameter] public string? CategorySlug { get; set; }
+
+    // UI State
+    private string _categorySortOption = "popular";
+    private TrustTier? _categoryTrustFilter;
+    private bool _showFeaturedOnly = false;
+    private bool _showTrendingOnly = false;
+    private bool _categoryGridView = true;
+
+    // Data fields
+    private List<PackageInfo> _trendingPackages = new();
+    private List<PackageInfo> _recentlyUpdatedPackages = new();
+    private List<PackageInfo> _categoryPackages = new();
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            // Load all data in parallel
+            var trendingTask = GetTrendingPackagesAsync();
+            var recentTask = GetRecentlyUpdatedPackagesAsync();
+
+            await Task.WhenAll(trendingTask, recentTask);
+
+            _trendingPackages = await trendingTask;
+            _recentlyUpdatedPackages = await recentTask;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading browse data: {ex.Message}");
+            // Use fallback mock data
+            _trendingPackages = GenerateMockPackages(8, trending: true);
+            _recentlyUpdatedPackages = GenerateMockPackages(6, recentlyUpdated: true);
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Handle category changes
+        if (!string.IsNullOrEmpty(CategorySlug))
+        {
+            var category = GetCategoryBySlug(CategorySlug);
+            if (category != null)
+            {
+                _categoryPackages = await GetCategoryPackagesAsync(category);
+                StateHasChanged();
+            }
+        }
+    }
+
+    // Event Handlers
+    private async Task HandleQuickSearch(SearchQuery query)
+    {
+        Navigation.NavigateTo($"/search?q={Uri.EscapeDataString(query.Text)}");
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleInstall(PackageInfo package)
+    {
+        // Implementation for package installation
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleDetails(PackageInfo package)
+    {
+        Navigation.NavigateTo($"/package/{package.Publisher.Name}/{package.Name}");
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleStar(PackageInfo package)
+    {
+        package.IsStarred = !package.IsStarred;
+        StateHasChanged();
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleShare(PackageInfo package)
+    {
+        // Implementation for package sharing
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleMore(PackageInfo package)
+    {
+        // Implementation for more options
+        await Task.CompletedTask;
+    }
+
+    private void BrowseCategory(string categorySlug)
+    {
+        Navigation.NavigateTo($"/browse/{categorySlug}");
+    }
+
+    private void ExploreCollection(CollectionInfo collection)
+    {
+        Navigation.NavigateTo($"/collections/{collection.Slug}");
+    }
+
+    private async Task LoadMorePackages()
+    {
+        // Implementation for loading more packages
+        await Task.CompletedTask;
+    }
+
+    // Data Generation Methods
+    private List<CollectionInfo> GetFeaturedCollections()
+    {
+        return new List<CollectionInfo>
+        {
+            new()
+            {
+                Name = "AI Essentials",
+                Slug = "ai-essentials",
+                Description = "Must-have AI tools for modern applications including language models, computer vision, and machine learning frameworks.",
+                Icon = Icons.Material.Filled.Psychology,
+                PackageCount = 24,
+                Tags = new[] { "AI", "ML", "NLP", "Computer Vision", "Deep Learning" }
+            },
+            new()
+            {
+                Name = "Enterprise Security",
+                Slug = "enterprise-security",
+                Description = "Enterprise-grade security tools with comprehensive scanning, monitoring, and compliance features.",
+                Icon = Icons.Material.Filled.Security,
+                PackageCount = 18,
+                Tags = new[] { "Security", "Enterprise", "Compliance", "Monitoring" }
+            },
+            new()
+            {
+                Name = "Data Pipeline Starters",
+                Slug = "data-pipeline",
+                Description = "Complete data processing pipeline with ETL tools, transformation engines, and analytics platforms.",
+                Icon = Icons.Material.Filled.DataUsage,
+                PackageCount = 32,
+                Tags = new[] { "Data", "ETL", "Analytics", "Processing", "Pipeline" }
+            }
+        };
+    }
+
+    private List<CategoryInfo> GetAllCategories()
+    {
+        return new List<CategoryInfo>
+        {
+            new() { Name = "AI & Machine Learning", Slug = "ai", Icon = Icons.Material.Filled.Psychology, PackageCount = 234, Description = "AI models, ML frameworks, and intelligent automation tools", VerifiedCount = 89, TotalDownloads = 2340000 },
+            new() { Name = "Data Processing", Slug = "data", Icon = Icons.Material.Filled.DataUsage, PackageCount = 189, Description = "ETL tools, data transformation, and analytics platforms", VerifiedCount = 67, TotalDownloads = 1890000 },
+            new() { Name = "Web Development", Slug = "web", Icon = Icons.Material.Filled.Web, PackageCount = 156, Description = "Web frameworks, APIs, and frontend development tools", VerifiedCount = 52, TotalDownloads = 1560000 },
+            new() { Name = "Automation Tools", Slug = "automation", Icon = Icons.Material.Filled.SmartToy, PackageCount = 142, Description = "Workflow automation, task scheduling, and process optimization", VerifiedCount = 45, TotalDownloads = 1420000 },
+            new() { Name = "Security & Privacy", Slug = "security", Icon = Icons.Material.Filled.Security, PackageCount = 98, Description = "Security scanning, privacy tools, and compliance frameworks", VerifiedCount = 38, TotalDownloads = 980000 },
+            new() { Name = "Productivity", Slug = "productivity", Icon = Icons.Material.Filled.BusinessCenter, PackageCount = 87, Description = "Productivity boosters, document processing, and collaboration tools", VerifiedCount = 32, TotalDownloads = 870000 },
+            new() { Name = "Analytics", Slug = "analytics", Icon = Icons.Material.Filled.Analytics, PackageCount = 76, Description = "Business intelligence, reporting, and data visualization tools", VerifiedCount = 28, TotalDownloads = 760000 },
+            new() { Name = "Communication", Slug = "communication", Icon = Icons.Material.Filled.Chat, PackageCount = 65, Description = "Messaging, notifications, and communication platforms", VerifiedCount = 24, TotalDownloads = 650000 },
+            new() { Name = "Media Processing", Slug = "media", Icon = Icons.Material.Filled.Image, PackageCount = 54, Description = "Image processing, video tools, and multimedia frameworks", VerifiedCount = 19, TotalDownloads = 540000 },
+            new() { Name = "Database Tools", Slug = "database", Icon = Icons.Material.Filled.Storage, PackageCount = 43, Description = "Database management, migration tools, and data modeling", VerifiedCount = 15, TotalDownloads = 430000 }
+        };
+    }
+
+    private CategoryInfo? GetCategoryBySlug(string slug)
+    {
+        return GetAllCategories().FirstOrDefault(c => c.Slug == slug);
+    }
+
+    private async Task<List<PackageInfo>> GetTrendingPackagesAsync()
+    {
+        try
+        {
+            var apiResults = await ApiClient.GetTrendingPackagesAsync("week", 8);
+            return ConvertApiResultsToPackageInfo(apiResults);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading trending packages: {ex.Message}");
+            return GenerateMockPackages(8, trending: true);
+        }
+    }
+
+    private async Task<List<PackageInfo>> GetRecentlyUpdatedPackagesAsync()
+    {
+        try
+        {
+            var searchRequest = new AdvancedSearchRequest
+            {
+                Query = "*",
+                SortBy = "created",
+                SortDirection = "descending",
+                Page = 1,
+                PageSize = 6
+            };
+            
+            var result = await ApiClient.SearchPackagesAdvancedAsync(searchRequest);
+            return ConvertApiResultsToPackageInfo(result.Items);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading recently updated packages: {ex.Message}");
+            return GenerateMockPackages(6, recentlyUpdated: true);
+        }
+    }
+
+    private async Task<List<PackageInfo>> GetCategoryPackagesAsync(CategoryInfo category)
+    {
+        try
+        {
+            var result = await ApiClient.GetPackagesByCategoryAsync(category.Slug, 1, 12);
+            return ConvertApiResultsToPackageInfo(result.Items);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading category packages: {ex.Message}");
+            return GenerateMockPackages(12, category: category.Slug);
+        }
+    }
+
+    private List<PackageInfo> GetCategoryPackages(CategoryInfo category)
+    {
+        return _categoryPackages.Where(p => p.Category.Equals(category.Slug, StringComparison.OrdinalIgnoreCase)).ToList();
+    }
+
+    private List<PackageInfo> GenerateMockPackages(int count, bool trending = false, bool recentlyUpdated = false, string? category = null)
+    {
+        var random = new Random();
+        var packages = new List<PackageInfo>();
+        
+        var baseNames = new[] { "ai-assistant", "data-processor", "web-scraper", "automation-bot", "security-scanner", "api-connector", "ml-toolkit", "file-manager", "chart-builder", "notification-service" };
+        var publishers = new[]
+        {
+            new PublisherInfo { Name = "ai-innovations", DisplayName = "AI Innovations", IsVerified = true },
+            new PublisherInfo { Name = "data-solutions", DisplayName = "Data Solutions Corp", IsVerified = true },
+            new PublisherInfo { Name = "dev-tools", DisplayName = "DevTools Inc", IsVerified = false },
+            new PublisherInfo { Name = "enterprise-tech", DisplayName = "Enterprise Tech", IsVerified = true }
+        };
+
+        for (int i = 0; i < count; i++)
+        {
+            var package = new PackageInfo
+            {
+                Name = $"{baseNames[i % baseNames.Length]}-{random.Next(1, 100)}",
+                LatestVersion = $"{random.Next(1, 5)}.{random.Next(0, 10)}.{random.Next(0, 10)}",
+                Description = $"Advanced {category ?? "tool"} with enhanced features and enterprise-grade security.",
+                Publisher = publishers[random.Next(publishers.Length)],
+                SecurityGrade = new[] { "A+", "A", "B+", "B" }[random.Next(4)],
+                SecurityScore = random.NextDouble() * 2 + 8,
+                TrustTier = (TrustTier)random.Next(4),
+                WeeklyDownloads = random.Next(1000, 150000),
+                Rating = random.NextDouble() * 2 + 3,
+                LastUpdated = recentlyUpdated ? DateTime.UtcNow.AddDays(-random.Next(1, 7)) : DateTime.UtcNow.AddDays(-random.Next(1, 90)),
+                Tags = GenerateRandomTags(random, category),
+                IsTrending = trending || random.Next(10) < 2,
+                IsStarred = false
+            };
+
+            packages.Add(package);
+        }
+
+        return packages;
+    }
+
+    private List<string> GenerateRandomTags(Random random, string? category = null)
+    {
+        var categoryTags = category switch
+        {
+            "ai" => new[] { "AI", "ML", "NLP", "Computer Vision", "Deep Learning" },
+            "data" => new[] { "Data", "ETL", "Analytics", "Processing", "Pipeline" },
+            "web" => new[] { "Web", "API", "Frontend", "Backend", "Framework" },
+            "automation" => new[] { "Automation", "Workflow", "Scheduling", "Task" },
+            "security" => new[] { "Security", "Privacy", "Compliance", "Scanning" },
+            _ => new[] { "Tool", "Utility", "Framework", "Service", "Platform" }
+        };
+
+        var count = random.Next(2, 5);
+        return categoryTags.OrderBy(x => random.Next()).Take(count).ToList();
+    }
+
+    private List<CategoryInfo> GetRelatedCategories(CategoryInfo currentCategory)
+    {
+        return GetAllCategories()
+            .Where(c => c.Slug != currentCategory.Slug)
+            .Take(5)
+            .ToList();
+    }
+
+    private List<PublisherInfo> GetFeaturedPublishers()
+    {
+        return new List<PublisherInfo>
+        {
+            new() { Name = "ai-innovations", DisplayName = "AI Innovations", IsVerified = true, PackageCount = 23 },
+            new() { Name = "data-solutions", DisplayName = "Data Solutions", IsVerified = true, PackageCount = 18 },
+            new() { Name = "enterprise-tech", DisplayName = "Enterprise Tech", IsVerified = true, PackageCount = 15 },
+            new() { Name = "open-source", DisplayName = "OpenSource Community", IsVerified = false, PackageCount = 12 }
+        };
+    }
+
+    private List<PublisherInfo> GetTopPublishersInCategory(CategoryInfo category)
+    {
+        return GetFeaturedPublishers().Take(4).ToList();
+    }
+
+    private List<MudBlazor.ChartSeries> GetPackageGrowthData()
+    {
+        var random = new Random();
+        var data = new double[12];
+        var baseValue = 50;
+        
+        for (int i = 0; i < 12; i++)
+        {
+            baseValue += random.Next(-5, 15);
+            data[i] = Math.Max(0, baseValue);
+        }
+
+        return new List<MudBlazor.ChartSeries>
+        {
+            new MudBlazor.ChartSeries { Name = "New Packages", Data = data }
+        };
+    }
+
+    private string[] GetTimeLabels()
+    {
+        var labels = new string[12];
+        var now = DateTime.Now;
+        
+        for (int i = 11; i >= 0; i--)
+        {
+            labels[11 - i] = now.AddMonths(-i).ToString("MMM");
+        }
+        
+        return labels;
+    }
+
+    private List<(string category, double percentage)> GetTopCategories()
+    {
+        return new List<(string, double)>
+        {
+            ("AI & ML", 28.5),
+            ("Data Processing", 22.1),
+            ("Web Development", 18.7),
+            ("Automation", 15.3),
+            ("Security", 15.4)
+        };
+    }
+
+    private string FormatDownloads(long downloads)
+    {
+        return downloads switch
+        {
+            >= 1000000 => $"{downloads / 1000000.0:F1}M",
+            >= 1000 => $"{downloads / 1000.0:F1}K",
+            _ => downloads.ToString()
+        };
+    }
+
+    private List<PackageInfo> ConvertApiResultsToPackageInfo(IEnumerable<PackageSearchResultItem> apiResults)
+    {
+        return apiResults.Select(item => new PackageInfo
+        {
+            Id = item.Id,
+            Name = item.Name,
+            Description = item.Description,
+            LatestVersion = item.Version,
+            Publisher = new PublisherInfo 
+            { 
+                Name = item.Publisher.ToLower().Replace(" ", "-"), 
+                DisplayName = item.Publisher, 
+                IsVerified = item.TrustTier != "unverified"
+            },
+            SecurityGrade = item.SecurityGrade,
+            SecurityScore = CalculateSecurityScore(item.SecurityGrade),
+            TrustTier = ConvertTrustTier(item.TrustTier),
+            WeeklyDownloads = item.DownloadCount,
+            Rating = item.Rating,
+            RatingCount = item.RatingCount,
+            Tags = item.Tags,
+            Category = item.Category,
+            License = item.License,
+            IsFeatured = item.IsFeatured,
+            IsTrending = item.IsTrending,
+            LastUpdated = item.LastUpdated,
+            CreatedAt = item.CreatedAt
+        }).ToList();
+    }
+
+    private double CalculateSecurityScore(string securityGrade)
+    {
+        return securityGrade.ToUpper() switch
+        {
+            "A+" => 10.0,
+            "A" => 9.0,
+            "B+" => 8.5,
+            "B" => 8.0,
+            "C+" => 7.5,
+            "C" => 7.0,
+            "D" => 6.0,
+            "F" => 4.0,
+            _ => 5.0
+        };
+    }
+
+    private TrustTier ConvertTrustTier(string trustTier)
+    {
+        return trustTier.ToLower() switch
+        {
+            "enterprise" => TrustTier.Enterprise,
+            "trusted" => TrustTier.CommunityTrusted,
+            "verified" => TrustTier.Verified,
+            "unverified" => TrustTier.Unverified,
+            _ => TrustTier.Unverified
+        };
+    }
+
+    // Helper classes
+    public class CollectionInfo
+    {
+        public string Name { get; set; } = "";
+        public string Slug { get; set; } = "";
+        public string Description { get; set; } = "";
+        public string Icon { get; set; } = "";
+        public int PackageCount { get; set; }
+        public string[] Tags { get; set; } = Array.Empty<string>();
+    }
+
+    public class CategoryInfo
+    {
+        public string Name { get; set; } = "";
+        public string Slug { get; set; } = "";
+        public string Icon { get; set; } = "";
+        public int PackageCount { get; set; }
+        public string Description { get; set; } = "";
+        public int VerifiedCount { get; set; }
+        public long TotalDownloads { get; set; }
+    }
+}
+
+public static class PublisherInfoExtensions
+{
+    // Extension methods for PublisherInfo if needed
+}

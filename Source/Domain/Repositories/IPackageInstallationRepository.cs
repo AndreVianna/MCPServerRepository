@@ -5,8 +5,7 @@ namespace MCPHub.Domain.Repositories;
 /// <summary>
 /// Repository interface for package installation tracking operations
 /// </summary>
-public interface IPackageInstallationRepository : IRepository<PackageInstallation>
-{
+public interface IPackageInstallationRepository : IRepository<PackageInstallation> {
     /// <summary>
     /// Gets all installations for a specific user
     /// </summary>

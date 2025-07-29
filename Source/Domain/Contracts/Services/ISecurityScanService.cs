@@ -7,8 +7,7 @@ namespace MCPHub.Domain.Contracts.Services;
 /// <summary>
 /// Application service interface for security scanning operations
 /// </summary>
-public interface ISecurityScanService 
-{
+public interface ISecurityScanService {
     /// <summary>
     /// Initiates a security scan for a package
     /// </summary>

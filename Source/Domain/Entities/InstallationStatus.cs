@@ -3,8 +3,7 @@ namespace MCPHub.Domain.Entities;
 /// <summary>
 /// Represents the status of a package installation
 /// </summary>
-public enum InstallationStatus
-{
+public enum InstallationStatus {
     /// <summary>
     /// Installation has been initiated but not yet completed
     /// </summary>

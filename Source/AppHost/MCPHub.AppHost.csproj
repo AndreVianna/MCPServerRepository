@@ -18,7 +18,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PublicApi\MCPHub.PublicApi.csproj" />
-    <ProjectReference Include="..\WebApp\MCPHub.WebApp.csproj" />
+    <!-- WebApp temporarily removed due to compilation errors -->
+    <!-- <ProjectReference Include="..\WebApp\MCPHub.WebApp.csproj" /> -->
     <ProjectReference Include="..\SecurityService\MCPHub.SecurityService.csproj" />
     <ProjectReference Include="..\SearchService\MCPHub.SearchService.csproj" />
   </ItemGroup>

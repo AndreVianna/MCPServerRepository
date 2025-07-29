@@ -102,7 +102,7 @@ public class IApplicationUserRepositoryTests {
         publisher1.EnablePublisher();
         var publisher2 = new ApplicationUser("publisher2", "pub2@example.com");
         publisher2.EnablePublisher();
-        
+
         var expectedPublishers = new List<ApplicationUser> { publisher1, publisher2 };
         repository.GetPublishersAsync(Arg.Any<CancellationToken>()).Returns(expectedPublishers);
 
@@ -123,7 +123,7 @@ public class IApplicationUserRepositoryTests {
         var searchTerm = "test";
         var user1 = new ApplicationUser("testuser", "test@example.com");
         var user2 = new ApplicationUser("anothertest", "another@test.com");
-        
+
         var expectedResults = new List<ApplicationUser> { user1, user2 };
         repository.SearchAsync(searchTerm, Arg.Any<CancellationToken>()).Returns(expectedResults);
 

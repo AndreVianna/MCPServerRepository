@@ -1,0 +1,589 @@
+@using MudBlazor
+@implements IDisposable
+
+<MudCard Class="analytics-chart-card">
+    <MudCardHeader>
+        <CardHeaderContent>
+            <div class="d-flex justify-space-between align-center">
+                <div>
+                    <MudText Typo="Typo.h6">@Title</MudText>
+                    @if (!string.IsNullOrEmpty(Subtitle))
+                    {
+                        <MudText Typo="Typo.caption" Class="text-secondary">@Subtitle</MudText>
+                    }
+                </div>
+                <div class="chart-controls d-flex align-center">
+                    @if (ShowTimeRangeSelector)
+                    {
+                        <MudSelect T="string" 
+                                   @bind-Value="@SelectedTimeRange"
+                                   Variant="Variant.Outlined"
+                                   Dense="true"
+                                   Class="mr-2"
+                                   Style="min-width: 120px;"
+                                   aria-label="Select time range">
+                            <MudSelectItem Value="@("week")">Last 7 days</MudSelectItem>
+                            <MudSelectItem Value="@("month")">Last 30 days</MudSelectItem>
+                            <MudSelectItem Value="@("quarter")">Last 90 days</MudSelectItem>
+                            <MudSelectItem Value="@("year")">Last year</MudSelectItem>
+                        </MudSelect>
+                    }
+                    
+                    <MudIconButton Icon="Icons.Material.Filled.Refresh"
+                                   Color="Color.Default"
+                                   Size="Size.Small"
+                                   @onclick="RefreshData"
+                                   Title="Refresh data"
+                                   aria-label="Refresh chart data" />
+                    
+                    <MudIconButton Icon="Icons.Material.Filled.Download"
+                                   Color="Color.Default"
+                                   Size="Size.Small"
+                                   @onclick="ExportData"
+                                   Title="Export data"
+                                   aria-label="Export chart data" />
+                    
+                    @if (EnableRealTime)
+                    {
+                        <MudIconButton Icon="@(_isRealTimeActive ? Icons.Material.Filled.Pause : Icons.Material.Filled.PlayArrow)"
+                                       Color="@(_isRealTimeActive ? Color.Error : Color.Success)"
+                                       Size="Size.Small"
+                                       @onclick="ToggleRealTime"
+                                       Title="@(_isRealTimeActive ? "Pause real-time updates" : "Start real-time updates")"
+                                       aria-label="Toggle real-time updates" />
+                    }
+                    
+                    @if (CustomControls != null)
+                    {
+                        @CustomControls
+                    }
+                </div>
+            </div>
+        </CardHeaderContent>
+    </MudCardHeader>
+
+    <MudCardContent Class="chart-content">
+        @if (IsLoading)
+        {
+            <div class="chart-loading d-flex justify-center align-center" 
+                 style="height: @($"{Height}px")"
+                 role="status"
+                 aria-label="Loading chart data">
+                <MudProgressCircular Indeterminate="true" Size="Size.Medium" />
+                <MudText Class="ml-3">Loading chart data...</MudText>
+            </div>
+        }
+        else if (HasError)
+        {
+            <div class="chart-error d-flex flex-column justify-center align-center" 
+                 style="height: @($"{Height}px")"
+                 role="alert">
+                <MudIcon Icon="Icons.Material.Filled.Error" Color="Color.Error" Size="Size.Large" />
+                <MudText Typo="Typo.body2" Class="mt-2">Failed to load chart data</MudText>
+                <MudButton Color="Color.Primary" 
+                           Variant="Variant.Text" 
+                           StartIcon="Icons.Material.Filled.Refresh"
+                           Class="mt-2"
+                           @onclick="RefreshData">
+                    Retry
+                </MudButton>
+            </div>
+        }
+        else if (!ChartSeries.Any() || !ChartSeries.Any(s => s.Data.Any()))
+        {
+            <div class="chart-empty d-flex flex-column justify-center align-center" 
+                 style="height: @($"{Height}px")">
+                <MudIcon Icon="Icons.Material.Filled.InsertChart" Color="Color.Default" Size="Size.Large" />
+                <MudText Typo="Typo.body2" Class="mt-2">No data available</MudText>
+            </div>
+        }
+        else
+        {
+            <div class="chart-container @(_isRealTimeActive ? "real-time-active" : "")" 
+                 style="height: @($"{Height}px")"
+                 role="img"
+                 aria-label="@GetChartAriaLabel()">
+                
+                @if (EnableRealTime && _isRealTimeActive)
+                {
+                    <div class="real-time-indicator">
+                        <MudChip T="string" Icon="Icons.Material.Filled.FiberManualRecord" 
+                                 Color="Color.Success" 
+                                 Size="Size.Small" 
+                                 Class="live-indicator">
+                            LIVE
+                        </MudChip>
+                    </div>
+                }
+                
+                @if (ChartType == Models.ChartType.Line)
+                {
+                    <MudChart ChartType="MudBlazor.ChartType.Line"
+                              ChartSeries="@ChartSeries"
+                              @bind-SelectedIndex="SelectedIndex"
+                              XAxisLabels="@XAxisLabels"
+                              Width="100%"
+                              Height="@($"{Height}px")"
+                              ChartOptions="@GetChartOptions()"
+                              @onclick="@(EnableDrillDown ? HandleChartClick : null)" />
+                }
+                else if (ChartType == Models.ChartType.Bar)
+                {
+                    <MudChart ChartType="MudBlazor.ChartType.Bar"
+                              ChartSeries="@ChartSeries"
+                              @bind-SelectedIndex="SelectedIndex"
+                              XAxisLabels="@XAxisLabels"
+                              Width="100%"
+                              Height="@($"{Height}px")"
+                              ChartOptions="@GetChartOptions()"
+                              @onclick="@(EnableDrillDown ? HandleChartClick : null)" />
+                }
+                else if (ChartType == Models.ChartType.Donut)
+                {
+                    <MudChart ChartType="MudBlazor.ChartType.Donut"
+                              ChartSeries="@ChartSeries"
+                              @bind-SelectedIndex="SelectedIndex"
+                              Width="100%"
+                              Height="@($"{Height}px")"
+                              ChartOptions="@GetChartOptions()"
+                              @onclick="@(EnableDrillDown ? HandleChartClick : null)" />
+                }
+                else if (ChartType == Models.ChartType.Pie)
+                {
+                    <MudChart ChartType="MudBlazor.ChartType.Pie"
+                              ChartSeries="@ChartSeries"
+                              @bind-SelectedIndex="SelectedIndex"
+                              Width="100%"
+                              Height="@($"{Height}px")"
+                              ChartOptions="@GetChartOptions()"
+                              @onclick="@(EnableDrillDown ? HandleChartClick : null)" />
+                }
+                
+                @if (EnableDrillDown && SelectedIndex >= 0)
+                {
+                    <div class="drill-down-tooltip">
+                        <MudPaper Class="pa-2" Elevation="3">
+                            <MudText Typo="Typo.caption">Click to drill down</MudText>
+                        </MudPaper>
+                    </div>
+                }
+            </div>
+
+            @if (ShowDataTable)
+            {
+                <div class="chart-data-table mt-4">
+                    <MudTable Items="@GetTableData()" 
+                              Dense="true" 
+                              Striped="true"
+                              Class="chart-table"
+                              aria-label="Chart data in table format">
+                        <HeaderContent>
+                            <MudTh>Period</MudTh>
+                            @foreach (var series in ChartSeries)
+                            {
+                                <MudTh>@series.Name</MudTh>
+                            }
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@context.Period</MudTd>
+                            @foreach (var value in context.Values)
+                            {
+                                <MudTd>@value.ToString("N0")</MudTd>
+                            }
+                        </RowTemplate>
+                    </MudTable>
+                </div>
+            }
+        }
+    </MudCardContent>
+
+    @if (ShowSummary && !IsLoading && !HasError && ChartSeries.Any())
+    {
+        <MudCardActions Class="chart-summary">
+            <div class="summary-stats d-flex justify-space-around w-100" 
+                 role="region" 
+                 aria-label="Chart summary statistics">
+                @foreach (var stat in GetSummaryStats())
+                {
+                    <div class="summary-stat text-center">
+                        <MudText Typo="Typo.h6" Color="@stat.Color">@stat.Value</MudText>
+                        <MudText Typo="Typo.caption">@stat.Label</MudText>
+                        @if (stat.Change.HasValue)
+                        {
+                            <div class="d-flex align-center justify-center mt-1">
+                                <MudIcon Icon="@(stat.Change > 0 ? Icons.Material.Filled.TrendingUp : Icons.Material.Filled.TrendingDown)"
+                                         Color="@(stat.Change > 0 ? Color.Success : Color.Error)"
+                                         Size="Size.Small" />
+                                <MudText Typo="Typo.caption" 
+                                         Color="@(stat.Change > 0 ? Color.Success : Color.Error)"
+                                         Class="ml-1">
+                                    @(Math.Abs(stat.Change.Value).ToString("F1"))%
+                                </MudText>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </MudCardActions>
+    }
+</MudCard>
+
+@code {
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string Subtitle { get; set; } = "";
+    [Parameter] public Models.ChartType ChartType { get; set; } = Models.ChartType.Line;
+    [Parameter] public List<MudBlazor.ChartSeries> ChartSeries { get; set; } = new();
+    [Parameter] public string[] XAxisLabels { get; set; } = Array.Empty<string>();
+    [Parameter] public int Height { get; set; } = 300;
+    [Parameter] public bool ShowTimeRangeSelector { get; set; } = true;
+    [Parameter] public bool ShowDataTable { get; set; } = false;
+    [Parameter] public bool ShowSummary { get; set; } = true;
+    [Parameter] public bool EnableDrillDown { get; set; } = false;
+    [Parameter] public bool EnableRealTime { get; set; } = false;
+    [Parameter] public bool ShowLegend { get; set; } = true;
+    [Parameter] public bool ShowTooltips { get; set; } = true;
+    [Parameter] public bool EnableZoom { get; set; } = false;
+    [Parameter] public bool EnableAnnotations { get; set; } = false;
+    [Parameter] public EventCallback<string> OnTimeRangeChanged { get; set; }
+    [Parameter] public EventCallback OnRefresh { get; set; }
+    [Parameter] public EventCallback OnExport { get; set; }
+    [Parameter] public EventCallback<ChartDrillDownEventArgs> OnDrillDown { get; set; }
+    [Parameter] public EventCallback<ChartDataPoint> OnDataPointClick { get; set; }
+    [Parameter] public Dictionary<string, object> CustomMetadata { get; set; } = new();
+    [Parameter] public RenderFragment? CustomControls { get; set; }
+
+    private string SelectedTimeRange = "month";
+    private int SelectedIndex = -1;
+    private bool IsLoading = false;
+    private bool HasError = false;
+    private bool _isRealTimeActive = false;
+    private Timer? _realTimeTimer;
+    private readonly TimeSpan _realTimeInterval = TimeSpan.FromSeconds(30);
+
+    private string GetChartAriaLabel()
+    {
+        var dataPoints = ChartSeries.SelectMany(s => s.Data).Count();
+        var seriesCount = ChartSeries.Count;
+        return $"{ChartType} chart titled {Title} with {seriesCount} data series and {dataPoints} total data points";
+    }
+
+    private ChartOptions GetChartOptions() => new()
+    {
+        YAxisTicks = 1000,
+        MaxNumYAxisTicks = 10,
+        YAxisLines = true,
+        XAxisLines = false,
+        LineStrokeWidth = 3,
+        ChartPalette = GetChartPalette()
+    };
+
+    private string[] GetChartPalette() => new[]
+    {
+        "#2563eb", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6",
+        "#06b6d4", "#84cc16", "#f97316", "#ec4899", "#6366f1"
+    };
+
+    private IEnumerable<ChartDataRow> GetTableData()
+    {
+        var rows = new List<ChartDataRow>();
+        for (int i = 0; i < XAxisLabels.Length; i++)
+        {
+            var values = ChartSeries.Select(s => s.Data.ElementAtOrDefault(i)).ToArray();
+            rows.Add(new ChartDataRow { Period = XAxisLabels[i], Values = values });
+        }
+        return rows;
+    }
+
+    private IEnumerable<SummaryStat> GetSummaryStats()
+    {
+        if (ChartSeries.Count == 0 || !ChartSeries.Any(s => s.Data.Any()))
+            return Array.Empty<SummaryStat>();
+
+        var primarySeries = ChartSeries.First();
+        var total = primarySeries.Data.Sum();
+        var average = primarySeries.Data.Average();
+        var max = primarySeries.Data.Max();
+        
+        // Calculate change (compare last vs previous period)
+        double? change = null;
+        if (primarySeries.Data.Length >= 2)
+        {
+            var current = primarySeries.Data.Last();
+            var previous = primarySeries.Data[^2];
+            if (previous > 0)
+            {
+                change = ((current - previous) / previous) * 100;
+            }
+        }
+
+        return new[]
+        {
+            new SummaryStat { Label = "Total", Value = FormatNumber(total), Color = Color.Primary },
+            new SummaryStat { Label = "Average", Value = FormatNumber(average), Color = Color.Info },
+            new SummaryStat { Label = "Peak", Value = FormatNumber(max), Color = Color.Success },
+            new SummaryStat { Label = "Change", Value = change?.ToString("+0.0%;-0.0%") ?? "N/A", Color = GetChangeColor(change), Change = change }
+        };
+    }
+
+    private string FormatNumber(double number) => number switch
+    {
+        >= 1000000 => $"{number / 1000000:F1}M",
+        >= 1000 => $"{number / 1000:F1}K",
+        _ => $"{number:N0}"
+    };
+
+    private Color GetChangeColor(double? change) => change switch
+    {
+        > 0 => Color.Success,
+        < 0 => Color.Error,
+        _ => Color.Default
+    };
+
+    private async Task RefreshData()
+    {
+        IsLoading = true;
+        HasError = false;
+        StateHasChanged();
+
+        try
+        {
+            await OnRefresh.InvokeAsync();
+        }
+        catch
+        {
+            HasError = true;
+        }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ExportData()
+    {
+        await OnExport.InvokeAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (OnTimeRangeChanged.HasDelegate)
+        {
+            await OnTimeRangeChanged.InvokeAsync(SelectedTimeRange);
+        }
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender && EnableRealTime)
+        {
+            // Initialize real-time updates if enabled by default
+        }
+    }
+
+    public void Dispose()
+    {
+        _realTimeTimer?.Dispose();
+    }
+
+    private async Task ToggleRealTime()
+    {
+        _isRealTimeActive = !_isRealTimeActive;
+        
+        if (_isRealTimeActive)
+        {
+            StartRealTimeUpdates();
+        }
+        else
+        {
+            StopRealTimeUpdates();
+        }
+        
+        StateHasChanged();
+    }
+
+    private void StartRealTimeUpdates()
+    {
+        _realTimeTimer?.Dispose();
+        _realTimeTimer = new Timer(async _ =>
+        {
+            await InvokeAsync(async () =>
+            {
+                try
+                {
+                    await OnRefresh.InvokeAsync();
+                    StateHasChanged();
+                }
+                catch (Exception ex)
+                {
+                    // Log error but don't stop real-time updates
+                    Console.WriteLine($"Real-time update error: {ex.Message}");
+                }
+            });
+        }, null, TimeSpan.Zero, _realTimeInterval);
+    }
+
+    private void StopRealTimeUpdates()
+    {
+        _realTimeTimer?.Dispose();
+        _realTimeTimer = null;
+    }
+
+    private async Task HandleChartClick()
+    {
+        if (!EnableDrillDown || SelectedIndex < 0) return;
+
+        try
+        {
+            var drillDownArgs = new ChartDrillDownEventArgs
+            {
+                SelectedIndex = SelectedIndex,
+                XAxisLabel = XAxisLabels.ElementAtOrDefault(SelectedIndex) ?? "",
+                SeriesData = ChartSeries.Select(s => s.Data.ElementAtOrDefault(SelectedIndex)).ToArray(),
+                SeriesNames = ChartSeries.Select(s => s.Name).ToArray(),
+                Metadata = CustomMetadata
+            };
+
+            await OnDrillDown.InvokeAsync(drillDownArgs);
+
+            // Also trigger data point click if available
+            if (OnDataPointClick.HasDelegate && XAxisLabels.Length > SelectedIndex)
+            {
+                var dataPoint = new ChartDataPoint
+                {
+                    Label = XAxisLabels[SelectedIndex],
+                    Value = ChartSeries.FirstOrDefault()?.Data.ElementAtOrDefault(SelectedIndex) ?? 0,
+                    Index = SelectedIndex,
+                    Metadata = CustomMetadata
+                };
+                
+                await OnDataPointClick.InvokeAsync(dataPoint);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Drill-down error: {ex.Message}");
+        }
+    }
+
+}
+
+@code {
+    /// <summary>
+    /// Chart data point for click events
+    /// </summary>
+    public class ChartDataPoint
+    {
+        public string Label { get; set; } = string.Empty;
+        public double Value { get; set; }
+        public int Index { get; set; }
+        public Dictionary<string, object> Metadata { get; set; } = new();
+    }
+}
+
+<style>
+/* Real-time and drill-down features */
+.real-time-indicator {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 10;
+}
+
+.live-indicator {
+    animation: pulse 2s infinite;
+}
+
+@@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+.chart-container.real-time-active {
+    border: 2px solid var(--mud-palette-success);
+    border-radius: 8px;
+}
+
+.drill-down-tooltip {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.chart-container:hover .drill-down-tooltip {
+    opacity: 1;
+}
+
+.chart-container[data-drill-down="true"] {
+    cursor: pointer;
+}
+
+.chart-container[data-drill-down="true"]:hover {
+    background-color: rgba(var(--mud-palette-primary-rgb), 0.05);
+}
+
+/* Enhanced accessibility */
+.chart-container:focus {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: 2px;
+}
+
+.chart-container[role="img"]:focus {
+    outline-style: dashed;
+}
+
+/* Mobile optimizations */
+@@media (max-width: 768px) {
+    .real-time-indicator {
+        top: 4px;
+        right: 4px;
+    }
+    
+    .live-indicator {
+        font-size: 0.75rem;
+    }
+    
+    .drill-down-tooltip {
+        display: none; /* Hide tooltips on mobile */
+    }
+    
+    .chart-container {
+        touch-action: pan-x pan-y;
+    }
+}
+
+/* Dark theme adjustments */
+@@media (prefers-color-scheme: dark) {
+    .chart-container {
+        background-color: rgba(255, 255, 255, 0.02);
+    }
+    
+    .chart-container.real-time-active {
+        border-color: var(--mud-palette-success-darken);
+    }
+    
+    .chart-container[data-drill-down="true"]:hover {
+        background-color: rgba(var(--mud-palette-primary-rgb), 0.1);
+    }
+}
+
+/* High contrast mode support */
+@@media (prefers-contrast: high) {
+    .chart-container {
+        border: 1px solid;
+    }
+    
+    .real-time-indicator {
+        background-color: var(--mud-palette-background);
+        border: 1px solid;
+        border-radius: 4px;
+        padding: 2px;
+    }
+}
+</style>

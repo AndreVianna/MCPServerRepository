@@ -1,0 +1,20 @@
+@namespace MCPHub.WebApp.Components.Shared
+
+<div class="d-flex justify-center align-center" style="min-height: @Height;">
+    <div class="text-center">
+        <MudProgressCircular Size="@Size" Indeterminate="true" Color="@Color" />
+        @if (!string.IsNullOrEmpty(Message))
+        {
+            <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mt-4">
+                @Message
+            </MudText>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Height { get; set; } = "200px";
+    [Parameter] public Size Size { get; set; } = Size.Medium;
+    [Parameter] public Color Color { get; set; } = Color.Primary;
+    [Parameter] public string Message { get; set; } = "Loading...";
+}

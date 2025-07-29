@@ -15,6 +15,6 @@ public class IndexServerCommandConsumer(
     /// <summary>
     /// Processes an IndexServerCommand message
     /// </summary>
-    public Task ConsumeAsync(IndexServerCommand message, CancellationToken cancellationToken = default) 
+    public Task ConsumeAsync(IndexServerCommand message, CancellationToken cancellationToken = default)
         => throw new NotImplementedException("Search indexing command processing will be implemented when search infrastructure is available");
 }

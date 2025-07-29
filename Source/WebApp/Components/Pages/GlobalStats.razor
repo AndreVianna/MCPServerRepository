@@ -1,0 +1,1189 @@
+@page "/analytics/global"
+@using MCPHub.WebApp.Services
+@using MCPHub.WebApp.Components.UI.Layout
+@using MCPHub.WebApp.Components.UI.Analytics
+@using MCPHub.WebApp.Components.UI.Models
+@using MCPHub.Domain.Entities
+@using MudBlazor
+@inject IAnalyticsService AnalyticsService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject ILogger<GlobalStats> Logger
+@inject NavigationManager Navigation
+
+<PageTitle>Global Package Statistics - MCP Hub</PageTitle>
+
+<ResponsiveContainer MaxWidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
+    <HeaderContent>
+        <div class="global-stats-header">
+            <div class="header-title mb-4">
+                <MudText Typo="Typo.h3">🌍 Global Package Statistics</MudText>
+                <MudText Typo="Typo.body1" Color="Color.Secondary">
+                    Platform-wide analytics and ecosystem insights
+                </MudText>
+            </div>
+
+            <div class="header-controls d-flex justify-space-between align-center flex-wrap gap-3">
+                <div class="time-range-selector d-flex align-center gap-3">
+                    <MudSelect Value="@_selectedTimeRange"
+                               Label="Time Range"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               Style="min-width: 150px;"
+                               T="string"
+                               ValueChanged="OnTimeRangeChanged">
+                        <MudSelectItem Value="@("week")">Last 7 days</MudSelectItem>
+                        <MudSelectItem Value="@("month")">Last 30 days</MudSelectItem>
+                        <MudSelectItem Value="@("quarter")">Last 3 months</MudSelectItem>
+                        <MudSelectItem Value="@("year")">Last year</MudSelectItem>
+                        <MudSelectItem Value="@("all")">All time</MudSelectItem>
+                    </MudSelect>
+
+                    <MudSelect Value="@_selectedCategory"
+                               Label="Category"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               Style="min-width: 180px;"
+                               T="string"
+                               Clearable="true"
+                               ValueChanged="OnCategoryChanged">
+                        <MudSelectItem Value="@("all")">All Categories</MudSelectItem>
+                        @if (_categories?.Any() == true)
+                        {
+                            @foreach (var category in _categories)
+                            {
+                                <MudSelectItem Value="@category.Category">@category.Category (@category.PackageCount)</MudSelectItem>
+                            }
+                        }
+                    </MudSelect>
+                </div>
+
+                <div class="export-controls d-flex gap-2">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="Icons.Material.Filled.Download"
+                               Size="Size.Medium"
+                               @onclick="ExportData">
+                        Export Report
+                    </MudButton>
+                    
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="Icons.Material.Filled.Refresh"
+                               Size="Size.Medium"
+                               @onclick="RefreshData"
+                               Disabled="_isLoading">
+                        Refresh
+                    </MudButton>
+                </div>
+            </div>
+        </div>
+    </HeaderContent>
+
+    <MainContent>
+        @if (_isLoading)
+        {
+            <div class="global-stats-loading">
+                <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mb-4" />
+                <MudGrid Spacing="3">
+                    <!-- Loading skeleton for overview metrics -->
+                    @for (int i = 0; i < 6; i++)
+                    {
+                        <MudItem xs="12" sm="6" md="4" lg="2">
+                            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="140px" />
+                        </MudItem>
+                    }
+                    <!-- Loading skeleton for charts -->
+                    <MudItem xs="12" lg="8">
+                        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="400px" />
+                    </MudItem>
+                    <MudItem xs="12" lg="4">
+                        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="400px" />
+                    </MudItem>
+                </MudGrid>
+            </div>
+        }
+        else
+        {
+            <!-- Global Overview Metrics -->
+            <div class="overview-metrics mb-6">
+                <MudGrid Spacing="3">
+                    <MudItem xs="12" sm="6" md="4" lg="2">
+                        <MetricsCard Title="Total Packages"
+                                     Value="@FormatNumber(_globalStats?.Overview.TotalPackages ?? 0)"
+                                     Icon="Icons.Material.Filled.Inventory"
+                                     Color="Color.Primary"
+                                     ShowTrend="true"
+                                     TrendValue="@GetMetricChange("packages")"
+                                     TrendLabel="this period"
+                                     IsClickable="true"
+                                     ClickText="Browse Packages"
+                                     OnClick="@(() => Navigation.NavigateTo("/browse"))" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6" md="4" lg="2">
+                        <MetricsCard Title="Total Downloads"
+                                     Value="@FormatNumber(_globalStats?.Overview.TotalDownloads ?? 0)"
+                                     Icon="Icons.Material.Filled.Download"
+                                     Color="Color.Success"
+                                     ShowTrend="true"
+                                     TrendValue="@GetMetricChange("downloads")"
+                                     TrendLabel="download growth"
+                                     IsClickable="true"
+                                     ClickText="View Trends"
+                                     OnClick="@(() => ScrollToSection("download-trends"))" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6" md="4" lg="2">
+                        <MetricsCard Title="Active Publishers"
+                                     Value="@FormatNumber(_globalStats?.Overview.ActivePublishers ?? 0)"
+                                     Icon="Icons.Material.Filled.Business"
+                                     Color="Color.Info"
+                                     ShowTrend="true"
+                                     TrendValue="@GetMetricChange("publishers")"
+                                     TrendLabel="new publishers"
+                                     IsClickable="true"
+                                     ClickText="Publisher Stats"
+                                     OnClick="@(() => ScrollToSection("publisher-insights"))" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6" md="4" lg="2">
+                        <MetricsCard Title="Countries Reached"
+                                     Value="@(_globalStats?.Overview.CountriesReached.ToString() ?? "N/A")"
+                                     Icon="Icons.Material.Filled.Public"
+                                     Color="Color.Warning"
+                                     ShowTrend="true"
+                                     TrendValue="@GetMetricChange("countries")"
+                                     TrendLabel="new countries"
+                                     IsClickable="true"
+                                     ClickText="Geographic View"
+                                     OnClick="@(() => ScrollToSection("geographic-distribution"))" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6" md="4" lg="2">
+                        <MetricsCard Title="Avg Rating"
+                                     Value="@(_globalStats?.Overview.AveragePackageRating.ToString("F1") ?? "N/A")"
+                                     Icon="Icons.Material.Filled.Star"
+                                     Color="Color.Tertiary"
+                                     ShowProgressBar="true"
+                                     Progress="@((_globalStats?.Overview.AveragePackageRating ?? 0) * 20)" 
+                                     IsClickable="true"
+                                     ClickText="Quality Metrics"
+                                     OnClick="@(() => ScrollToSection("quality-metrics"))" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6" md="4" lg="2">
+                        <MetricsCard Title="Security Score"
+                                     Value="@(_globalStats?.Overview.AverageSecurityScore.ToString("F0") ?? "N/A")"
+                                     Icon="Icons.Material.Filled.Security"
+                                     Color="@GetSecurityScoreColor()"
+                                     ShowProgressBar="true"
+                                     Progress="@_globalStats?.Overview.AverageSecurityScore"
+                                     IsClickable="true"
+                                     ClickText="Security Center"
+                                     OnClick="@(() => ScrollToSection("security-overview"))" />
+                    </MudItem>
+                </MudGrid>
+            </div>
+
+            <!-- Main Analytics Charts -->
+            <div class="main-charts mb-6">
+                <MudGrid Spacing="3">
+                    <!-- Download Trends Chart -->
+                    <MudItem xs="12" lg="8" id="download-trends">
+                        <AnalyticsChart Title="🚀 Global Download Trends"
+                                        Subtitle="Package downloads across the platform"
+                                        ChartType="ChartTypeConverter.FromMudBlazor(MudBlazor.ChartType.Line)"
+                                        ChartSeries="@GetDownloadTrendsChartSeries().ToMudBlazorChartSeries()"
+                                        XAxisLabels="@GetDownloadTrendsLabels()"
+                                        Height="400"
+                                        ShowTimeRangeSelector="false"
+                                        ShowSummary="true"
+                                        EnableRealTime="true"
+                                        EnableDrillDown="true"
+                                        OnRefresh="RefreshDownloadTrends"
+                                        OnDrillDown="HandleDownloadTrendsDrillDown"
+                                        OnExport="ExportDownloadTrends" />
+                    </MudItem>
+
+                    <!-- Technology Stack Distribution -->
+                    <MudItem xs="12" lg="4">
+                        <AnalyticsChart Title="⚡ Technology Stack"
+                                        Subtitle="Popular technologies and frameworks"
+                                        ChartType="ChartTypeConverter.FromMudBlazor(MudBlazor.ChartType.Donut)"
+                                        ChartSeries="@GetTechnologyStackChartSeries().ToMudBlazorChartSeries()"
+                                        Height="400"
+                                        ShowTimeRangeSelector="false"
+                                        ShowSummary="false"
+                                        ShowDataTable="true"
+                                        EnableDrillDown="true"
+                                        OnDrillDown="HandleTechnologyDrillDown"
+                                        OnExport="ExportTechnologyData" />
+                    </MudItem>
+                </MudGrid>
+            </div>
+
+            <!-- Secondary Analytics -->
+            <div class="secondary-charts mb-6">
+                <MudGrid Spacing="3">
+                    <!-- Geographic Distribution -->
+                    <MudItem xs="12" lg="6" id="geographic-distribution">
+                        <MudCard Class="analytics-chart-card" Elevation="2">
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.h6">🌎 Geographic Distribution</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        Package adoption by region
+                                    </MudText>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                            <MudCardContent Class="pa-4">
+                                <div class="geographic-chart" style="height: 350px;">
+                                    @if (_globalStats?.Geographic?.TopCountries?.Any() == true)
+                                    {
+                                        <div class="geographic-list">
+                                            @foreach (var country in _globalStats.Geographic.TopCountries.Take(10))
+                                            {
+                                                <div class="country-item d-flex justify-space-between align-center mb-3 @(_selectedCountry == country.CountryCode ? "selected" : "")"
+                                                     @onclick="@(() => SelectCountry(country.CountryCode))"
+                                                     role="button"
+                                                     tabindex="0">
+                                                    <div class="country-info d-flex align-center">
+                                                        <span class="country-flag mr-2" style="font-size: 1.5em;">@GetCountryFlag(country.CountryCode)</span>
+                                                        <div>
+                                                            <MudText Typo="Typo.body2" Class="font-weight-bold">@country.CountryName</MudText>
+                                                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                                @country.Percentage.ToString("F1")% of downloads • @country.UniqueUsers users
+                                                            </MudText>
+                                                        </div>
+                                                    </div>
+                                                    <div class="country-stats text-right">
+                                                        <MudText Typo="Typo.body2" Class="font-weight-bold">
+                                                            @FormatNumber(country.Downloads)
+                                                        </MudText>
+                                                        <div class="d-flex align-center gap-2">
+                                                            <MudProgressLinear Value="@country.Percentage" 
+                                                                               Color="Color.Primary" 
+                                                                               Size="Size.Small"
+                                                                               Style="width: 60px;" />
+                                                            @if (country.GrowthRate > 0)
+                                                            {
+                                                                <MudIcon Icon="Icons.Material.Filled.TrendingUp" 
+                                                                         Color="Color.Success" 
+                                                                         Size="Size.Small" />
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="no-data text-center pa-8">
+                                            <MudIcon Icon="Icons.Material.Outlined.Map" Size="Size.Large" Color="Color.Secondary" />
+                                            <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mt-2">
+                                                No geographic data available
+                                            </MudText>
+                                        </div>
+                                    }
+                                </div>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+
+                    <!-- Category Performance -->
+                    <MudItem xs="12" lg="6">
+                        <MudCard Class="analytics-chart-card" Elevation="2">
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.h6">📊 Category Performance</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        Top performing package categories
+                                    </MudText>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                            <MudCardContent Class="pa-0">
+                                @if (_categories?.Any() == true)
+                                {
+                                    <MudList T="string">
+                                        @foreach (var category in _categories.Take(8))
+                                        {
+                                            <MudListItem T="string" Class="category-performance-item"
+                                                         @onclick="@(() => FilterByCategory(category.Category))"
+                                                         Icon="@GetCategoryIcon(category.Category)">
+                                                <div class="category-content d-flex justify-space-between align-center w-100">
+                                                    <div class="category-info">
+                                                        <MudText Typo="Typo.body2" Class="font-weight-bold">
+                                                            @category.Category
+                                                        </MudText>
+                                                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                            @category.PackageCount packages • Avg rating: @category.AverageRating.ToString("F1")
+                                                        </MudText>
+                                                    </div>
+                                                    <div class="category-metrics d-flex align-center gap-3">
+                                                        <div class="metric text-center">
+                                                            <MudText Typo="Typo.caption" Color="Color.Secondary">Downloads</MudText>
+                                                            <MudText Typo="Typo.body2" Class="font-weight-bold">
+                                                                @FormatNumber(category.TotalDownloads)
+                                                            </MudText>
+                                                        </div>
+                                                        <div class="metric text-center">
+                                                            <MudText Typo="Typo.caption" Color="Color.Secondary">Growth</MudText>
+                                                            <MudText Typo="Typo.body2" 
+                                                                     Class="font-weight-bold"
+                                                                     Color="@(category.GrowthRate >= 0 ? Color.Success : Color.Error)">
+                                                                @category.GrowthRate.ToString("+0.0%;-0.0%")
+                                                            </MudText>
+                                                        </div>
+                                                        <MudIconButton Icon="Icons.Material.Filled.ArrowForward"
+                                                                       Size="Size.Small"
+                                                                       Color="Color.Primary" />
+                                                    </div>
+                                                </div>
+                                            </MudListItem>
+                                            @if (category != _categories.Last())
+                                            {
+                                                <MudDivider />
+                                            }
+                                        }
+                                    </MudList>
+                                }
+                                else
+                                {
+                                    <div class="no-data text-center pa-8">
+                                        <MudIcon Icon="Icons.Material.Outlined.Category" Size="Size.Large" Color="Color.Secondary" />
+                                        <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mt-2">
+                                            No category data available
+                                        </MudText>
+                                    </div>
+                                }
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                </MudGrid>
+            </div>
+
+            <!-- Trending Packages and Ecosystem Health -->
+            <div class="insights-section mb-6">
+                <MudGrid Spacing="3">
+                    <!-- Trending Packages -->
+                    <MudItem xs="12" lg="8">
+                        <MudCard Class="analytics-chart-card" Elevation="2">
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <div class="d-flex justify-space-between align-center">
+                                        <div>
+                                            <MudText Typo="Typo.h6">🔥 Trending Packages</MudText>
+                                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                Fastest growing packages this period
+                                            </MudText>
+                                        </div>
+                                        <MudButton Variant="Variant.Text" 
+                                                   Color="Color.Primary" 
+                                                   EndIcon="Icons.Material.Filled.ArrowForward"
+                                                   @onclick="@(() => Navigation.NavigateTo("/trending"))">
+                                            View All
+                                        </MudButton>
+                                    </div>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                            <MudCardContent Class="pa-0">
+                                @if (_globalStats?.TrendingPackages?.Any() == true)
+                                {
+                                    <div class="trending-packages-grid">
+                                        @foreach (var package in _globalStats.TrendingPackages.Take(6))
+                                        {
+                                            <div class="trending-package-card pa-4"
+                                                 @onclick="@(() => Navigation.NavigateTo($"/package/{package.PackageId}"))"
+                                                 role="button"
+                                                 tabindex="0">
+                                                <div class="d-flex justify-space-between align-center mb-2">
+                                                    <MudText Typo="Typo.body1" Class="font-weight-bold">@package.Name</MudText>
+                                                    <MudChip T="string" Text="@package.GrowthPercentage.ToString("+0.0%")" 
+                                                             Color="Color.Success" 
+                                                             Size="Size.Small" />
+                                                </div>
+                                                <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2">
+                                                    @package.Description?.Truncate(100)
+                                                </MudText>
+                                                <div class="d-flex justify-space-between align-center">
+                                                    <div class="d-flex align-center gap-2">
+                                                        <MudText Typo="Typo.caption">@FormatNumber(package.Downloads) downloads</MudText>
+                                                        <MudRating ReadOnly="true" 
+                                                                   SelectedValue="@((int)package.Rating)" 
+                                                                   MaxValue="5" 
+                                                                   Size="Size.Small" />
+                                                    </div>
+                                                    <div class="d-flex align-center gap-1">
+                                                        <SecurityGradeBadge Grade="@package.SecurityGrade" Size="Size.Small" />
+                                                        <TrustTierIndicator Tier="@package.TrustTier" Size="Size.Small" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="no-data text-center pa-8">
+                                        <MudIcon Icon="Icons.Material.Outlined.TrendingUp" Size="Size.Large" Color="Color.Secondary" />
+                                        <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mt-2">
+                                            No trending packages data available
+                                        </MudText>
+                                    </div>
+                                }
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+
+                    <!-- Ecosystem Health -->
+                    <MudItem xs="12" lg="4" id="ecosystem-health">
+                        <MudCard Class="analytics-chart-card" Elevation="2">
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.h6">🌱 Ecosystem Health</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        Overall platform health indicators
+                                    </MudText>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                            <MudCardContent Class="pa-4">
+                                @if (_ecosystemHealth != null)
+                                {
+                                    <div class="ecosystem-health-score text-center mb-4">
+                                        <MudText Typo="Typo.h4" Color="@GetHealthScoreColor()">
+                                            @_ecosystemHealth.OverallHealthScore.ToString("F0")%
+                                        </MudText>
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                            Overall Health Score
+                                        </MudText>
+                                    </div>
+
+                                    <div class="health-indicators">
+                                        <div class="health-indicator mb-3">
+                                            <div class="d-flex justify-space-between align-center mb-1">
+                                                <MudText Typo="Typo.body2">Security</MudText>
+                                                <MudText Typo="Typo.caption">@_ecosystemHealth.Indicators.SecurityHealth.ToString("F0")%</MudText>
+                                            </div>
+                                            <MudProgressLinear Value="@_ecosystemHealth.Indicators.SecurityHealth" 
+                                                               Color="@GetHealthIndicatorColor(_ecosystemHealth.Indicators.SecurityHealth)" />
+                                        </div>
+
+                                        <div class="health-indicator mb-3">
+                                            <div class="d-flex justify-space-between align-center mb-1">
+                                                <MudText Typo="Typo.body2">Quality</MudText>
+                                                <MudText Typo="Typo.caption">@_ecosystemHealth.Indicators.QualityHealth.ToString("F0")%</MudText>
+                                            </div>
+                                            <MudProgressLinear Value="@_ecosystemHealth.Indicators.QualityHealth" 
+                                                               Color="@GetHealthIndicatorColor(_ecosystemHealth.Indicators.QualityHealth)" />
+                                        </div>
+
+                                        <div class="health-indicator mb-3">
+                                            <div class="d-flex justify-space-between align-center mb-1">
+                                                <MudText Typo="Typo.body2">Diversity</MudText>
+                                                <MudText Typo="Typo.caption">@_ecosystemHealth.Indicators.DiversityHealth.ToString("F0")%</MudText>
+                                            </div>
+                                            <MudProgressLinear Value="@_ecosystemHealth.Indicators.DiversityHealth" 
+                                                               Color="@GetHealthIndicatorColor(_ecosystemHealth.Indicators.DiversityHealth)" />
+                                        </div>
+
+                                        <div class="health-indicator mb-3">
+                                            <div class="d-flex justify-space-between align-center mb-1">
+                                                <MudText Typo="Typo.body2">Activity</MudText>
+                                                <MudText Typo="Typo.caption">@_ecosystemHealth.Indicators.ActivityHealth.ToString("F0")%</MudText>
+                                            </div>
+                                            <MudProgressLinear Value="@_ecosystemHealth.Indicators.ActivityHealth" 
+                                                               Color="@GetHealthIndicatorColor(_ecosystemHealth.Indicators.ActivityHealth)" />
+                                        </div>
+
+                                        <div class="health-indicator mb-3">
+                                            <div class="d-flex justify-space-between align-center mb-1">
+                                                <MudText Typo="Typo.body2">Community</MudText>
+                                                <MudText Typo="Typo.caption">@_ecosystemHealth.Indicators.CommunityHealth.ToString("F0")%</MudText>
+                                            </div>
+                                            <MudProgressLinear Value="@_ecosystemHealth.Indicators.CommunityHealth" 
+                                                               Color="@GetHealthIndicatorColor(_ecosystemHealth.Indicators.CommunityHealth)" />
+                                        </div>
+
+                                        <div class="health-indicator">
+                                            <div class="d-flex justify-space-between align-center mb-1">
+                                                <MudText Typo="Typo.body2">Innovation</MudText>
+                                                <MudText Typo="Typo.caption">@_ecosystemHealth.Indicators.InnovationHealth.ToString("F0")%</MudText>
+                                            </div>
+                                            <MudProgressLinear Value="@_ecosystemHealth.Indicators.InnovationHealth" 
+                                                               Color="@GetHealthIndicatorColor(_ecosystemHealth.Indicators.InnovationHealth)" />
+                                        </div>
+                                    </div>
+
+                                    @if (_ecosystemHealth.Alerts?.Any() == true)
+                                    {
+                                        <MudDivider Class="my-4" />
+                                        <MudText Typo="Typo.subtitle2" Class="mb-2">Health Alerts</MudText>
+                                        @foreach (var alert in _ecosystemHealth.Alerts.Take(3))
+                                        {
+                                            <MudAlert Severity="@GetAlertSeverity(alert.Severity)" 
+                                                      Dense="true" 
+                                                      Class="mb-2">
+                                                <strong>@alert.Title:</strong> @alert.Description
+                                            </MudAlert>
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="no-data text-center pa-4">
+                                        <MudIcon Icon="Icons.Material.Outlined.HealthAndSafety" Size="Size.Large" Color="Color.Secondary" />
+                                        <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mt-2">
+                                            Health data loading...
+                                        </MudText>
+                                    </div>
+                                }
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                </MudGrid>
+            </div>
+        }
+    </MainContent>
+</ResponsiveContainer>
+
+@code {
+    private bool _isLoading = true;
+    private string _selectedTimeRange = "30d";
+    private string _selectedCategory = "";
+    private string _selectedCountry = "";
+
+    private GlobalPlatformStatistics? _globalStats;
+    private IEnumerable<CategoryStatistics>? _categories;
+    private TechnologyStackAnalysis? _technologyStack;
+    private EcosystemHealthMetrics? _ecosystemHealth;
+    private List<PackageInfo>? _trendingPackages;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadGlobalStatistics();
+    }
+
+    private async Task LoadGlobalStatistics()
+    {
+        try
+        {
+            _isLoading = true;
+            StateHasChanged();
+
+            // Load global statistics
+            _globalStats = await AnalyticsService.GetGlobalStatisticsAsync(_selectedTimeRange);
+            _categories = _globalStats?.Categories;
+
+            // Load additional data
+            _technologyStack = await AnalyticsService.GetTechnologyStackAnalysisAsync(_selectedTimeRange);
+            _ecosystemHealth = await AnalyticsService.GetEcosystemHealthAsync();
+        }
+        catch (NotImplementedException)
+        {
+            // Generate mock data for development
+            GenerateMockGlobalData();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading global statistics");
+            Snackbar.Add("Failed to load global statistics", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void GenerateMockGlobalData()
+    {
+        var random = new Random();
+        
+        _globalStats = new GlobalPlatformStatistics
+        {
+            TimeRange = _selectedTimeRange,
+            Overview = new GlobalOverviewMetrics
+            {
+                TotalPackages = 15847,
+                TotalDownloads = 42891567,
+                ActivePublishers = 3249,
+                TotalUsers = 89432,
+                AveragePackageRating = 4.3,
+                AverageSecurityScore = 87.5,
+                CountriesReached = 142,
+                GrowthRate = 23.4,
+                MetricChanges = new Dictionary<string, long>
+                {
+                    ["packages"] = 1234,
+                    ["downloads"] = 8945672,
+                    ["publishers"] = 234,
+                    ["countries"] = 8
+                }
+            },
+            Geographic = new GlobalGeographicDistribution
+            {
+                TotalCountries = 142,
+                TopCountries = new[]
+                {
+                    new CountryAnalytics { CountryCode = "US", CountryName = "United States", Downloads = 15892345, Percentage = 37.1, GrowthRate = 15.2, UniqueUsers = 28934 },
+                    new CountryAnalytics { CountryCode = "CN", CountryName = "China", Downloads = 8945672, Percentage = 20.9, GrowthRate = 28.7, UniqueUsers = 18945 },
+                    new CountryAnalytics { CountryCode = "DE", CountryName = "Germany", Downloads = 4892345, Percentage = 11.4, GrowthRate = 12.3, UniqueUsers = 12456 },
+                    new CountryAnalytics { CountryCode = "IN", CountryName = "India", Downloads = 3945672, Percentage = 9.2, GrowthRate = 45.6, UniqueUsers = 15678 },
+                    new CountryAnalytics { CountryCode = "GB", CountryName = "United Kingdom", Downloads = 2893456, Percentage = 6.7, GrowthRate = 8.9, UniqueUsers = 8934 },
+                    new CountryAnalytics { CountryCode = "JP", CountryName = "Japan", Downloads = 2345678, Percentage = 5.5, GrowthRate = 6.2, UniqueUsers = 7823 },
+                    new CountryAnalytics { CountryCode = "FR", CountryName = "France", Downloads = 1945672, Percentage = 4.5, GrowthRate = 11.7, UniqueUsers = 6789 },
+                    new CountryAnalytics { CountryCode = "CA", CountryName = "Canada", Downloads = 1456789, Percentage = 3.4, GrowthRate = 14.2, UniqueUsers = 5234 },
+                    new CountryAnalytics { CountryCode = "AU", CountryName = "Australia", Downloads = 892345, Percentage = 2.1, GrowthRate = 18.9, UniqueUsers = 3456 },
+                    new CountryAnalytics { CountryCode = "BR", CountryName = "Brazil", Downloads = 723456, Percentage = 1.7, GrowthRate = 32.1, UniqueUsers = 2987 }
+                }
+            },
+            TrendingPackages = new[]
+            {
+                new TrendingPackageData { PackageId = Guid.NewGuid(), Name = "@ai/claude-assistant", Description = "Advanced AI assistant integration toolkit with Claude API support", Category = "AI & ML", Publisher = "Anthropic Tools", Downloads = 892345, GrowthPercentage = 245.6, Rating = 4.9, SecurityGrade = "A+", TrustTier = TrustTier.Verified },
+                new TrendingPackageData { PackageId = Guid.NewGuid(), Name = "@web/fast-crawler", Description = "High-performance web scraping and crawling framework", Category = "Web Scraping", Publisher = "DevTools Inc", Downloads = 567892, GrowthPercentage = 189.2, Rating = 4.7, SecurityGrade = "A", TrustTier = TrustTier.CommunityTrusted },
+                new TrendingPackageData { PackageId = Guid.NewGuid(), Name = "@data/stream-processor", Description = "Real-time data streaming and processing engine", Category = "Data Processing", Publisher = "DataFlow Solutions", Downloads = 345678, GrowthPercentage = 156.7, Rating = 4.8, SecurityGrade = "A", TrustTier = TrustTier.CommunityTrusted },
+                new TrendingPackageData { PackageId = Guid.NewGuid(), Name = "@security/vault-manager", Description = "Secure credential and secret management system", Category = "Security", Publisher = "SecureVault Ltd", Downloads = 298456, GrowthPercentage = 134.5, Rating = 4.6, SecurityGrade = "A+", TrustTier = TrustTier.Verified },
+                new TrendingPackageData { PackageId = Guid.NewGuid(), Name = "@ui/component-kit", Description = "Modern React component library with advanced features", Category = "UI Components", Publisher = "UI Masters", Downloads = 234567, GrowthPercentage = 112.3, Rating = 4.4, SecurityGrade = "B+", TrustTier = TrustTier.Community },
+                new TrendingPackageData { PackageId = Guid.NewGuid(), Name = "@api/graphql-toolkit", Description = "Complete GraphQL development and testing toolkit", Category = "API Tools", Publisher = "GraphQL Pro", Downloads = 187234, GrowthPercentage = 98.7, Rating = 4.5, SecurityGrade = "A-", TrustTier = TrustTier.CommunityTrusted }
+            }
+        };
+
+        _categories = new[]
+        {
+            new CategoryStatistics { Category = "AI & ML", PackageCount = 1247, TotalDownloads = 12894567, AverageRating = 4.6, GrowthRate = 67.8 },
+            new CategoryStatistics { Category = "Web Scraping", PackageCount = 892, TotalDownloads = 8945672, AverageRating = 4.4, GrowthRate = 45.3 },
+            new CategoryStatistics { Category = "Data Processing", PackageCount = 1534, TotalDownloads = 7834567, AverageRating = 4.3, GrowthRate = 38.9 },
+            new CategoryStatistics { Category = "API Tools", PackageCount = 2156, TotalDownloads = 6789345, AverageRating = 4.2, GrowthRate = 29.7 },
+            new CategoryStatistics { Category = "Security", PackageCount = 673, TotalDownloads = 5672834, AverageRating = 4.7, GrowthRate = 52.1 },
+            new CategoryStatistics { Category = "UI Components", PackageCount = 1891, TotalDownloads = 4567892, AverageRating = 4.1, GrowthRate = 22.4 },
+            new CategoryStatistics { Category = "Database", PackageCount = 1023, TotalDownloads = 3456789, AverageRating = 4.0, GrowthRate = 18.6 },
+            new CategoryStatistics { Category = "Testing", PackageCount = 756, TotalDownloads = 2345678, AverageRating = 4.2, GrowthRate = 15.3 }
+        };
+
+        _technologyStack = new TechnologyStackAnalysis
+        {
+            Technologies = new Dictionary<string, TechnologyUsage>
+            {
+                ["TypeScript"] = new() { Technology = "TypeScript", PackageCount = 6847, MarketShare = 43.2, GrowthRate = 28.5 },
+                ["Python"] = new() { Technology = "Python", PackageCount = 4923, MarketShare = 31.1, GrowthRate = 22.1 },
+                ["JavaScript"] = new() { Technology = "JavaScript", PackageCount = 3456, MarketShare = 21.8, GrowthRate = 12.7 },
+                ["Go"] = new() { Technology = "Go", PackageCount = 892, MarketShare = 5.6, GrowthRate = 45.3 },
+                ["Rust"] = new() { Technology = "Rust", PackageCount = 567, MarketShare = 3.6, GrowthRate = 67.8 }
+            }
+        };
+
+        _ecosystemHealth = new EcosystemHealthMetrics
+        {
+            OverallHealthScore = 87.3,
+            Indicators = new EcosystemHealthIndicators
+            {
+                SecurityHealth = 89.2,
+                QualityHealth = 84.7,
+                DiversityHealth = 91.5,
+                ActivityHealth = 88.9,
+                CommunityHealth = 85.3,
+                InnovationHealth = 93.1
+            },
+            Alerts = new[]
+            {
+                new HealthAlert { Title = "Security Alert", Description = "3 packages have unpatched vulnerabilities", Severity = AlertSeverity.Medium, Category = "Security" },
+                new HealthAlert { Title = "Quality Notice", Description = "Average test coverage has decreased by 2%", Severity = AlertSeverity.Low, Category = "Quality" }
+            }
+        };
+    }
+
+    private async Task OnTimeRangeChanged()
+    {
+        await LoadGlobalStatistics();
+    }
+
+    private async Task OnCategoryChanged()
+    {
+        await LoadGlobalStatistics();
+    }
+
+    private async Task RefreshData()
+    {
+        await LoadGlobalStatistics();
+        Snackbar.Add("Global statistics refreshed", Severity.Success);
+    }
+
+    private async Task ExportData()
+    {
+        if (_globalStats == null)
+        {
+            Snackbar.Add("No data available for export", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            var exportData = new ExportAnalyticsData
+            {
+                Title = "Global Package Statistics",
+                Description = $"Platform-wide analytics for {_selectedTimeRange} time range" + 
+                             (!string.IsNullOrEmpty(_selectedCategory) ? $" (Category: {_selectedCategory})" : ""),
+                TimeRange = GetTimeRangeDisplayName(_selectedTimeRange),
+                GeneratedAt = DateTime.UtcNow,
+                Summary = new List<SummaryStat>
+                {
+                    new() { Label = "Total Packages", Value = FormatNumber(_globalStats.Overview.TotalPackages), Change = GetMetricChange("packages") },
+                    new() { Label = "Total Downloads", Value = FormatNumber(_globalStats.Overview.TotalDownloads), Change = GetMetricChange("downloads") },
+                    new() { Label = "Active Publishers", Value = FormatNumber(_globalStats.Overview.ActivePublishers), Change = GetMetricChange("publishers") },
+                    new() { Label = "New Packages This Period", Value = FormatNumber(_globalStats.Overview.NewPackages), Change = GetMetricChange("new_packages") },
+                    new() { Label = "Package Updates", Value = FormatNumber(_globalStats.Overview.PackageUpdates), Change = GetMetricChange("updates") },
+                    new() { Label = "Growth Rate", Value = $"{_globalStats.Overview.GrowthRate:F1}%", Change = GetMetricChange("growth") }
+                },
+                Charts = new List<ExportChartData>
+                {
+                    new()
+                    {
+                        Title = "Download Trends Over Time",
+                        Description = "Package download trends for the selected time period",
+                        ChartType = MCPHub.WebApp.Components.UI.Models.ChartType.Line,
+                        Series = GetDownloadTrendsSeries(),
+                        XAxisLabels = GetDownloadLabels()
+                    },
+                    new()
+                    {
+                        Title = "Technology Stack Distribution",
+                        Description = "Distribution of packages by technology stack",
+                        ChartType = MCPHub.WebApp.Components.UI.Models.ChartType.Donut,
+                        Series = GetTechnologyStackSeries(),
+                        XAxisLabels = GetTechnologyLabels()
+                    }
+                },
+                Tables = new Dictionary<string, List<Dictionary<string, object>>>
+                {
+                    ["CategoryBreakdown"] = _categories?.Select(c => new Dictionary<string, object>
+                    {
+                        ["Category"] = c.Category,
+                        ["Package Count"] = c.PackageCount,
+                        ["Total Downloads"] = c.TotalDownloads,
+                        ["Avg Rating"] = c.AverageRating,
+                        ["Growth Rate"] = c.GrowthRate
+                    }).ToList() ?? new(),
+                    ["TrendingPackages"] = _trendingPackages?.Select(p => new Dictionary<string, object>
+                    {
+                        ["Package Name"] = p.Name,
+                        ["Downloads"] = p.WeeklyDownloads,
+                        ["Rating"] = p.Rating,
+                        ["Trust Tier"] = p.TrustTier.ToString(),
+                        ["Security Grade"] = p.SecurityGrade
+                    }).ToList() ?? new()
+                },
+                RawData = new Dictionary<string, object>
+                {
+                    ["ExportMetadata"] = new
+                    {
+                        ExportedBy = "MCP Hub Analytics",
+                        Version = "1.0",
+                        TimeRange = _selectedTimeRange,
+                        Category = _selectedCategory ?? "All",
+                        TotalRecords = _globalStats.Overview.TotalPackages
+                    }
+                }
+            };
+
+            var dialog = await DialogService.ShowExportDialogAsync(exportData, "global_package_statistics");
+            var result = await dialog.Result;
+            
+            if (!result.Canceled)
+            {
+                Logger.LogInformation("Global statistics exported successfully");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error preparing export data");
+            Snackbar.Add("Failed to prepare export data", Severity.Error);
+        }
+    }
+
+    private void ScrollToSection(string sectionId)
+    {
+        // TODO: Implement smooth scrolling to section
+        Navigation.NavigateTo($"#${sectionId}");
+    }
+
+    private void SelectCountry(string countryCode)
+    {
+        _selectedCountry = countryCode;
+        // TODO: Show detailed country analytics
+        Snackbar.Add($"Selected {countryCode} for detailed view", Severity.Info);
+    }
+
+    private void FilterByCategory(string category)
+    {
+        Navigation.NavigateTo($"/browse?category={Uri.EscapeDataString(category)}");
+    }
+
+    private async Task RefreshDownloadTrends()
+    {
+        // TODO: Refresh only download trends data
+        await LoadGlobalStatistics();
+    }
+
+    private async Task HandleDownloadTrendsDrillDown(ChartDrillDownEventArgs args)
+    {
+        // TODO: Navigate to detailed download analytics
+        Snackbar.Add($"Drilling down into data for {args.XAxisLabel}", Severity.Info);
+    }
+
+    private async Task ExportDownloadTrends()
+    {
+        try
+        {
+            var chartData = new ExportChartData
+            {
+                Title = "Download Trends Over Time",
+                Description = $"Package download trends for {GetTimeRangeDisplayName(_selectedTimeRange)}" + 
+                             (!string.IsNullOrEmpty(_selectedCategory) ? $" (Category: {_selectedCategory})" : ""),
+                ChartType = MCPHub.WebApp.Components.UI.Models.ChartType.Line,
+                Series = GetDownloadTrendsSeries(),
+                XAxisLabels = GetDownloadLabels()
+            };
+
+            var dialog = await DialogService.ShowExportDialogAsync(chartData, "download_trends");
+            var result = await dialog.Result;
+            
+            if (!result.Canceled)
+            {
+                Logger.LogInformation("Download trends exported successfully");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error exporting download trends");
+            Snackbar.Add("Failed to export download trends", Severity.Error);
+        }
+    }
+
+    private async Task HandleTechnologyDrillDown(ChartDrillDownEventArgs args)
+    {
+        // TODO: Navigate to technology-specific analytics
+        Snackbar.Add($"Viewing packages using technology: {args.XAxisLabel}", Severity.Info);
+    }
+
+    private async Task ExportTechnologyData()
+    {
+        try
+        {
+            var chartData = new ExportChartData
+            {
+                Title = "Technology Stack Distribution",
+                Description = $"Distribution of packages by technology stack for {GetTimeRangeDisplayName(_selectedTimeRange)}" + 
+                             (!string.IsNullOrEmpty(_selectedCategory) ? $" (Category: {_selectedCategory})" : ""),
+                ChartType = MCPHub.WebApp.Components.UI.Models.ChartType.Donut,
+                Series = GetTechnologyStackSeries(),
+                XAxisLabels = GetTechnologyLabels()
+            };
+
+            var dialog = await DialogService.ShowExportDialogAsync(chartData, "technology_distribution");
+            var result = await dialog.Result;
+            
+            if (!result.Canceled)
+            {
+                Logger.LogInformation("Technology distribution exported successfully");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error exporting technology distribution");
+            Snackbar.Add("Failed to export technology distribution", Severity.Error);
+        }
+    }
+
+    // Helper methods for export data generation
+    private List<Components.UI.Models.ChartSeries> GetDownloadTrendsSeries()
+    {
+        if (_globalStats?.Downloads?.TrendData == null) return new();
+
+        return new List<Components.UI.Models.ChartSeries>
+        {
+            new() { Name = "Downloads", Data = _globalStats.Downloads.TrendData.Select(d => (double)d.Value).ToArray() }
+        };
+    }
+
+    private string[] GetDownloadLabels()
+    {
+        if (_globalStats?.Downloads?.TrendData == null) return Array.Empty<string>();
+        return _globalStats.Downloads.TrendData.Select(d => d.Label).ToArray();
+    }
+
+    private List<Components.UI.Models.ChartSeries> GetTechnologyStackSeries()
+    {
+        if (_technologyStack?.Technologies == null) return new();
+
+        return new List<Components.UI.Models.ChartSeries>
+        {
+            new() { 
+                Name = "Market Share", 
+                Data = _technologyStack.Technologies.Values.Select(t => t.MarketShare).ToArray() 
+            }
+        };
+    }
+
+    private string[] GetTechnologyLabels()
+    {
+        if (_technologyStack?.Technologies == null) return Array.Empty<string>();
+        return _technologyStack.Technologies.Keys.ToArray();
+    }
+
+    private string GetTimeRangeDisplayName(string timeRange) => timeRange switch
+    {
+        "7d" => "Last 7 days",
+        "30d" => "Last 30 days",
+        "90d" => "Last 3 months",
+        "1y" => "Last year",
+        "all" => "All time",
+        _ => timeRange
+    };
+
+    // Helper methods for data formatting and display
+    private string FormatNumber(long number) => number switch
+    {
+        >= 1000000 => $"{number / 1000000.0:F1}M",
+        >= 1000 => $"{number / 1000.0:F1}K",
+        _ => number.ToString("N0")
+    };
+
+    private double? GetMetricChange(string metric) => _globalStats?.Overview.MetricChanges.TryGetValue(metric, out var change) == true ? change : null;
+
+    private Color GetSecurityScoreColor() => (_globalStats?.Overview.AverageSecurityScore ?? 0) switch
+    {
+        >= 90 => Color.Success,
+        >= 70 => Color.Warning,
+        _ => Color.Error
+    };
+
+    private Color GetHealthScoreColor() => (_ecosystemHealth?.OverallHealthScore ?? 0) switch
+    {
+        >= 85 => Color.Success,
+        >= 70 => Color.Warning,
+        _ => Color.Error
+    };
+
+    private Color GetHealthIndicatorColor(double value) => value switch
+    {
+        >= 85 => Color.Success,
+        >= 70 => Color.Warning,
+        _ => Color.Error
+    };
+
+    private Severity GetAlertSeverity(AlertSeverity severity) => severity switch
+    {
+        AlertSeverity.Critical => Severity.Error,
+        AlertSeverity.High => Severity.Error,
+        AlertSeverity.Medium => Severity.Warning,
+        AlertSeverity.Low => Severity.Info,
+        _ => Severity.Normal
+    };
+
+    private string GetCountryFlag(string countryCode) => countryCode switch
+    {
+        "US" => "🇺🇸",
+        "CN" => "🇨🇳",
+        "DE" => "🇩🇪",
+        "IN" => "🇮🇳",
+        "GB" => "🇬🇧",
+        "JP" => "🇯🇵",
+        "FR" => "🇫🇷",
+        "CA" => "🇨🇦",
+        "AU" => "🇦🇺",
+        "BR" => "🇧🇷",
+        _ => "🌍"
+    };
+
+    private string GetCategoryIcon(string category) => category switch
+    {
+        "AI & ML" => Icons.Material.Filled.Psychology,
+        "Web Scraping" => Icons.Material.Filled.Web,
+        "Data Processing" => Icons.Material.Filled.DataUsage,
+        "API Tools" => Icons.Material.Filled.Api,
+        "Security" => Icons.Material.Filled.Security,
+        "UI Components" => Icons.Material.Filled.Widgets,
+        "Database" => Icons.Material.Filled.Storage,
+        "Testing" => Icons.Material.Filled.BugReport,
+        _ => Icons.Material.Filled.Category
+    };
+
+    private List<Components.UI.Models.ChartSeries> GetDownloadTrendsChartSeries()
+    {
+        if (_globalStats?.Downloads?.TrendData == null) return new();
+
+        return new List<Components.UI.Models.ChartSeries>
+        {
+            new() { Name = "Downloads", Data = _globalStats.Downloads.TrendData.Select(d => (double)d.Value).ToArray() }
+        };
+    }
+
+    private string[] GetDownloadTrendsLabels()
+    {
+        if (_globalStats?.Downloads?.TrendData == null) return Array.Empty<string>();
+
+        return _globalStats.Downloads.TrendData.Select(d => d.Label).ToArray();
+    }
+
+    private List<Components.UI.Models.ChartSeries> GetTechnologyStackChartSeries()
+    {
+        if (_technologyStack?.Technologies == null) return new();
+
+        return new List<Components.UI.Models.ChartSeries>
+        {
+            new() { 
+                Name = "Market Share", 
+                Data = _technologyStack.Technologies.Values.Select(t => t.MarketShare).ToArray() 
+            }
+        };
+    }
+}
+
+<style>
+.global-stats-header {
+    margin-bottom: 32px;
+}
+
+.header-title h3 {
+    margin-bottom: 8px;
+}
+
+.overview-metrics,
+.main-charts,
+.secondary-charts,
+.insights-section {
+    width: 100%;
+}
+
+.analytics-chart-card {
+    height: 100%;
+    border-radius: 12px;
+    border: 1px solid var(--mud-palette-divider);
+}
+
+.geographic-list {
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.country-item {
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.country-item:hover {
+    background-color: var(--mud-palette-action-hover);
+}
+
+.country-item.selected {
+    background-color: var(--mud-palette-primary-lighten);
+}
+
+.category-performance-item {
+    padding: 16px 24px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.category-performance-item:hover {
+    background-color: var(--mud-palette-action-hover);
+}
+
+.trending-packages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1px;
+    background-color: var(--mud-palette-divider);
+}
+
+.trending-package-card {
+    background-color: var(--mud-palette-surface);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.trending-package-card:hover {
+    background-color: var(--mud-palette-action-hover);
+    transform: translateY(-2px);
+}
+
+.ecosystem-health-score {
+    padding: 16px;
+    border: 2px solid var(--mud-palette-divider);
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(var(--mud-palette-success-rgb), 0.1), rgba(var(--mud-palette-info-rgb), 0.1));
+}
+
+.health-indicator {
+    padding: 8px 0;
+}
+
+.health-indicator:last-child {
+    padding-bottom: 0;
+}
+
+/* Mobile optimizations */
+@@media (max-width: 768px) {
+    .header-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+    }
+    
+    .time-range-selector,
+    .export-controls {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .trending-packages-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .country-item,
+    .category-performance-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .category-metrics,
+    .country-stats {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+/* Dark theme adjustments */
+@@media (prefers-color-scheme: dark) {
+    .trending-package-card {
+        background-color: rgba(255, 255, 255, 0.02);
+    }
+    
+    .ecosystem-health-score {
+        background: linear-gradient(135deg, rgba(var(--mud-palette-success-rgb), 0.15), rgba(var(--mud-palette-info-rgb), 0.15));
+    }
+}
+
+/* Accessibility enhancements */
+.country-item:focus,
+.category-performance-item:focus,
+.trending-package-card:focus {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: 2px;
+}
+
+/* Animation for loading states */
+.global-stats-loading {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+</style>

@@ -1,0 +1,113 @@
+@using MudBlazor
+@using MCPHub.Domain.ValueObjects
+@using Microsoft.AspNetCore.Components.Web
+
+<MudTooltip Text="@TooltipText" Placement="Placement.Top" Arrow="true">
+    <MudChip T="string" 
+             Size="Size.Medium" 
+             Color="@GetGradeColor()" 
+             Class="@GetGradeClass()"
+             Style="@GetGradeStyle()"
+             @onclick="ShowDetailedReport"
+             @onkeypress="HandleKeyPress"
+             tabindex="0"
+             role="button"
+             aria-label="@GetAriaLabel()"
+             aria-describedby="@($"security-grade-help-{UniqueId}")">
+        <MudIcon Icon="@GetGradeIcon()" Size="Size.Small" Class="mr-1" />
+        @Grade
+        @if (ShowScore)
+        {
+            <span class="ml-1 text-xs">(@Score.ToString("F1"))</span>
+        }
+    </MudChip>
+</MudTooltip>
+
+@if (ShowHelperText)
+{
+    <div id="@($"security-grade-help-{UniqueId}")" class="sr-only">
+        Security grade @Grade with score @Score.ToString("F1") out of 10.0. 
+        @GetGradeDescription() Click for detailed security report.
+    </div>
+}
+
+@code {
+    [Parameter] public string Grade { get; set; } = "A+";
+    [Parameter] public double Score { get; set; } = 9.4;
+    [Parameter] public bool ShowScore { get; set; } = true;
+    [Parameter] public bool ShowHelperText { get; set; } = true;
+    [Parameter] public SecurityScanResult? DetailedReport { get; set; }
+    [Parameter] public SecurityBadgeStyle Style { get; set; } = SecurityBadgeStyle.Standard;
+    [Parameter] public EventCallback OnDetailClick { get; set; }
+    [Parameter] public string Class { get; set; } = "";
+
+    private string UniqueId { get; set; } = Guid.NewGuid().ToString("N")[..8];
+
+    private string TooltipText => $"Security Grade: {Grade} ({Score:F1}/10.0)";
+
+    private string GetAriaLabel() => $"Security grade {Grade} with score {Score:F1} out of 10, button";
+
+    private Color GetGradeColor() => Grade switch
+    {
+        "A+" or "A" => Color.Success,
+        "B+" or "B" => Color.Warning,
+        "C+" or "C" => Color.Error,
+        "F" => Color.Error,
+        _ => Color.Default
+    };
+
+    private string GetGradeClass() 
+    {
+        var baseClass = $"security-grade security-grade-{Grade.ToLower().Replace("+", "plus")} {Class}";
+        
+        return Style switch
+        {
+            SecurityBadgeStyle.Compact => $"{baseClass} security-grade-compact",
+            SecurityBadgeStyle.Detailed => $"{baseClass} security-grade-detailed",
+            _ => baseClass
+        };
+    }
+
+    private string GetGradeStyle() => Grade switch
+    {
+        "A+" => "background: linear-gradient(135deg, #10b981, #059669); color: white; font-weight: 600;",
+        "A" => "background: linear-gradient(135deg, #34d399, #10b981); color: white; font-weight: 600;",
+        "B+" or "B" => "background: linear-gradient(135deg, #f59e0b, #d97706); color: white; font-weight: 600;",
+        "C+" or "C" => "background: linear-gradient(135deg, #ef4444, #dc2626); color: white; font-weight: 600;",
+        "F" => "background: linear-gradient(135deg, #7f1d1d, #991b1b); color: white; font-weight: 600;",
+        _ => "background: #6b7280; color: white; font-weight: 600;"
+    };
+
+    private string GetGradeIcon() => Grade switch
+    {
+        "A+" => Icons.Material.Filled.Security,
+        "A" => Icons.Material.Filled.Verified,
+        "B+" or "B" => Icons.Material.Filled.Warning,
+        "C+" or "C" => Icons.Material.Filled.Error,
+        "F" => Icons.Material.Filled.Dangerous,
+        _ => Icons.Material.Filled.Help
+    };
+
+    private string GetGradeDescription() => Grade switch
+    {
+        "A+" => "Excellent security with comprehensive analysis and no critical vulnerabilities.",
+        "A" => "Very good security with minor issues that don't affect overall safety.",
+        "B+" or "B" => "Good security with some moderate issues that should be addressed.",
+        "C+" or "C" => "Poor security with significant issues requiring immediate attention.",
+        "F" => "Critical security failures with severe vulnerabilities detected.",
+        _ => "Security analysis pending or unavailable."
+    };
+
+    private async Task ShowDetailedReport()
+    {
+        await OnDetailClick.InvokeAsync();
+    }
+
+    private async Task HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" || e.Key == " ")
+        {
+            await ShowDetailedReport();
+        }
+    }
+}

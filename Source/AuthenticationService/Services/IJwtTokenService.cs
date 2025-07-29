@@ -1,5 +1,6 @@
-using MCPHub.Domain.Entities;
 using System.Security.Claims;
+
+using MCPHub.Domain.Entities;
 
 namespace MCPHub.AuthenticationService.Services;
 

@@ -5,8 +5,7 @@ namespace MCPHub.Domain.Events;
 /// <summary>
 /// Event raised when a new version of an existing MCP package is published
 /// </summary>
-public record PackageVersionPublishedEvent : BaseEvent
-{
+public record PackageVersionPublishedEvent : BaseEvent {
     /// <summary>
     /// ID of the parent package
     /// </summary>
@@ -102,8 +101,7 @@ public record PackageVersionPublishedEvent : BaseEvent
         string? releaseNotes = null,
         PackageCapabilitiesChanges? capabilityChanges = null,
         bool isBreakingChange = false,
-        string? migrationNotes = null)
-    {
+        string? migrationNotes = null) {
         PackageId = packageId;
         PackageVersionId = packageVersionId;
         PackageName = packageName;
@@ -125,8 +123,7 @@ public record PackageVersionPublishedEvent : BaseEvent
 /// <summary>
 /// Summary of capability changes between package versions
 /// </summary>
-public class PackageCapabilitiesChanges
-{
+public class PackageCapabilitiesChanges {
     /// <summary>
     /// Tools added in this version
     /// </summary>
@@ -185,8 +182,8 @@ public class PackageCapabilitiesChanges
     /// <summary>
     /// Whether there are any capability changes
     /// </summary>
-    public bool HasChanges => 
-        AddedTools.Any() || RemovedTools.Any() || ModifiedTools.Any() ||
+    public bool HasChanges
+        => AddedTools.Any() || RemovedTools.Any() || ModifiedTools.Any() ||
         AddedResources.Any() || RemovedResources.Any() || ModifiedResources.Any() ||
         AddedPrompts.Any() || RemovedPrompts.Any() || ModifiedPrompts.Any() ||
         AddedPermissions.Any() || RemovedPermissions.Any();

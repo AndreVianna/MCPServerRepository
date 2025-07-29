@@ -32,7 +32,7 @@ public class SearchRequestTests {
         };
 
         // Act
-        var isValid = searchRequest.IsValid(out string? errorMessage);
+        var isValid = searchRequest.IsValid(out var errorMessage);
 
         // Assert
         isValid.Should().BeTrue();
@@ -52,7 +52,7 @@ public class SearchRequestTests {
         };
 
         // Act
-        var isValid = searchRequest.IsValid(out string? errorMessage);
+        var isValid = searchRequest.IsValid(out var errorMessage);
 
         // Assert
         isValid.Should().BeFalse();
@@ -72,7 +72,7 @@ public class SearchRequestTests {
         };
 
         // Act
-        var isValid = searchRequest.IsValid(out string? errorMessage);
+        var isValid = searchRequest.IsValid(out var errorMessage);
 
         // Assert
         isValid.Should().BeFalse();
@@ -93,7 +93,7 @@ public class SearchRequestTests {
         };
 
         // Act
-        var isValid = searchRequest.IsValid(out string? errorMessage);
+        var isValid = searchRequest.IsValid(out var errorMessage);
 
         // Assert
         isValid.Should().BeFalse();
@@ -114,7 +114,7 @@ public class SearchRequestTests {
         };
 
         // Act
-        var isValid = searchRequest.IsValid(out string? errorMessage);
+        var isValid = searchRequest.IsValid(out var errorMessage);
 
         // Assert
         isValid.Should().BeTrue();
@@ -136,7 +136,7 @@ public class SearchRequestTests {
         };
 
         // Act
-        var isValid = searchRequest.IsValid(out string? errorMessage);
+        var isValid = searchRequest.IsValid(out var errorMessage);
 
         // Assert
         isValid.Should().BeTrue();
@@ -155,7 +155,7 @@ public class SearchRequestTests {
         };
 
         // Act
-        var isValid = searchRequest.IsValid(out string? errorMessage);
+        var isValid = searchRequest.IsValid(out var errorMessage);
 
         // Assert
         isValid.Should().BeTrue();
@@ -172,7 +172,7 @@ public class SearchRequestTests {
         };
 
         // Act
-        var isValid = searchRequest.IsValid(out string? errorMessage);
+        var isValid = searchRequest.IsValid(out var errorMessage);
 
         // Assert
         isValid.Should().BeTrue();
@@ -193,7 +193,7 @@ public class SearchRequestTests {
         };
 
         // Act
-        var isValid = searchRequest.IsValid(out string? errorMessage);
+        var isValid = searchRequest.IsValid(out var errorMessage);
 
         // Assert
         isValid.Should().BeTrue();
@@ -213,7 +213,7 @@ public class SearchRequestTests {
         };
 
         // Act
-        var isValid = searchRequest.IsValid(out string? errorMessage);
+        var isValid = searchRequest.IsValid(out var errorMessage);
 
         // Assert
         isValid.Should().BeTrue();
@@ -238,7 +238,7 @@ public class SearchRequestTests {
         };
 
         // Act
-        var isValid = searchRequest.IsValid(out string? errorMessage);
+        var isValid = searchRequest.IsValid(out var errorMessage);
 
         // Assert
         isValid.Should().BeTrue();

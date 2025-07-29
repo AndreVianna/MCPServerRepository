@@ -28,4 +28,9 @@ public static class DomainTestCategories {
     /// Unit tests for domain services.
     /// </summary>
     public const string DomainService = "DomainService";
+
+    /// <summary>
+    /// Unit tests for services.
+    /// </summary>
+    public const string Services = "Services";
 }

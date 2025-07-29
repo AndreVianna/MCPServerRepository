@@ -1,30 +1,123 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">WebApp</a>
-    </div>
-</div>
+﻿@using Microsoft.AspNetCore.Components.Authorization
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+<div class="d-flex flex-column">
+    <MudNavMenu>
+        <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">
+            Home
+        </MudNavLink>
+        
+        <MudNavLink Href="/search" Icon="@Icons.Material.Filled.Search">
+            Search Packages
+        </MudNavLink>
+        
+        <MudNavLink Href="/browse" Icon="@Icons.Material.Filled.Explore">
+            Browse & Discover
+        </MudNavLink>
+        
+        <MudNavLink Href="/servers" Icon="@Icons.Material.Filled.Dns">
+            MCP Servers
+        </MudNavLink>
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
+        <MudDivider Class="my-2" />
+        
+        <MudNavGroup Text="Security" Icon="@Icons.Material.Filled.Security" Expanded="false">
+            <MudNavLink Href="/security/dashboard" Icon="@Icons.Material.Filled.Dashboard">
+                Security Dashboard
+            </MudNavLink>
+            <MudNavLink Href="/security/scans" Icon="@Icons.Material.Filled.Scanner">
+                Security Scans
+            </MudNavLink>
+            <MudNavLink Href="/security/alerts" Icon="@Icons.Material.Filled.Warning">
+                Security Alerts
+            </MudNavLink>
+        </MudNavGroup>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
+        <AuthorizeView>
+            <Authorized>
+                <MudDivider Class="my-2" />
+                
+                <MudNavGroup Text="Publisher" Icon="@Icons.Material.Filled.Publish" Expanded="false">
+                    <MudNavLink Href="/publisher/dashboard" Icon="@Icons.Material.Filled.Dashboard">
+                        Dashboard
+                    </MudNavLink>
+                    <MudNavLink Href="/publisher/packages" Icon="@Icons.Material.Filled.Inventory">
+                        Packages
+                    </MudNavLink>
+                    <MudNavLink Href="/publisher/packages/publish" Icon="@Icons.Material.Filled.Add">
+                        Publish Package
+                    </MudNavLink>
+                    <MudNavLink Href="/publisher/analytics" Icon="@Icons.Material.Filled.Analytics">
+                        Analytics
+                    </MudNavLink>
+                    <MudNavLink Href="/publisher/security" Icon="@Icons.Material.Filled.Security">
+                        Security Center
+                    </MudNavLink>
+                    <MudNavLink Href="/publisher/profile" Icon="@Icons.Material.Filled.AccountCircle">
+                        Profile & Settings
+                    </MudNavLink>
+                </MudNavGroup>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-    </nav>
+                <MudNavGroup Text="Trust Tier" Icon="@Icons.Material.Filled.VerifiedUser" Expanded="false">
+                    <MudNavLink Href="/trust/overview" Icon="@Icons.Material.Filled.Info">
+                        Trust Overview
+                    </MudNavLink>
+                    <MudNavLink Href="/trust/verification" Icon="@Icons.Material.Filled.VerifiedUser">
+                        Verification Process
+                    </MudNavLink>
+                    <MudNavLink Href="/trust/history" Icon="@Icons.Material.Filled.History">
+                        Trust History
+                    </MudNavLink>
+                </MudNavGroup>
+                
+                <MudDivider Class="my-2" />
+                
+                <MudNavGroup Text="My Account" Icon="@Icons.Material.Filled.AccountCircle" Expanded="false">
+                    <MudNavLink Href="/profile" Icon="@Icons.Material.Filled.Person">
+                        Profile
+                    </MudNavLink>
+                    <MudNavLink Href="/profile/security" Icon="@Icons.Material.Filled.Security">
+                        Security
+                    </MudNavLink>
+                    <MudNavLink Href="/profile/privacy" Icon="@Icons.Material.Filled.Shield">
+                        Privacy
+                    </MudNavLink>
+                    <MudNavLink Href="/profile/activity" Icon="@Icons.Material.Filled.History">
+                        Activity
+                    </MudNavLink>
+                    <MudNavLink Href="/profile/apikeys" Icon="@Icons.Material.Filled.VpnKey">
+                        API Keys
+                    </MudNavLink>
+                </MudNavGroup>
+            </Authorized>
+            <NotAuthorized>
+                <MudDivider Class="my-2" />
+                
+                <MudNavLink Href="/login" Icon="@Icons.Material.Filled.Login">
+                    Login
+                </MudNavLink>
+                
+                <MudNavLink Href="/register" Icon="@Icons.Material.Filled.PersonAdd">
+                    Register
+                </MudNavLink>
+            </NotAuthorized>
+        </AuthorizeView>
+
+        <MudDivider Class="my-2" />
+        
+        <MudNavGroup Text="Help & Support" Icon="@Icons.Material.Filled.Help" Expanded="false">
+            <MudNavLink Href="/docs" Icon="@Icons.Material.Filled.Description">
+                Documentation
+            </MudNavLink>
+            <MudNavLink Href="/api-docs" Icon="@Icons.Material.Filled.Api">
+                API Reference
+            </MudNavLink>
+            <MudNavLink Href="/support" Icon="@Icons.Material.Filled.Support">
+                Support
+            </MudNavLink>
+            <MudNavLink Href="/about" Icon="@Icons.Material.Filled.Info">
+                About
+            </MudNavLink>
+        </MudNavGroup>
+    </MudNavMenu>
 </div>
 

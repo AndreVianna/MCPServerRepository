@@ -5,8 +5,7 @@ namespace MCPHub.Domain.Contracts.Requests;
 /// <summary>
 /// Request model for recording package downloads
 /// </summary>
-public record DownloadRequest
-{
+public record DownloadRequest {
     /// <summary>
     /// Gets or sets the user agent string from the client
     /// </summary>
@@ -36,8 +35,7 @@ public record DownloadRequest
     /// Validates that the download method is one of the allowed values
     /// </summary>
     /// <returns>True if valid, false otherwise</returns>
-    public bool IsValid()
-    {
+    public bool IsValid() {
         var allowedMethods = new[] { "CLI", "Web", "API" };
         return allowedMethods.Contains(DownloadMethod, StringComparer.OrdinalIgnoreCase);
     }

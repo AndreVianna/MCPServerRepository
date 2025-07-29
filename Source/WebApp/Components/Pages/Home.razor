@@ -1,7 +1,471 @@
 ﻿@page "/"
+@inject IApiClientService ApiClient
+@inject NavigationManager Navigation
 
-<PageTitle>Home</PageTitle>
+<PageTitle>MCP Hub - Secure AI Tool Registry</PageTitle>
 
-<h1>Hello, world!</h1>
+<!-- Hero Section -->
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-8 mb-12">
+    <MudGrid Justify="Justify.Center" AlignItems="Center" Class="min-vh-50">
+        <MudItem xs="12" md="8" Class="text-center">
+            <MudIcon Icon="@Icons.Material.Filled.Security" 
+                     Color="Color.Primary" 
+                     Style="font-size: 4rem; margin-bottom: 1rem;" />
+            
+            <MudText Typo="Typo.h2" Color="Color.Primary" Class="font-weight-bold mb-4">
+                MCP Hub
+            </MudText>
+            
+            <MudText Typo="Typo.h5" Color="Color.Secondary" Class="mb-6">
+                The secure, enterprise-grade registry for Model Context Protocol servers
+            </MudText>
+            
+            <MudText Typo="Typo.body1" Color="Color.Default" Class="mb-8 mx-auto" Style="max-width: 600px;">
+                Discover, install, and manage MCP servers with confidence. Our comprehensive security scanning, 
+                trust tier verification, and transparent package monitoring ensure you get the safest, 
+                highest-quality tools for your AI applications.
+            </MudText>
+            
+            <MudButtonGroup>
+                <MudButton Variant="Variant.Filled" 
+                          Color="Color.Primary" 
+                          Size="Size.Large"
+                          StartIcon="@Icons.Material.Filled.Search"
+                          OnClick="@(() => Navigation.NavigateTo("/search"))"
+                          Class="mr-4">
+                    Search Packages
+                </MudButton>
+                
+                <MudButton Variant="Variant.Outlined" 
+                          Color="Color.Primary" 
+                          Size="Size.Large"
+                          StartIcon="@Icons.Material.Filled.Publish"
+                          OnClick="@(() => Navigation.NavigateTo("/publisher/dashboard"))">
+                    Publish Server
+                </MudButton>
+            </MudButtonGroup>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
 
-Welcome to your new app.
+<!-- Security Features Section -->
+<MudContainer MaxWidth="MaxWidth.Large" Class="mb-12">
+    <MudText Typo="Typo.h4" Color="Color.Primary" Class="text-center mb-8 font-weight-bold">
+        Enterprise-Grade Security
+    </MudText>
+    
+    <MudGrid Spacing="4">
+        <MudItem xs="12" md="4">
+            <MudCard Elevation="2" Class="pa-6 h-100">
+                <MudCardContent>
+                    <div class="text-center mb-4">
+                        <MudIcon Icon="@Icons.Material.Filled.Shield" 
+                                Color="Color.Success" 
+                                Style="font-size: 3rem;" />
+                    </div>
+                    <MudText Typo="Typo.h6" Class="text-center mb-3 font-weight-bold">
+                        Automated Security Scanning
+                    </MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="text-center">
+                        Every package undergoes comprehensive automated security analysis including 
+                        dependency scanning, vulnerability detection, and malware checks.
+                    </MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        
+        <MudItem xs="12" md="4">
+            <MudCard Elevation="2" Class="pa-6 h-100">
+                <MudCardContent>
+                    <div class="text-center mb-4">
+                        <MudIcon Icon="@Icons.Material.Filled.VerifiedUser" 
+                                Color="Color.Primary" 
+                                Style="font-size: 3rem;" />
+                    </div>
+                    <MudText Typo="Typo.h6" Class="text-center mb-3 font-weight-bold">
+                        Trust Tier Verification
+                    </MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="text-center">
+                        Publishers advance through verified trust tiers based on security compliance, 
+                        community reputation, and enterprise validation.
+                    </MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        
+        <MudItem xs="12" md="4">
+            <MudCard Elevation="2" Class="pa-6 h-100">
+                <MudCardContent>
+                    <div class="text-center mb-4">
+                        <MudIcon Icon="@Icons.Material.Filled.Analytics" 
+                                Color="Color.Warning" 
+                                Style="font-size: 3rem;" />
+                    </div>
+                    <MudText Typo="Typo.h6" Class="text-center mb-3 font-weight-bold">
+                        Transparent Monitoring
+                    </MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="text-center">
+                        Real-time security dashboards, audit trails, and performance metrics 
+                        provide complete visibility into package security status.
+                    </MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+<!-- Quick Stats Section -->
+<MudContainer MaxWidth="MaxWidth.Large" Class="mb-12">
+    <MudPaper Elevation="1" Class="pa-8" Style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);">
+        <MudGrid Justify="Justify.SpaceAround" AlignItems="Center">
+            <MudItem xs="6" md="3" Class="text-center">
+                <MudText Typo="Typo.h3" Color="Color.Primary" Class="font-weight-bold">
+                    @_packageCount
+                </MudText>
+                <MudText Typo="Typo.body1" Color="Color.Secondary">
+                    Packages Available
+                </MudText>
+            </MudItem>
+            
+            <MudItem xs="6" md="3" Class="text-center">
+                <MudText Typo="Typo.h3" Color="Color.Success" Class="font-weight-bold">
+                    @_securityScansCount
+                </MudText>
+                <MudText Typo="Typo.body1" Color="Color.Secondary">
+                    Security Scans Performed
+                </MudText>
+            </MudItem>
+            
+            <MudItem xs="6" md="3" Class="text-center">
+                <MudText Typo="Typo.h3" Color="Color.Warning" Class="font-weight-bold">
+                    @_verifiedPublishersCount
+                </MudText>
+                <MudText Typo="Typo.body1" Color="Color.Secondary">
+                    Verified Publishers
+                </MudText>
+            </MudItem>
+            
+            <MudItem xs="6" md="3" Class="text-center">
+                <MudText Typo="Typo.h3" Color="Color.Info" Class="font-weight-bold">
+                    @_totalDownloadsCount
+                </MudText>
+                <MudText Typo="Typo.body1" Color="Color.Secondary">
+                    Total Downloads
+                </MudText>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+</MudContainer>
+
+<!-- Enhanced Search Demo Section -->
+<MudContainer MaxWidth="MaxWidth.Large" Class="mb-12">
+    <MudText Typo="Typo.h4" Color="Color.Primary" Class="text-center mb-8 font-weight-bold">
+        🔍 Try Our Enhanced Search
+    </MudText>
+    
+    <MudPaper Elevation="2" Class="pa-6">
+        <EnhancedSearchBar Placeholder="Search for MCP servers, AI tools, data processors..."
+                         EnableVoiceSearch="true"
+                         EnableAdvancedSearch="true"
+                         Categories="@GetSampleCategories()"
+                         Size="@SearchBarSize.Large"
+                         OnSearch="@HandleDemoSearch"
+                         Class="mb-4" />
+        
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="text-center">
+            Experience AI-powered search with voice input, smart suggestions, and advanced filtering
+        </MudText>
+    </MudPaper>
+</MudContainer>
+
+<!-- Featured Packages Section -->
+<MudContainer MaxWidth="MaxWidth.Large" Class="mb-12">
+    <MudText Typo="Typo.h4" Color="Color.Primary" Class="text-center mb-8 font-weight-bold">
+        🌟 Featured Packages
+    </MudText>
+    
+    <MudGrid Spacing="4">
+        @foreach (var package in GetFeaturedPackages())
+        {
+            <MudItem xs="12" md="6" lg="4">
+                <PackageCard Package="@package" 
+                           IsFeatured="true"
+                           ShowAIInsights="false"
+                           OnInstallClick="@HandleDemoInstall"
+                           OnDetailsClick="@HandleDemoDetails"
+                           OnStarClick="@HandleDemoStar"
+                           OnShareClick="@HandleDemoShare"
+                           OnMoreClick="@HandleDemoMore"
+                           OnTagClick="@HandleDemoTagClick" />
+            </MudItem>
+        }
+    </MudGrid>
+    
+    <div class="text-center mt-6">
+        <MudButton Color="Color.Primary" 
+                   Variant="Variant.Outlined"
+                   StartIcon="@Icons.Material.Filled.Explore"
+                   @onclick="@(() => Navigation.NavigateTo("/components"))"
+                   Size="Size.Large">
+            View Component Showcase
+        </MudButton>
+    </div>
+</MudContainer>
+
+<!-- Security Showcase Section -->
+<MudContainer MaxWidth="MaxWidth.Large" Class="mb-12">
+    <MudText Typo="Typo.h4" Color="Color.Primary" Class="text-center mb-8 font-weight-bold">
+        🔒 Security at a Glance
+    </MudText>
+    
+    <MudGrid Spacing="4" Justify="Justify.Center">
+        <MudItem xs="12" md="8">
+            <MudPaper Elevation="2" Class="pa-6">
+                <MudText Typo="Typo.h6" Class="mb-4 text-center">Security Grade Examples</MudText>
+                
+                <div class="d-flex justify-center flex-wrap gap-4 mb-4">
+                    <SecurityGradeBadge Grade="A+" Score="9.8" OnDetailClick="@ShowDemoSecurityDetail" />
+                    <SecurityGradeBadge Grade="A" Score="9.2" OnDetailClick="@ShowDemoSecurityDetail" />
+                    <SecurityGradeBadge Grade="B+" Score="8.5" OnDetailClick="@ShowDemoSecurityDetail" />
+                    <SecurityGradeBadge Grade="B" Score="8.0" OnDetailClick="@ShowDemoSecurityDetail" />
+                </div>
+                
+                <MudText Typo="Typo.h6" Class="mb-4 text-center">Trust Tier Examples</MudText>
+                
+                <div class="d-flex justify-center flex-wrap gap-4">
+                    <TrustTierIndicator Tier="TrustTier.Enterprise" OnDetailsClick="@ShowDemoTrustDetail" />
+                    <TrustTierIndicator Tier="TrustTier.CommunityTrusted" OnDetailsClick="@ShowDemoTrustDetail" />
+                    <TrustTierIndicator Tier="TrustTier.Verified" OnDetailsClick="@ShowDemoTrustDetail" />
+                    <TrustTierIndicator Tier="TrustTier.Unverified" OnDetailsClick="@ShowDemoTrustDetail" />
+                </div>
+                
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Class="text-center mt-4">
+                    Every package displays clear security grades and trust tier indicators
+                </MudText>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+<!-- Get Started Section -->
+<MudContainer MaxWidth="MaxWidth.Large" Class="mb-12">
+    <MudText Typo="Typo.h4" Color="Color.Primary" Class="text-center mb-8 font-weight-bold">
+        Get Started in Minutes
+    </MudText>
+    
+    <MudGrid Spacing="4">
+        <MudItem xs="12" md="6">
+            <MudCard Elevation="2" Class="pa-6">
+                <MudCardContent>
+                    <MudText Typo="Typo.h6" Color="Color.Primary" Class="mb-4 font-weight-bold">
+                        For Developers
+                    </MudText>
+                    
+                    <MudList T="string" Dense="true">
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.Search" Text="Browse our secure package registry" />
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.Download" Text="Install packages with mcpm CLI tool" />
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.Apps" Text="Integrate MCP servers into your applications" />
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.Visibility" Text="Monitor security status and updates" />
+                    </MudList>
+                    
+                    <MudButton Variant="Variant.Filled" 
+                              Color="Color.Primary" 
+                              FullWidth="true"
+                              StartIcon="@Icons.Material.Filled.GetApp"
+                              OnClick="@(() => Navigation.NavigateTo("/docs/cli"))"
+                              Class="mt-4">
+                        Install CLI Tool
+                    </MudButton>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+        
+        <MudItem xs="12" md="6">
+            <MudCard Elevation="2" Class="pa-6">
+                <MudCardContent>
+                    <MudText Typo="Typo.h6" Color="Color.Primary" Class="mb-4 font-weight-bold">
+                        For Publishers
+                    </MudText>
+                    
+                    <MudList T="string" Dense="true">
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.AccountCircle" Text="Create your publisher account" />
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.Publish" Text="Register your MCP servers" />
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.Security" Text="Pass security verification" />
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.TrendingUp" Text="Build trust tier reputation" />
+                    </MudList>
+                    
+                    <MudButton Variant="Variant.Outlined" 
+                              Color="Color.Primary" 
+                              FullWidth="true"
+                              StartIcon="@Icons.Material.Filled.PersonAdd"
+                              OnClick="@(() => Navigation.NavigateTo("/register"))"
+                              Class="mt-4">
+                        Register as Publisher
+                    </MudButton>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
+@code {
+    private string _packageCount = "1,200+";
+    private string _securityScansCount = "50K+";
+    private string _verifiedPublishersCount = "300+";
+    private string _totalDownloadsCount = "2.5M+";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // In future implementation, load actual statistics from API
+        // For now, using placeholder values that reflect the enterprise scale
+        await Task.CompletedTask;
+    }
+
+    private Dictionary<string, string> GetSampleCategories()
+    {
+        return new Dictionary<string, string>
+        {
+            { "ai", "AI & Machine Learning" },
+            { "data", "Data Processing" },
+            { "web", "Web Development" },
+            { "automation", "Automation Tools" },
+            { "security", "Security & Privacy" }
+        };
+    }
+
+    private List<PackageInfo> GetFeaturedPackages()
+    {
+        return new List<PackageInfo>
+        {
+            new()
+            {
+                Name = "ai-super-tools",
+                LatestVersion = "2.1.0",
+                Description = "Comprehensive AI toolkit with machine learning capabilities, natural language processing, and computer vision features for modern applications.",
+                Publisher = new PublisherInfo 
+                { 
+                    Name = "ai-innovations",
+                    DisplayName = "AI Innovations Ltd",
+                    Type = PublisherType.Organization,
+                    IsVerified = true
+                },
+                SecurityGrade = "A+",
+                SecurityScore = 9.8,
+                TrustTier = TrustTier.Enterprise,
+                WeeklyDownloads = 125000,
+                Rating = 4.9,
+                LastUpdated = DateTime.UtcNow.AddDays(-2),
+                Tags = new List<string> { "AI", "ML", "Computer Vision", "NLP" },
+                IsTrending = true,
+                IsStarred = false,
+                IsFeatured = true
+            },
+            new()
+            {
+                Name = "data-processor-pro",
+                LatestVersion = "1.8.2",
+                Description = "High-performance data processing engine with built-in ETL capabilities, real-time streaming, and advanced analytics support.",
+                Publisher = new PublisherInfo 
+                { 
+                    Name = "data-solutions",
+                    DisplayName = "DataSolutions Corp",
+                    Type = PublisherType.Organization,
+                    IsVerified = true
+                },
+                SecurityGrade = "A",
+                SecurityScore = 9.3,
+                TrustTier = TrustTier.CommunityTrusted,
+                WeeklyDownloads = 89000,
+                Rating = 4.7,
+                LastUpdated = DateTime.UtcNow.AddDays(-5),
+                Tags = new List<string> { "Data", "ETL", "Analytics", "Streaming" },
+                IsTrending = false,
+                IsStarred = false,
+                IsFeatured = true
+            },
+            new()
+            {
+                Name = "web-automation-suite",
+                LatestVersion = "3.0.1",
+                Description = "Complete web automation framework with browser control, form handling, data extraction, and testing capabilities.",
+                Publisher = new PublisherInfo 
+                { 
+                    Name = "automation-experts",
+                    DisplayName = "Automation Experts Inc",
+                    Type = PublisherType.Organization,
+                    IsVerified = true
+                },
+                SecurityGrade = "A",
+                SecurityScore = 9.1,
+                TrustTier = TrustTier.Verified,
+                WeeklyDownloads = 67000,
+                Rating = 4.6,
+                LastUpdated = DateTime.UtcNow.AddDays(-3),
+                Tags = new List<string> { "Automation", "Web", "Testing", "Scraping" },
+                IsTrending = true,
+                IsStarred = false,
+                IsFeatured = true
+            }
+        };
+    }
+
+    // Demo event handlers
+    private async Task HandleDemoSearch(SearchQuery query)
+    {
+        // For demo purposes, navigate to search page with query
+        Navigation.NavigateTo($"/search?q={Uri.EscapeDataString(query.Text)}");
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleDemoInstall(PackageInfo package)
+    {
+        // For demo purposes, show a snackbar
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleDemoDetails(PackageInfo package)
+    {
+        // For demo purposes, navigate to package details
+        Navigation.NavigateTo($"/package/{package.Publisher.Name}/{package.Name}");
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleDemoStar(PackageInfo package)
+    {
+        // For demo purposes, toggle star state
+        package.IsStarred = !package.IsStarred;
+        StateHasChanged();
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleDemoShare(PackageInfo package)
+    {
+        // For demo purposes
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleDemoMore(PackageInfo package)
+    {
+        // For demo purposes
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleDemoTagClick(string tag)
+    {
+        // For demo purposes, navigate to search with tag filter
+        Navigation.NavigateTo($"/search?tag={Uri.EscapeDataString(tag)}");
+        await Task.CompletedTask;
+    }
+
+    private async Task ShowDemoSecurityDetail()
+    {
+        // For demo purposes
+        await Task.CompletedTask;
+    }
+
+    private async Task ShowDemoTrustDetail()
+    {
+        // For demo purposes
+        await Task.CompletedTask;
+    }
+}

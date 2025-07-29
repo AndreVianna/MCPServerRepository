@@ -1,5 +1,6 @@
 using MCPHub.AuthenticationService.Services;
 using MCPHub.Domain.Contracts.Requests;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace MCPHub.AuthenticationService.Controllers;
@@ -19,7 +20,7 @@ public class AuthenticationController(IAuthenticationService authenticationServi
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Authentication result with tokens</returns>
     [HttpPost("login")]
-    public Task<IActionResult> LoginAsync([FromBody] LoginRequest request, CancellationToken cancellationToken = default) 
+    public Task<IActionResult> LoginAsync([FromBody] LoginRequest request, CancellationToken cancellationToken = default)
         => throw new NotImplementedException("Login endpoint will be implemented when first consumer requires it");
 
     /// <summary>
@@ -29,7 +30,7 @@ public class AuthenticationController(IAuthenticationService authenticationServi
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Registration result</returns>
     [HttpPost("register")]
-    public Task<IActionResult> RegisterAsync([FromBody] RegisterRequest request, CancellationToken cancellationToken = default) 
+    public Task<IActionResult> RegisterAsync([FromBody] RegisterRequest request, CancellationToken cancellationToken = default)
         => throw new NotImplementedException("Registration endpoint will be implemented when first consumer requires it");
 
     /// <summary>
@@ -39,7 +40,7 @@ public class AuthenticationController(IAuthenticationService authenticationServi
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>New access token</returns>
     [HttpPost("refresh")]
-    public Task<IActionResult> RefreshTokenAsync([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken = default) 
+    public Task<IActionResult> RefreshTokenAsync([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken = default)
         => throw new NotImplementedException("Token refresh endpoint will be implemented when first consumer requires it");
 
     /// <summary>
@@ -48,7 +49,6 @@ public class AuthenticationController(IAuthenticationService authenticationServi
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Logout result</returns>
     [HttpPost("logout")]
-    public Task<IActionResult> LogoutAsync(CancellationToken cancellationToken = default) 
+    public Task<IActionResult> LogoutAsync(CancellationToken cancellationToken = default)
         => throw new NotImplementedException("Logout endpoint will be implemented when first consumer requires it");
 }
-

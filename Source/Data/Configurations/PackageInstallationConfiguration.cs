@@ -1,5 +1,7 @@
 using System.Text.Json;
+
 using MCPHub.Domain.Entities;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -8,10 +10,8 @@ namespace MCPHub.Data.Configurations;
 /// <summary>
 /// Entity Framework configuration for PackageInstallation entity
 /// </summary>
-public class PackageInstallationConfiguration : IEntityTypeConfiguration<PackageInstallation>
-{
-    public void Configure(EntityTypeBuilder<PackageInstallation> builder)
-    {
+public class PackageInstallationConfiguration : IEntityTypeConfiguration<PackageInstallation> {
+    public void Configure(EntityTypeBuilder<PackageInstallation> builder) {
         builder.HasKey(pi => pi.Id);
 
         builder.Property(pi => pi.Version)
@@ -76,8 +76,7 @@ public class PackageInstallationConfiguration : IEntityTypeConfiguration<Package
             .HasDatabaseName("IX_PackageInstallations_StatusTime");
 
         // Configure AuditTrail as JSON column
-        builder.OwnsMany(pi => pi.AuditTrail, auditBuilder =>
-        {
+        builder.OwnsMany(pi => pi.AuditTrail, auditBuilder => {
             auditBuilder.ToJson();
             auditBuilder.Property(a => a.Action).IsRequired();
             auditBuilder.Property(a => a.UserId).IsRequired();

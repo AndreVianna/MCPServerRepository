@@ -4,33 +4,32 @@ namespace MCPHub.Common.Services;
 /// Rate limiting service for API protection
 /// Supports: In-Memory → Redis → Enterprise Gateway
 /// </summary>
-public interface IRateLimitingService
-{
+public interface IRateLimitingService {
     /// <summary>
     /// Checks if request is allowed under rate limits
     /// </summary>
     Task<RateLimitResult> CheckRateLimitAsync(string identifier, string policy, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Records a request for rate limiting
     /// </summary>
     Task RecordRequestAsync(string identifier, string policy, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets current usage for an identifier
     /// </summary>
     Task<RateLimitUsage> GetUsageAsync(string identifier, string policy, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Resets rate limit counters
     /// </summary>
     Task ResetAsync(string identifier, string policy, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Configures rate limit policies
     /// </summary>
     Task SetPolicyAsync(string policyName, RateLimitPolicy policy, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets rate limiting statistics
     /// </summary>
@@ -66,8 +65,7 @@ public record RateLimitPolicy(
 /// <summary>
 /// Rate limiting strategies
 /// </summary>
-public enum RateLimitStrategy
-{
+public enum RateLimitStrategy {
     FixedWindow,
     SlidingWindow,
     TokenBucket,

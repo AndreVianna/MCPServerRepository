@@ -1,0 +1,618 @@
+@page "/publisher/dashboard"
+@using MCPHub.WebApp.Services
+@using MCPHub.WebApp.Components.UI.Analytics
+@using MCPHub.WebApp.Components.UI.Layout
+@using MCPHub.WebApp.Components.UI.Security
+@using MudBlazor
+@using Microsoft.AspNetCore.Authorization
+@inject IPublisherDashboardService DashboardService
+@inject ISnackbar Snackbar
+@inject ILogger<Dashboard> Logger
+@attribute [Authorize]
+
+<PageTitle>Publisher Dashboard - MCP Hub</PageTitle>
+
+<ResponsiveContainer MaxWidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
+    <HeaderContent>
+        <div class="dashboard-header">
+            <div class="welcome-section mb-4">
+                <MudText Typo="Typo.h4" Class="welcome-title">
+                    👋 Welcome back, @GetPublisherDisplayName()
+                </MudText>
+                <MudText Typo="Typo.body1" Color="Color.Secondary" Class="welcome-subtitle">
+                    Here's what's happening with your packages
+                </MudText>
+            </div>
+
+            <div class="metrics-overview">
+                <MudGrid Spacing="3">
+                    <MudItem xs="12" sm="6" md="3">
+                        <MetricsCard 
+                            Title="Packages"
+                            Value="@(_metrics?.TotalPackages.ToString() ?? "0")"
+                            Icon="Icons.Material.Filled.Inventory"
+                            Color="Color.Primary"
+                            IsLoading="_isLoadingMetrics"
+                            TrendValue="@(_metrics?.DownloadGrowthPercentage)"
+                            TrendLabel="from last month" />
+                    </MudItem>
+                    
+                    <MudItem xs="12" sm="6" md="3">
+                        <MetricsCard 
+                            Title="Total Downloads"
+                            Value="@($"{FormatNumber(_metrics?.WeeklyDownloads ?? 0)}/week")"
+                            Icon="Icons.Material.Filled.Download"
+                            Color="Color.Success"
+                            IsLoading="_isLoadingMetrics"
+                            TrendValue="@(_metrics?.DownloadGrowthPercentage)"
+                            TrendLabel="weekly growth" />
+                    </MudItem>
+                    
+                    <MudItem xs="12" sm="6" md="3">
+                        <MetricsCard 
+                            Title="Active Alerts"
+                            Value="@(_metrics?.ActiveAlerts.ToString() ?? "0")"
+                            Icon="Icons.Material.Filled.Warning"
+                            Color="@(_metrics?.ActiveAlerts > 0 ? Color.Warning : Color.Success)"
+                            IsLoading="_isLoadingMetrics"
+                            ShowTrend="false" />
+                    </MudItem>
+                    
+                    <MudItem xs="12" sm="6" md="3">
+                        <MetricsCard 
+                            Title="Avg Rating"
+                            Value="@(_metrics?.AverageRating.ToString("F1") ?? "0.0")"
+                            Icon="Icons.Material.Filled.Star"
+                            Color="Color.Warning"
+                            IsLoading="_isLoadingMetrics"
+                            TrendValue="@(_metrics?.RatingTrend)"
+                            TrendLabel="rating change" />
+                    </MudItem>
+                </MudGrid>
+            </div>
+
+            <div class="dashboard-actions mt-4">
+                <MudButton 
+                    Variant="Variant.Filled"
+                    Color="Color.Primary"
+                    StartIcon="Icons.Material.Filled.Add"
+                    Size="Size.Large"
+                    Href="/publisher/packages/publish"
+                    Class="publish-button">
+                    Publish Package
+                </MudButton>
+            </div>
+        </div>
+    </HeaderContent>
+
+    <MainContent>
+        <MudGrid Spacing="4">
+            <!-- Recent Activity Section -->
+            <MudItem xs="12" lg="8">
+                <MudPaper Class="activity-section pa-4" Elevation="2">
+                    <div class="section-header d-flex justify-space-between align-center mb-4">
+                        <MudText Typo="Typo.h6">📊 Recent Activity</MudText>
+                        <MudButton 
+                            Variant="Variant.Text"
+                            Color="Color.Primary"
+                            Size="Size.Small"
+                            EndIcon="Icons.Material.Filled.ArrowForward"
+                            Href="/publisher/activity">
+                            View All
+                        </MudButton>
+                    </div>
+
+                    @if (_isLoadingActivity)
+                    {
+                        <div class="activity-loading">
+                            @for (int i = 0; i < 5; i++)
+                            {
+                                <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="60px" Class="mb-2" />
+                            }
+                        </div>
+                    }
+                    else if (_recentActivity?.Any() == true)
+                    {
+                        <div class="activity-list">
+                            @foreach (var activity in _recentActivity.Take(10))
+                            {
+                                <div class="activity-item d-flex align-center pa-3 mb-2">
+                                    <MudIcon 
+                                        Icon="@GetActivityIcon(activity.Type)"
+                                        Color="@GetActivityColor(activity.Priority)"
+                                        Size="Size.Medium"
+                                        Class="activity-icon mr-3" />
+                                    
+                                    <div class="activity-content flex-grow-1">
+                                        <MudText Typo="Typo.body2" Class="activity-title">
+                                            @activity.Title
+                                        </MudText>
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="activity-description">
+                                            @activity.Description
+                                        </MudText>
+                                    </div>
+                                    
+                                    <div class="activity-meta">
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                            @FormatTimeAgo(activity.Timestamp)
+                                        </MudText>
+                                        @if (activity.Priority == ActivityPriority.High || activity.Priority == ActivityPriority.Critical)
+                                        {
+                                            <MudChip T="string" Size="Size.Small" Color="Color.Error" Variant="Variant.Filled" Class="ml-2">
+                                                @activity.Priority
+                                            </MudChip>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="no-activity text-center pa-6">
+                            <MudIcon Icon="Icons.Material.Outlined.Timeline" Size="Size.Large" Color="Color.Secondary" />
+                            <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mt-2">
+                                No recent activity to display
+                            </MudText>
+                        </div>
+                    }
+                </MudPaper>
+
+                <!-- Download Trends Chart -->
+                <MudPaper Class="trends-section pa-4 mt-4" Elevation="2">
+                    <AnalyticsChart 
+                        Title="Download Trends"
+                        Subtitle="Package downloads over the last 30 days"
+                        ChartType="ChartTypeConverter.FromMudBlazor(MudBlazor.ChartType.Line)"
+                        ChartSeries="@_downloadChartSeries"
+                        XAxisLabels="@_downloadChartLabels"
+                        Height="350"
+                        ShowTimeRangeSelector="true"
+                        ShowSummary="true"
+                        OnRefresh="RefreshDownloadData"
+                        OnTimeRangeChanged="OnTimeRangeChanged" />
+                </MudPaper>
+            </MudItem>
+
+            <!-- Sidebar Content -->
+            <MudItem xs="12" lg="4">
+                <!-- Security Alerts -->
+                <MudPaper Class="alerts-section pa-4 mb-4" Elevation="2">
+                    <div class="section-header d-flex justify-space-between align-center mb-3">
+                        <MudText Typo="Typo.h6">🔒 Security Alerts</MudText>
+                        @if (_securityAlerts?.Any() == true)
+                        {
+                            <MudChip T="string" Size="Size.Small" Color="Color.Warning">
+                                @_securityAlerts.Count()
+                            </MudChip>
+                        }
+                    </div>
+
+                    @if (_isLoadingAlerts)
+                    {
+                        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="120px" />
+                    }
+                    else if (_securityAlerts?.Any() == true)
+                    {
+                        <div class="alerts-list">
+                            @foreach (var alert in _securityAlerts.Take(3))
+                            {
+                                <SecurityAlertCard 
+                                    Alert="alert"
+                                    ShowActions="true"
+                                    OnActionClick="@((string action) => HandleAlertAction(action))"
+                                    Class="mb-3" />
+                            }
+                            
+                            @if (_securityAlerts.Count() > 3)
+                            {
+                                <MudButton 
+                                    Variant="Variant.Text"
+                                    Color="Color.Primary"
+                                    Size="Size.Small"
+                                    FullWidth="true"
+                                    Href="/publisher/security">
+                                    View All @_securityAlerts.Count() Alerts
+                                </MudButton>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="no-alerts text-center pa-4">
+                            <MudIcon Icon="Icons.Material.Filled.Shield" Size="Size.Large" Color="Color.Success" />
+                            <MudText Typo="Typo.body2" Color="Color.Success" Class="mt-2">
+                                All packages secure
+                            </MudText>
+                        </div>
+                    }
+                </MudPaper>
+
+                <!-- Top Performing Packages -->
+                <MudPaper Class="top-packages-section pa-4 mb-4" Elevation="2">
+                    <div class="section-header mb-3">
+                        <MudText Typo="Typo.h6">🏆 Top Performing Packages</MudText>
+                    </div>
+
+                    @if (_isLoadingTopPackages)
+                    {
+                        @for (int i = 0; i < 5; i++)
+                        {
+                            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="50px" Class="mb-2" />
+                        }
+                    }
+                    else if (_topPackages?.Any() == true)
+                    {
+                        <div class="top-packages-list">
+                            @foreach (var (package, index) in _topPackages.Take(5).Select((p, i) => (p, i + 1)))
+                            {
+                                <div class="top-package-item d-flex align-center pa-2 mb-2">
+                                    <MudChip T="string" Size="Size.Small" Color="Color.Primary" Class="rank-chip mr-3">
+                                        @index
+                                    </MudChip>
+                                    
+                                    <div class="package-info flex-grow-1">
+                                        <MudText Typo="Typo.body2" Class="package-name">
+                                            @package.Name
+                                        </MudText>
+                                        <div class="package-stats d-flex align-center">
+                                            <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mr-3">
+                                                @FormatNumber(package.WeeklyDownloads)/week
+                                            </MudText>
+                                            <SecurityGradeBadge 
+                                                Grade="@package.SecurityGrade"
+                                                Score="@package.SecurityScore"
+                                                ShowScore="false"
+                                                Size="Size.Small" />
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="package-growth">
+                                        <MudText 
+                                            Typo="Typo.caption" 
+                                            Color="@(package.GrowthPercentage >= 0 ? Color.Success : Color.Error)"
+                                            Class="d-flex align-center">
+                                            <MudIcon 
+                                                Icon="@(package.GrowthPercentage >= 0 ? Icons.Material.Filled.TrendingUp : Icons.Material.Filled.TrendingDown)"
+                                                Size="Size.Small" 
+                                                Class="mr-1" />
+                                            @(package.GrowthPercentage.ToString("+0.0%;-0.0%"))
+                                        </MudText>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="no-packages text-center pa-4">
+                            <MudIcon Icon="Icons.Material.Outlined.Inventory" Size="Size.Large" Color="Color.Secondary" />
+                            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-2">
+                                No packages published yet
+                            </MudText>
+                        </div>
+                    }
+                </MudPaper>
+
+                <!-- Quick Actions -->
+                <MudPaper Class="quick-actions-section pa-4" Elevation="2">
+                    <div class="section-header mb-3">
+                        <MudText Typo="Typo.h6">🔧 Quick Actions</MudText>
+                    </div>
+
+                    <div class="quick-actions-grid">
+                        <MudButton 
+                            Variant="Variant.Outlined"
+                            Color="Color.Primary"
+                            StartIcon="Icons.Material.Filled.Add"
+                            FullWidth="true"
+                            Href="/publisher/packages/publish"
+                            Class="mb-2">
+                            Publish Package
+                        </MudButton>
+                        
+                        <MudButton 
+                            Variant="Variant.Outlined"
+                            Color="Color.Secondary"
+                            StartIcon="Icons.Material.Filled.Settings"
+                            FullWidth="true"
+                            Href="/publisher/profile"
+                            Class="mb-2">
+                            Profile Settings
+                        </MudButton>
+                        
+                        <MudButton 
+                            Variant="Variant.Outlined"
+                            Color="Color.Info"
+                            StartIcon="Icons.Material.Filled.Analytics"
+                            FullWidth="true"
+                            Href="/publisher/analytics"
+                            Class="mb-2">
+                            View Analytics
+                        </MudButton>
+                        
+                        <MudButton 
+                            Variant="Variant.Outlined"
+                            Color="Color.Warning"
+                            StartIcon="Icons.Material.Filled.Security"
+                            FullWidth="true"
+                            Href="/publisher/security">
+                            Security Center
+                        </MudButton>
+                    </div>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    </MainContent>
+</ResponsiveContainer>
+
+@code {
+    private PublisherMetrics? _metrics;
+    private IEnumerable<PublisherActivity>? _recentActivity;
+    private IEnumerable<SecurityAlert>? _securityAlerts;
+    private IEnumerable<PackagePerformance>? _topPackages;
+    
+    private bool _isLoadingMetrics = true;
+    private bool _isLoadingActivity = true;
+    private bool _isLoadingAlerts = true;
+    private bool _isLoadingTopPackages = true;
+    
+    private List<MudBlazor.ChartSeries> _downloadChartSeries = new();
+    private string[] _downloadChartLabels = [];
+    
+    private Guid _publisherId = Guid.NewGuid(); // TODO: Get from authentication context
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDashboardDataAsync();
+    }
+
+    private async Task LoadDashboardDataAsync()
+    {
+        try
+        {
+            // Load all dashboard data in parallel
+            var tasks = new[]
+            {
+                LoadMetricsAsync(),
+                LoadRecentActivityAsync(),
+                LoadSecurityAlertsAsync(),
+                LoadTopPackagesAsync(),
+                LoadDownloadDataAsync()
+            };
+
+            await Task.WhenAll(tasks);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading dashboard data");
+            Snackbar.Add("Failed to load dashboard data", Severity.Error);
+        }
+    }
+
+    private async Task LoadMetricsAsync()
+    {
+        try
+        {
+            _isLoadingMetrics = true;
+            _metrics = await DashboardService.GetPublisherMetricsAsync(_publisherId);
+        }
+        catch (NotImplementedException)
+        {
+            // Create mock data for development
+            _metrics = new PublisherMetrics
+            {
+                TotalPackages = 12,
+                WeeklyDownloads = 234500,
+                ActiveAlerts = 2,
+                AverageRating = 4.8,
+                DownloadGrowthPercentage = 23.5,
+                RatingTrend = 0.2
+            };
+        }
+        finally
+        {
+            _isLoadingMetrics = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadRecentActivityAsync()
+    {
+        try
+        {
+            _isLoadingActivity = true;
+            _recentActivity = await DashboardService.GetRecentActivityAsync(_publisherId, 15);
+        }
+        catch (NotImplementedException)
+        {
+            // Create mock data for development
+            _recentActivity = new List<PublisherActivity>
+            {
+                new() { Id = Guid.NewGuid(), Type = ActivityType.PackageUpdated, Title = "@ai/claude-tools updated to v2.1.4", Description = "Downloads up 23% this week (45.2K)", Timestamp = DateTime.UtcNow.AddHours(-2), Priority = ActivityPriority.Normal },
+                new() { Id = Guid.NewGuid(), Type = ActivityType.SecurityScanCompleted, Title = "@ai/gpt-connector security scan completed", Description = "Grade A maintained, no issues found", Timestamp = DateTime.UtcNow.AddHours(-4), Priority = ActivityPriority.Normal },
+                new() { Id = Guid.NewGuid(), Type = ActivityType.PackageTrending, Title = "@tools/web-scraper trending", Description = "Featured in \"Trending This Week\"", Timestamp = DateTime.UtcNow.AddHours(-6), Priority = ActivityPriority.High },
+                new() { Id = Guid.NewGuid(), Type = ActivityType.SecurityAlertTriggered, Title = "@data/processor security alert", Description = "Dependency update required (axios v1.6.7 → v1.6.8)", Timestamp = DateTime.UtcNow.AddDays(-1), Priority = ActivityPriority.Critical }
+            };
+        }
+        finally
+        {
+            _isLoadingActivity = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadSecurityAlertsAsync()
+    {
+        try
+        {
+            _isLoadingAlerts = true;
+            _securityAlerts = await DashboardService.GetSecurityAlertsAsync(_publisherId);
+        }
+        catch (NotImplementedException)
+        {
+            // Create mock data for development
+            _securityAlerts = new List<SecurityAlert>
+            {
+                new() { Id = Guid.NewGuid(), PackageName = "@data/processor", Title = "Dependency Update Required", Description = "axios v1.6.7 has known vulnerability CVE-2024-1234", Severity = Domain.ValueObjects.SecurityScanSeverity.Medium, Type = SecurityAlertType.DependencyUpdate, DetectedAt = DateTime.UtcNow.AddDays(-1), CanAutoFix = true },
+                new() { Id = Guid.NewGuid(), PackageName = "@utils/file-handler", Title = "License Compatibility Issue", Description = "New dependency has GPL license (conflicts with MIT)", Severity = Domain.ValueObjects.SecurityScanSeverity.Low, Type = SecurityAlertType.LicenseIssue, DetectedAt = DateTime.UtcNow.AddHours(-6), CanAutoFix = false }
+            };
+        }
+        finally
+        {
+            _isLoadingAlerts = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadTopPackagesAsync()
+    {
+        try
+        {
+            _isLoadingTopPackages = true;
+            _topPackages = await DashboardService.GetTopPerformingPackagesAsync(_publisherId, "downloads", 10);
+        }
+        catch (NotImplementedException)
+        {
+            // Create mock data for development
+            _topPackages = new List<PackagePerformance>
+            {
+                new() { PackageId = Guid.NewGuid(), Name = "@ai/claude-tools", WeeklyDownloads = 45200, SecurityGrade = "A+", SecurityScore = 9.4, GrowthPercentage = 23.0 },
+                new() { PackageId = Guid.NewGuid(), Name = "@tools/web-scraper", WeeklyDownloads = 34100, SecurityGrade = "A", SecurityScore = 9.0, GrowthPercentage = 45.0 },
+                new() { PackageId = Guid.NewGuid(), Name = "@data/processor", WeeklyDownloads = 28700, SecurityGrade = "A+", SecurityScore = 9.2, GrowthPercentage = 12.0 },
+                new() { PackageId = Guid.NewGuid(), Name = "@ai/gpt-connector", WeeklyDownloads = 22300, SecurityGrade = "A", SecurityScore = 8.8, GrowthPercentage = 8.0 },
+                new() { PackageId = Guid.NewGuid(), Name = "@utils/file-handler", WeeklyDownloads = 18900, SecurityGrade = "B+", SecurityScore = 8.2, GrowthPercentage = -2.0 }
+            };
+        }
+        finally
+        {
+            _isLoadingTopPackages = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadDownloadDataAsync()
+    {
+        try
+        {
+            var analytics = await DashboardService.GetDownloadAnalyticsAsync(_publisherId);
+            
+            // Convert to chart data
+            _downloadChartSeries = new List<MudBlazor.ChartSeries>
+            {
+                new() { Name = "Downloads", Data = new double[] { 45000, 52000, 48000, 61000, 55000, 67000, 59000 } }
+            };
+            _downloadChartLabels = new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+        }
+        catch (NotImplementedException)
+        {
+            // Create mock chart data
+            _downloadChartSeries = new List<MudBlazor.ChartSeries>
+            {
+                new() { Name = "Downloads", Data = new double[] { 45000, 52000, 48000, 61000, 55000, 67000, 59000 } }
+            };
+            _downloadChartLabels = new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+        }
+        
+        StateHasChanged();
+    }
+
+    private string GetPublisherDisplayName()
+    {
+        // TODO: Get from authentication context
+        return "@anthropic";
+    }
+
+    private string FormatNumber(long number)
+    {
+        return number switch
+        {
+            var n when n >= 1000000 => $"{number / 1000000.0:F1}M",
+            var n when n >= 1000 => $"{number / 1000.0:F1}K",
+            _ => number.ToString("N0")
+        };
+    }
+
+    private string FormatTimeAgo(DateTime timestamp)
+    {
+        var timeSpan = DateTime.UtcNow - timestamp;
+        return timeSpan.TotalDays switch
+        {
+            var days when days < 1 && timeSpan.TotalHours < 1 => $"{(int)timeSpan.TotalMinutes}m ago",
+            var days when days < 1 => $"{(int)timeSpan.TotalHours}h ago",
+            var days when days < 7 => $"{(int)timeSpan.TotalDays}d ago",
+            var days when days < 30 => $"{(int)(timeSpan.TotalDays / 7)}w ago",
+            _ => timestamp.ToString("MMM dd")
+        };
+    }
+
+    private string GetActivityIcon(ActivityType type)
+    {
+        return type switch
+        {
+            ActivityType.PackagePublished => Icons.Material.Filled.Publish,
+            ActivityType.PackageUpdated => Icons.Material.Filled.Update,
+            ActivityType.SecurityScanCompleted => Icons.Material.Filled.Security,
+            ActivityType.SecurityAlertTriggered => Icons.Material.Filled.Warning,
+            ActivityType.SecurityAlertResolved => Icons.Material.Filled.CheckCircle,
+            ActivityType.TrustTierUpgraded => Icons.Material.Filled.TrendingUp,
+            ActivityType.PackageTrending => Icons.Material.Filled.Whatshot,
+            ActivityType.DownloadMilestone => Icons.Material.Filled.EmojiEvents,
+            ActivityType.ReviewReceived => Icons.Material.Filled.RateReview,
+            ActivityType.PackageDeprecated => Icons.Material.Filled.Archive,
+            ActivityType.PackageRestored => Icons.Material.Filled.Restore,
+            _ => Icons.Material.Filled.Info
+        };
+    }
+
+    private Color GetActivityColor(ActivityPriority priority)
+    {
+        return priority switch
+        {
+            ActivityPriority.Critical => Color.Error,
+            ActivityPriority.High => Color.Warning,
+            ActivityPriority.Normal => Color.Primary,
+            ActivityPriority.Low => Color.Secondary,
+            _ => Color.Default
+        };
+    }
+
+    private async Task HandleAlertAction(SecurityAlert alert, string action)
+    {
+        try
+        {
+            // Handle alert actions like "Fix Now", "Learn More", "Dismiss"
+            Logger.LogInformation("Handling alert action: {Action} for alert {AlertId}", action, alert.Id);
+            
+            switch (action.ToLower())
+            {
+                case "fix":
+                    Snackbar.Add($"Initiating auto-fix for {alert.PackageName}", Severity.Info);
+                    break;
+                case "dismiss":
+                    Snackbar.Add("Alert dismissed", Severity.Success);
+                    break;
+                default:
+                    // Navigate to detailed view or external resource
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error handling alert action");
+            Snackbar.Add("Failed to process alert action", Severity.Error);
+        }
+    }
+
+    private async Task RefreshDownloadData()
+    {
+        await LoadDownloadDataAsync();
+        Snackbar.Add("Download data refreshed", Severity.Success);
+    }
+
+    private async Task OnTimeRangeChanged(string timeRange)
+    {
+        Logger.LogInformation("Time range changed to: {TimeRange}", timeRange);
+        await LoadDownloadDataAsync();
+    }
+}

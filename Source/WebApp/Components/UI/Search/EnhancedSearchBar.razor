@@ -1,0 +1,348 @@
+@using MudBlazor
+@using Microsoft.AspNetCore.Components.Web
+@using MCPHub.Domain.Entities
+
+<div class="enhanced-search-container @GetContainerClass()">
+    <MudAutocomplete T="SearchSuggestion"
+                     @bind-Value="@SelectedSuggestion"
+                     SearchFunc="@SearchSuggestions"
+                     ToStringFunc="@(s => s?.DisplayText ?? "")"
+                     Placeholder="@Placeholder"
+                     Variant="Variant.Outlined"
+                     AdornmentIcon="@Icons.Material.Filled.Search"
+                     AdornmentColor="Color.Primary"
+                     Class="@GetSearchClass()"
+                     @onkeypress="HandleKeyPress"
+                     ResetValueOnEmptyText="true"
+                     CoerceText="true"
+                     MaxItems="8"
+                     aria-label="@Placeholder"
+                     aria-describedby="@($"search-help-{UniqueId}")">
+        
+        <ItemTemplate Context="suggestion">
+            <div class="search-suggestion-item d-flex align-center">
+                <MudIcon Icon="@GetSuggestionIcon(suggestion)" 
+                         Size="MudBlazor.Size.Small" 
+                         Class="mr-2" />
+                <div class="suggestion-content">
+                    <MudText Typo="Typo.body2" Class="suggestion-text">
+                        @suggestion.DisplayText
+                    </MudText>
+                    @if (!string.IsNullOrEmpty(suggestion.Description))
+                    {
+                        <MudText Typo="Typo.caption" Class="suggestion-description">
+                            @suggestion.Description
+                        </MudText>
+                    }
+                </div>
+                @if (suggestion.Type == SuggestionType.AIRecommendation)
+                {
+                    <MudChip T="string" 
+                             Size="MudBlazor.Size.Small" 
+                             Color="Color.Primary" 
+                             Variant="Variant.Text"
+                             Class="ml-auto">
+                        AI
+                    </MudChip>
+                }
+            </div>
+        </ItemTemplate>
+        
+        <ItemSelectedTemplate Context="suggestion">
+            <MudText>@suggestion.DisplayText</MudText>
+        </ItemSelectedTemplate>
+
+        <MoreItemsTemplate>
+            <div class="search-more-items d-flex align-center justify-center pa-2">
+                <MudIcon Icon="Icons.Material.Filled.ExpandMore" Class="mr-1" />
+                <MudText Typo="Typo.caption">More suggestions...</MudText>
+            </div>
+        </MoreItemsTemplate>
+    </MudAutocomplete>
+
+    <!-- Voice Search Button -->
+    @if (EnableVoiceSearch && IsVoiceSupported)
+    {
+        <MudIconButton Icon="@GetVoiceIcon()"
+                       Color="@GetVoiceColor()"
+                       Size="MudBlazor.Size.Medium"
+                       Class="voice-search-button"
+                       @onclick="ToggleVoiceSearch"
+                       Title="@GetVoiceTooltip()"
+                       aria-label="@GetVoiceTooltip()" />
+    }
+
+    <!-- Advanced Search Toggle -->
+    @if (EnableAdvancedSearch)
+    {
+        <MudIconButton Icon="Icons.Material.Filled.Tune"
+                       Color="@(ShowAdvancedFilters ? Color.Primary : Color.Default)"
+                       Size="MudBlazor.Size.Medium"
+                       Class="advanced-search-button"
+                       @onclick="ToggleAdvancedSearch"
+                       Title="Advanced search options"
+                       aria-label="Advanced search options"
+                       aria-expanded="@ShowAdvancedFilters.ToString().ToLower()" />
+    }
+
+    <!-- Search Filters (Expandable) -->
+    @if (ShowAdvancedFilters)
+    {
+        <MudCollapse Expanded="@ShowAdvancedFilters" Class="mt-3">
+            <div class="advanced-filters pa-3" 
+                 role="region" 
+                 aria-label="Advanced search filters">
+                <MudGrid>
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudSelect T="string" 
+                                   @bind-Value="@SelectedCategory"
+                                   Label="Category"
+                                   Variant="Variant.Outlined"
+                                   Dense="true"
+                                   aria-label="Filter by category">
+                            <MudSelectItem Value="@("all_categories")">All Categories</MudSelectItem>
+                            @foreach (var category in Categories)
+                            {
+                                <MudSelectItem Value="@category.Key">@category.Value</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                    
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudSelect T="TrustTier?" 
+                                   @bind-Value="@SelectedTrustTier"
+                                   Label="Trust Tier"
+                                   Variant="Variant.Outlined"
+                                   Dense="true"
+                                   aria-label="Filter by trust tier">
+                            <MudSelectItem Value="@((TrustTier?)null)">Any Trust Level</MudSelectItem>
+                            @foreach (TrustTier tier in Enum.GetValues<TrustTier>())
+                            {
+                                <MudSelectItem Value="@tier">@tier.ToString()</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                    
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudSelect T="string" 
+                                   @bind-Value="@SelectedSecurityGrade"
+                                   Label="Min Security Grade"
+                                   Variant="Variant.Outlined"
+                                   Dense="true"
+                                   aria-label="Filter by minimum security grade">
+                            <MudSelectItem Value="@("any_grade")">Any Grade</MudSelectItem>
+                            <MudSelectItem Value="@("A_plus")">A+ and above</MudSelectItem>
+                            <MudSelectItem Value="@("A")">A and above</MudSelectItem>
+                            <MudSelectItem Value="@("B")">B and above</MudSelectItem>
+                            <MudSelectItem Value="@("C")">C and above</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudSelect T="string" 
+                                   @bind-Value="@SelectedTimeframe"
+                                   Label="Updated"
+                                   Variant="Variant.Outlined"
+                                   Dense="true"
+                                   aria-label="Filter by update timeframe">
+                            <MudSelectItem Value="@("any_time")">Any time</MudSelectItem>
+                            <MudSelectItem Value="@("week")">This week</MudSelectItem>
+                            <MudSelectItem Value="@("month")">This month</MudSelectItem>
+                            <MudSelectItem Value="@("three_months")">Last 3 months</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                </MudGrid>
+                
+                <div class="filter-actions mt-3 d-flex justify-end">
+                    <MudButton Color="Color.Default" 
+                               Variant="Variant.Text"
+                               @onclick="ClearFilters"
+                               StartIcon="Icons.Material.Filled.Clear">
+                        Clear Filters
+                    </MudButton>
+                    <MudButton Color="Color.Primary" 
+                               Variant="Variant.Filled"
+                               Class="ml-2"
+                               @onclick="ApplyFilters"
+                               StartIcon="Icons.Material.Filled.Search">
+                        Apply Filters
+                    </MudButton>
+                </div>
+            </div>
+        </MudCollapse>
+    }
+
+    <!-- Screen reader helper text -->
+    <div id="@($"search-help-{UniqueId}")" class="sr-only">
+        Search for MCP packages. Type to see suggestions. 
+        @if (EnableVoiceSearch) { <span>Press voice search button for voice input.</span> }
+        @if (EnableAdvancedSearch) { <span>Use advanced filters for refined search.</span> }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Placeholder { get; set; } = "Search packages...";
+    [Parameter] public bool EnableVoiceSearch { get; set; } = true;
+    [Parameter] public bool EnableAdvancedSearch { get; set; } = true;
+    [Parameter] public SearchBarSize Size { get; set; } = SearchBarSize.Medium;
+    [Parameter] public EventCallback<SearchQuery> OnSearch { get; set; }
+    [Parameter] public Dictionary<string, string> Categories { get; set; } = new();
+    [Parameter] public string Class { get; set; } = "";
+
+    private string UniqueId { get; set; } = Guid.NewGuid().ToString("N")[..8];
+    private SearchSuggestion? SelectedSuggestion;
+    private bool ShowAdvancedFilters = false;
+    private bool IsVoiceListening = false;
+    private bool IsVoiceSupported = false;
+    private string SelectedCategory = "";
+    private TrustTier? SelectedTrustTier;
+    private string SelectedSecurityGrade = "";
+    private string SelectedTimeframe = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Check if browser supports voice recognition
+        IsVoiceSupported = await CheckVoiceSupport();
+    }
+
+    private string GetContainerClass() => $"enhanced-search-container {Class}";
+
+    private string GetSearchClass() => Size switch
+    {
+        SearchBarSize.Small => "search-bar-small",
+        SearchBarSize.Large => "search-bar-large",
+        _ => "search-bar-medium"
+    };
+
+    private async Task<IEnumerable<SearchSuggestion>> SearchSuggestions(string value, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(value) || value.Length < 2)
+            return Array.Empty<SearchSuggestion>();
+
+        // Simulate API call for suggestions with debounce
+        await Task.Delay(300);
+        
+        var suggestions = new List<SearchSuggestion>
+        {
+            new() { DisplayText = $"{value} packages", Type = SuggestionType.Query, Description = "Search all packages" },
+            new() { DisplayText = $"{value} tools", Type = SuggestionType.Category, Description = "In Tools category" },
+            new() { DisplayText = $"AI-powered {value}", Type = SuggestionType.AIRecommendation, Description = "AI suggestion" }
+        };
+
+        // Add recent searches if available
+        if (value.Length >= 3)
+        {
+            suggestions.Add(new SearchSuggestion 
+            { 
+                DisplayText = $"Recent: {value}*", 
+                Type = SuggestionType.RecentSearch, 
+                Description = "From your search history" 
+            });
+        }
+
+        return suggestions;
+    }
+
+    private string GetSuggestionIcon(SearchSuggestion suggestion) => suggestion.Type switch
+    {
+        SuggestionType.Query => Icons.Material.Filled.Search,
+        SuggestionType.Package => Icons.Material.Filled.Inventory,
+        SuggestionType.Category => Icons.Material.Filled.Category,
+        SuggestionType.Publisher => Icons.Material.Filled.Person,
+        SuggestionType.AIRecommendation => Icons.Material.Filled.Psychology,
+        SuggestionType.Tag => Icons.Material.Filled.Tag,
+        SuggestionType.RecentSearch => Icons.Material.Filled.History,
+        _ => Icons.Material.Filled.Search
+    };
+
+    private string GetVoiceIcon() => IsVoiceListening 
+        ? Icons.Material.Filled.MicOff 
+        : Icons.Material.Filled.Mic;
+
+    private Color GetVoiceColor() => IsVoiceListening 
+        ? Color.Error 
+        : Color.Default;
+
+    private string GetVoiceTooltip() => IsVoiceListening 
+        ? "Stop voice search" 
+        : "Start voice search";
+
+    private async Task ToggleVoiceSearch()
+    {
+        if (IsVoiceListening)
+        {
+            await StopVoiceRecognition();
+        }
+        else
+        {
+            await StartVoiceRecognition();
+        }
+    }
+
+    private void ToggleAdvancedSearch()
+    {
+        ShowAdvancedFilters = !ShowAdvancedFilters;
+    }
+
+    private async Task HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && SelectedSuggestion != null)
+        {
+            await PerformSearch();
+        }
+    }
+
+    private async Task PerformSearch()
+    {
+        var searchQuery = new SearchQuery
+        {
+            Text = SelectedSuggestion?.DisplayText ?? "",
+            Category = SelectedCategory,
+            TrustTier = SelectedTrustTier,
+            SecurityGrade = SelectedSecurityGrade,
+            Timeframe = SelectedTimeframe
+        };
+
+        await OnSearch.InvokeAsync(searchQuery);
+    }
+
+    private async Task ApplyFilters()
+    {
+        await PerformSearch();
+    }
+
+    private void ClearFilters()
+    {
+        SelectedCategory = "";
+        SelectedTrustTier = null;
+        SelectedSecurityGrade = "";
+        SelectedTimeframe = "";
+        StateHasChanged();
+    }
+
+    private async Task<bool> CheckVoiceSupport()
+    {
+        // Implementation would check browser capabilities
+        // For now, assume voice is supported in modern browsers
+        return true;
+    }
+
+    private async Task StartVoiceRecognition()
+    {
+        IsVoiceListening = true;
+        // Implementation would start browser voice recognition
+        // This is a placeholder for the actual voice API integration
+        StateHasChanged();
+        
+        // Simulate voice recognition duration
+        await Task.Delay(5000);
+        await StopVoiceRecognition();
+    }
+
+    private async Task StopVoiceRecognition()
+    {
+        IsVoiceListening = false;
+        // Implementation would stop browser voice recognition
+        StateHasChanged();
+    }
+}

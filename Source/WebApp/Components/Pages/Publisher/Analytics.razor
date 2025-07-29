@@ -1,0 +1,985 @@
+@page "/publisher/analytics"
+@using MCPHub.WebApp.Services
+@using MCPHub.WebApp.Components.UI.Layout
+@using MCPHub.WebApp.Components.UI.Analytics
+@using MCPHub.WebApp.Components.UI.Charts
+@using MCPHub.Domain.Entities
+@using MudBlazor
+@using Microsoft.AspNetCore.Authorization
+@inject IAnalyticsService AnalyticsService
+@inject IPublisherDashboardService DashboardService
+@inject ISnackbar Snackbar
+@inject ILogger<Analytics> Logger
+@attribute [Authorize]
+
+<PageTitle>Analytics - MCP Hub</PageTitle>
+
+<ResponsiveContainer MaxWidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
+    <HeaderContent>
+        <div class="analytics-header">
+            <div class="header-title mb-4">
+                <MudText Typo="Typo.h4">📊 Analytics & Insights</MudText>
+                <MudText Typo="Typo.body1" Color="Color.Secondary">
+                    Monitor your package performance and user engagement
+                </MudText>
+            </div>
+
+            <div class="header-controls d-flex justify-space-between align-center flex-wrap gap-3">
+                <div class="time-range-selector d-flex align-center gap-3">
+                    <MudSelect @bind-Value="@_selectedTimeRange"
+                               Label="Time Range"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               Style="min-width: 150px;"
+                               T="string">
+                        <MudSelectItem Value="@("week")">Last 7 days</MudSelectItem>
+                        <MudSelectItem Value="@("month")">Last 30 days</MudSelectItem>
+                        <MudSelectItem Value="@("quarter")">Last 3 months</MudSelectItem>
+                        <MudSelectItem Value="@("year")">Last year</MudSelectItem>
+                        <MudSelectItem Value="@("all")">All time</MudSelectItem>
+                    </MudSelect>
+
+                    <MudSelect @bind-Value="@_selectedPackage"
+                               Label="Package"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               Style="min-width: 200px;"
+                               T="string"
+                               Clearable="true">
+                        <MudSelectItem Value="@string.Empty">All Packages</MudSelectItem>
+                        @if (_packages?.Any() == true)
+                        {
+                            @foreach (var package in _packages)
+                            {
+                                <MudSelectItem Value="@package.Name">@package.Name</MudSelectItem>
+                            }
+                        }
+                    </MudSelect>
+                </div>
+
+                <div class="export-controls d-flex gap-2">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="Icons.Material.Filled.Download"
+                               Size="Size.Medium"
+                               @onclick="ExportData">
+                        Export Data
+                    </MudButton>
+                    
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="Icons.Material.Filled.Refresh"
+                               Size="Size.Medium"
+                               @onclick="RefreshData"
+                               Disabled="_isLoading">
+                        Refresh
+                    </MudButton>
+                </div>
+            </div>
+        </div>
+    </HeaderContent>
+
+    <MainContent>
+        @if (_isLoading)
+        {
+            <div class="analytics-loading">
+                <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mb-4" />
+                <MudGrid Spacing="3">
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="140px" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="140px" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="140px" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="140px" />
+                    </MudItem>
+                    <MudItem xs="12" lg="8">
+                        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="400px" />
+                    </MudItem>
+                    <MudItem xs="12" lg="4">
+                        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="400px" />
+                    </MudItem>
+                </MudGrid>
+            </div>
+        }
+        else
+        {
+            <!-- Key Metrics Overview -->
+            <div class="analytics-metrics mb-6">
+                <MudGrid Spacing="3">
+                    <MudItem xs="12" sm="6" md="3">
+                        <MetricsCard Title="Total Downloads"
+                                     Value="@FormatNumber(_analytics?.TotalDownloads ?? 0)"
+                                     Icon="Icons.Material.Filled.Download"
+                                     Color="Color.Primary"
+                                     ShowTrend="true"
+                                     TrendValue="@_analytics?.DownloadGrowth"
+                                     TrendLabel="vs last period"
+                                     IsClickable="true"
+                                     ClickText="View Details"
+                                     OnClick="@(() => NavigateToSection("downloads"))" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6" md="3">
+                        <MetricsCard Title="Active Users"
+                                     Value="@FormatNumber(_analytics?.ActiveUsers ?? 0)"
+                                     Icon="Icons.Material.Filled.People"
+                                     Color="Color.Success"
+                                     ShowTrend="true"
+                                     TrendValue="@_analytics?.UserGrowth"
+                                     TrendLabel="new users"
+                                     IsClickable="true"
+                                     ClickText="View Users"
+                                     OnClick="@(() => NavigateToSection("users"))" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6" md="3">
+                        <MetricsCard Title="Average Rating"
+                                     Value="@(_analytics?.AverageRating?.ToString("F1") ?? "N/A")"
+                                     Icon="Icons.Material.Filled.Star"
+                                     Color="Color.Warning"
+                                     ShowTrend="true"
+                                     TrendValue="@_analytics?.RatingChange"
+                                     TrendLabel="rating change"
+                                     ShowProgressBar="true"
+                                     Progress="@((_analytics?.AverageRating ?? 0) * 20)" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6" md="3">
+                        <MetricsCard Title="Security Score"
+                                     Value="@(_analytics?.SecurityScore?.ToString("F0") ?? "N/A")"
+                                     Icon="Icons.Material.Filled.Security"
+                                     Color="@GetSecurityScoreColor()"
+                                     ShowTrend="true"
+                                     TrendValue="@_analytics?.SecurityScoreChange"
+                                     TrendLabel="security improvement"
+                                     ShowProgressBar="true"
+                                     Progress="@_analytics?.SecurityScore"
+                                     IsClickable="true"
+                                     ClickText="Security Center"
+                                     OnClick="@(() => Navigation.NavigateTo("/publisher/security"))" />
+                    </MudItem>
+                </MudGrid>
+            </div>
+
+            <!-- Main Analytics Charts -->
+            <div class="analytics-charts mb-6">
+                <MudGrid Spacing="3">
+                    <!-- Download Trends Chart -->
+                    <MudItem xs="12" lg="8">
+                        <MudCard Class="analytics-chart-card" Elevation="2">
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <div class="chart-header d-flex justify-space-between align-center">
+                                        <div>
+                                            <MudText Typo="Typo.h6">📈 Download Trends</MudText>
+                                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                Package downloads over time
+                                            </MudText>
+                                        </div>
+                                        <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small">
+                                            <MudButton @onclick="@(() => _chartType = "line")"
+                                                       Variant="@(_chartType == "line" ? Variant.Filled : Variant.Outlined)">
+                                                Line
+                                            </MudButton>
+                                            <MudButton @onclick="@(() => _chartType = "bar")"
+                                                       Variant="@(_chartType == "bar" ? Variant.Filled : Variant.Outlined)">
+                                                Bar
+                                            </MudButton>
+                                        </MudButtonGroup>
+                                    </div>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                            <MudCardContent Class="pa-4">
+                                <div class="chart-container" style="height: 300px;">
+                                    @if (_downloadChartData?.Any() == true)
+                                    {
+                                        <div class="mock-chart download-chart">
+                                            <div class="chart-y-axis">
+                                                <span>50K</span>
+                                                <span>40K</span>
+                                                <span>30K</span>
+                                                <span>20K</span>
+                                                <span>10K</span>
+                                                <span>0</span>
+                                            </div>
+                                            <div class="chart-area">
+                                                @foreach (var point in _downloadChartData.Take(30))
+                                                {
+                                                    <div class="chart-bar" 
+                                                         style="height: @(point.Value / 500.0)%; 
+                                                                background: linear-gradient(45deg, var(--mud-palette-primary), var(--mud-palette-primary-lighten));"
+                                                         title="@point.Date.ToString("MMM dd"): @FormatNumber(point.Value) downloads">
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="chart-x-axis">
+                                                <span>@_downloadChartData.First().Date.ToString("MMM dd")</span>
+                                                <span>@_downloadChartData.Last().Date.ToString("MMM dd")</span>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="no-chart-data text-center pa-8">
+                                            <MudIcon Icon="Icons.Material.Outlined.ShowChart" Size="Size.Large" Color="Color.Secondary" />
+                                            <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mt-2">
+                                                No download data available for the selected period
+                                            </MudText>
+                                        </div>
+                                    }
+                                </div>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+
+                    <!-- Geographic Distribution -->
+                    <MudItem xs="12" lg="4">
+                        <MudCard Class="analytics-chart-card" Elevation="2">
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.h6">🌍 Geographic Distribution</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        Downloads by region
+                                    </MudText>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                            <MudCardContent Class="pa-4">
+                                <div class="geographic-chart" style="height: 300px;">
+                                    @if (_geographicData?.Any() == true)
+                                    {
+                                        <div class="geographic-list">
+                                            @foreach (var region in _geographicData.Take(8))
+                                            {
+                                                <div class="region-item d-flex justify-space-between align-center mb-3">
+                                                    <div class="region-info d-flex align-center">
+                                                        <span class="region-flag mr-2">@GetRegionFlag(region.Region)</span>
+                                                        <div>
+                                                            <MudText Typo="Typo.body2">@region.Region</MudText>
+                                                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                                @region.Percentage.ToString("F1")% of downloads
+                                                            </MudText>
+                                                        </div>
+                                                    </div>
+                                                    <div class="region-stats text-right">
+                                                        <MudText Typo="Typo.body2" Class="font-weight-bold">
+                                                            @FormatNumber(region.Downloads)
+                                                        </MudText>
+                                                        <MudProgressLinear Value="@region.Percentage" 
+                                                                           Color="Color.Primary" 
+                                                                           Size="Size.Small"
+                                                                           Class="mt-1"
+                                                                           Style="width: 60px;" />
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="no-chart-data text-center pa-8">
+                                            <MudIcon Icon="Icons.Material.Outlined.Map" Size="Size.Large" Color="Color.Secondary" />
+                                            <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mt-2">
+                                                No geographic data available
+                                            </MudText>
+                                        </div>
+                                    }
+                                </div>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                </MudGrid>
+            </div>
+
+            <!-- Package Performance & User Engagement -->
+            <div class="analytics-details">
+                <MudGrid Spacing="3">
+                    <!-- Package Performance Breakdown -->
+                    <MudItem xs="12" lg="6">
+                        <MudCard Class="analytics-detail-card" Elevation="2">
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.h6">📦 Package Performance</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        Individual package metrics
+                                    </MudText>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                            <MudCardContent Class="pa-0">
+                                @if (_packagePerformance?.Any() == true)
+                                {
+                                    <MudList T="object">
+                                        @foreach (var package in _packagePerformance.Take(6))
+                                        {
+                                            <MudListItem T="object" Class="package-performance-item">
+                                                <div class="performance-content d-flex justify-space-between align-center w-100">
+                                                    <div class="package-info">
+                                                        <MudText Typo="Typo.body2" Class="font-weight-bold">
+                                                            @package.Name
+                                                        </MudText>
+                                                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                            v@package.Version • @FormatNumber(package.Downloads) downloads
+                                                        </MudText>
+                                                    </div>
+                                                    <div class="performance-metrics d-flex align-center gap-3">
+                                                        <div class="metric text-center">
+                                                            <MudText Typo="Typo.caption" Color="Color.Secondary">Rating</MudText>
+                                                            <MudText Typo="Typo.body2" Class="font-weight-bold">
+                                                                @package.Rating.ToString("F1")
+                                                            </MudText>
+                                                        </div>
+                                                        <div class="metric text-center">
+                                                            <MudText Typo="Typo.caption" Color="Color.Secondary">Growth</MudText>
+                                                            <MudText Typo="Typo.body2" 
+                                                                     Class="font-weight-bold"
+                                                                     Color="@(package.Growth >= 0 ? Color.Success : Color.Error)">
+                                                                @package.Growth.ToString("+0.0%;-0.0%")
+                                                            </MudText>
+                                                        </div>
+                                                        <MudIconButton Icon="Icons.Material.Filled.Analytics"
+                                                                       Size="Size.Small"
+                                                                       Color="Color.Primary"
+                                                                       @onclick="@(() => Navigation.NavigateTo($"/publisher/packages/{package.Id}/analytics"))" />
+                                                    </div>
+                                                </div>
+                                            </MudListItem>
+                                            @if (package != _packagePerformance.Last())
+                                            {
+                                                <MudDivider />
+                                            }
+                                        }
+                                    </MudList>
+                                }
+                                else
+                                {
+                                    <div class="no-data text-center pa-8">
+                                        <MudIcon Icon="Icons.Material.Outlined.Inventory" Size="Size.Large" Color="Color.Secondary" />
+                                        <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mt-2">
+                                            No package performance data available
+                                        </MudText>
+                                    </div>
+                                }
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+
+                    <!-- User Engagement Insights -->
+                    <MudItem xs="12" lg="6">
+                        <MudCard Class="analytics-detail-card" Elevation="2">
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.h6">👥 User Engagement</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        Community interaction metrics
+                                    </MudText>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                            <MudCardContent Class="pa-4">
+                                <div class="engagement-metrics">
+                                    <MudGrid Spacing="2">
+                                        <MudItem xs="6">
+                                            <div class="engagement-stat text-center pa-3">
+                                                <MudIcon Icon="Icons.Material.Filled.Star" 
+                                                         Color="Color.Warning" 
+                                                         Size="Size.Medium" />
+                                                <MudText Typo="Typo.h6" Class="mt-2">
+                                                    @(_analytics?.TotalReviews ?? 0)
+                                                </MudText>
+                                                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                    Total Reviews
+                                                </MudText>
+                                            </div>
+                                        </MudItem>
+                                        
+                                        <MudItem xs="6">
+                                            <div class="engagement-stat text-center pa-3">
+                                                <MudIcon Icon="Icons.Material.Filled.Favorite" 
+                                                         Color="Color.Error" 
+                                                         Size="Size.Medium" />
+                                                <MudText Typo="Typo.h6" Class="mt-2">
+                                                    @(_analytics?.TotalFavorites ?? 0)
+                                                </MudText>
+                                                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                    Favorites
+                                                </MudText>
+                                            </div>
+                                        </MudItem>
+                                        
+                                        <MudItem xs="6">
+                                            <div class="engagement-stat text-center pa-3">
+                                                <MudIcon Icon="Icons.Material.Filled.BugReport" 
+                                                         Color="Color.Info" 
+                                                         Size="Size.Medium" />
+                                                <MudText Typo="Typo.h6" Class="mt-2">
+                                                    @(_analytics?.TotalIssues ?? 0)
+                                                </MudText>
+                                                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                    Issues Reported
+                                                </MudText>
+                                            </div>
+                                        </MudItem>
+                                        
+                                        <MudItem xs="6">
+                                            <div class="engagement-stat text-center pa-3">
+                                                <MudIcon Icon="Icons.Material.Filled.Forum" 
+                                                         Color="Color.Success" 
+                                                         Size="Size.Medium" />
+                                                <MudText Typo="Typo.h6" Class="mt-2">
+                                                    @(_analytics?.CommunityScore?.ToString("F0") ?? "N/A")
+                                                </MudText>
+                                                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                    Community Score
+                                                </MudText>
+                                            </div>
+                                        </MudItem>
+                                    </MudGrid>
+                                </div>
+
+                                <MudDivider Class="my-4" />
+
+                                <div class="engagement-insights">
+                                    <MudText Typo="Typo.subtitle2" Class="mb-3">Recent Activity</MudText>
+                                    @if (_recentActivity?.Any() == true)
+                                    {
+                                        @foreach (var activity in _recentActivity.Take(4))
+                                        {
+                                            <div class="activity-item d-flex align-center mb-2">
+                                                <MudIcon Icon="@GetActivityIcon(activity.Type)" 
+                                                         Color="@GetActivityColor(activity.Type)" 
+                                                         Size="Size.Small" 
+                                                         Class="mr-2" />
+                                                <div class="flex-grow-1">
+                                                    <MudText Typo="Typo.caption">
+                                                        @activity.Description
+                                                    </MudText>
+                                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                        @FormatActivityTime(activity.Timestamp)
+                                                    </MudText>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                            No recent activity to display
+                                        </MudText>
+                                    }
+                                </div>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                </MudGrid>
+            </div>
+        }
+    </MainContent>
+</ResponsiveContainer>
+
+@code {
+    private bool _isLoading = true;
+    private string _selectedTimeRange = "30d";
+    private string _selectedPackage = "";
+    private string _chartType = "line";
+
+    private PublisherAnalytics? _analytics;
+    private IEnumerable<PackageListItem>? _packages;
+    private IEnumerable<MCPHub.WebApp.Services.ChartDataPoint>? _downloadChartData;
+    private IEnumerable<GeographicDataPoint>? _geographicData;
+    private IEnumerable<PackagePerformanceData>? _packagePerformance;
+    private IEnumerable<ActivityData>? _recentActivity;
+
+    [Inject] private NavigationManager Navigation { get; set; } = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAnalyticsData();
+    }
+
+    private async Task LoadAnalyticsData()
+    {
+        try
+        {
+            _isLoading = true;
+            StateHasChanged();
+
+            // Load analytics data
+            _analytics = await AnalyticsService.GetPublisherAnalyticsAsync(
+                Guid.NewGuid(), // TODO: Get from authentication context
+                _selectedTimeRange,
+                _selectedPackage);
+
+            // Load chart data
+            _downloadChartData = await AnalyticsService.GetDownloadTrendsAsync(
+                Guid.NewGuid(), // TODO: Get from authentication context
+                _selectedTimeRange,
+                _selectedPackage);
+
+            _geographicData = await AnalyticsService.GetGeographicDistributionAsync(
+                Guid.NewGuid(), // TODO: Get from authentication context
+                _selectedTimeRange);
+
+            // Load packages for filter
+            var packageResult = await DashboardService.GetPublisherPackagesAsync(Guid.NewGuid());
+            _packages = packageResult?.Packages;
+        }
+        catch (NotImplementedException)
+        {
+            // Generate mock data for development
+            GenerateMockAnalyticsData();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading analytics data");
+            Snackbar.Add("Failed to load analytics data", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void GenerateMockAnalyticsData()
+    {
+        var random = new Random();
+        
+        _analytics = new PublisherAnalytics
+        {
+            TotalDownloads = 128500,
+            DownloadGrowth = 15.2,
+            ActiveUsers = 2847,
+            UserGrowth = 8.7,
+            AverageRating = 4.6,
+            RatingChange = 0.2,
+            SecurityScore = 92,
+            SecurityScoreChange = 3.0,
+            TotalReviews = 156,
+            TotalFavorites = 892,
+            TotalIssues = 23,
+            CommunityScore = 85.5
+        };
+
+        // Generate download trend data
+        var downloadData = new List<ChartDataPoint>();
+        var startDate = DateTime.UtcNow.AddDays(-30);
+        for (int i = 0; i < 30; i++)
+        {
+            downloadData.Add(new ChartDataPoint
+            {
+                Date = startDate.AddDays(i),
+                Value = random.Next(800, 2500) + (i * 30) // Trending upward
+            });
+        }
+        _downloadChartData = downloadData;
+
+        // Generate geographic data
+        _geographicData = new[]
+        {
+            new GeographicDataPoint { Region = "United States", Downloads = 45200, Percentage = 35.2 },
+            new GeographicDataPoint { Region = "United Kingdom", Downloads = 18700, Percentage = 14.6 },
+            new GeographicDataPoint { Region = "Germany", Downloads = 15300, Percentage = 11.9 },
+            new GeographicDataPoint { Region = "Canada", Downloads = 12800, Percentage = 10.0 },
+            new GeographicDataPoint { Region = "France", Downloads = 9600, Percentage = 7.5 },
+            new GeographicDataPoint { Region = "Australia", Downloads = 7400, Percentage = 5.8 },
+            new GeographicDataPoint { Region = "Japan", Downloads = 6500, Percentage = 5.1 },
+            new GeographicDataPoint { Region = "Other", Downloads = 12000, Percentage = 9.9 }
+        };
+
+        // Generate package performance data
+        _packagePerformance = new[]
+        {
+            new PackagePerformanceData { Id = Guid.NewGuid(), Name = "@ai/claude-tools", Version = "2.1.4", Downloads = 45200, Rating = 4.9, Growth = 23.5 },
+            new PackagePerformanceData { Id = Guid.NewGuid(), Name = "@tools/web-scraper", Version = "1.8.2", Downloads = 34100, Rating = 4.7, Growth = 18.2 },
+            new PackagePerformanceData { Id = Guid.NewGuid(), Name = "@data/processor", Version = "3.0.1", Downloads = 28700, Rating = 4.8, Growth = 12.0 },
+            new PackagePerformanceData { Id = Guid.NewGuid(), Name = "@ai/gpt-connector", Version = "2.3.0", Downloads = 22300, Rating = 4.6, Growth = 8.0 },
+            new PackagePerformanceData { Id = Guid.NewGuid(), Name = "@utils/file-handler", Version = "1.5.3", Downloads = 18900, Rating = 4.4, Growth = -2.1 }
+        };
+
+        // Generate recent activity
+        _recentActivity = new[]
+        {
+            new ActivityData { Type = "download", Description = "Your package @ai/claude-tools was downloaded 500 times today", Timestamp = DateTime.UtcNow.AddHours(-2) },
+            new ActivityData { Type = "review", Description = "New 5-star review for @tools/web-scraper", Timestamp = DateTime.UtcNow.AddHours(-8) },
+            new ActivityData { Type = "issue", Description = "Issue reported for @data/processor v3.0.1", Timestamp = DateTime.UtcNow.AddDays(-1) },
+            new ActivityData { Type = "favorite", Description = "Your package @ai/gpt-connector was favorited 15 times", Timestamp = DateTime.UtcNow.AddDays(-2) }
+        };
+
+        // Mock packages for filter
+        _packages = new[]
+        {
+            new PackageListItem { Name = "@ai/claude-tools" },
+            new PackageListItem { Name = "@tools/web-scraper" },
+            new PackageListItem { Name = "@data/processor" },
+            new PackageListItem { Name = "@ai/gpt-connector" },
+            new PackageListItem { Name = "@utils/file-handler" }
+        };
+    }
+
+    private async Task RefreshData()
+    {
+        await LoadAnalyticsData();
+        Snackbar.Add("Analytics data refreshed", Severity.Success);
+    }
+
+    private async Task ExportData()
+    {
+        // TODO: Implement data export functionality
+        Snackbar.Add("Export functionality coming soon", Severity.Info);
+    }
+
+    private void NavigateToSection(string section)
+    {
+        // TODO: Navigate to specific analytics section or filter view
+        Snackbar.Add($"Navigate to {section} section", Severity.Info);
+    }
+
+    private Color GetSecurityScoreColor()
+    {
+        return (_analytics?.SecurityScore ?? 0) switch
+        {
+            var score when score >= 90 => Color.Success,
+            var score when score >= 70 => Color.Warning,
+            _ => Color.Error
+        };
+    }
+
+    private string GetRegionFlag(string region)
+    {
+        return region switch
+        {
+            "United States" => "🇺🇸",
+            "United Kingdom" => "🇬🇧",
+            "Germany" => "🇩🇪",
+            "Canada" => "🇨🇦",
+            "France" => "🇫🇷",
+            "Australia" => "🇦🇺",
+            "Japan" => "🇯🇵",
+            _ => "🌍"
+        };
+    }
+
+    private string GetActivityIcon(string type)
+    {
+        return type switch
+        {
+            "download" => Icons.Material.Filled.Download,
+            "review" => Icons.Material.Filled.Star,
+            "issue" => Icons.Material.Filled.BugReport,
+            "favorite" => Icons.Material.Filled.Favorite,
+            _ => Icons.Material.Filled.Info
+        };
+    }
+
+    private Color GetActivityColor(string type)
+    {
+        return type switch
+        {
+            "download" => Color.Primary,
+            "review" => Color.Warning,
+            "issue" => Color.Error,
+            "favorite" => Color.Success,
+            _ => Color.Secondary
+        };
+    }
+
+    private string FormatActivityTime(DateTime timestamp)
+    {
+        var timeSpan = DateTime.UtcNow - timestamp;
+        return timeSpan.TotalDays switch
+        {
+            var days when days < 1 && timeSpan.TotalHours < 1 => $"{(int)timeSpan.TotalMinutes}m ago",
+            var days when days < 1 => $"{(int)timeSpan.TotalHours}h ago",
+            var days when days < 7 => $"{(int)timeSpan.TotalDays}d ago",
+            _ => timestamp.ToString("MMM dd")
+        };
+    }
+
+    private string FormatNumber(long number)
+    {
+        return number switch
+        {
+            var n when n >= 1000000 => $"{number / 1000000.0:F1}M",
+            var n when n >= 1000 => $"{number / 1000.0:F1}K",
+            _ => number.ToString("N0")
+        };
+    }
+
+    // Data classes for mock data
+    public class PublisherAnalytics
+    {
+        public long TotalDownloads { get; set; }
+        public double DownloadGrowth { get; set; }
+        public int ActiveUsers { get; set; }
+        public double UserGrowth { get; set; }
+        public double AverageRating { get; set; }
+        public double RatingChange { get; set; }
+        public double SecurityScore { get; set; }
+        public double SecurityScoreChange { get; set; }
+        public int TotalReviews { get; set; }
+        public int TotalFavorites { get; set; }
+        public int TotalIssues { get; set; }
+        public double CommunityScore { get; set; }
+    }
+
+
+    public class GeographicDataPoint
+    {
+        public string Region { get; set; } = string.Empty;
+        public long Downloads { get; set; }
+        public double Percentage { get; set; }
+    }
+
+    public class PackagePerformanceData
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Version { get; set; } = string.Empty;
+        public long Downloads { get; set; }
+        public double Rating { get; set; }
+        public double Growth { get; set; }
+    }
+
+    public class ActivityData
+    {
+        public string Type { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public DateTime Timestamp { get; set; }
+    }
+}
+
+<style>
+.analytics-header {
+    margin-bottom: 32px;
+}
+
+.header-title h4 {
+    margin-bottom: 8px;
+}
+
+.time-range-selector,
+.export-controls {
+    flex-wrap: wrap;
+}
+
+.analytics-loading {
+    margin-bottom: 24px;
+}
+
+.analytics-metrics,
+.analytics-charts,
+.analytics-details {
+    width: 100%;
+}
+
+.analytics-chart-card,
+.analytics-detail-card {
+    height: 100%;
+    border-radius: 12px;
+    border: 1px solid var(--mud-palette-divider);
+}
+
+.chart-header {
+    width: 100%;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    background: var(--mud-palette-background-grey);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+/* Mock Chart Styles */
+.mock-chart {
+    display: flex;
+    height: 100%;
+    align-items: flex-end;
+    position: relative;
+}
+
+.chart-y-axis {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-right: 8px;
+    font-size: 0.75rem;
+    color: var(--mud-palette-text-secondary);
+    height: 100%;
+    min-width: 40px;
+}
+
+.chart-area {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    flex-grow: 1;
+    height: 100%;
+    padding: 0 8px;
+    gap: 2px;
+}
+
+.chart-bar {
+    flex: 1;
+    min-height: 4px;
+    border-radius: 2px 2px 0 0;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.chart-bar:hover {
+    opacity: 0.8;
+    transform: scaleY(1.05);
+}
+
+.chart-x-axis {
+    position: absolute;
+    bottom: -20px;
+    left: 50px;
+    right: 8px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--mud-palette-text-secondary);
+}
+
+.no-chart-data,
+.no-data {
+    background-color: var(--mud-palette-background-grey);
+    border-radius: 8px;
+    border: 2px dashed var(--mud-palette-divider);
+}
+
+.geographic-chart {
+    padding: 8px 0;
+}
+
+.geographic-list {
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.region-item {
+    padding: 8px 0;
+}
+
+.region-flag {
+    font-size: 1.2rem;
+}
+
+.region-stats {
+    min-width: 80px;
+}
+
+.package-performance-item {
+    padding: 16px 24px;
+}
+
+.performance-content {
+    gap: 16px;
+}
+
+.performance-metrics {
+    min-width: 150px;
+}
+
+.engagement-metrics {
+    margin-bottom: 16px;
+}
+
+.engagement-stat {
+    background-color: var(--mud-palette-background-grey);
+    border-radius: 8px;
+    border: 1px solid var(--mud-palette-divider);
+}
+
+.engagement-insights {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.activity-item {
+    padding: 8px 0;
+}
+
+/* Responsive adjustments */
+@@media (max-width: 768px) {
+    .header-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+    }
+    
+    .time-range-selector,
+    .export-controls {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .time-range-selector .mud-select,
+    .export-controls .mud-button {
+        width: 100%;
+    }
+    
+    .chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .performance-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .performance-metrics {
+        width: 100%;
+        justify-content: space-around;
+    }
+}
+
+@@media (max-width: 480px) {
+    .analytics-header {
+        margin-bottom: 24px;
+    }
+    
+    .header-title h4 {
+        font-size: 1.5rem;
+    }
+    
+    .region-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .region-stats {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .engagement-metrics .mud-grid .mud-item {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* Dark theme adjustments */
+@@media (prefers-color-scheme: dark) {
+    .chart-container {
+        background-color: rgba(255, 255, 255, 0.02);
+    }
+    
+    .engagement-stat {
+        background-color: rgba(255, 255, 255, 0.02);
+    }
+}
+</style>

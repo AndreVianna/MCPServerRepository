@@ -1,5 +1,5 @@
-﻿using MCPHub.Domain.Entities;
-using MCPHub.Domain.Common;
+﻿using MCPHub.Domain.Common;
+using MCPHub.Domain.Entities;
 
 namespace MCPHub.Data.Configurations;
 
@@ -15,13 +15,11 @@ public class PublisherConfiguration : IEntityTypeConfiguration<Publisher> {
             .IsRequired()
             .HasConversion<string>();
 
-
         // Indexes
         builder.HasIndex(p => p.Name)
             .IsUnique();
 
         builder.HasIndex(p => p.Type);
-
 
         // Configure AuditTrail as JSON column
         builder.OwnsMany(p => p.AuditTrail, auditBuilder => {

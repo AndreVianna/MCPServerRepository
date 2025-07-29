@@ -3,8 +3,7 @@ namespace MCPHub.Domain.ValueObjects;
 /// <summary>
 /// Represents the validation results for package manifest and content validation
 /// </summary>
-public class ValidationSummary
-{
+public class ValidationSummary {
     /// <summary>
     /// Indicates if the validation passed without errors
     /// </summary>
@@ -30,8 +29,7 @@ public class ValidationSummary
     /// </summary>
     public long ValidationTimeMs { get; init; }
 
-    public ValidationSummary() 
-    {
+    public ValidationSummary() {
         IsValid = true;
         Errors = new List<string>().AsReadOnly();
         Warnings = new List<string>().AsReadOnly();
@@ -44,8 +42,7 @@ public class ValidationSummary
         IEnumerable<string>? errors = null,
         IEnumerable<string>? warnings = null,
         string context = "",
-        long validationTimeMs = 0)
-    {
+        long validationTimeMs = 0) {
         IsValid = isValid;
         Errors = errors?.ToList().AsReadOnly() ?? new List<string>().AsReadOnly();
         Warnings = warnings?.ToList().AsReadOnly() ?? new List<string>().AsReadOnly();
@@ -56,32 +53,22 @@ public class ValidationSummary
     /// <summary>
     /// Creates a successful validation summary
     /// </summary>
-    public static ValidationSummary Success(string context = "", long validationTimeMs = 0, IEnumerable<string>? warnings = null)
-    {
-        return new ValidationSummary(true, null, warnings, context, validationTimeMs);
-    }
+    public static ValidationSummary Success(string context = "", long validationTimeMs = 0, IEnumerable<string>? warnings = null) => new ValidationSummary(true, null, warnings, context, validationTimeMs);
 
     /// <summary>
     /// Creates a failed validation summary
     /// </summary>
-    public static ValidationSummary Failure(IEnumerable<string> errors, string context = "", long validationTimeMs = 0, IEnumerable<string>? warnings = null)
-    {
-        return new ValidationSummary(false, errors, warnings, context, validationTimeMs);
-    }
+    public static ValidationSummary Failure(IEnumerable<string> errors, string context = "", long validationTimeMs = 0, IEnumerable<string>? warnings = null) => new ValidationSummary(false, errors, warnings, context, validationTimeMs);
 
     /// <summary>
     /// Creates a failed validation summary with a single error
     /// </summary>
-    public static ValidationSummary Failure(string error, string context = "", long validationTimeMs = 0, IEnumerable<string>? warnings = null)
-    {
-        return new ValidationSummary(false, [error], warnings, context, validationTimeMs);
-    }
+    public static ValidationSummary Failure(string error, string context = "", long validationTimeMs = 0, IEnumerable<string>? warnings = null) => new ValidationSummary(false, [error], warnings, context, validationTimeMs);
 
     /// <summary>
     /// Combines multiple validation summaries into one
     /// </summary>
-    public static ValidationSummary Combine(params ValidationSummary[] summaries)
-    {
+    public static ValidationSummary Combine(params ValidationSummary[] summaries) {
         if (summaries.Length == 0)
             return Success();
 

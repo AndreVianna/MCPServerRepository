@@ -52,5 +52,30 @@ public enum ScanType {
     /// <summary>
     /// Full comprehensive scan (all scan types)
     /// </summary>
-    Full
+    Full,
+
+    /// <summary>
+    /// Malware detection scan
+    /// </summary>
+    Malware,
+
+    /// <summary>
+    /// License compliance scan
+    /// </summary>
+    License,
+
+    /// <summary>
+    /// Comprehensive security analysis (combination of multiple scan types)
+    /// </summary>
+    Comprehensive,
+
+    /// <summary>
+    /// All available scan types
+    /// </summary>
+    All,
+
+    /// <summary>
+    /// Vulnerability scan (alias for DependencyVulnerability)
+    /// </summary>
+    Vulnerability
 }

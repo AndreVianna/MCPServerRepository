@@ -1,34 +1,33 @@
 using MCPHub.Common.Services;
 using MCPHub.PublicApi.Configuration;
 using MCPHub.PublicApi.Services;
+
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
 using Moq;
+
 using Xunit;
 
 namespace MCPHub.PublicApi.UnitTests.Services;
 
-public class SimpleRateLimitingServiceTests : IDisposable
-{
+public class SimpleRateLimitingServiceTests : IDisposable {
     private readonly Mock<IOptions<RateLimitingOptions>> _mockOptions;
     private readonly Mock<IDistributedCache> _mockCache;
     private readonly Mock<ILogger<RateLimitingService>> _mockLogger;
     private readonly RateLimitingOptions _options;
     private readonly RateLimitingService _service;
 
-    public SimpleRateLimitingServiceTests()
-    {
+    public SimpleRateLimitingServiceTests() {
         _mockOptions = new Mock<IOptions<RateLimitingOptions>>();
         _mockCache = new Mock<IDistributedCache>();
         _mockLogger = new Mock<ILogger<RateLimitingService>>();
 
-        _options = new RateLimitingOptions
-        {
+        _options = new RateLimitingOptions {
             Enabled = true,
             UseInMemory = true,
-            Authentication = new EndpointRateLimitConfig
-            {
+            Authentication = new EndpointRateLimitConfig {
                 PermitLimit = 5,
                 WindowMinutes = 1,
                 QueueLimit = 0,
@@ -42,25 +41,20 @@ public class SimpleRateLimitingServiceTests : IDisposable
         _service = new RateLimitingService(_mockOptions.Object, _mockCache.Object, _mockLogger.Object);
     }
 
-    public void Dispose()
-    {
-        _service?.Dispose();
-    }
+    public void Dispose() => _service?.Dispose();
 
     [Fact]
-    public async Task CheckRateLimitAsync_WhenDisabled_ShouldAlwaysAllow()
-    {
+    public async Task CheckRateLimitAsync_WhenDisabled_ShouldAlwaysAllow() {
         // Arrange - Create a new service with disabled options
         var disabledOptions = new RateLimitingOptions { Enabled = false };
         var mockDisabledOptions = new Mock<IOptions<RateLimitingOptions>>();
         mockDisabledOptions.Setup(x => x.Value).Returns(disabledOptions);
-        
+
         var disabledService = new RateLimitingService(mockDisabledOptions.Object, _mockCache.Object, _mockLogger.Object);
         var identifier = "192.168.1.1";
         var policy = "Authentication";
 
-        try
-        {
+        try {
             // Act
             var result = await disabledService.CheckRateLimitAsync(identifier, policy);
 
@@ -68,15 +62,13 @@ public class SimpleRateLimitingServiceTests : IDisposable
             Assert.True(result.IsAllowed);
             Assert.Equal(long.MaxValue, result.RequestsRemaining);
         }
-        finally
-        {
+        finally {
             disabledService.Dispose();
         }
     }
 
     [Fact]
-    public async Task CheckRateLimitAsync_FirstRequest_ShouldAllow()
-    {
+    public async Task CheckRateLimitAsync_FirstRequest_ShouldAllow() {
         // Arrange
         var identifier = "192.168.1.1";
         var policy = "Authentication";
@@ -90,8 +82,7 @@ public class SimpleRateLimitingServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task RecordRequestAsync_ShouldUpdateUsage()
-    {
+    public async Task RecordRequestAsync_ShouldUpdateUsage() {
         // Arrange
         var identifier = "192.168.1.1";
         var policy = "Authentication";
@@ -105,8 +96,7 @@ public class SimpleRateLimitingServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task GetUsageAsync_NoRequests_ShouldReturnZero()
-    {
+    public async Task GetUsageAsync_NoRequests_ShouldReturnZero() {
         // Arrange
         var identifier = "192.168.1.1";
         var policy = "Authentication";
@@ -119,8 +109,7 @@ public class SimpleRateLimitingServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task ResetAsync_ShouldClearUsage()
-    {
+    public async Task ResetAsync_ShouldClearUsage() {
         // Arrange
         var identifier = "192.168.1.1";
         var policy = "Authentication";
@@ -135,8 +124,7 @@ public class SimpleRateLimitingServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task GetStatisticsAsync_ShouldReturnStatistics()
-    {
+    public async Task GetStatisticsAsync_ShouldReturnStatistics() {
         // Arrange
         var identifier = "192.168.1.1";
         var policy = "Authentication";

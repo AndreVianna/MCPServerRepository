@@ -5,8 +5,7 @@ namespace MCPHub.Domain.ValueObjects;
 /// <summary>
 /// Represents the structure of an MCP package manifest (mcp-manifest.json)
 /// </summary>
-public class MCPManifest
-{
+public class MCPManifest {
     /// <summary>
     /// Package name (must follow naming convention)
     /// </summary>
@@ -109,11 +108,35 @@ public class MCPManifest
     [JsonPropertyName("files")]
     public IEnumerable<string> Files { get; set; } = [];
 
+    // Convenience properties for easier access
+    /// <summary>
+    /// Server information (convenience property)
+    /// </summary>
+    [JsonIgnore]
+    public ServerInfo Info => new() { Name = Name, Version = Version, Description = Description };
+
+    /// <summary>
+    /// Tools provided by this package (convenience property)
+    /// </summary>
+    [JsonIgnore]
+    public IEnumerable<MCPTool> Tools => Capabilities.Tools;
+
+    /// <summary>
+    /// Resources provided by this package (convenience property)
+    /// </summary>
+    [JsonIgnore]
+    public IEnumerable<MCPResource> Resources => Capabilities.Resources;
+
+    /// <summary>
+    /// Prompts provided by this package (convenience property)
+    /// </summary>
+    [JsonIgnore]
+    public IEnumerable<MCPPrompt> Prompts => Capabilities.Prompts;
+
     /// <summary>
     /// Validates the manifest structure and required fields
     /// </summary>
-    public ValidationSummary Validate()
-    {
+    public ValidationSummary Validate() {
         var errors = new List<string>();
         var warnings = new List<string>();
 
@@ -135,15 +158,13 @@ public class MCPManifest
             errors.Add("Author name is required");
 
         // Name format validation (namespace/package or simple name)
-        if (!string.IsNullOrWhiteSpace(Name))
-        {
+        if (!string.IsNullOrWhiteSpace(Name)) {
             if (!IsValidPackageName(Name))
                 errors.Add("Package name must contain only lowercase letters, numbers, hyphens, and optionally a namespace prefix (e.g., @namespace/package)");
         }
 
         // Version format validation (semantic versioning)
-        if (!string.IsNullOrWhiteSpace(Version))
-        {
+        if (!string.IsNullOrWhiteSpace(Version)) {
             if (!IsValidSemanticVersion(Version))
                 errors.Add("Package version must follow semantic versioning (e.g., 1.0.0, 2.1.0-beta.1)");
         }
@@ -162,59 +183,52 @@ public class MCPManifest
         if (!string.IsNullOrWhiteSpace(Bugs) && !IsValidUrl(Bugs))
             errors.Add("Bugs URL must be a valid URL");
 
-        return errors.Count == 0 
+        return errors.Count == 0
             ? ValidationSummary.Success("manifest", 0, warnings)
             : ValidationSummary.Failure(errors, "manifest", 0, warnings);
     }
 
-    private static bool IsValidPackageName(string name)
-    {
+    private static bool IsValidPackageName(string name) {
         // Allow @namespace/package format or simple package name
-        if (name.StartsWith('@'))
-        {
+        if (name.StartsWith('@')) {
             var parts = name.Split('/');
-            if (parts.Length != 2) return false;
+            if (parts.Length != 2)
+                return false;
             return IsValidNamePart(parts[0][1..]) && IsValidNamePart(parts[1]);
         }
-        
+
         return IsValidNamePart(name);
     }
 
-    private static bool IsValidNamePart(string part)
-    {
-        if (string.IsNullOrWhiteSpace(part)) return false;
-        if (part.Length > 50) return false; // Reasonable length limit
-        
-        return part.All(c => char.IsLetterOrDigit(c) || c == '-') && 
-               char.IsLetter(part[0]) && 
+    private static bool IsValidNamePart(string part) {
+        if (string.IsNullOrWhiteSpace(part))
+            return false;
+        if (part.Length > 50)
+            return false; // Reasonable length limit
+
+        return part.All(c => char.IsLetterOrDigit(c) || c == '-') &&
+               char.IsLetter(part[0]) &&
                !part.EndsWith('-');
     }
 
-    private static bool IsValidSemanticVersion(string version)
-    {
-        try
-        {
+    private static bool IsValidSemanticVersion(string version) {
+        try {
             var semVer = System.Version.Parse(version.Split('-')[0]);
             return semVer.Major >= 0 && semVer.Minor >= 0 && semVer.Build >= 0;
         }
-        catch
-        {
+        catch {
             return false;
         }
     }
 
-    private static bool IsValidUrl(string url)
-    {
-        return Uri.TryCreate(url, UriKind.Absolute, out var uri) && 
+    private static bool IsValidUrl(string url) => Uri.TryCreate(url, UriKind.Absolute, out var uri) &&
                (uri.Scheme == "http" || uri.Scheme == "https");
-    }
 }
 
 /// <summary>
 /// Author information in the manifest
 /// </summary>
-public class MCPAuthor
-{
+public class MCPAuthor {
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
 
@@ -228,8 +242,7 @@ public class MCPAuthor
 /// <summary>
 /// MCP capabilities that this package provides
 /// </summary>
-public class MCPCapabilities
-{
+public class MCPCapabilities {
     /// <summary>
     /// Tools/functions that this MCP server provides
     /// </summary>
@@ -249,19 +262,21 @@ public class MCPCapabilities
     public IEnumerable<MCPPrompt> Prompts { get; set; } = [];
 
     /// <summary>
+    /// Logging capability
+    /// </summary>
+    [JsonPropertyName("logging")]
+    public bool Logging { get; set; } = false;
+
+    /// <summary>
     /// Checks if any capabilities are defined
     /// </summary>
-    public bool HasAnyCapability()
-    {
-        return Tools.Any() || Resources.Any() || Prompts.Any();
-    }
+    public bool HasAnyCapability() => Tools.Any() || Resources.Any() || Prompts.Any();
 }
 
 /// <summary>
 /// MCP tool definition
 /// </summary>
-public class MCPTool
-{
+public class MCPTool {
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
 
@@ -275,8 +290,7 @@ public class MCPTool
 /// <summary>
 /// MCP resource definition
 /// </summary>
-public class MCPResource
-{
+public class MCPResource {
     [JsonPropertyName("uri")]
     public string Uri { get; set; } = string.Empty;
 
@@ -293,8 +307,7 @@ public class MCPResource
 /// <summary>
 /// MCP prompt definition
 /// </summary>
-public class MCPPrompt
-{
+public class MCPPrompt {
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
 
@@ -308,8 +321,7 @@ public class MCPPrompt
 /// <summary>
 /// MCP prompt argument definition
 /// </summary>
-public class MCPPromptArgument
-{
+public class MCPPromptArgument {
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
 
@@ -323,8 +335,7 @@ public class MCPPromptArgument
 /// <summary>
 /// Required permissions for the MCP package
 /// </summary>
-public class MCPPermissions
-{
+public class MCPPermissions {
     /// <summary>
     /// Network access permissions
     /// </summary>
@@ -347,8 +358,7 @@ public class MCPPermissions
 /// <summary>
 /// Network access permissions
 /// </summary>
-public class MCPNetworkPermissions
-{
+public class MCPNetworkPermissions {
     [JsonPropertyName("allowedHosts")]
     public IEnumerable<string> AllowedHosts { get; set; } = [];
 
@@ -359,8 +369,7 @@ public class MCPNetworkPermissions
 /// <summary>
 /// Filesystem access permissions
 /// </summary>
-public class MCPFilesystemPermissions
-{
+public class MCPFilesystemPermissions {
     [JsonPropertyName("allowedPaths")]
     public IEnumerable<string> AllowedPaths { get; set; } = [];
 
@@ -371,8 +380,7 @@ public class MCPFilesystemPermissions
 /// <summary>
 /// Runtime configuration for Docker containers
 /// </summary>
-public class MCPRuntime
-{
+public class MCPRuntime {
     [JsonPropertyName("docker")]
     public MCPDockerConfig? Docker { get; set; }
 }
@@ -380,8 +388,7 @@ public class MCPRuntime
 /// <summary>
 /// Docker configuration
 /// </summary>
-public class MCPDockerConfig
-{
+public class MCPDockerConfig {
     [JsonPropertyName("image")]
     public string Image { get; set; } = string.Empty;
 
@@ -396,4 +403,25 @@ public class MCPDockerConfig
 
     [JsonPropertyName("volumes")]
     public IEnumerable<string> Volumes { get; set; } = [];
+}
+
+/// <summary>
+/// Server information structure
+/// </summary>
+public class ServerInfo
+{
+    public string Name { get; set; } = string.Empty;
+    public string Version { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// Server capabilities structure
+/// </summary>
+public class ServerCapabilities
+{
+    public bool Logging { get; set; } = false;
+    public bool Tools { get; set; } = false;
+    public bool Resources { get; set; } = false;
+    public bool Prompts { get; set; } = false;
 }

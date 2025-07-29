@@ -18,8 +18,7 @@ public class AuthController(
     UserManager<ApplicationUser> userManager,
     SignInManager<ApplicationUser> signInManager,
     IJwtService jwtService,
-    ILogger<AuthController> logger) : ControllerBase
-{
+    ILogger<AuthController> logger) : ControllerBase {
     private readonly UserManager<ApplicationUser> _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
     private readonly SignInManager<ApplicationUser> _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
     private readonly IJwtService _jwtService = jwtService ?? throw new ArgumentNullException(nameof(jwtService));
@@ -32,19 +31,15 @@ public class AuthController(
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Authentication result with JWT tokens</returns>
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
-    {
-        try
-        {
+    public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken) {
+        try {
             _logger.LogInformation("Login attempt for email: {Email}", request.Email);
-            
+
             // Find user by email
             var user = await _userManager.FindByEmailAsync(request.Email);
-            if (user == null)
-            {
+            if (user == null) {
                 _logger.LogWarning("Login failed - user not found for email: {Email}", request.Email);
-                return BadRequest(new AuthenticationResult
-                {
+                return BadRequest(new AuthenticationResult {
                     IsSuccess = false,
                     ErrorMessage = "Invalid email or password"
                 });
@@ -52,14 +47,12 @@ public class AuthController(
 
             // Check password
             var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
-            if (!result.Succeeded)
-            {
-                _logger.LogWarning("Login failed for user {UserId}: {Reason}", user.Id, 
+            if (!result.Succeeded) {
+                _logger.LogWarning("Login failed for user {UserId}: {Reason}", user.Id,
                     result.IsLockedOut ? "Account locked" : "Invalid password");
-                
+
                 var errorMessage = result.IsLockedOut ? "Account is locked out" : "Invalid email or password";
-                return BadRequest(new AuthenticationResult
-                {
+                return BadRequest(new AuthenticationResult {
                     IsSuccess = false,
                     ErrorMessage = errorMessage
                 });
@@ -71,9 +64,8 @@ public class AuthController(
             var expiresAt = DateTime.UtcNow.AddMinutes(15); // TODO: Get from configuration
 
             _logger.LogInformation("Login successful for user {UserId}", user.Id);
-            
-            return Ok(new AuthenticationResult
-            {
+
+            return Ok(new AuthenticationResult {
                 IsSuccess = true,
                 User = user,
                 AccessToken = accessToken,
@@ -81,11 +73,9 @@ public class AuthController(
                 ExpiresAt = expiresAt
             });
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Error occurred during login for email: {Email}", request.Email);
-            return StatusCode(500, new AuthenticationResult
-            {
+            return StatusCode(500, new AuthenticationResult {
                 IsSuccess = false,
                 ErrorMessage = "An error occurred while processing your request"
             });
@@ -99,19 +89,15 @@ public class AuthController(
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>New JWT tokens</returns>
     [HttpPost("refresh")]
-    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken)
-    {
-        try
-        {
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken) {
+        try {
             _logger.LogInformation("Token refresh attempt");
-            
+
             // Validate refresh token
             var userId = await _jwtService.ValidateRefreshTokenAsync(request.RefreshToken, cancellationToken);
-            if (userId == null)
-            {
+            if (userId == null) {
                 _logger.LogWarning("Token refresh failed - invalid refresh token");
-                return BadRequest(new TokenResult
-                {
+                return BadRequest(new TokenResult {
                     IsSuccess = false,
                     ErrorMessage = "Invalid refresh token"
                 });
@@ -119,11 +105,9 @@ public class AuthController(
 
             // Get user
             var user = await _userManager.FindByIdAsync(userId.ToString()!);
-            if (user == null)
-            {
+            if (user == null) {
                 _logger.LogWarning("Token refresh failed - user not found for ID: {UserId}", userId);
-                return BadRequest(new TokenResult
-                {
+                return BadRequest(new TokenResult {
                     IsSuccess = false,
                     ErrorMessage = "User not found"
                 });
@@ -138,20 +122,17 @@ public class AuthController(
             await _jwtService.RevokeRefreshTokenAsync(request.RefreshToken, cancellationToken);
 
             _logger.LogInformation("Token refresh successful for user {UserId}", user.Id);
-            
-            return Ok(new TokenResult
-            {
+
+            return Ok(new TokenResult {
                 IsSuccess = true,
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
                 ExpiresAt = expiresAt
             });
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Error occurred during token refresh");
-            return StatusCode(500, new TokenResult
-            {
+            return StatusCode(500, new TokenResult {
                 IsSuccess = false,
                 ErrorMessage = "An error occurred while processing your request"
             });
@@ -165,16 +146,12 @@ public class AuthController(
     /// <returns>Logout result</returns>
     [HttpPost("logout")]
     [Authorize]
-    public async Task<IActionResult> Logout(CancellationToken cancellationToken)
-    {
-        try
-        {
+    public async Task<IActionResult> Logout(CancellationToken cancellationToken) {
+        try {
             var userIdClaim = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
-            {
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId)) {
                 _logger.LogWarning("Logout failed - invalid user ID in token");
-                return BadRequest(new LogoutResult
-                {
+                return BadRequest(new LogoutResult {
                     IsSuccess = false,
                     ErrorMessage = "Invalid user context"
                 });
@@ -184,17 +161,14 @@ public class AuthController(
 
             // TODO: Implement refresh token revocation logic
             // For now, we'll just return success as the access token will expire naturally
-            
-            return Ok(new LogoutResult
-            {
+
+            return Ok(new LogoutResult {
                 IsSuccess = true
             });
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Error occurred during logout");
-            return StatusCode(500, new LogoutResult
-            {
+            return StatusCode(500, new LogoutResult {
                 IsSuccess = false,
                 ErrorMessage = "An error occurred while processing your request"
             });
@@ -208,45 +182,58 @@ public class AuthController(
     /// <returns>User profile information</returns>
     [HttpGet("profile")]
     [Authorize]
-    public async Task<IActionResult> GetProfile(CancellationToken cancellationToken)
-    {
-        try
-        {
+    public async Task<IActionResult> GetProfile(CancellationToken cancellationToken) {
+        try {
             var userIdClaim = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
-            {
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId)) {
                 _logger.LogWarning("Get profile failed - invalid user ID in token");
-                return BadRequest(new UserProfileResult
-                {
+                return BadRequest(new UserProfileResult {
                     IsSuccess = false,
                     ErrorMessage = "Invalid user context"
                 });
             }
 
             var user = await _userManager.FindByIdAsync(userId.ToString());
-            if (user == null)
-            {
+            if (user == null) {
                 _logger.LogWarning("Get profile failed - user not found for ID: {UserId}", userId);
-                return NotFound(new UserProfileResult
-                {
+                return NotFound(new UserProfileResult {
                     IsSuccess = false,
                     ErrorMessage = "User not found"
                 });
             }
 
             _logger.LogInformation("Profile retrieved for user {UserId}", userId);
-            
-            return Ok(new UserProfileResult
-            {
+
+            // Map ApplicationUser to UserProfile
+            var profile = new UserProfile {
+                Id = user.Id,
+                UserName = user.UserName ?? string.Empty,
+                Email = user.Email ?? string.Empty,
+                DisplayName = user.DisplayName,
+                Bio = user.Bio,
+                Website = user.Website,
+                GitHubUrl = user.GitHubUsername != null ? $"https://github.com/{user.GitHubUsername}" : null,
+                TwitterUrl = user.TwitterHandle != null ? $"https://twitter.com/{user.TwitterHandle}" : null,
+                AvatarUrl = user.AvatarUrl,
+                AccountType = user.IsPublisher ? "Publisher" : "User",
+                IsEmailVerified = user.IsEmailVerified,
+                IsPublicProfile = true,
+                ShowEmail = false,
+                ReceiveUpdates = false,
+                ReceiveMarketingEmails = false,
+                IsTwoFactorEnabled = user.TwoFactorEnabled,
+                CreatedAt = DateTime.UtcNow, // TODO: Get from audit trail
+                LastLoginAt = null
+            };
+
+            return Ok(new UserProfileResult {
                 IsSuccess = true,
-                User = user
+                Profile = profile
             });
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Error occurred while getting user profile");
-            return StatusCode(500, new UserProfileResult
-            {
+            return StatusCode(500, new UserProfileResult {
                 IsSuccess = false,
                 ErrorMessage = "An error occurred while processing your request"
             });

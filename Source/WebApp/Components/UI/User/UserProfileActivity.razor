@@ -1,0 +1,360 @@
+@using MCPHub.Domain.Contracts.Responses
+@inject IUserProfileService ProfileService
+@inject ISnackbar Snackbar
+
+<MudGrid Spacing="4">
+    <!-- Activity Timeline -->
+    <MudItem xs="12" md="8">
+        <div class="d-flex justify-space-between align-center mb-4">
+            <MudText Typo="Typo.h6">Recent Activity</MudText>
+            <MudButton Variant="Variant.Text" 
+                      Size="Size.Small"
+                      StartIcon="@Icons.Material.Filled.Refresh"
+                      OnClick="@LoadActivityLog">
+                Refresh
+            </MudButton>
+        </div>
+
+        @if (_isLoading)
+        {
+            <div class="text-center py-8">
+                <MudProgressCircular Size="Size.Large" Indeterminate="true" />
+                <MudText Typo="Typo.body2" Class="mt-4">Loading activity...</MudText>
+            </div>
+        }
+        else if (_activities?.Any() == true)
+        {
+            <MudTimeline TimelineOrientation="TimelineOrientation.Vertical">
+                @foreach (var activity in _activities)
+                {
+                    <MudTimelineItem Size="Size.Small" Color="@GetActivityColor(activity.Action)">
+                        <ItemContent>
+                            <MudCard Outlined="true" Class="mb-3">
+                                <MudCardContent Class="py-3">
+                                    <div class="d-flex justify-space-between align-start">
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-center mb-2">
+                                                <MudIcon Icon="@GetActivityIcon(activity.Action)" 
+                                                        Color="@GetActivityColor(activity.Action)" 
+                                                        Size="Size.Small" 
+                                                        Class="mr-2" />
+                                                <MudText Typo="Typo.subtitle2" Class="font-weight-bold">
+                                                    @activity.Action
+                                                </MudText>
+                                            </div>
+                                            <MudText Typo="Typo.body2" Class="mb-2">
+                                                @activity.Description
+                                            </MudText>
+                                            <div class="d-flex align-center gap-4">
+                                                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                    @activity.Timestamp.ToString("MMM dd, yyyy 'at' HH:mm")
+                                                </MudText>
+                                                @if (!string.IsNullOrEmpty(activity.IpAddress))
+                                                {
+                                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                        IP: @activity.IpAddress
+                                                    </MudText>
+                                                }
+                                            </div>
+                                        </div>
+                                        @if (activity.Metadata?.Any() == true)
+                                        {
+                                            <MudIconButton Icon="@Icons.Material.Filled.MoreVert" 
+                                                          Size="Size.Small"
+                                                          OnClick="@(() => ToggleActivityDetails(activity.Id))" />
+                                        }
+                                    </div>
+                                    
+                                    @if (_expandedActivities.Contains(activity.Id) && activity.Metadata?.Any() == true)
+                                    {
+                                        <MudDivider Class="my-3" />
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2">
+                                            Additional Details:
+                                        </MudText>
+                                        <div class="activity-metadata">
+                                            @foreach (var item in activity.Metadata)
+                                            {
+                                                <div class="metadata-item">
+                                                    <MudText Typo="Typo.caption" Class="font-weight-bold">
+                                                        @item.Key:
+                                                    </MudText>
+                                                    <MudText Typo="Typo.caption" Class="ml-2">
+                                                        @item.Value
+                                                    </MudText>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </MudCardContent>
+                            </MudCard>
+                        </ItemContent>
+                    </MudTimelineItem>
+                }
+            </MudTimeline>
+
+            @if (_totalCount > _activities.Length)
+            {
+                <div class="text-center mt-4">
+                    <MudButton Variant="Variant.Outlined"
+                              Color="Color.Primary"
+                              OnClick="@LoadMoreActivities"
+                              Disabled="@_isLoadingMore">
+                        @if (_isLoadingMore)
+                        {
+                            <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                            <span class="ml-2">Loading more...</span>
+                        }
+                        else
+                        {
+                            <span>Load More</span>
+                        }
+                    </MudButton>
+                </div>
+            }
+        }
+        else
+        {
+            <MudAlert Severity="Severity.Info">
+                No recent activity found. Your actions will appear here.
+            </MudAlert>
+        }
+    </MudItem>
+
+    <!-- Activity Summary -->
+    <MudItem xs="12" md="4">
+        <MudPaper Elevation="1" Class="pa-4 mb-4">
+            <MudText Typo="Typo.h6" Class="mb-4">Activity Summary</MudText>
+            
+            <div class="activity-stats">
+                <div class="stat-item mb-3">
+                    <div class="d-flex justify-space-between align-center">
+                        <div class="d-flex align-center">
+                            <MudIcon Icon="@Icons.Material.Filled.Login" Color="Color.Primary" Size="Size.Small" Class="mr-2" />
+                            <MudText Typo="Typo.body2">Total Logins</MudText>
+                        </div>
+                        <MudText Typo="Typo.body1" Class="font-weight-bold">@_activityStats.TotalLogins</MudText>
+                    </div>
+                </div>
+                
+                <div class="stat-item mb-3">
+                    <div class="d-flex justify-space-between align-center">
+                        <div class="d-flex align-center">
+                            <MudIcon Icon="@Icons.Material.Filled.GetApp" Color="Color.Success" Size="Size.Small" Class="mr-2" />
+                            <MudText Typo="Typo.body2">Packages Installed</MudText>
+                        </div>
+                        <MudText Typo="Typo.body1" Class="font-weight-bold">@_activityStats.PackagesInstalled</MudText>
+                    </div>
+                </div>
+                
+                <div class="stat-item mb-3">
+                    <div class="d-flex justify-space-between align-center">
+                        <div class="d-flex align-center">
+                            <MudIcon Icon="@Icons.Material.Filled.Favorite" Color="Color.Secondary" Size="Size.Small" Class="mr-2" />
+                            <MudText Typo="Typo.body2">Packages Liked</MudText>
+                        </div>
+                        <MudText Typo="Typo.body1" Class="font-weight-bold">@_activityStats.PackagesLiked</MudText>
+                    </div>
+                </div>
+                
+                <div class="stat-item mb-3">
+                    <div class="d-flex justify-space-between align-center">
+                        <div class="d-flex align-center">
+                            <MudIcon Icon="@Icons.Material.Filled.Publish" Color="Color.Info" Size="Size.Small" Class="mr-2" />
+                            <MudText Typo="Typo.body2">Packages Published</MudText>
+                        </div>
+                        <MudText Typo="Typo.body1" Class="font-weight-bold">@_activityStats.PackagesPublished</MudText>
+                    </div>
+                </div>
+            </div>
+        </MudPaper>
+
+        <MudPaper Elevation="1" Class="pa-4">
+            <MudText Typo="Typo.h6" Class="mb-4">Activity Filters</MudText>
+            
+            <MudSelect @bind-Value="_selectedFilter"
+                       Label="Filter by Activity"
+                       Variant="Variant.Outlined"
+                       AnchorOrigin="Origin.BottomCenter"
+                       FullWidth="true"
+                       Class="mb-3">
+                <MudSelectItem Value="@string.Empty">All Activities</MudSelectItem>
+                <MudSelectItem Value="@("Login")">Login Events</MudSelectItem>
+                <MudSelectItem Value="@("Package")">Package Activities</MudSelectItem>
+                <MudSelectItem Value="@("Profile")">Profile Changes</MudSelectItem>
+                <MudSelectItem Value="@("Security")">Security Events</MudSelectItem>
+            </MudSelect>
+            
+            <MudDateRangePicker @bind-DateRange="_dateRange"
+                               Label="Date Range"
+                               Variant="Variant.Outlined"
+                               FullWidth="true"
+                               Class="mb-3" />
+            
+            <MudButton Variant="Variant.Filled"
+                      Color="Color.Primary"
+                      StartIcon="@Icons.Material.Filled.FilterList"
+                      OnClick="@ApplyFilters"
+                      FullWidth="true">
+                Apply Filters
+            </MudButton>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+<style>
+    .activity-stats .stat-item {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--mud-palette-lines-default);
+    }
+
+    .activity-stats .stat-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-metadata {
+        display: grid;
+        gap: 0.25rem;
+    }
+
+    .metadata-item {
+        display: flex;
+        align-items: center;
+    }
+</style>
+
+@code {
+    private ActivityLogEntry[]? _activities;
+    private int _totalCount = 0;
+    private int _currentPage = 1;
+    private readonly int _pageSize = 10;
+    private bool _isLoading = true;
+    private bool _isLoadingMore = false;
+    private readonly HashSet<Guid> _expandedActivities = new();
+    
+    private string _selectedFilter = string.Empty;
+    private DateRange? _dateRange;
+    
+    private ActivityStats _activityStats = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadActivityLog();
+        LoadActivityStats();
+    }
+
+    private async Task LoadActivityLog()
+    {
+        _isLoading = true;
+        _currentPage = 1;
+        try
+        {
+            var result = await ProfileService.GetActivityLogAsync(_pageSize, _currentPage);
+            if (result.IsSuccess)
+            {
+                _activities = result.Activities;
+                _totalCount = result.TotalCount;
+            }
+            else
+            {
+                Snackbar.Add($"Failed to load activity: {result.ErrorMessage}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading activity: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task LoadMoreActivities()
+    {
+        _isLoadingMore = true;
+        _currentPage++;
+        try
+        {
+            var result = await ProfileService.GetActivityLogAsync(_pageSize, _currentPage);
+            if (result.IsSuccess && result.Activities?.Any() == true)
+            {
+                var currentList = _activities?.ToList() ?? new List<ActivityLogEntry>();
+                currentList.AddRange(result.Activities);
+                _activities = currentList.ToArray();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading more activities: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoadingMore = false;
+        }
+    }
+
+    private void LoadActivityStats()
+    {
+        // TODO: Load real statistics from service
+        _activityStats = new ActivityStats
+        {
+            TotalLogins = 45,
+            PackagesInstalled = 12,
+            PackagesLiked = 8,
+            PackagesPublished = 3
+        };
+    }
+
+    private async Task ApplyFilters()
+    {
+        // TODO: Implement filtering logic
+        await LoadActivityLog();
+        Snackbar.Add("Filters applied!", Severity.Info);
+    }
+
+    private void ToggleActivityDetails(Guid activityId)
+    {
+        if (_expandedActivities.Contains(activityId))
+        {
+            _expandedActivities.Remove(activityId);
+        }
+        else
+        {
+            _expandedActivities.Add(activityId);
+        }
+        StateHasChanged();
+    }
+
+    private Color GetActivityColor(string action) => action.ToLower() switch
+    {
+        var a when a.Contains("login") => Color.Primary,
+        var a when a.Contains("install") || a.Contains("download") => Color.Success,
+        var a when a.Contains("publish") || a.Contains("upload") => Color.Info,
+        var a when a.Contains("delete") || a.Contains("remove") => Color.Error,
+        var a when a.Contains("update") || a.Contains("edit") => Color.Warning,
+        var a when a.Contains("security") || a.Contains("2fa") => Color.Secondary,
+        _ => Color.Default
+    };
+
+    private string GetActivityIcon(string action) => action.ToLower() switch
+    {
+        var a when a.Contains("login") => Icons.Material.Filled.Login,
+        var a when a.Contains("logout") => Icons.Material.Filled.Logout,
+        var a when a.Contains("install") || a.Contains("download") => Icons.Material.Filled.GetApp,
+        var a when a.Contains("publish") || a.Contains("upload") => Icons.Material.Filled.Publish,
+        var a when a.Contains("delete") || a.Contains("remove") => Icons.Material.Filled.Delete,
+        var a when a.Contains("update") || a.Contains("edit") => Icons.Material.Filled.Edit,
+        var a when a.Contains("security") || a.Contains("2fa") => Icons.Material.Filled.Security,
+        var a when a.Contains("favorite") || a.Contains("like") => Icons.Material.Filled.Favorite,
+        var a when a.Contains("profile") => Icons.Material.Filled.Person,
+        _ => Icons.Material.Filled.Activity
+    };
+
+    public class ActivityStats
+    {
+        public int TotalLogins { get; set; }
+        public int PackagesInstalled { get; set; }
+        public int PackagesLiked { get; set; }
+        public int PackagesPublished { get; set; }
+    }
+}

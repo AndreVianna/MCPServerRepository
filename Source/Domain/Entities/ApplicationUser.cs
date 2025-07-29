@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 
 using MCPHub.Domain.Common;
+
 using Microsoft.AspNetCore.Identity;
 
 namespace MCPHub.Domain.Entities;

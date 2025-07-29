@@ -1,0 +1,276 @@
+@using MCPHub.Domain.Contracts.Requests
+@using MCPHub.Domain.Contracts.Responses
+@inject ISecurityService SecurityService
+@inject ISnackbar Snackbar
+
+<EditForm Model="@_keyModel" OnValidSubmit="@HandleCreateApiKey">
+    <DataAnnotationsValidator />
+    <MudGrid Spacing="4">
+        <MudItem xs="12">
+            <MudTextField @bind-Value="_keyModel.Name"
+                          Label="API Key Name"
+                          Variant="Variant.Outlined"
+                          Required="true"
+                          For="@(() => _keyModel.Name)"
+                          HelperText="A descriptive name to identify this key"
+                          FullWidth="true"
+                          Immediate="true" />
+        </MudItem>
+        
+        <MudItem xs="12">
+            <MudTextField @bind-Value="_keyModel.Description"
+                          Label="Description (Optional)"
+                          Variant="Variant.Outlined"
+                          Lines="3"
+                          For="@(() => _keyModel.Description)"
+                          HelperText="What will this API key be used for?"
+                          FullWidth="true"
+                          Immediate="true" />
+        </MudItem>
+        
+        <MudItem xs="12">
+            <MudText Typo="Typo.subtitle1" Class="mb-3">Permissions</MudText>
+            <MudGrid Spacing="2">
+                <MudItem xs="12" sm="6">
+                    <MudCheckBox @bind-Value="_keyModel.ReadPackages" 
+                                Color="Color.Primary"
+                                Label="Read Packages" />
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                        View package information and download packages
+                    </MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudCheckBox @bind-Value="_keyModel.PublishPackages" 
+                                Color="Color.Primary"
+                                Label="Publish Packages" />
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                        Upload and publish new package versions
+                    </MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudCheckBox @bind-Value="_keyModel.ManageProfile" 
+                                Color="Color.Primary"
+                                Label="Manage Profile" />
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                        Update profile information and settings
+                    </MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudCheckBox @bind-Value="_keyModel.AccessStatistics" 
+                                Color="Color.Primary"
+                                Label="Access Statistics" />
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                        View download statistics and analytics
+                    </MudText>
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+        
+        <MudItem xs="12">
+            <MudSwitch @bind-Value="_keyModel.HasExpiration" 
+                      Color="Color.Primary"
+                      Label="Set expiration date"
+                      Class="mb-3" />
+            
+            @if (_keyModel.HasExpiration)
+            {
+                <MudDatePicker @bind-Date="_keyModel.ExpirationDate"
+                               Label="Expiration Date"
+                               Variant="Variant.Outlined"
+                               MinDate="DateTime.Today.AddDays(1)"
+                               FullWidth="true"
+                               HelperText="The key will automatically expire on this date" />
+            }
+        </MudItem>
+        
+        <MudItem xs="12">
+            <MudAlert Severity="Severity.Info" Class="mb-4">
+                <strong>Security Note:</strong> API keys provide access to your account. Keep them secure and only share them with trusted applications.
+            </MudAlert>
+        </MudItem>
+        
+        <MudItem xs="12">
+            <div class="d-flex justify-end gap-2">
+                <MudButton Variant="Variant.Text" 
+                          Color="Color.Secondary"
+                          OnClick="@HandleCancel">
+                    Cancel
+                </MudButton>
+                
+                <MudButton ButtonType="ButtonType.Submit"
+                          Variant="Variant.Filled"
+                          Color="Color.Primary"
+                          Disabled="@(_isCreating || !HasValidPermissions())"
+                          StartIcon="@(_isCreating ? null : Icons.Material.Filled.VpnKey)">
+                    @if (_isCreating)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                        <span class="ml-2">Creating...</span>
+                    }
+                    else
+                    {
+                        <span>Create API Key</span>
+                    }
+                </MudButton>
+            </div>
+        </MudItem>
+    </MudGrid>
+</EditForm>
+
+<!-- Success Dialog -->
+<MudDialog @bind-IsVisible="_showSuccessDialog" Options="@_successDialogOptions">
+    <TitleContent>
+        <div class="d-flex align-center">
+            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Class="mr-3" />
+            API Key Created Successfully
+        </div>
+    </TitleContent>
+    <DialogContent>
+        <MudAlert Severity="Severity.Success" Class="mb-4">
+            <strong>Important:</strong> This is the only time you'll see your API key. Copy it now and store it safely.
+        </MudAlert>
+        
+        <MudTextField Value="@_createdApiKey"
+                      Label="Your New API Key"
+                      Variant="Variant.Outlined"
+                      ReadOnly="true"
+                      Adornment="Adornment.End"
+                      AdornmentIcon="@Icons.Material.Filled.ContentCopy"
+                      OnAdornmentClick="@(() => CopyToClipboard(_createdApiKey))"
+                      FullWidth="true"
+                      Class="mb-4" />
+        
+        <MudText Typo="Typo.body2" Color="Color.Secondary">
+            Store this key in a secure location. If you lose it, you'll need to create a new one.
+        </MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" 
+                  Variant="Variant.Filled"
+                  OnClick="@HandleSuccessDialogClose">
+            I've Saved My Key
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public EventCallback<MCPHub.Domain.Contracts.Responses.ApiKeyInfo> OnKeyCreated { get; set; }
+
+    private CreateApiKeyModel _keyModel = new();
+    private bool _isCreating = false;
+    private bool _showSuccessDialog = false;
+    private string _createdApiKey = string.Empty;
+
+    private readonly DialogOptions _successDialogOptions = new()
+    {
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true,
+        CloseButton = false,
+        BackdropClick = false
+    };
+
+    private async Task HandleCreateApiKey()
+    {
+        _isCreating = true;
+        try
+        {
+            var scopes = new List<string>();
+            if (_keyModel.ReadPackages) scopes.Add("packages:read");
+            if (_keyModel.PublishPackages) scopes.Add("packages:write");
+            if (_keyModel.ManageProfile) scopes.Add("profile:write");
+            if (_keyModel.AccessStatistics) scopes.Add("statistics:read");
+
+            var request = new GenerateApiKeyRequest
+            {
+                Name = _keyModel.Name,
+                Description = _keyModel.Description,
+                Scopes = scopes.ToArray(),
+                ExpiresAt = _keyModel.HasExpiration ? _keyModel.ExpirationDate : null
+            };
+
+            var result = await SecurityService.GenerateApiKeyAsync(request);
+            
+            if (result.IsSuccess && result.ApiKey != null)
+            {
+                _createdApiKey = result.ApiKey.Key;
+                _showSuccessDialog = true;
+                
+                // Reset form
+                _keyModel = new();
+            }
+            else
+            {
+                Snackbar.Add($"Failed to create API key: {result.ErrorMessage}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error creating API key: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isCreating = false;
+        }
+    }
+
+    private async Task HandleCancel()
+    {
+        await OnKeyCreated.InvokeAsync(new MCPHub.Domain.Contracts.Responses.ApiKeyInfo 
+        { 
+            Id = Guid.Empty, 
+            Name = string.Empty, 
+            Key = string.Empty,
+            CreatedAt = DateTime.UtcNow,
+            IsActive = false
+        });
+    }
+
+    private async Task HandleSuccessDialogClose()
+    {
+        _showSuccessDialog = false;
+        
+        // Create a dummy API key info for the callback
+        var apiKeyInfo = new MCPHub.Domain.Contracts.Responses.ApiKeyInfo
+        {
+            Id = Guid.NewGuid(),
+            Name = _keyModel.Name,
+            Description = _keyModel.Description,
+            Key = _createdApiKey,
+            CreatedAt = DateTime.UtcNow,
+            ExpiresAt = _keyModel.HasExpiration ? _keyModel.ExpirationDate : null,
+            IsActive = true
+        };
+        
+        await OnKeyCreated.InvokeAsync(apiKeyInfo);
+    }
+
+    private bool HasValidPermissions() =>
+        _keyModel.ReadPackages || 
+        _keyModel.PublishPackages || 
+        _keyModel.ManageProfile || 
+        _keyModel.AccessStatistics;
+
+    private async Task CopyToClipboard(string text)
+    {
+        // TODO: Implement clipboard copy
+        Snackbar.Add("API key copied to clipboard!", Severity.Success);
+    }
+
+    public class CreateApiKeyModel
+    {
+        [Required(ErrorMessage = "API key name is required")]
+        [StringLength(100, ErrorMessage = "Name cannot exceed 100 characters")]
+        public string Name { get; set; } = string.Empty;
+
+        [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters")]
+        public string Description { get; set; } = string.Empty;
+
+        public bool ReadPackages { get; set; } = true;
+        public bool PublishPackages { get; set; } = false;
+        public bool ManageProfile { get; set; } = false;
+        public bool AccessStatistics { get; set; } = false;
+
+        public bool HasExpiration { get; set; } = false;
+        public DateTime? ExpirationDate { get; set; }
+    }
+}

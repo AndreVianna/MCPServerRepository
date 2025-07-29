@@ -6,8 +6,7 @@ namespace MCPHub.Domain.Contracts.Services;
 /// <summary>
 /// Service interface for trust tier calculation and management
 /// </summary>
-public interface ITrustTierCalculationService
-{
+public interface ITrustTierCalculationService {
     /// <summary>
     /// Calculates the trust tier for a specific package based on current metrics
     /// </summary>
@@ -35,9 +34,9 @@ public interface ITrustTierCalculationService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Task representing the operation</returns>
     Task UpdatePackageTrustTierAsync(
-        Guid packageId, 
-        TrustTier newTier, 
-        string reason, 
+        Guid packageId,
+        TrustTier newTier,
+        string reason,
         Guid? changedByUserId = null,
         bool isManual = false,
         CancellationToken cancellationToken = default);
@@ -50,8 +49,8 @@ public interface ITrustTierCalculationService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Chronological history of trust tier changes</returns>
     Task<IEnumerable<TrustTierHistory>> GetTrustTierHistoryAsync(
-        Guid packageId, 
-        int limit = 50, 
+        Guid packageId,
+        int limit = 50,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -61,7 +60,7 @@ public interface ITrustTierCalculationService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Platform trust tier statistics</returns>
     Task<TrustTierStatistics> GetTrustTierStatisticsAsync(
-        int periodDays = 30, 
+        int periodDays = 30,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -71,7 +70,7 @@ public interface ITrustTierCalculationService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Dictionary of package IDs to their new trust tiers</returns>
     Task<Dictionary<Guid, TrustTier>> BatchRecalculateTrustTiersAsync(
-        IEnumerable<Guid> packageIds, 
+        IEnumerable<Guid> packageIds,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -81,7 +80,7 @@ public interface ITrustTierCalculationService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Summary of recalculation results</returns>
     Task<TrustTierRecalculationSummary> RecalculateAllTrustTiersAsync(
-        int maxConcurrency = 10, 
+        int maxConcurrency = 10,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -92,8 +91,8 @@ public interface ITrustTierCalculationService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Validation result indicating eligibility and missing requirements</returns>
     Task<TrustTierValidationResult> ValidateTrustTierEligibilityAsync(
-        Guid packageId, 
-        TrustTier targetTier, 
+        Guid packageId,
+        TrustTier targetTier,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -104,8 +103,8 @@ public interface ITrustTierCalculationService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>List of packages eligible for promotion</returns>
     Task<IEnumerable<Guid>> GetEligibleForPromotionAsync(
-        TrustTier? fromTier = null, 
-        int limit = 100, 
+        TrustTier? fromTier = null,
+        int limit = 100,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -116,8 +115,8 @@ public interface ITrustTierCalculationService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>List of packages at risk for demotion</returns>
     Task<IEnumerable<Guid>> GetAtRiskForDemotionAsync(
-        TrustTier? fromTier = null, 
-        int limit = 100, 
+        TrustTier? fromTier = null,
+        int limit = 100,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -129,8 +128,8 @@ public interface ITrustTierCalculationService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Results of emergency demotion operations</returns>
     Task<Dictionary<Guid, bool>> EmergencyDemotePackagesAsync(
-        IEnumerable<Guid> packageIds, 
-        string reason, 
+        IEnumerable<Guid> packageIds,
+        string reason,
         TrustTier demoteToTier = TrustTier.Unverified,
         CancellationToken cancellationToken = default);
 }

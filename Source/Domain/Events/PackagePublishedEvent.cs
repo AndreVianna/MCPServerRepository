@@ -5,8 +5,7 @@ namespace MCPHub.Domain.Events;
 /// <summary>
 /// Event raised when a new MCP package is published
 /// </summary>
-public record PackagePublishedEvent : BaseEvent
-{
+public record PackagePublishedEvent : BaseEvent {
     /// <summary>
     /// ID of the published package
     /// </summary>
@@ -96,8 +95,7 @@ public record PackagePublishedEvent : BaseEvent
         string checksumSha256,
         bool isPrerelease = false,
         string? repository = null,
-        PackageCapabilitiesSummary? capabilities = null)
-    {
+        PackageCapabilitiesSummary? capabilities = null) {
         PackageId = packageId;
         PackageName = packageName;
         Version = version;
@@ -118,8 +116,7 @@ public record PackagePublishedEvent : BaseEvent
 /// <summary>
 /// Summary of MCP capabilities for events
 /// </summary>
-public class PackageCapabilitiesSummary
-{
+public class PackageCapabilitiesSummary {
     /// <summary>
     /// Number of tools provided
     /// </summary>

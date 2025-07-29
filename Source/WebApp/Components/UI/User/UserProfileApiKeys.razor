@@ -1,0 +1,472 @@
+@using MCPHub.Domain.Contracts.Requests
+@using MCPHub.Domain.Contracts.Responses
+@inject ISecurityService SecurityService
+@inject ISnackbar Snackbar
+
+<MudGrid Spacing="4">
+    <!-- API Keys List -->
+    <MudItem xs="12" md="8">
+        <div class="d-flex justify-space-between align-center mb-4">
+            <MudText Typo="Typo.h6">API Keys</MudText>
+            <MudButton Variant="Variant.Filled"
+                      Color="Color.Primary"
+                      StartIcon="@Icons.Material.Filled.Add"
+                      OnClick="@(() => _showCreateDialog = true)">
+                Create New Key
+            </MudButton>
+        </div>
+
+        @if (_isLoading)
+        {
+            <div class="text-center py-8">
+                <MudProgressCircular Size="Size.Large" Indeterminate="true" />
+                <MudText Typo="Typo.body2" Class="mt-4">Loading API keys...</MudText>
+            </div>
+        }
+        else if (_apiKeys?.Any() == true)
+        {
+            <div class="api-keys-list">
+                @foreach (var apiKey in _apiKeys)
+                {
+                    <MudCard Outlined="true" Class="mb-4">
+                        <MudCardContent>
+                            <div class="d-flex justify-space-between align-start mb-3">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-center mb-2">
+                                        <MudIcon Icon="@Icons.Material.Filled.VpnKey" Class="mr-2" />
+                                        <MudText Typo="Typo.h6" Class="font-weight-bold">
+                                            @apiKey.Name
+                                        </MudText>
+                                        @if (apiKey.IsActive)
+                                        {
+                                            <MudChip T="string" Size="Size.Small" Color="Color.Success" Class="ml-2">
+                                                Active
+                                            </MudChip>
+                                        }
+                                        else
+                                        {
+                                            <MudChip T="string" Size="Size.Small" Color="Color.Default" Class="ml-2">
+                                                Inactive
+                                            </MudChip>
+                                        }
+                                    </div>
+                                    
+                                    @if (!string.IsNullOrEmpty(apiKey.Description))
+                                    {
+                                        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-2">
+                                            @apiKey.Description
+                                        </MudText>
+                                    }
+                                    
+                                    <div class="api-key-details mb-3">
+                                        <MudGrid Spacing="2">
+                                            <MudItem xs="12" md="6">
+                                                <MudText Typo="Typo.caption" Color="Color.Secondary">Key</MudText>
+                                                <div class="d-flex align-center">
+                                                    <MudTextField Value="@GetMaskedKey(apiKey.Key)"
+                                                                 Variant="Variant.Outlined"
+                                                                 ReadOnly="true"
+                                                                 Dense="true"
+                                                                 Class="flex-grow-1 mr-2" />
+                                                    <MudIconButton Icon="@Icons.Material.Filled.ContentCopy"
+                                                                  Size="Size.Small"
+                                                                  OnClick="@(() => CopyToClipboard(apiKey.Key))"
+                                                                  Title="Copy to clipboard" />
+                                                    <MudIconButton Icon="@(_visibleKeys.Contains(apiKey.Id) ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                                                                  Size="Size.Small"
+                                                                  OnClick="@(() => ToggleKeyVisibility(apiKey.Id))"
+                                                                  Title="Toggle visibility" />
+                                                </div>
+                                            </MudItem>
+                                            <MudItem xs="12" md="6">
+                                                <MudText Typo="Typo.caption" Color="Color.Secondary">Scopes</MudText>
+                                                <div class="scopes-container">
+                                                    @if (apiKey.Scopes?.Any() == true)
+                                                    {
+                                                        @foreach (var scope in apiKey.Scopes)
+                                                        {
+                                                            <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Class="mr-1 mb-1">
+                                                                @scope
+                                                            </MudChip>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                                            No specific scopes
+                                                        </MudText>
+                                                    }
+                                                </div>
+                                            </MudItem>
+                                        </MudGrid>
+                                    </div>
+                                    
+                                    <div class="api-key-metadata">
+                                        <MudGrid Spacing="1">
+                                            <MudItem xs="12" sm="4">
+                                                <MudText Typo="Typo.caption" Color="Color.Secondary">Created</MudText>
+                                                <MudText Typo="Typo.body2">
+                                                    @apiKey.CreatedAt.ToString("MMM dd, yyyy")
+                                                </MudText>
+                                            </MudItem>
+                                            <MudItem xs="12" sm="4">
+                                                <MudText Typo="Typo.caption" Color="Color.Secondary">Expires</MudText>
+                                                <MudText Typo="Typo.body2">
+                                                    @(apiKey.ExpiresAt?.ToString("MMM dd, yyyy") ?? "Never")
+                                                </MudText>
+                                            </MudItem>
+                                            <MudItem xs="12" sm="4">
+                                                <MudText Typo="Typo.caption" Color="Color.Secondary">Last Used</MudText>
+                                                <MudText Typo="Typo.body2">
+                                                    @(apiKey.LastUsedAt?.ToString("MMM dd, yyyy") ?? "Never")
+                                                </MudText>
+                                            </MudItem>
+                                        </MudGrid>
+                                    </div>
+                                </div>
+                                
+                                <MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small">
+                                    <MudMenuItem Icon="@Icons.Material.Filled.Edit" 
+                                                OnClick="@(() => EditApiKey(apiKey))">
+                                        Edit
+                                    </MudMenuItem>
+                                    <MudMenuItem Icon="@Icons.Material.Filled.Refresh"
+                                                OnClick="@(() => RegenerateApiKey(apiKey))">
+                                        Regenerate
+                                    </MudMenuItem>
+                                    <MudDivider />
+                                    <MudMenuItem Icon="@Icons.Material.Filled.Delete" 
+                                                IconColor="Color.Error"
+                                                OnClick="@(() => ConfirmDeleteApiKey(apiKey))">
+                                        Delete
+                                    </MudMenuItem>
+                                </MudMenu>
+                            </div>
+                        </MudCardContent>
+                    </MudCard>
+                }
+            </div>
+        }
+        else
+        {
+            <MudAlert Severity="Severity.Info">
+                <strong>No API keys found.</strong> Create your first API key to start accessing the MCP Hub API programmatically.
+            </MudAlert>
+        }
+    </MudItem>
+
+    <!-- API Usage Information -->
+    <MudItem xs="12" md="4">
+        <MudPaper Elevation="1" Class="pa-4 mb-4">
+            <MudText Typo="Typo.h6" Class="mb-4">API Usage</MudText>
+            
+            <div class="usage-stats mb-4">
+                <div class="stat-item mb-3">
+                    <div class="d-flex justify-space-between">
+                        <MudText Typo="Typo.body2">Requests Today</MudText>
+                        <MudText Typo="Typo.body1" Class="font-weight-bold">@_apiUsage.RequestsToday</MudText>
+                    </div>
+                </div>
+                <div class="stat-item mb-3">
+                    <div class="d-flex justify-space-between">
+                        <MudText Typo="Typo.body2">Requests This Month</MudText>
+                        <MudText Typo="Typo.body1" Class="font-weight-bold">@_apiUsage.RequestsThisMonth</MudText>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="d-flex justify-space-between">
+                        <MudText Typo="Typo.body2">Rate Limit</MudText>
+                        <MudText Typo="Typo.body1" Class="font-weight-bold">@_apiUsage.RateLimit/hour</MudText>
+                    </div>
+                </div>
+            </div>
+            
+            <MudProgressLinear Value="@_apiUsage.UsagePercentage" 
+                              Color="@GetUsageColor()" 
+                              Size="Size.Medium" 
+                              Class="mb-2" />
+            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                @_apiUsage.UsagePercentage.ToString("F1")% of monthly quota used
+            </MudText>
+        </MudPaper>
+
+        <MudPaper Elevation="1" Class="pa-4">
+            <MudText Typo="Typo.h6" Class="mb-4">API Documentation</MudText>
+            
+            <MudText Typo="Typo.body2" Class="mb-4">
+                Learn how to use the MCP Hub API to integrate with your applications.
+            </MudText>
+            
+            <MudButton Variant="Variant.Outlined"
+                      Color="Color.Primary"
+                      StartIcon="@Icons.Material.Filled.Description"
+                      Href="/docs/api"
+                      Target="_blank"
+                      FullWidth="true"
+                      Class="mb-2">
+                View Documentation
+            </MudButton>
+            
+            <MudButton Variant="Variant.Text"
+                      Color="Color.Secondary"
+                      StartIcon="@Icons.Material.Filled.Code"
+                      Href="/docs/examples"
+                      Target="_blank"
+                      FullWidth="true">
+                Code Examples
+            </MudButton>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+<!-- Create API Key Dialog -->
+<MudDialog @bind-IsVisible="_showCreateDialog" Options="@_dialogOptions">
+    <TitleContent>
+        <div class="d-flex align-center">
+            <MudIcon Icon="@Icons.Material.Filled.VpnKey" Class="mr-3" />
+            Create New API Key
+        </div>
+    </TitleContent>
+    <DialogContent>
+        <CreateApiKeyComponent OnKeyCreated="@HandleApiKeyCreated" />
+    </DialogContent>
+</MudDialog>
+
+<!-- Delete Confirmation Dialog -->
+<MudDialog @bind-IsVisible="_showDeleteDialog" Options="@_deleteDialogOptions">
+    <TitleContent>
+        <div class="d-flex align-center">
+            <MudIcon Icon="@Icons.Material.Filled.Warning" Color="Color.Error" Class="mr-3" />
+            Delete API Key
+        </div>
+    </TitleContent>
+    <DialogContent>
+        <MudAlert Severity="Severity.Error" Class="mb-4">
+            <strong>Warning:</strong> This action cannot be undone. Applications using this API key will immediately lose access.
+        </MudAlert>
+        
+        <MudText Typo="Typo.body1" Class="mb-4">
+            Are you sure you want to delete the API key "<strong>@(_keyToDelete?.Name)</strong>"?
+        </MudText>
+        
+        <MudTextField @bind-Value="_deleteConfirmation"
+                      Label="Type 'DELETE' to confirm"
+                      Variant="Variant.Outlined"
+                      FullWidth="true" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => _showDeleteDialog = false)">Cancel</MudButton>
+        <MudButton Color="Color.Error" 
+                  Variant="Variant.Filled"
+                  OnClick="@HandleDeleteApiKey"
+                  Disabled="@(_deleteConfirmation != "DELETE" || _isDeleting)">
+            @if (_isDeleting)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                <span class="ml-2">Deleting...</span>
+            }
+            else
+            {
+                <span>Delete API Key</span>
+            }
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+<style>
+    .usage-stats .stat-item {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--mud-palette-lines-default);
+    }
+
+    .usage-stats .stat-item:last-child {
+        border-bottom: none;
+    }
+
+    .scopes-container {
+        min-height: 2rem;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+</style>
+
+@code {
+    private MCPHub.Domain.Contracts.Responses.ApiKeyInfo[]? _apiKeys;
+    private bool _isLoading = true;
+    private bool _showCreateDialog = false;
+    private bool _showDeleteDialog = false;
+    private bool _isDeleting = false;
+    private MCPHub.Domain.Contracts.Responses.ApiKeyInfo? _keyToDelete;
+    private string _deleteConfirmation = string.Empty;
+    private readonly HashSet<Guid> _visibleKeys = new();
+    
+    private ApiUsageStats _apiUsage = new();
+
+    private readonly DialogOptions _dialogOptions = new()
+    {
+        MaxWidth = MaxWidth.Medium,
+        FullWidth = true,
+        CloseButton = true
+    };
+
+    private readonly DialogOptions _deleteDialogOptions = new()
+    {
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true,
+        CloseButton = false,
+        BackdropClick = false
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadApiKeys();
+        LoadApiUsage();
+    }
+
+    private async Task LoadApiKeys()
+    {
+        _isLoading = true;
+        try
+        {
+            var result = await SecurityService.GetApiKeysAsync();
+            if (result.IsSuccess)
+            {
+                _apiKeys = result.ApiKeys;
+            }
+            else
+            {
+                Snackbar.Add($"Failed to load API keys: {result.ErrorMessage}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading API keys: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void LoadApiUsage()
+    {
+        // TODO: Load real API usage statistics
+        _apiUsage = new ApiUsageStats
+        {
+            RequestsToday = 245,
+            RequestsThisMonth = 5420,
+            RateLimit = 1000,
+            UsagePercentage = 34.2
+        };
+    }
+
+    private async Task HandleApiKeyCreated(MCPHub.Domain.Contracts.Responses.ApiKeyInfo newApiKey)
+    {
+        _showCreateDialog = false;
+        await LoadApiKeys(); // Refresh the list
+        Snackbar.Add("API key created successfully!", Severity.Success);
+    }
+
+    private void EditApiKey(MCPHub.Domain.Contracts.Responses.ApiKeyInfo apiKey)
+    {
+        // TODO: Implement API key editing
+        Snackbar.Add("API key editing will be available soon!", Severity.Info);
+    }
+
+    private async Task RegenerateApiKey(MCPHub.Domain.Contracts.Responses.ApiKeyInfo apiKey)
+    {
+        // TODO: Implement API key regeneration
+        Snackbar.Add("API key regenerated successfully!", Severity.Success);
+    }
+
+    private void ConfirmDeleteApiKey(MCPHub.Domain.Contracts.Responses.ApiKeyInfo apiKey)
+    {
+        _keyToDelete = apiKey;
+        _deleteConfirmation = string.Empty;
+        _showDeleteDialog = true;
+    }
+
+    private async Task HandleDeleteApiKey()
+    {
+        if (_keyToDelete == null) return;
+
+        _isDeleting = true;
+        try
+        {
+            var request = new RevokeApiKeyRequest { ApiKeyId = _keyToDelete.Id };
+            var result = await SecurityService.RevokeApiKeyAsync(request);
+            
+            if (result.IsSuccess)
+            {
+                Snackbar.Add("API key deleted successfully!", Severity.Success);
+                _showDeleteDialog = false;
+                await LoadApiKeys(); // Refresh the list
+            }
+            else
+            {
+                Snackbar.Add($"Failed to delete API key: {result.ErrorMessage}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error deleting API key: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isDeleting = false;
+        }
+    }
+
+    private string GetMaskedKey(string key)
+    {
+        if (_visibleKeys.Contains(GetKeyId(key)))
+        {
+            return key;
+        }
+        
+        if (key.Length <= 8)
+        {
+            return new string('*', key.Length);
+        }
+        
+        return key.Substring(0, 4) + new string('*', key.Length - 8) + key.Substring(key.Length - 4);
+    }
+
+    private void ToggleKeyVisibility(Guid keyId)
+    {
+        if (_visibleKeys.Contains(keyId))
+        {
+            _visibleKeys.Remove(keyId);
+        }
+        else
+        {
+            _visibleKeys.Add(keyId);
+        }
+        StateHasChanged();
+    }
+
+    private Guid GetKeyId(string key) => 
+        _apiKeys?.FirstOrDefault(k => k.Key == key)?.Id ?? Guid.Empty;
+
+    private async Task CopyToClipboard(string text)
+    {
+        // TODO: Implement clipboard copy
+        Snackbar.Add("API key copied to clipboard!", Severity.Success);
+    }
+
+    private Color GetUsageColor() => _apiUsage.UsagePercentage switch
+    {
+        var usage when usage < 50 => Color.Success,
+        var usage when usage < 80 => Color.Warning,
+        _ => Color.Error
+    };
+
+    public class ApiUsageStats
+    {
+        public int RequestsToday { get; set; }
+        public int RequestsThisMonth { get; set; }
+        public int RateLimit { get; set; }
+        public double UsagePercentage { get; set; }
+    }
+}

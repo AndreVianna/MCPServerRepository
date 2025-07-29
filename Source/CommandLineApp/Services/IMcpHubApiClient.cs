@@ -5,8 +5,7 @@ namespace MCPHub.CommandLineApp.Services;
 /// <summary>
 /// Interface for MCP Hub API client operations
 /// </summary>
-public interface IMcpHubApiClient
-{
+public interface IMcpHubApiClient {
     /// <summary>
     /// Searches for packages using the advanced search API
     /// </summary>

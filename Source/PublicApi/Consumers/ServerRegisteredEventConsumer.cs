@@ -16,6 +16,6 @@ public class ServerRegisteredEventConsumer(
     /// <summary>
     /// Processes a ServerRegisteredEvent message
     /// </summary>
-    public Task ConsumeAsync(ServerRegisteredEvent message, CancellationToken cancellationToken = default) 
+    public Task ConsumeAsync(ServerRegisteredEvent message, CancellationToken cancellationToken = default)
         => throw new NotImplementedException("Server registration event processing will be implemented when messaging infrastructure is available");
 }

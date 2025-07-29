@@ -5,8 +5,7 @@ namespace MCPHub.Domain.Contracts.Responses;
 /// <summary>
 /// Represents a comprehensive trust tier assessment for a package
 /// </summary>
-public class TrustTierAssessment
-{
+public class TrustTierAssessment {
     /// <summary>
     /// Gets or sets the current trust tier of the package
     /// </summary>

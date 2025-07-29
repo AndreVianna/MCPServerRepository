@@ -6,8 +6,7 @@ namespace MCPHub.Domain.Contracts.Responses;
 /// <summary>
 /// Result of a package publishing operation
 /// </summary>
-public class PublishResult
-{
+public class PublishResult {
     /// <summary>
     /// Indicates if the publishing operation was successful
     /// </summary>
@@ -63,8 +62,7 @@ public class PublishResult
         PackageVersion? packageVersion = null,
         ValidationSummary? validationSummary = null,
         long publishTimeMs = 0,
-        string? storageUrl = null)
-    {
+        string? storageUrl = null) {
         Success = success;
         Errors = errors?.ToList().AsReadOnly() ?? new List<string>().AsReadOnly();
         Warnings = warnings?.ToList().AsReadOnly() ?? new List<string>().AsReadOnly();
@@ -84,9 +82,7 @@ public class PublishResult
         ValidationSummary? validationSummary = null,
         long publishTimeMs = 0,
         string? storageUrl = null,
-        IEnumerable<string>? warnings = null)
-    {
-        return new PublishResult(
+        IEnumerable<string>? warnings = null) => new PublishResult(
             true,
             null,
             warnings,
@@ -95,7 +91,6 @@ public class PublishResult
             validationSummary,
             publishTimeMs,
             storageUrl);
-    }
 
     /// <summary>
     /// Creates a failed publish result
@@ -104,9 +99,7 @@ public class PublishResult
         IEnumerable<string> errors,
         ValidationSummary? validationSummary = null,
         long publishTimeMs = 0,
-        IEnumerable<string>? warnings = null)
-    {
-        return new PublishResult(
+        IEnumerable<string>? warnings = null) => new PublishResult(
             false,
             errors,
             warnings,
@@ -115,7 +108,6 @@ public class PublishResult
             validationSummary,
             publishTimeMs,
             null);
-    }
 
     /// <summary>
     /// Creates a failed publish result with a single error
@@ -124,9 +116,7 @@ public class PublishResult
         string error,
         ValidationSummary? validationSummary = null,
         long publishTimeMs = 0,
-        IEnumerable<string>? warnings = null)
-    {
-        return new PublishResult(
+        IEnumerable<string>? warnings = null) => new PublishResult(
             false,
             [error],
             warnings,
@@ -135,5 +125,4 @@ public class PublishResult
             validationSummary,
             publishTimeMs,
             null);
-    }
 }

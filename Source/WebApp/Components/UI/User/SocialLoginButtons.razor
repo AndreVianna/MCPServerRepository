@@ -1,0 +1,107 @@
+@inject IAuthenticationService AuthService
+@inject ISnackbar Snackbar
+
+<div class="social-login-section">
+    <MudDivider Class="mb-4">
+        <MudText Typo="Typo.body2" Color="Color.Secondary">or continue with</MudText>
+    </MudDivider>
+
+    <MudGrid Spacing="2">
+        <MudItem xs="12" sm="4">
+            <MudButton Variant="Variant.Outlined"
+                      Color="Color.Default"
+                      FullWidth="true"
+                      Size="Size.Large"
+                      StartIcon="@Icons.Custom.Brands.GitHub"
+                      OnClick="@(() => HandleSocialLogin("GitHub"))"
+                      Disabled="@IsLoading"
+                      Class="social-login-button github-button">
+                GitHub
+            </MudButton>
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudButton Variant="Variant.Outlined"
+                      Color="Color.Default"
+                      FullWidth="true"
+                      Size="Size.Large"
+                      StartIcon="@Icons.Custom.Brands.Google"
+                      OnClick="@(() => HandleSocialLogin("Google"))"
+                      Disabled="@IsLoading"
+                      Class="social-login-button google-button">
+                Google
+            </MudButton>
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudButton Variant="Variant.Outlined"
+                      Color="Color.Default"
+                      FullWidth="true"
+                      Size="Size.Large"
+                      StartIcon="@Icons.Custom.Brands.Microsoft"
+                      OnClick="@(() => HandleSocialLogin("Microsoft"))"
+                      Disabled="@IsLoading"
+                      Class="social-login-button microsoft-button">
+                Microsoft
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+
+    @if (IsLoading)
+    {
+        <div class="text-center mt-4">
+            <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+            <MudText Typo="Typo.caption" Class="ml-2">Connecting to @_currentProvider...</MudText>
+        </div>
+    }
+</div>
+
+<style>
+    .social-login-button {
+        border: 2px solid var(--mud-palette-lines-default);
+        transition: all 0.2s ease-in-out;
+    }
+
+    .social-login-button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .github-button:hover {
+        border-color: #333;
+        background-color: rgba(51, 51, 51, 0.05);
+    }
+
+    .google-button:hover {
+        border-color: #db4437;
+        background-color: rgba(219, 68, 55, 0.05);
+    }
+
+    .microsoft-button:hover {
+        border-color: #0078d4;
+        background-color: rgba(0, 120, 212, 0.05);
+    }
+</style>
+
+@code {
+    [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public EventCallback<string> OnSocialLoginClick { get; set; }
+
+    private string _currentProvider = string.Empty;
+
+    private async Task HandleSocialLogin(string provider)
+    {
+        _currentProvider = provider;
+        IsLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            await OnSocialLoginClick.InvokeAsync(provider);
+        }
+        finally
+        {
+            IsLoading = false;
+            _currentProvider = string.Empty;
+            StateHasChanged();
+        }
+    }
+}

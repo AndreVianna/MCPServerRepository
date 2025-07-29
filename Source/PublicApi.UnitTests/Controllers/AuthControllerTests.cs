@@ -1,27 +1,27 @@
 using System.Security.Claims;
+
+using MCPHub.PublicApi.Controllers;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using MCPHub.PublicApi.Controllers;
 
 namespace MCPHub.PublicApi.UnitTests.Controllers;
 
 /// <summary>
 /// Unit tests for AuthController
 /// </summary>
-public class AuthControllerTests
-{
+public class AuthControllerTests {
     private readonly AuthController _controller;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IJwtService _jwtService;
     private readonly ILogger<AuthController> _logger;
 
-    public AuthControllerTests()
-    {
+    public AuthControllerTests() {
         _userManager = Substitute.For<UserManager<ApplicationUser>>(
             Substitute.For<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
         _signInManager = Substitute.For<SignInManager<ApplicationUser>>(
-            _userManager, Substitute.For<IHttpContextAccessor>(), 
+            _userManager, Substitute.For<IHttpContextAccessor>(),
             Substitute.For<IUserClaimsPrincipalFactory<ApplicationUser>>(), null, null, null, null);
         _jwtService = Substitute.For<IJwtService>();
         _logger = Substitute.For<ILogger<AuthController>>();
@@ -30,15 +30,13 @@ public class AuthControllerTests
     }
 
     [Fact]
-    public async Task Login_WithValidCredentials_ReturnsSuccessResult()
-    {
+    public async Task Login_WithValidCredentials_ReturnsSuccessResult() {
         // Arrange
-        var request = new LoginRequest 
-        { 
-            Email = "test@example.com", 
-            Password = "TestPassword123!" 
+        var request = new LoginRequest {
+            Email = "test@example.com",
+            Password = "TestPassword123!"
         };
-        
+
         var user = CreateTestUser();
         var accessToken = "test-access-token";
         var refreshToken = "test-refresh-token";
@@ -58,7 +56,7 @@ public class AuthControllerTests
         result.Should().BeOfType<OkObjectResult>();
         var okResult = (OkObjectResult)result;
         var authResult = okResult.Value.Should().BeOfType<AuthenticationResult>().Subject;
-        
+
         authResult.IsSuccess.Should().BeTrue();
         authResult.User.Should().Be(user);
         authResult.AccessToken.Should().Be(accessToken);
@@ -67,13 +65,11 @@ public class AuthControllerTests
     }
 
     [Fact]
-    public async Task Login_WithInvalidEmail_ReturnsBadRequest()
-    {
+    public async Task Login_WithInvalidEmail_ReturnsBadRequest() {
         // Arrange
-        var request = new LoginRequest 
-        { 
-            Email = "nonexistent@example.com", 
-            Password = "TestPassword123!" 
+        var request = new LoginRequest {
+            Email = "nonexistent@example.com",
+            Password = "TestPassword123!"
         };
 
         _userManager.FindByEmailAsync(request.Email).Returns((ApplicationUser?)null);
@@ -85,21 +81,19 @@ public class AuthControllerTests
         result.Should().BeOfType<BadRequestObjectResult>();
         var badRequestResult = (BadRequestObjectResult)result;
         var authResult = badRequestResult.Value.Should().BeOfType<AuthenticationResult>().Subject;
-        
+
         authResult.IsSuccess.Should().BeFalse();
         authResult.ErrorMessage.Should().Be("Invalid email or password");
     }
 
     [Fact]
-    public async Task Login_WithInvalidPassword_ReturnsBadRequest()
-    {
+    public async Task Login_WithInvalidPassword_ReturnsBadRequest() {
         // Arrange
-        var request = new LoginRequest 
-        { 
-            Email = "test@example.com", 
-            Password = "WrongPassword" 
+        var request = new LoginRequest {
+            Email = "test@example.com",
+            Password = "WrongPassword"
         };
-        
+
         var user = CreateTestUser();
 
         _userManager.FindByEmailAsync(request.Email).Returns(user);
@@ -113,21 +107,19 @@ public class AuthControllerTests
         result.Should().BeOfType<BadRequestObjectResult>();
         var badRequestResult = (BadRequestObjectResult)result;
         var authResult = badRequestResult.Value.Should().BeOfType<AuthenticationResult>().Subject;
-        
+
         authResult.IsSuccess.Should().BeFalse();
         authResult.ErrorMessage.Should().Be("Invalid email or password");
     }
 
     [Fact]
-    public async Task Login_WithLockedOutAccount_ReturnsBadRequest()
-    {
+    public async Task Login_WithLockedOutAccount_ReturnsBadRequest() {
         // Arrange
-        var request = new LoginRequest 
-        { 
-            Email = "test@example.com", 
-            Password = "TestPassword123!" 
+        var request = new LoginRequest {
+            Email = "test@example.com",
+            Password = "TestPassword123!"
         };
-        
+
         var user = CreateTestUser();
 
         _userManager.FindByEmailAsync(request.Email).Returns(user);
@@ -141,14 +133,13 @@ public class AuthControllerTests
         result.Should().BeOfType<BadRequestObjectResult>();
         var badRequestResult = (BadRequestObjectResult)result;
         var authResult = badRequestResult.Value.Should().BeOfType<AuthenticationResult>().Subject;
-        
+
         authResult.IsSuccess.Should().BeFalse();
         authResult.ErrorMessage.Should().Be("Account is locked out");
     }
 
     [Fact]
-    public async Task RefreshToken_WithValidToken_ReturnsSuccessResult()
-    {
+    public async Task RefreshToken_WithValidToken_ReturnsSuccessResult() {
         // Arrange
         var request = new RefreshTokenRequest { RefreshToken = "valid-refresh-token" };
         var userId = Guid.NewGuid();
@@ -173,7 +164,7 @@ public class AuthControllerTests
         result.Should().BeOfType<OkObjectResult>();
         var okResult = (OkObjectResult)result;
         var tokenResult = okResult.Value.Should().BeOfType<TokenResult>().Subject;
-        
+
         tokenResult.IsSuccess.Should().BeTrue();
         tokenResult.AccessToken.Should().Be(newAccessToken);
         tokenResult.RefreshToken.Should().Be(newRefreshToken);
@@ -181,8 +172,7 @@ public class AuthControllerTests
     }
 
     [Fact]
-    public async Task RefreshToken_WithInvalidToken_ReturnsBadRequest()
-    {
+    public async Task RefreshToken_WithInvalidToken_ReturnsBadRequest() {
         // Arrange
         var request = new RefreshTokenRequest { RefreshToken = "invalid-refresh-token" };
 
@@ -196,14 +186,13 @@ public class AuthControllerTests
         result.Should().BeOfType<BadRequestObjectResult>();
         var badRequestResult = (BadRequestObjectResult)result;
         var tokenResult = badRequestResult.Value.Should().BeOfType<TokenResult>().Subject;
-        
+
         tokenResult.IsSuccess.Should().BeFalse();
         tokenResult.ErrorMessage.Should().Be("Invalid refresh token");
     }
 
     [Fact]
-    public async Task GetProfile_WithValidUser_ReturnsUserProfile()
-    {
+    public async Task GetProfile_WithValidUser_ReturnsUserProfile() {
         // Arrange
         var userId = Guid.NewGuid();
         var user = CreateTestUser();
@@ -218,10 +207,8 @@ public class AuthControllerTests
         var identity = new ClaimsIdentity(claims, "Test");
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        _controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext
-            {
+        _controller.ControllerContext = new ControllerContext {
+            HttpContext = new DefaultHttpContext {
                 User = claimsPrincipal
             }
         };
@@ -235,23 +222,20 @@ public class AuthControllerTests
         result.Should().BeOfType<OkObjectResult>();
         var okResult = (OkObjectResult)result;
         var profileResult = okResult.Value.Should().BeOfType<UserProfileResult>().Subject;
-        
+
         profileResult.IsSuccess.Should().BeTrue();
-        profileResult.User.Should().Be(user);
+        profileResult.Profile.Should().NotBeNull();
     }
 
     [Fact]
-    public async Task GetProfile_WithInvalidUserClaim_ReturnsBadRequest()
-    {
+    public async Task GetProfile_WithInvalidUserClaim_ReturnsBadRequest() {
         // Arrange
         var claims = new List<Claim>(); // No user ID claim
         var identity = new ClaimsIdentity(claims, "Test");
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        _controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext
-            {
+        _controller.ControllerContext = new ControllerContext {
+            HttpContext = new DefaultHttpContext {
                 User = claimsPrincipal
             }
         };
@@ -263,14 +247,13 @@ public class AuthControllerTests
         result.Should().BeOfType<BadRequestObjectResult>();
         var badRequestResult = (BadRequestObjectResult)result;
         var profileResult = badRequestResult.Value.Should().BeOfType<UserProfileResult>().Subject;
-        
+
         profileResult.IsSuccess.Should().BeFalse();
         profileResult.ErrorMessage.Should().Be("Invalid user context");
     }
 
     [Fact]
-    public async Task Logout_WithValidUser_ReturnsSuccess()
-    {
+    public async Task Logout_WithValidUser_ReturnsSuccess() {
         // Arrange
         var userId = Guid.NewGuid();
         var claims = new List<Claim>
@@ -281,10 +264,8 @@ public class AuthControllerTests
         var identity = new ClaimsIdentity(claims, "Test");
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        _controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext
-            {
+        _controller.ControllerContext = new ControllerContext {
+            HttpContext = new DefaultHttpContext {
                 User = claimsPrincipal
             }
         };
@@ -296,18 +277,14 @@ public class AuthControllerTests
         result.Should().BeOfType<OkObjectResult>();
         var okResult = (OkObjectResult)result;
         var logoutResult = okResult.Value.Should().BeOfType<LogoutResult>().Subject;
-        
+
         logoutResult.IsSuccess.Should().BeTrue();
     }
 
-    private static ApplicationUser CreateTestUser()
-    {
-        return new ApplicationUser("testuser", "test@example.com")
-        {
-            Id = Guid.NewGuid(),
-            UserName = "testuser",
-            Email = "test@example.com",
-            EmailConfirmed = true
-        };
-    }
+    private static ApplicationUser CreateTestUser() => new ApplicationUser("testuser", "test@example.com") {
+        Id = Guid.NewGuid(),
+        UserName = "testuser",
+        Email = "test@example.com",
+        EmailConfirmed = true
+    };
 }

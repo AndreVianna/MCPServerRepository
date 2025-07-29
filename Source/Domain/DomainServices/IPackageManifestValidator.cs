@@ -5,8 +5,7 @@ namespace MCPHub.Domain.DomainServices;
 /// <summary>
 /// Service for validating MCP package manifests
 /// </summary>
-public interface IPackageManifestValidator
-{
+public interface IPackageManifestValidator {
     /// <summary>
     /// Validates the manifest JSON content and structure
     /// </summary>
@@ -22,7 +21,7 @@ public interface IPackageManifestValidator
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Parsed manifest and validation summary</returns>
     Task<(MCPManifest? Manifest, ValidationSummary ValidationSummary)> ParseAndValidateAsync(
-        string manifestContent, 
+        string manifestContent,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -33,8 +32,8 @@ public interface IPackageManifestValidator
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Validation summary indicating if publisher owns the namespace</returns>
     Task<ValidationSummary> ValidateNamespaceOwnershipAsync(
-        string packageName, 
-        Guid publisherId, 
+        string packageName,
+        Guid publisherId,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -45,8 +44,8 @@ public interface IPackageManifestValidator
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Validation summary indicating if version is unique</returns>
     Task<ValidationSummary> ValidateVersionUniquenessAsync(
-        string packageName, 
-        string version, 
+        string packageName,
+        string version,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -56,7 +55,7 @@ public interface IPackageManifestValidator
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Validation summary for dependency resolution</returns>
     Task<ValidationSummary> ValidateDependenciesAsync(
-        Dictionary<string, string> dependencies, 
+        Dictionary<string, string> dependencies,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -66,6 +65,6 @@ public interface IPackageManifestValidator
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Validation summary for security analysis</returns>
     Task<ValidationSummary> ValidateSecurityAsync(
-        MCPManifest manifest, 
+        MCPManifest manifest,
         CancellationToken cancellationToken = default);
 }

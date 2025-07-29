@@ -1,13 +1,16 @@
 using System.Security.Claims;
+
 using MCPHub.Domain.Contracts.Requests;
 using MCPHub.Domain.Contracts.Responses;
 using MCPHub.Domain.Contracts.Services;
 using MCPHub.Domain.Entities;
 using MCPHub.Domain.ValueObjects;
 using MCPHub.PublicApi.Controllers.V1;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+
 using Moq;
 
 namespace MCPHub.PublicApi.UnitTests.Controllers.V1;
@@ -15,25 +18,30 @@ namespace MCPHub.PublicApi.UnitTests.Controllers.V1;
 /// <summary>
 /// Unit tests for publishing functionality in PackagesV1Controller
 /// </summary>
-[TestClass]
-public class PackagesV1ControllerPublishingTests
-{
-    private Mock<IPackageService> _mockPackageService;
-    private Mock<IPackagePublishingService> _mockPublishingService;
-    private Mock<ILogger<PackagesV1Controller>> _mockLogger;
-    private PackagesV1Controller _controller;
+public class PackagesV1ControllerPublishingTests {
+    private readonly Mock<IPackageService> _mockPackageService;
+    private readonly Mock<IPackagePublishingService> _mockPublishingService;
+    private readonly Mock<IPackageInstallationService> _mockInstallationService;
+    private readonly Mock<ISecurityScanService> _mockSecurityScanService;
+    private readonly Mock<ITrustTierCalculationService> _mockTrustTierService;
+    private readonly Mock<ILogger<PackagesV1Controller>> _mockLogger;
+    private readonly PackagesV1Controller _controller;
     private readonly Guid _testUserId = Guid.NewGuid();
 
-    [TestInitialize]
-    public void Initialize()
-    {
+    public PackagesV1ControllerPublishingTests() {
         _mockPackageService = new Mock<IPackageService>();
         _mockPublishingService = new Mock<IPackagePublishingService>();
+        _mockInstallationService = new Mock<IPackageInstallationService>();
+        _mockSecurityScanService = new Mock<ISecurityScanService>();
+        _mockTrustTierService = new Mock<ITrustTierCalculationService>();
         _mockLogger = new Mock<ILogger<PackagesV1Controller>>();
 
         _controller = new PackagesV1Controller(
             _mockPackageService.Object,
             _mockPublishingService.Object,
+            _mockInstallationService.Object,
+            _mockSecurityScanService.Object,
+            _mockTrustTierService.Object,
             _mockLogger.Object);
 
         // Setup user claims
@@ -45,24 +53,20 @@ public class PackagesV1ControllerPublishingTests
         var identity = new ClaimsIdentity(claims, "test");
         var principal = new ClaimsPrincipal(identity);
 
-        _controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext
-            {
+        _controller.ControllerContext = new ControllerContext {
+            HttpContext = new DefaultHttpContext {
                 User = principal
             }
         };
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("PackagesV1Controller")]
-    [TestCategory("Publishing")]
-    public async Task PublishPackage_WithValidRequest_ShouldReturnCreated()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "PackagesV1Controller")]
+    [Trait("Category", "Publishing")]
+    public async Task PublishPackage_WithValidRequest_ShouldReturnCreated() {
         // Arrange
-        var request = new PublishRequest
-        {
+        var request = new PublishRequest {
             ManifestContent = """
             {
                 "name": "test-package",
@@ -87,24 +91,22 @@ public class PackagesV1ControllerPublishingTests
         var result = await _controller.PublishPackage(request, CancellationToken.None);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(CreatedAtActionResult));
+        Assert.IsType<CreatedAtActionResult>(result);
         var createdResult = (CreatedAtActionResult)result;
-        Assert.AreEqual(201, createdResult.StatusCode);
+        Assert.Equal(201, createdResult.StatusCode);
 
         _mockPublishingService.Verify(
             x => x.PublishPackageAsync(request, _testUserId, It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("PackagesV1Controller")]
-    [TestCategory("Publishing")]
-    public async Task PublishPackage_WithInvalidRequest_ShouldReturnBadRequest()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "PackagesV1Controller")]
+    [Trait("Category", "Publishing")]
+    public async Task PublishPackage_WithInvalidRequest_ShouldReturnBadRequest() {
         // Arrange
-        var request = new PublishRequest
-        {
+        var request = new PublishRequest {
             ManifestContent = """
             {
                 "name": "test-package",
@@ -121,24 +123,22 @@ public class PackagesV1ControllerPublishingTests
         var result = await _controller.PublishPackage(request, CancellationToken.None);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(ObjectResult));
+        Assert.IsType<ObjectResult>(result);
         var objectResult = (ObjectResult)result;
-        Assert.AreEqual(400, objectResult.StatusCode);
+        Assert.Equal(400, objectResult.StatusCode);
 
         _mockPublishingService.Verify(
             x => x.PublishPackageAsync(It.IsAny<PublishRequest>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()),
             Times.Never);
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("PackagesV1Controller")]
-    [TestCategory("Publishing")]
-    public async Task PublishPackage_WithPublishingFailure_ShouldReturnBadRequest()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "PackagesV1Controller")]
+    [Trait("Category", "Publishing")]
+    public async Task PublishPackage_WithPublishingFailure_ShouldReturnBadRequest() {
         // Arrange
-        var request = new PublishRequest
-        {
+        var request = new PublishRequest {
             ManifestContent = """
             {
                 "name": "invalid-package",
@@ -161,21 +161,19 @@ public class PackagesV1ControllerPublishingTests
         var result = await _controller.PublishPackage(request, CancellationToken.None);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(ObjectResult));
+        Assert.IsType<ObjectResult>(result);
         var objectResult = (ObjectResult)result;
-        Assert.AreEqual(400, objectResult.StatusCode);
+        Assert.Equal(400, objectResult.StatusCode);
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("PackagesV1Controller")]
-    [TestCategory("Publishing")]
-    public async Task PublishPackageVersion_WithValidRequest_ShouldReturnCreated()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "PackagesV1Controller")]
+    [Trait("Category", "Publishing")]
+    public async Task PublishPackageVersion_WithValidRequest_ShouldReturnCreated() {
         // Arrange
         var packageName = "test-package";
-        var request = new PublishVersionRequest
-        {
+        var request = new PublishVersionRequest {
             Version = "1.1.0",
             ManifestContent = """
             {
@@ -200,20 +198,18 @@ public class PackagesV1ControllerPublishingTests
         var result = await _controller.PublishPackageVersion(packageName, request, CancellationToken.None);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(CreatedAtActionResult));
+        Assert.IsType<CreatedAtActionResult>(result);
         var createdResult = (CreatedAtActionResult)result;
-        Assert.AreEqual(201, createdResult.StatusCode);
+        Assert.Equal(201, createdResult.StatusCode);
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("PackagesV1Controller")]
-    [TestCategory("Publishing")]
-    public async Task PublishPackageVersion_WithEmptyPackageName_ShouldReturnBadRequest()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "PackagesV1Controller")]
+    [Trait("Category", "Publishing")]
+    public async Task PublishPackageVersion_WithEmptyPackageName_ShouldReturnBadRequest() {
         // Arrange
-        var request = new PublishVersionRequest
-        {
+        var request = new PublishVersionRequest {
             Version = "1.1.0",
             ManifestContent = "{}",
             PackageUrl = "https://example.com/package.zip"
@@ -223,17 +219,16 @@ public class PackagesV1ControllerPublishingTests
         var result = await _controller.PublishPackageVersion("", request, CancellationToken.None);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(ObjectResult));
+        Assert.IsType<ObjectResult>(result);
         var objectResult = (ObjectResult)result;
-        Assert.AreEqual(400, objectResult.StatusCode);
+        Assert.Equal(400, objectResult.StatusCode);
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("PackagesV1Controller")]
-    [TestCategory("Publishing")]
-    public async Task ValidateManifest_WithValidManifest_ShouldReturnOk()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "PackagesV1Controller")]
+    [Trait("Category", "Publishing")]
+    public async Task ValidateManifest_WithValidManifest_ShouldReturnOk() {
         // Arrange
         var manifestContent = """
         {
@@ -256,36 +251,34 @@ public class PackagesV1ControllerPublishingTests
         var result = await _controller.ValidateManifest(manifestContent, CancellationToken.None);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(ObjectResult));
+        Assert.IsType<ObjectResult>(result);
         var objectResult = (ObjectResult)result;
-        Assert.AreEqual(200, objectResult.StatusCode);
+        Assert.Equal(200, objectResult.StatusCode);
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("PackagesV1Controller")]
-    [TestCategory("Publishing")]
-    public async Task ValidateManifest_WithEmptyManifest_ShouldReturnBadRequest()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "PackagesV1Controller")]
+    [Trait("Category", "Publishing")]
+    public async Task ValidateManifest_WithEmptyManifest_ShouldReturnBadRequest() {
         // Act
         var result = await _controller.ValidateManifest("", CancellationToken.None);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(ObjectResult));
+        Assert.IsType<ObjectResult>(result);
         var objectResult = (ObjectResult)result;
-        Assert.AreEqual(400, objectResult.StatusCode);
+        Assert.Equal(400, objectResult.StatusCode);
 
         _mockPublishingService.Verify(
             x => x.ValidateManifestAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
             Times.Never);
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("PackagesV1Controller")]
-    [TestCategory("Publishing")]
-    public async Task GetPackageVersions_WithValidPackageName_ShouldReturnOk()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "PackagesV1Controller")]
+    [Trait("Category", "Publishing")]
+    public async Task GetPackageVersions_WithValidPackageName_ShouldReturnOk() {
         // Arrange
         var packageName = "test-package";
         var versions = new List<PackageVersionInfo>
@@ -302,17 +295,16 @@ public class PackagesV1ControllerPublishingTests
         var result = await _controller.GetPackageVersions(packageName, false, CancellationToken.None);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(ObjectResult));
+        Assert.IsType<ObjectResult>(result);
         var objectResult = (ObjectResult)result;
-        Assert.AreEqual(200, objectResult.StatusCode);
+        Assert.Equal(200, objectResult.StatusCode);
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("PackagesV1Controller")]
-    [TestCategory("Publishing")]
-    public async Task GetPackageVersions_WithNoVersions_ShouldReturnNotFound()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "PackagesV1Controller")]
+    [Trait("Category", "Publishing")]
+    public async Task GetPackageVersions_WithNoVersions_ShouldReturnNotFound() {
         // Arrange
         var packageName = "nonexistent-package";
         var versions = new List<PackageVersionInfo>();
@@ -325,17 +317,16 @@ public class PackagesV1ControllerPublishingTests
         var result = await _controller.GetPackageVersions(packageName, false, CancellationToken.None);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(ObjectResult));
+        Assert.IsType<ObjectResult>(result);
         var objectResult = (ObjectResult)result;
-        Assert.AreEqual(404, objectResult.StatusCode);
+        Assert.Equal(404, objectResult.StatusCode);
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("PackagesV1Controller")]
-    [TestCategory("Publishing")]
-    public async Task CheckPackageNameAvailability_WithAvailableName_ShouldReturnOk()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "PackagesV1Controller")]
+    [Trait("Category", "Publishing")]
+    public async Task CheckPackageNameAvailability_WithAvailableName_ShouldReturnOk() {
         // Arrange
         var packageName = "available-package";
 
@@ -347,17 +338,16 @@ public class PackagesV1ControllerPublishingTests
         var result = await _controller.CheckPackageNameAvailability(packageName, CancellationToken.None);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(ObjectResult));
+        Assert.IsType<ObjectResult>(result);
         var objectResult = (ObjectResult)result;
-        Assert.AreEqual(200, objectResult.StatusCode);
+        Assert.Equal(200, objectResult.StatusCode);
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("PackagesV1Controller")]
-    [TestCategory("Publishing")]
-    public async Task CheckPackageNameAvailability_WithUnavailableName_ShouldReturnOk()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "PackagesV1Controller")]
+    [Trait("Category", "Publishing")]
+    public async Task CheckPackageNameAvailability_WithUnavailableName_ShouldReturnOk() {
         // Arrange
         var packageName = "taken-package";
 
@@ -369,40 +359,37 @@ public class PackagesV1ControllerPublishingTests
         var result = await _controller.CheckPackageNameAvailability(packageName, CancellationToken.None);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(ObjectResult));
+        Assert.IsType<ObjectResult>(result);
         var objectResult = (ObjectResult)result;
-        Assert.AreEqual(200, objectResult.StatusCode);
+        Assert.Equal(200, objectResult.StatusCode);
         // Should still return 200 but with isAvailable = false in the response
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("PackagesV1Controller")]
-    [TestCategory("Publishing")]
-    public async Task CheckPackageNameAvailability_WithEmptyPackageName_ShouldReturnBadRequest()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "PackagesV1Controller")]
+    [Trait("Category", "Publishing")]
+    public async Task CheckPackageNameAvailability_WithEmptyPackageName_ShouldReturnBadRequest() {
         // Act
         var result = await _controller.CheckPackageNameAvailability("", CancellationToken.None);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(ObjectResult));
+        Assert.IsType<ObjectResult>(result);
         var objectResult = (ObjectResult)result;
-        Assert.AreEqual(400, objectResult.StatusCode);
+        Assert.Equal(400, objectResult.StatusCode);
 
         _mockPublishingService.Verify(
             x => x.IsPackageNameAvailableAsync(It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()),
             Times.Never);
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("PackagesV1Controller")]
-    [TestCategory("Publishing")]
-    public async Task PublishPackage_WithUnauthorizedException_ShouldReturnForbidden()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "PackagesV1Controller")]
+    [Trait("Category", "Publishing")]
+    public async Task PublishPackage_WithUnauthorizedException_ShouldReturnForbidden() {
         // Arrange
-        var request = new PublishRequest
-        {
+        var request = new PublishRequest {
             ManifestContent = "{}",
             PackageUrl = "https://example.com/package.zip"
         };
@@ -415,20 +402,18 @@ public class PackagesV1ControllerPublishingTests
         var result = await _controller.PublishPackage(request, CancellationToken.None);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(ObjectResult));
+        Assert.IsType<ObjectResult>(result);
         var objectResult = (ObjectResult)result;
-        Assert.AreEqual(403, objectResult.StatusCode);
+        Assert.Equal(403, objectResult.StatusCode);
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("PackagesV1Controller")]
-    [TestCategory("Publishing")]
-    public async Task PublishPackage_WithArgumentException_ShouldReturnBadRequest()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "PackagesV1Controller")]
+    [Trait("Category", "Publishing")]
+    public async Task PublishPackage_WithArgumentException_ShouldReturnBadRequest() {
         // Arrange
-        var request = new PublishRequest
-        {
+        var request = new PublishRequest {
             ManifestContent = "{}",
             PackageUrl = "https://example.com/package.zip"
         };
@@ -441,20 +426,18 @@ public class PackagesV1ControllerPublishingTests
         var result = await _controller.PublishPackage(request, CancellationToken.None);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(ObjectResult));
+        Assert.IsType<ObjectResult>(result);
         var objectResult = (ObjectResult)result;
-        Assert.AreEqual(400, objectResult.StatusCode);
+        Assert.Equal(400, objectResult.StatusCode);
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("PackagesV1Controller")]
-    [TestCategory("Publishing")]
-    public async Task PublishPackage_WithGenericException_ShouldReturnInternalServerError()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "PackagesV1Controller")]
+    [Trait("Category", "Publishing")]
+    public async Task PublishPackage_WithGenericException_ShouldReturnInternalServerError() {
         // Arrange
-        var request = new PublishRequest
-        {
+        var request = new PublishRequest {
             ManifestContent = "{}",
             PackageUrl = "https://example.com/package.zip"
         };
@@ -467,8 +450,8 @@ public class PackagesV1ControllerPublishingTests
         var result = await _controller.PublishPackage(request, CancellationToken.None);
 
         // Assert
-        Assert.IsInstanceOfType(result, typeof(ObjectResult));
+        Assert.IsType<ObjectResult>(result);
         var objectResult = (ObjectResult)result;
-        Assert.AreEqual(500, objectResult.StatusCode);
+        Assert.Equal(500, objectResult.StatusCode);
     }
 }

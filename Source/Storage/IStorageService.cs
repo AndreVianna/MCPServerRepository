@@ -170,14 +170,14 @@ public interface IStorageService {
     /// Gets the storage provider type
     /// </summary>
     StorageProviderType ProviderType { get; }
-    
+
     /// <summary>
     /// Checks storage service health
     /// </summary>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Storage health information</returns>
     Task<StorageHealthInfo> CheckHealthAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets storage performance metrics
     /// </summary>

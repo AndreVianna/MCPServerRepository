@@ -1,6 +1,6 @@
-using MCPHub.Domain.Entities;
 using MCPHub.Domain.Contracts.Requests;
 using MCPHub.Domain.Contracts.Responses;
+using MCPHub.Domain.Entities;
 
 namespace MCPHub.AuthenticationService.Services;
 
@@ -44,4 +44,3 @@ public interface IUserProfileService {
     /// <returns>Email verification result</returns>
     Task<EmailVerificationResult> VerifyEmailAsync(Guid userId, string verificationToken, CancellationToken cancellationToken = default);
 }
-

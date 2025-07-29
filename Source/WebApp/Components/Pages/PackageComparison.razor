@@ -1,0 +1,1116 @@
+@page "/analytics/compare"
+@using MCPHub.WebApp.Services
+@using MCPHub.WebApp.Components.UI.Layout
+@using MCPHub.WebApp.Components.UI.Analytics
+@using MCPHub.WebApp.Components.UI.Security
+@using MCPHub.WebApp.Components.UI.Packages
+@using MCPHub.Domain.Entities
+@using MudBlazor
+@inject IAnalyticsService AnalyticsService
+@inject IPackageManagementService PackageService
+@inject ISnackbar Snackbar
+@inject ILogger<PackageComparison> Logger
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Package Comparison - MCP Hub</PageTitle>
+
+<ResponsiveContainer MaxWidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
+    <HeaderContent>
+        <div class="package-comparison-header">
+            <div class="header-title mb-4">
+                <MudText Typo="Typo.h3">⚖️ Package Comparison</MudText>
+                <MudText Typo="Typo.body1" Color="Color.Secondary">
+                    Compare packages side-by-side to make informed decisions
+                </MudText>
+            </div>
+
+            <div class="header-controls mb-4">
+                <MudGrid Spacing="3" AlignItems="Center">
+                    <MudItem xs="12" md="6">
+                        <div class="package-selector">
+                            <MudText Typo="Typo.subtitle2" Class="mb-2">Select Packages to Compare</MudText>
+                            <div class="d-flex gap-2 flex-wrap">
+                                @for (int i = 0; i < _maxComparePackages; i++)
+                                {
+                                    var index = i; // Capture for closure
+                                    <div class="package-select-card" style="min-width: 250px;">
+                                        @if (_selectedPackages.Count > index && _selectedPackages[index] != null)
+                                        {
+                                            <MudCard Class="selected-package-card pa-3" Elevation="2">
+                                                <div class="d-flex justify-space-between align-center">
+                                                    <div class="d-flex align-center gap-2">
+                                                        <MudIcon Icon="Icons.Material.Filled.Inventory" Size="Size.Small" />
+                                                        <div>
+                                                            <MudText Typo="Typo.body2" Class="font-weight-bold">
+                                                                @_selectedPackages[index]!.Name
+                                                            </MudText>
+                                                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                                v@_selectedPackages[index]!.LatestVersion
+                                                            </MudText>
+                                                        </div>
+                                                    </div>
+                                                    <MudIconButton Icon="Icons.Material.Filled.Close"
+                                                                   Size="Size.Small"
+                                                                   Color="Color.Error"
+                                                                   @onclick="@(() => RemovePackage(index))" />
+                                                </div>
+                                            </MudCard>
+                                        }
+                                        else
+                                        {
+                                            <MudButton Variant="Variant.Outlined"
+                                                       Color="Color.Primary"
+                                                       StartIcon="Icons.Material.Filled.Add"
+                                                       FullWidth="true"
+                                                       Class="add-package-button"
+                                                       Style="height: 80px; border-style: dashed;"
+                                                       @onclick="@(() => OpenPackageSelector(index))">
+                                                Add Package @(index + 1)
+                                            </MudButton>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </MudItem>
+
+                    <MudItem xs="12" md="6">
+                        <div class="comparison-controls d-flex flex-column gap-3">
+                            <div class="d-flex gap-2">
+                                <MudSelect Value="@_selectedTimeRange"
+                                           Label="Time Range"
+                                           Variant="Variant.Outlined"
+                                           Margin="Margin.Dense"
+                                           Style="min-width: 150px;"
+                                           T="string"
+                                           ValueChanged="OnTimeRangeChanged">
+                                    <MudSelectItem Value="@("week")">Last 7 days</MudSelectItem>
+                                    <MudSelectItem Value="@("month")">Last 30 days</MudSelectItem>
+                                    <MudSelectItem Value="@("quarter")">Last 3 months</MudSelectItem>
+                                    <MudSelectItem Value="@("year")">Last year</MudSelectItem>
+                                </MudSelect>
+
+                                <MudButton Variant="Variant.Filled"
+                                           Color="Color.Primary"
+                                           StartIcon="Icons.Material.Filled.Compare"
+                                           @onclick="ComparePackages"
+                                           Disabled="@(_selectedPackages.Count < 2 || _isLoading)">
+                                    Compare
+                                </MudButton>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <MudButton Variant="Variant.Outlined"
+                                           Color="Color.Secondary"
+                                           StartIcon="Icons.Material.Filled.Download"
+                                           @onclick="ExportComparison"
+                                           Size="Size.Medium"
+                                           Disabled="@(_comparisonResult == null)">
+                                    Export
+                                </MudButton>
+
+                                <MudButton Variant="Variant.Outlined"
+                                           Color="Color.Secondary"
+                                           StartIcon="Icons.Material.Filled.Share"
+                                           @onclick="ShareComparison"
+                                           Size="Size.Medium"
+                                           Disabled="@(_comparisonResult == null)">
+                                    Share
+                                </MudButton>
+
+                                <MudButton Variant="Variant.Text"
+                                           Color="Color.Error"
+                                           StartIcon="Icons.Material.Filled.Clear"
+                                           @onclick="ClearComparison"
+                                           Size="Size.Medium">
+                                    Clear All
+                                </MudButton>
+                            </div>
+                        </div>
+                    </MudItem>
+                </MudGrid>
+            </div>
+        </div>
+    </HeaderContent>
+
+    <MainContent>
+        @if (_isLoading)
+        {
+            <div class="comparison-loading text-center pa-8">
+                <MudProgressCircular Indeterminate="true" Size="Size.Large" />
+                <MudText Typo="Typo.h6" Class="mt-4">Analyzing packages...</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    This may take a few moments while we gather comprehensive data
+                </MudText>
+            </div>
+        }
+        else if (_comparisonResult != null)
+        {
+            <!-- Comparison Summary -->
+            <div class="comparison-summary mb-6">
+                <MudCard Class="comparison-summary-card" Elevation="3">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h6">📋 Comparison Summary</MudText>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudGrid Spacing="3">
+                            <MudItem xs="12" md="4">
+                                <div class="summary-item text-center">
+                                    <MudIcon Icon="Icons.Material.Filled.EmojiEvents" Color="Color.Success" Size="Size.Large" />
+                                    <MudText Typo="Typo.h6" Class="mt-2">@_comparisonResult.Summary.TopPerformer</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Top Overall Performer</MudText>
+                                </div>
+                            </MudItem>
+
+                            <MudItem xs="12" md="4">
+                                <div class="summary-item text-center">
+                                    <MudIcon Icon="Icons.Material.Filled.TrendingUp" Color="Color.Info" Size="Size.Large" />
+                                    <MudText Typo="Typo.h6" Class="mt-2">@_comparisonResult.Summary.FastestGrowing</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Fastest Growing</MudText>
+                                </div>
+                            </MudItem>
+
+                            <MudItem xs="12" md="4">
+                                <div class="summary-item text-center">
+                                    <MudIcon Icon="Icons.Material.Filled.Verified" Color="Color.Tertiary" Size="Size.Large" />
+                                    <MudText Typo="Typo.h6" Class="mt-2">@_comparisonResult.Summary.MostConsistent</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Most Consistent</MudText>
+                                </div>
+                            </MudItem>
+                        </MudGrid>
+                    </MudCardContent>
+                </MudCard>
+            </div>
+
+            <!-- Comparison Matrix -->
+            <div class="comparison-matrix mb-6">
+                <MudCard Class="comparison-matrix-card" Elevation="2">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <div class="d-flex justify-space-between align-center">
+                                <div>
+                                    <MudText Typo="Typo.h6">📊 Detailed Comparison Matrix</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        Side-by-side metric comparison
+                                    </MudText>
+                                </div>
+                                <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small">
+                                    <MudButton @onclick="@(() => _matrixView = "detailed")"
+                                               Variant="@(_matrixView == "detailed" ? Variant.Filled : Variant.Outlined)">
+                                        Detailed
+                                    </MudButton>
+                                    <MudButton @onclick="@(() => _matrixView = "scores")"
+                                               Variant="@(_matrixView == "scores" ? Variant.Filled : Variant.Outlined)">
+                                        Scores
+                                    </MudButton>
+                                </MudButtonGroup>
+                            </div>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent Class="pa-0">
+                        <div class="comparison-table-container">
+                            <MudTable Items="@GetComparisonRows()" 
+                                      Dense="true" 
+                                      Striped="true" 
+                                      Class="comparison-table"
+                                      FixedHeader="true"
+                                      Height="500px">
+                                <HeaderContent>
+                                    <MudTh Style="width: 200px; position: sticky; left: 0; background: var(--mud-palette-surface); z-index: 10;">
+                                        Metric
+                                    </MudTh>
+                                    @foreach (var package in _comparisonResult.ComparisonData)
+                                    {
+                                        <MudTh Class="text-center package-column">
+                                            <div class="package-header">
+                                                <MudText Typo="Typo.body2" Class="font-weight-bold">@package.PackageName</MudText>
+                                                <MudText Typo="Typo.caption" Color="Color.Secondary">Rank #@package.OverallRank</MudText>
+                                            </div>
+                                        </MudTh>
+                                    }
+                                </HeaderContent>
+                                <RowTemplate>
+                                    <MudTd Style="position: sticky; left: 0; background: var(--mud-palette-surface); z-index: 5;">
+                                        <div class="metric-name">
+                                            <MudIcon Icon="@GetMetricIcon(context.Metric)" Size="Size.Small" Class="mr-2" />
+                                            <MudText Typo="Typo.body2">@context.Metric</MudText>
+                                        </div>
+                                    </MudTd>
+                                    @foreach (var value in context.Values)
+                                    {
+                                        <MudTd Class="text-center metric-value">
+                                            @if (_matrixView == "detailed")
+                                            {
+                                                <MudText Typo="Typo.body2">@FormatMetricValue(context.Metric, value.Value)</MudText>
+                                                @if (value.IsWinner)
+                                                {
+                                                    <MudIcon Icon="Icons.Material.Filled.Star" Color="Color.Success" Size="Size.Small" />
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <div class="score-display">
+                                                    <MudText Typo="Typo.body2">@value.NormalizedScore.ToString("F1")</MudText>
+                                                    <MudProgressLinear Value="@value.NormalizedScore" 
+                                                                       Color="@GetScoreColor(value.NormalizedScore)" 
+                                                                       Size="Size.Small" />
+                                                </div>
+                                            }
+                                        </MudTd>
+                                    }
+                                </RowTemplate>
+                            </MudTable>
+                        </div>
+                    </MudCardContent>
+                </MudCard>
+            </div>
+
+            <!-- Visual Comparison Charts -->
+            <div class="visual-comparison mb-6">
+                <MudGrid Spacing="3">
+                    <!-- Downloads Comparison -->
+                    <MudItem xs="12" lg="6">
+                        <AnalyticsChart Title="📈 Downloads Comparison"
+                                        Subtitle="Download trends over time"
+                                        ChartType="Components.UI.Models.ChartType.Line"
+                                        ChartSeries="@ChartSeriesConverter.ToMudBlazor(GetDownloadsComparisonSeries())"
+                                        XAxisLabels="@GetComparisonTimeLabels()"
+                                        Height="300"
+                                        ShowTimeRangeSelector="false"
+                                        ShowSummary="false"
+                                        ShowLegend="true"
+                                        OnExport="ExportDownloadsChart" />
+                    </MudItem>
+
+                    <!-- Performance Radar -->
+                    <MudItem xs="12" lg="6">
+                        <MudCard Class="analytics-chart-card" Elevation="2">
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.h6">🎯 Performance Radar</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        Overall performance comparison
+                                    </MudText>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                            <MudCardContent Class="pa-4">
+                                <div class="radar-chart-container" style="height: 300px;">
+                                    <!-- Placeholder for radar chart - would integrate with proper charting library -->
+                                    <div class="radar-chart-placeholder d-flex justify-center align-center h-100">
+                                        <div class="text-center">
+                                            <MudIcon Icon="Icons.Material.Outlined.Radar" Size="Size.Large" Color="Color.Secondary" />
+                                            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-2">
+                                                Performance Radar Chart
+                                            </MudText>
+                                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                Interactive radar visualization coming soon
+                                            </MudText>
+                                        </div>
+                                    </div>
+                                </div>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                </MudGrid>
+            </div>
+
+            <!-- Comparison Insights -->
+            <div class="comparison-insights mb-6">
+                <MudCard Class="insights-card" Elevation="2">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h6">💡 Key Insights</MudText>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                AI-generated insights based on the comparison
+                            </MudText>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        @if (_comparisonResult.Insights?.Any() == true)
+                        {
+                            <MudGrid Spacing="3">
+                                @foreach (var insight in _comparisonResult.Insights)
+                                {
+                                    <MudItem xs="12" md="6">
+                                        <MudAlert Severity="@GetInsightSeverity(insight.Type)" 
+                                                  Class="insight-alert">
+                                            <div>
+                                                <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-2">
+                                                    @insight.Title
+                                                </MudText>
+                                                <MudText Typo="Typo.body2">
+                                                    @insight.Description
+                                                </MudText>
+                                                @if (insight.AffectedPackages?.Any() == true)
+                                                {
+                                                    <div class="mt-2">
+                                                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                            Affects: @string.Join(", ", insight.AffectedPackages.Select(GetPackageName))
+                                                        </MudText>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </MudAlert>
+                                    </MudItem>
+                                }
+                            </MudGrid>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                No specific insights available for this comparison.
+                            </MudText>
+                        }
+                    </MudCardContent>
+                </MudCard>
+            </div>
+
+            <!-- Recommendation Cards -->
+            <div class="recommendations-section mb-6">
+                <MudText Typo="Typo.h6" Class="mb-4">🎯 Recommendations</MudText>
+                <MudGrid Spacing="3">
+                    @foreach (var package in _comparisonResult.ComparisonData.OrderBy(p => p.OverallRank))
+                    {
+                        <MudItem xs="12" md="6" lg="4">
+                            <MudCard Class="recommendation-card" Elevation="2">
+                                <MudCardContent>
+                                    <div class="d-flex justify-space-between align-center mb-3">
+                                        <MudText Typo="Typo.h6">@package.PackageName</MudText>
+                                        <MudChip T="string" Text="@($"Rank #{package.OverallRank}")" 
+                                                 Color="@GetRankColor(package.OverallRank)" 
+                                                 Size="Size.Small" />
+                                    </div>
+
+                                    <div class="recommendation-metrics mb-3">
+                                        @foreach (var metric in package.NormalizedScores.Take(3))
+                                        {
+                                            <div class="d-flex justify-space-between align-center mb-1">
+                                                <MudText Typo="Typo.caption">@metric.Key</MudText>
+                                                <div class="d-flex align-center gap-2">
+                                                    <MudProgressLinear Value="@metric.Value" 
+                                                                       Color="@GetScoreColor(metric.Value)" 
+                                                                       Size="Size.Small"
+                                                                       Style="width: 60px;" />
+                                                    <MudText Typo="Typo.caption">@metric.Value.ToString("F0")</MudText>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <div class="d-flex gap-2">
+                                        <MudButton Variant="Variant.Outlined"
+                                                   Color="Color.Primary"
+                                                   Size="Size.Small"
+                                                   StartIcon="Icons.Material.Filled.Visibility"
+                                                   @onclick="@(() => Navigation.NavigateTo($"/package/{package.PackageId}"))">
+                                            View Package
+                                        </MudButton>
+                                        <MudButton Variant="Variant.Text"
+                                                   Color="Color.Secondary"
+                                                   Size="Size.Small"
+                                                   StartIcon="Icons.Material.Filled.Analytics"
+                                                   @onclick="@(() => Navigation.NavigateTo($"/package/{package.PackageId}/analytics"))">
+                                            Analytics
+                                        </MudButton>
+                                    </div>
+                                </MudCardContent>
+                            </MudCard>
+                        </MudItem>
+                    }
+                </MudGrid>
+            </div>
+        }
+        else
+        {
+            <!-- Empty State -->
+            <div class="empty-comparison-state text-center pa-8">
+                <MudIcon Icon="Icons.Material.Outlined.CompareArrows" 
+                         Size="Size.Large" 
+                         Color="Color.Secondary" 
+                         Style="font-size: 4rem;" />
+                <MudText Typo="Typo.h5" Class="mt-4 mb-2">Compare Packages</MudText>
+                <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-4">
+                    Select 2 or more packages to start comparing their performance, security, and features.
+                </MudText>
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="Icons.Material.Filled.Search"
+                           @onclick="@(() => OpenPackageSelector(0))">
+                    Search Packages
+                </MudButton>
+            </div>
+        }
+    </MainContent>
+</ResponsiveContainer>
+
+<!-- Package Selection Dialog -->
+<MudDialog @bind-IsVisible="_showPackageSelector" Options="_dialogOptions">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="Icons.Material.Filled.Search" Class="mr-3" />
+            Select Package for Comparison
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <div class="package-search-container">
+            <MudTextField @bind-Value="_packageSearchQuery"
+                          Label="Search packages"
+                          Variant="Variant.Outlined"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="Icons.Material.Filled.Search"
+                          @onkeyup="SearchPackages"
+                          Class="mb-4" />
+
+            @if (_searchResults?.Any() == true)
+            {
+                <MudList T="string" Clickable="true" Class="package-search-results">
+                    @foreach (var package in _searchResults.Take(10))
+                    {
+                        <MudListItem T="string" @onclick="@(() => SelectPackageForComparison(package))">
+                            <div class="d-flex align-center gap-3 w-100">
+                                <MudIcon Icon="Icons.Material.Filled.Inventory" />
+                                <div class="flex-grow-1">
+                                    <MudText Typo="Typo.body2" Class="font-weight-bold">@package.Name</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        @package.Description?.Truncate(80)
+                                    </MudText>
+                                </div>
+                                <div class="d-flex align-center gap-2">
+                                    <SecurityGradeBadge Grade="@package.SecurityGrade" Size="Size.Small" />
+                                    <TrustTierIndicator Tier="@package.TrustTier" Size="Size.Small" />
+                                </div>
+                            </div>
+                        </MudListItem>
+                    }
+                </MudList>
+            }
+            else if (!string.IsNullOrEmpty(_packageSearchQuery))
+            {
+                <div class="text-center pa-4">
+                    <MudText Color="Color.Secondary">No packages found matching your search.</MudText>
+                </div>
+            }
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton @onclick="ClosePackageSelector">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private const int _maxComparePackages = 4;
+    private bool _isLoading = false;
+    private string _selectedTimeRange = "30d";
+    private string _matrixView = "detailed";
+    private int _currentSelectorIndex = 0;
+
+    private List<PackageInfo> _selectedPackages = new();
+    private PackageComparisonResult? _comparisonResult;
+
+    // Package selection dialog
+    private bool _showPackageSelector = false;
+    private string _packageSearchQuery = "";
+    private IEnumerable<PackageInfo>? _searchResults;
+    private readonly DialogOptions _dialogOptions = new() { MaxWidth = MaxWidth.Medium, FullWidth = true };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await InitializeFromUrl();
+    }
+
+    private async Task InitializeFromUrl()
+    {
+        var uri = new Uri(Navigation.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        var packagesParam = query["packages"];
+
+        if (!string.IsNullOrEmpty(packagesParam))
+        {
+            var packageIds = packagesParam.Split(',')
+                .Where(id => Guid.TryParse(id, out _))
+                .Select(Guid.Parse)
+                .ToArray();
+
+            foreach (var packageId in packageIds.Take(_maxComparePackages))
+            {
+                var packageInfo = await GetPackageInfo(packageId);
+                if (packageInfo != null)
+                {
+                    _selectedPackages.Add(packageInfo);
+                }
+            }
+
+            if (_selectedPackages.Count >= 2)
+            {
+                await ComparePackages();
+            }
+        }
+    }
+
+    private async Task<PackageInfo?> GetPackageInfo(Guid packageId)
+    {
+        try
+        {
+            // This would normally fetch from PackageService
+            // For now, return mock data
+            var mockPackages = GetMockPackages();
+            return mockPackages.FirstOrDefault(p => p.Name.GetHashCode() == packageId.GetHashCode() % mockPackages.Count);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading package info for {PackageId}", packageId);
+            return null;
+        }
+    }
+
+    private void OpenPackageSelector(int index)
+    {
+        _currentSelectorIndex = index;
+        _packageSearchQuery = "";
+        _searchResults = null;
+        _showPackageSelector = true;
+    }
+
+    private void ClosePackageSelector()
+    {
+        _showPackageSelector = false;
+        _packageSearchQuery = "";
+        _searchResults = null;
+    }
+
+    private async Task SearchPackages()
+    {
+        if (string.IsNullOrWhiteSpace(_packageSearchQuery) || _packageSearchQuery.Length < 2)
+        {
+            _searchResults = null;
+            return;
+        }
+
+        try
+        {
+            // This would normally search via PackageService
+            // For now, use mock data
+            var mockPackages = GetMockPackages();
+            _searchResults = mockPackages.Where(p => 
+                p.Name.Contains(_packageSearchQuery, StringComparison.OrdinalIgnoreCase) ||
+                (p.Description?.Contains(_packageSearchQuery, StringComparison.OrdinalIgnoreCase) == true)
+            ).Take(10);
+            
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error searching packages");
+            Snackbar.Add("Error searching packages", Severity.Error);
+        }
+    }
+
+    private void SelectPackageForComparison(PackageInfo package)
+    {
+        // Check if package is already selected
+        if (_selectedPackages.Any(p => p?.Name == package.Name))
+        {
+            Snackbar.Add("Package is already selected for comparison", Severity.Warning);
+            return;
+        }
+
+        // Add or replace package at the current index
+        if (_currentSelectorIndex < _selectedPackages.Count)
+        {
+            _selectedPackages[_currentSelectorIndex] = package;
+        }
+        else
+        {
+            while (_selectedPackages.Count <= _currentSelectorIndex)
+            {
+                _selectedPackages.Add(null!);
+            }
+            _selectedPackages[_currentSelectorIndex] = package;
+        }
+
+        ClosePackageSelector();
+        StateHasChanged();
+    }
+
+    private void RemovePackage(int index)
+    {
+        if (index < _selectedPackages.Count)
+        {
+            _selectedPackages.RemoveAt(index);
+        }
+        
+        _comparisonResult = null;
+        StateHasChanged();
+    }
+
+    private async Task ComparePackages()
+    {
+        var validPackages = _selectedPackages.Where(p => p != null).ToList();
+        
+        if (validPackages.Count < 2)
+        {
+            Snackbar.Add("Please select at least 2 packages to compare", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            _isLoading = true;
+            StateHasChanged();
+
+            var packageIds = validPackages.Select(p => Guid.NewGuid()).ToArray(); // Mock IDs
+            _comparisonResult = await AnalyticsService.ComparePackagesAsync(packageIds, _selectedTimeRange);
+
+            UpdateUrl();
+        }
+        catch (NotImplementedException)
+        {
+            GenerateMockComparisonResult();
+            UpdateUrl();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error comparing packages");
+            Snackbar.Add("Failed to compare packages", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void GenerateMockComparisonResult()
+    {
+        var validPackages = _selectedPackages.Where(p => p != null).ToList();
+        var random = new Random();
+
+        _comparisonResult = new PackageComparisonResult
+        {
+            TimeRange = _selectedTimeRange,
+            ComparedPackages = validPackages.Select(p => Guid.NewGuid()),
+            ComparisonData = validPackages.Select((package, index) => new PackageComparisonData
+            {
+                PackageId = Guid.NewGuid(),
+                PackageName = package.Name,
+                Metrics = new Dictionary<string, object>
+                {
+                    ["Downloads"] = random.Next(10000, 1000000),
+                    ["Rating"] = Math.Round(random.NextDouble() * 2 + 3, 1),
+                    ["Security Score"] = random.Next(70, 100),
+                    ["Active Users"] = random.Next(1000, 50000),
+                    ["Performance"] = random.Next(60, 100),
+                    ["Community"] = random.Next(50, 100)
+                },
+                NormalizedScores = new Dictionary<string, double>
+                {
+                    ["Downloads"] = random.Next(60, 100),
+                    ["Rating"] = random.Next(70, 100),
+                    ["Security Score"] = random.Next(70, 100),
+                    ["Active Users"] = random.Next(60, 100),
+                    ["Performance"] = random.Next(60, 100),
+                    ["Community"] = random.Next(50, 100)
+                },
+                OverallRank = index + 1
+            }).ToArray(),
+            Summary = new ComparisonSummary
+            {
+                TopPerformer = validPackages.First().Name,
+                FastestGrowing = validPackages.Skip(1).FirstOrDefault()?.Name ?? validPackages.First().Name,
+                MostConsistent = validPackages.Last().Name,
+                AverageGrowth = 15.7
+            },
+            Insights = new[]
+            {
+                new ComparisonInsight 
+                { 
+                    Title = "Performance Leader", 
+                    Description = $"{validPackages.First().Name} shows consistently higher performance metrics across all categories.",
+                    Type = InsightType.Achievement,
+                    AffectedPackages = new[] { Guid.NewGuid() }
+                },
+                new ComparisonInsight 
+                { 
+                    Title = "Security Consideration", 
+                    Description = "Consider security scores when making your final decision. Higher scores indicate better security practices.",
+                    Type = InsightType.Recommendation,
+                    AffectedPackages = validPackages.Select(p => Guid.NewGuid()).ToArray()
+                }
+            }
+        };
+    }
+
+    private void UpdateUrl()
+    {
+        if (_selectedPackages.Any())
+        {
+            var packageIds = string.Join(",", _selectedPackages.Where(p => p != null).Select(p => Guid.NewGuid()));
+            Navigation.NavigateTo($"/analytics/compare?packages={packageIds}", replace: true);
+        }
+    }
+
+    private async Task OnTimeRangeChanged()
+    {
+        if (_comparisonResult != null)
+        {
+            await ComparePackages();
+        }
+    }
+
+    private async Task ExportComparison()
+    {
+        Snackbar.Add("Export functionality coming soon", Severity.Info);
+    }
+
+    private async Task ShareComparison()
+    {
+        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", Navigation.Uri);
+        Snackbar.Add("Comparison URL copied to clipboard", Severity.Success);
+    }
+
+    private void ClearComparison()
+    {
+        _selectedPackages.Clear();
+        _comparisonResult = null;
+        Navigation.NavigateTo("/analytics/compare", replace: true);
+        StateHasChanged();
+    }
+
+    private async Task ExportDownloadsChart()
+    {
+        Snackbar.Add("Exporting downloads chart", Severity.Info);
+    }
+
+    // Helper methods and data transformation
+    private List<PackageInfo> GetMockPackages()
+    {
+        return new List<PackageInfo>
+        {
+            new() { Name = "@ai/claude-tools", Description = "Advanced AI assistant integration toolkit", SecurityGrade = "A+", TrustTier = TrustTier.Verified, LatestVersion = "2.1.4", Publisher = new PublisherInfo { Name = "AI Corp", Type = PublisherType.Organization, IsVerified = true } },
+            new() { Name = "@web/scraper-pro", Description = "Professional web scraping framework", SecurityGrade = "A", TrustTier = TrustTier.CommunityTrusted, LatestVersion = "1.8.2", Publisher = new PublisherInfo { Name = "WebDev Inc", Type = PublisherType.Organization, IsVerified = true } },
+            new() { Name = "@data/processor", Description = "High-performance data processing engine", SecurityGrade = "A-", TrustTier = TrustTier.CommunityTrusted, LatestVersion = "3.0.1", Publisher = new PublisherInfo { Name = "DataFlow Ltd", Type = PublisherType.Organization, IsVerified = false } },
+            new() { Name = "@ui/components", Description = "Modern UI component library", SecurityGrade = "B+", TrustTier = TrustTier.Community, LatestVersion = "4.2.0", Publisher = new PublisherInfo { Name = "UI Makers", Type = PublisherType.Organization, IsVerified = false } },
+            new() { Name = "@api/toolkit", Description = "RESTful API development toolkit", SecurityGrade = "A", TrustTier = TrustTier.CommunityTrusted, LatestVersion = "2.5.1", Publisher = new PublisherInfo { Name = "DevTools Co", Type = PublisherType.Organization, IsVerified = true } },
+            new() { Name = "@security/vault", Description = "Secure credential management system", SecurityGrade = "A+", TrustTier = TrustTier.Verified, LatestVersion = "1.3.0", Publisher = new PublisherInfo { Name = "SecureTech", Type = PublisherType.Organization, IsVerified = true } }
+        };
+    }
+
+    private IEnumerable<ComparisonMatrixRow> GetComparisonRows()
+    {
+        if (_comparisonResult?.ComparisonMatrix?.Matrix == null) return Array.Empty<ComparisonMatrixRow>();
+
+        var metrics = new[] { "Downloads", "Rating", "Security Score", "Active Users", "Performance", "Community" };
+        
+        return metrics.Select(metric => new ComparisonMatrixRow
+        {
+            Metric = metric,
+            Values = _comparisonResult.ComparisonData.Select(package => new ComparisonValue
+            {
+                Value = package.Metrics.TryGetValue(metric, out var value) ? value : 0,
+                NormalizedScore = package.NormalizedScores.TryGetValue(metric, out var score) ? score : 0,
+                IsWinner = _comparisonResult.ComparisonMatrix.Winners.TryGetValue(metric, out var winnerId) && winnerId == package.PackageId
+            }).ToArray()
+        });
+    }
+
+    private List<Components.UI.Models.ChartSeries> GetDownloadsComparisonSeries()
+    {
+        if (_comparisonResult?.ComparisonData == null) return new();
+
+        return _comparisonResult.ComparisonData.Select(package => new Components.UI.Models.ChartSeries
+        {
+            Name = package.PackageName,
+            Data = GenerateMockTrendData()
+        }).ToList();
+    }
+
+    private double[] GenerateMockTrendData()
+    {
+        var random = new Random();
+        return Enumerable.Range(0, 30).Select(i => (double)random.Next(100, 1000)).ToArray();
+    }
+
+    private string[] GetComparisonTimeLabels()
+    {
+        return Enumerable.Range(0, 30).Select(i => DateTime.UtcNow.AddDays(-29 + i).ToString("MMM dd")).ToArray();
+    }
+
+    private string GetMetricIcon(string metric) => metric switch
+    {
+        "Downloads" => Icons.Material.Filled.Download,
+        "Rating" => Icons.Material.Filled.Star,
+        "Security Score" => Icons.Material.Filled.Security,
+        "Active Users" => Icons.Material.Filled.People,
+        "Performance" => Icons.Material.Filled.Speed,
+        "Community" => Icons.Material.Filled.Forum,
+        _ => Icons.Material.Filled.Assessment
+    };
+
+    private string FormatMetricValue(string metric, object value) => metric switch
+    {
+        "Downloads" when value is int or long => FormatNumber(Convert.ToInt64(value)),
+        "Rating" when value is double d => d.ToString("F1"),
+        "Security Score" when value is int i => i.ToString(),
+        "Active Users" when value is int or long => FormatNumber(Convert.ToInt64(value)),
+        "Performance" when value is int i => $"{i}%",
+        "Community" when value is int i => $"{i}%",
+        _ => value.ToString() ?? "N/A"
+    };
+
+    private string FormatNumber(long number) => number switch
+    {
+        >= 1000000 => $"{number / 1000000.0:F1}M",
+        >= 1000 => $"{number / 1000.0:F1}K",
+        _ => number.ToString("N0")
+    };
+
+    private Color GetScoreColor(double score) => score switch
+    {
+        >= 80 => Color.Success,
+        >= 60 => Color.Warning,
+        _ => Color.Error
+    };
+
+    private Color GetRankColor(int rank) => rank switch
+    {
+        1 => Color.Success,
+        2 => Color.Info,
+        3 => Color.Warning,
+        _ => Color.Default
+    };
+
+    private Severity GetInsightSeverity(InsightType type) => type switch
+    {
+        InsightType.Achievement => Severity.Success,
+        InsightType.Warning => Severity.Warning,
+        InsightType.Opportunity => Severity.Info,
+        InsightType.Recommendation => Severity.Normal,
+        _ => Severity.Normal
+    };
+
+    private string GetPackageName(Guid packageId)
+    {
+        var package = _selectedPackages.FirstOrDefault(p => p != null);
+        return package?.Name ?? "Unknown Package";
+    }
+
+    // Data models for comparison matrix
+    private class ComparisonMatrixRow
+    {
+        public string Metric { get; set; } = "";
+        public ComparisonValue[] Values { get; set; } = Array.Empty<ComparisonValue>();
+    }
+
+    private class ComparisonValue
+    {
+        public object Value { get; set; } = "";
+        public double NormalizedScore { get; set; }
+        public bool IsWinner { get; set; }
+    }
+}
+
+<style>
+.package-comparison-header {
+    margin-bottom: 32px;
+}
+
+.package-select-card {
+    min-height: 80px;
+}
+
+.selected-package-card {
+    border: 2px solid var(--mud-palette-primary);
+}
+
+.add-package-button {
+    border-style: dashed !important;
+    border-width: 2px !important;
+}
+
+.add-package-button:hover {
+    background-color: var(--mud-palette-primary-hover);
+    border-style: solid !important;
+}
+
+.comparison-loading {
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.comparison-summary-card,
+.comparison-matrix-card,
+.insights-card {
+    border-radius: 12px;
+    border: 1px solid var(--mud-palette-divider);
+}
+
+.summary-item {
+    padding: 16px;
+    border-radius: 8px;
+    background-color: var(--mud-palette-background-grey);
+}
+
+.comparison-table-container {
+    max-height: 500px;
+    overflow: auto;
+}
+
+.package-column {
+    min-width: 150px;
+}
+
+.package-header {
+    text-align: center;
+}
+
+.metric-name {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+}
+
+.metric-value {
+    padding: 8px;
+}
+
+.score-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.radar-chart-placeholder {
+    border: 2px dashed var(--mud-palette-divider);
+    border-radius: 8px;
+}
+
+.insight-alert {
+    margin-bottom: 16px;
+}
+
+.recommendation-card {
+    height: 100%;
+    border-radius: 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.recommendation-metrics {
+    background-color: var(--mud-palette-background-grey);
+    border-radius: 6px;
+    padding: 12px;
+}
+
+.empty-comparison-state {
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.package-search-results {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.package-search-results .mud-list-item {
+    border-radius: 4px;
+    margin-bottom: 4px;
+}
+
+.package-search-results .mud-list-item:hover {
+    background-color: var(--mud-palette-action-hover);
+}
+
+/* Mobile optimizations */
+@@media (max-width: 768px) {
+    .package-selector {
+        margin-bottom: 24px;
+    }
+    
+    .package-select-card {
+        min-width: 100%;
+        margin-bottom: 12px;
+    }
+    
+    .comparison-controls {
+        width: 100%;
+    }
+    
+    .comparison-controls .d-flex {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .comparison-table-container {
+        font-size: 0.85rem;
+    }
+    
+    .package-column {
+        min-width: 120px;
+    }
+    
+    .metric-name {
+        font-size: 0.8rem;
+    }
+    
+    .summary-item {
+        margin-bottom: 16px;
+    }
+}
+
+/* Dark theme adjustments */
+@@media (prefers-color-scheme: dark) {
+    .summary-item,
+    .recommendation-metrics {
+        background-color: rgba(255, 255, 255, 0.02);
+    }
+    
+    .selected-package-card {
+        border-color: var(--mud-palette-primary-darken);
+    }
+    
+    .radar-chart-placeholder {
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+}
+
+/* Accessibility enhancements */
+.package-select-card:focus,
+.recommendation-card:focus {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: 2px;
+}
+
+/* Scrollbar styling for comparison table */
+.comparison-table-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.comparison-table-container::-webkit-scrollbar-track {
+    background: var(--mud-palette-background-grey);
+    border-radius: 4px;
+}
+
+.comparison-table-container::-webkit-scrollbar-thumb {
+    background: var(--mud-palette-divider);
+    border-radius: 4px;
+}
+
+.comparison-table-container::-webkit-scrollbar-thumb:hover {
+    background: var(--mud-palette-text-secondary);
+}
+</style>

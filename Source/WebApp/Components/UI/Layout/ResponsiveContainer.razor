@@ -1,0 +1,204 @@
+@using MudBlazor
+@inject IBrowserViewportService BrowserViewportService
+
+<div class="responsive-container @GetContainerClass()"
+     role="main"
+     aria-label="@(AriaLabel ?? "Main content area")">
+     
+    @if (IsMobile)
+    {
+        <!-- Mobile Layout -->
+        <div class="mobile-layout" role="document">
+            @if (ShowHeader && (MobileHeaderContent != null || HeaderContent != null))
+            {
+                <div class="mobile-header" role="banner">
+                    @if (MobileHeaderContent != null)
+                    {
+                        @MobileHeaderContent
+                    }
+                    else
+                    {
+                        @HeaderContent
+                    }
+                </div>
+            }
+            
+            <div class="mobile-content" role="main">
+                @if (MainContent != null)
+                {
+                    @MainContent
+                }
+            </div>
+            
+            @if (SidebarContent != null)
+            {
+                <div class="mobile-sidebar" 
+                     role="complementary" 
+                     aria-label="Additional content and navigation">
+                    @SidebarContent
+                </div>
+            }
+            
+            @if (ShowFooter && FooterContent != null)
+            {
+                <div class="mobile-footer" role="contentinfo">
+                    @FooterContent
+                </div>
+            }
+        </div>
+    }
+    else if (IsTablet)
+    {
+        <!-- Tablet Layout -->
+        <MudGrid Class="tablet-layout" Spacing="2" role="document">
+            @if (ShowHeader && HeaderContent != null)
+            {
+                <MudItem xs="12" Class="tablet-header" role="banner">
+                    @HeaderContent
+                </MudItem>
+            }
+            
+            <MudItem xs="@(SidebarContent != null ? 8 : 12)" Class="tablet-main" role="main">
+                @if (MainContent != null)
+                {
+                    @MainContent
+                }
+            </MudItem>
+            
+            @if (SidebarContent != null)
+            {
+                <MudItem xs="4" Class="tablet-sidebar" 
+                         role="complementary" 
+                         aria-label="Sidebar content">
+                    @SidebarContent
+                </MudItem>
+            }
+            
+            @if (ShowFooter && FooterContent != null)
+            {
+                <MudItem xs="12" Class="tablet-footer" role="contentinfo">
+                    @FooterContent
+                </MudItem>
+            }
+        </MudGrid>
+    }
+    else
+    {
+        <!-- Desktop Layout -->
+        <div class="desktop-layout" role="document">
+            @if (ShowHeader && HeaderContent != null)
+            {
+                <div class="desktop-header" role="banner">
+                    @HeaderContent
+                </div>
+            }
+            
+            <div class="desktop-body d-flex">
+                @if (SidebarContent != null && SidebarPosition == SidebarPosition.Left)
+                {
+                    <div class="desktop-sidebar desktop-sidebar-left" 
+                         style="width: @($"{SidebarWidth}px")"
+                         role="complementary"
+                         aria-label="Left sidebar navigation">
+                        @SidebarContent
+                    </div>
+                }
+                
+                <div class="desktop-main flex-grow-1" role="main">
+                    @if (MainContent != null)
+                    {
+                        @MainContent
+                    }
+                </div>
+                
+                @if (SidebarContent != null && SidebarPosition == SidebarPosition.Right)
+                {
+                    <div class="desktop-sidebar desktop-sidebar-right" 
+                         style="width: @($"{SidebarWidth}px")"
+                         role="complementary"
+                         aria-label="Right sidebar navigation">
+                        @SidebarContent
+                    </div>
+                }
+            </div>
+            
+            @if (ShowFooter && FooterContent != null)
+            {
+                <div class="desktop-footer" role="contentinfo">
+                    @FooterContent
+                </div>
+            }
+        </div>
+    }
+
+    <!-- Skip to main content link for accessibility -->
+    @if (ShowSkipLink)
+    {
+        <a href="#main-content" class="skip-link sr-only sr-only-focusable">
+            Skip to main content
+        </a>
+    }
+</div>
+
+@code {
+    [Parameter] public RenderFragment? HeaderContent { get; set; }
+    [Parameter] public RenderFragment? MobileHeaderContent { get; set; }
+    [Parameter] public RenderFragment? MainContent { get; set; }
+    [Parameter] public RenderFragment? SidebarContent { get; set; }
+    [Parameter] public RenderFragment? FooterContent { get; set; }
+    [Parameter] public bool ShowHeader { get; set; } = true;
+    [Parameter] public bool ShowFooter { get; set; } = true;
+    [Parameter] public bool ShowSkipLink { get; set; } = true;
+    [Parameter] public SidebarPosition SidebarPosition { get; set; } = SidebarPosition.Right;
+    [Parameter] public int SidebarWidth { get; set; } = 300;
+    [Parameter] public string CssClass { get; set; } = "";
+    [Parameter] public ContainerMaxWidth MaxWidth { get; set; } = ContainerMaxWidth.Large;
+    [Parameter] public bool FullHeight { get; set; } = false;
+    [Parameter] public string? AriaLabel { get; set; }
+
+    private bool IsMobile { get; set; } = true;
+    private bool IsTablet { get; set; } = false;
+    private bool IsDesktop { get; set; } = false;
+
+    private string GetContainerClass()
+    {
+        var classes = new List<string> { CssClass };
+        
+        if (FullHeight)
+            classes.Add("full-height");
+            
+        classes.Add($"max-width-{MaxWidth.ToString().ToLower()}");
+        
+        if (IsMobile)
+            classes.Add("mobile-container");
+        else if (IsTablet)
+            classes.Add("tablet-container");
+        else
+            classes.Add("desktop-container");
+            
+        return string.Join(" ", classes.Where(c => !string.IsNullOrEmpty(c)));
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Get initial viewport size and determine layout
+        var breakpoint = await BrowserViewportService.GetCurrentBreakpointAsync();
+        UpdateLayoutFromBreakpoint(breakpoint);
+        
+        // Subscribe to breakpoint changes
+        await BrowserViewportService.SubscribeAsync(Guid.NewGuid(), OnBreakpointChanged, fireImmediately: false);
+    }
+
+    private async Task OnBreakpointChanged(BrowserViewportEventArgs args)
+    {
+        UpdateLayoutFromBreakpoint(args.Breakpoint);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void UpdateLayoutFromBreakpoint(Breakpoint breakpoint)
+    {
+        IsMobile = breakpoint == Breakpoint.Xs || breakpoint == Breakpoint.Sm;
+        IsTablet = breakpoint == Breakpoint.Md;
+        IsDesktop = breakpoint == Breakpoint.Lg || breakpoint == Breakpoint.Xl || breakpoint == Breakpoint.Xxl;
+    }
+}

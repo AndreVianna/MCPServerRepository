@@ -1,33 +1,33 @@
+using System.Security.Claims;
+
 using MCPHub.PublicApi.Controllers.V1;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+
 using Moq;
-using System.Security.Claims;
+
 using Xunit;
 
 namespace MCPHub.PublicApi.UnitTests.Controllers.V1;
 
-public class SimpleBaseApiV1ControllerTests
-{
+public class SimpleBaseApiV1ControllerTests {
     private readonly TestController _controller;
     private readonly Mock<ILogger<TestController>> _mockLogger;
 
-    public SimpleBaseApiV1ControllerTests()
-    {
+    public SimpleBaseApiV1ControllerTests() {
         _mockLogger = new Mock<ILogger<TestController>>();
-        _controller = new TestController(_mockLogger.Object);
-        
-        // Setup controller context
-        _controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = new DefaultHttpContext()
+        _controller = new TestController(_mockLogger.Object) {
+            // Setup controller context
+            ControllerContext = new ControllerContext {
+                HttpContext = new DefaultHttpContext()
+            }
         };
     }
 
     [Fact]
-    public void CreateErrorResponse_ShouldReturnCorrectFormat()
-    {
+    public void CreateErrorResponse_ShouldReturnCorrectFormat() {
         // Arrange
         var message = "Test error message";
         var statusCode = 400;
@@ -38,7 +38,7 @@ public class SimpleBaseApiV1ControllerTests
         // Assert
         Assert.NotNull(result);
         Assert.Equal(statusCode, result.StatusCode);
-        
+
         dynamic value = result.Value!;
         Assert.Equal(message, value.Error.Message);
         Assert.Equal("1.0", value.Error.Version);
@@ -47,8 +47,7 @@ public class SimpleBaseApiV1ControllerTests
     }
 
     [Fact]
-    public void CreateSuccessResponse_ShouldReturnCorrectFormat()
-    {
+    public void CreateSuccessResponse_ShouldReturnCorrectFormat() {
         // Arrange
         var data = new { Id = 1, Name = "Test" };
         var message = "Success message";
@@ -59,7 +58,7 @@ public class SimpleBaseApiV1ControllerTests
         // Assert
         Assert.NotNull(result);
         Assert.Equal(200, result.StatusCode);
-        
+
         dynamic value = result.Value!;
         Assert.Equal(data, value.Data);
         Assert.Equal(message, value.Message);
@@ -68,8 +67,7 @@ public class SimpleBaseApiV1ControllerTests
     }
 
     [Fact]
-    public void GetCurrentUserId_WhenNotAuthenticated_ShouldReturnNull()
-    {
+    public void GetCurrentUserId_WhenNotAuthenticated_ShouldReturnNull() {
         // Act
         var userId = _controller.TestGetCurrentUserId();
 
@@ -78,8 +76,7 @@ public class SimpleBaseApiV1ControllerTests
     }
 
     [Fact]
-    public void GetCurrentUserId_WhenAuthenticated_ShouldReturnUserId()
-    {
+    public void GetCurrentUserId_WhenAuthenticated_ShouldReturnUserId() {
         // Arrange
         var expectedUserId = Guid.NewGuid();
         var claims = new List<Claim>
@@ -97,8 +94,7 @@ public class SimpleBaseApiV1ControllerTests
     }
 
     [Fact]
-    public void GetCurrentUserRoles_WhenNotAuthenticated_ShouldReturnEmpty()
-    {
+    public void GetCurrentUserRoles_WhenNotAuthenticated_ShouldReturnEmpty() {
         // Act
         var roles = _controller.TestGetCurrentUserRoles();
 
@@ -108,8 +104,7 @@ public class SimpleBaseApiV1ControllerTests
     }
 
     [Fact]
-    public void HasRole_WhenUserHasRole_ShouldReturnTrue()
-    {
+    public void HasRole_WhenUserHasRole_ShouldReturnTrue() {
         // Arrange
         var claims = new List<Claim>
         {
@@ -131,10 +126,7 @@ public class SimpleBaseApiV1ControllerTests
     }
 
     // Test controller to expose protected methods
-    private class TestController : BaseApiV1Controller
-    {
-        public TestController(ILogger<TestController> logger) : base(logger) { }
-
+    private class TestController(ILogger<SimpleBaseApiV1ControllerTests.TestController> logger) : BaseApiV1Controller(logger) {
         public IActionResult TestCreateErrorResponse(string message, int statusCode = 400)
             => CreateErrorResponse(message, statusCode);
 

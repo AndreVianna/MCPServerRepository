@@ -3,8 +3,7 @@ namespace MCPHub.Storage;
 /// <summary>
 /// Storage provider types for technology progression
 /// </summary>
-public enum StorageProviderType
-{
+public enum StorageProviderType {
     LocalFile,    // Development tier
     AzureBlob,    // Production tier
     AWSS3,        // Production tier alternative

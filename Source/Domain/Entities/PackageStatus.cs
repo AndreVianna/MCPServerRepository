@@ -4,5 +4,9 @@ public enum PackageStatus {
     Pending,
     Approved,
     Rejected,
-    Suspended
+    Suspended,
+    Published,
+    Draft,
+    Deleted,
+    Deprecated
 }

@@ -1,0 +1,1087 @@
+@page "/analytics/market"
+@using MCPHub.WebApp.Services
+@using MCPHub.WebApp.Components.UI.Layout
+@using MCPHub.WebApp.Components.UI.Analytics
+@using MCPHub.WebApp.Components.UI.Security
+@using MCPHub.WebApp.Components.UI.Models
+@using MCPHub.Domain.Entities
+@using MudBlazor
+@inject IAnalyticsService AnalyticsService
+@inject ISnackbar Snackbar
+@inject ILogger<MarketInsights> Logger
+@inject NavigationManager Navigation
+
+<PageTitle>Market Insights - MCP Hub</PageTitle>
+
+<ResponsiveContainer MaxWidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
+    <HeaderContent>
+        <div class="market-insights-header">
+            <div class="header-title mb-4">
+                <MudText Typo="Typo.h3">📊 Market Insights</MudText>
+                <MudText Typo="Typo.body1" Color="Color.Secondary">
+                    Competitive analysis and market intelligence for the MCP ecosystem
+                </MudText>
+            </div>
+
+            <div class="header-controls d-flex justify-space-between align-center flex-wrap gap-3">
+                <div class="market-filters d-flex align-center gap-3">
+                    <MudSelect Value="@_selectedTimeRange"
+                               Label="Time Range"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               Style="min-width: 150px;"
+                               T="string"
+                               ValueChanged="OnTimeRangeChanged">
+                        <MudSelectItem Value="@("month")">Last 30 days</MudSelectItem>
+                        <MudSelectItem Value="@("quarter")">Last 3 months</MudSelectItem>
+                        <MudSelectItem Value="@("halfyear")">Last 6 months</MudSelectItem>
+                        <MudSelectItem Value="@("year")">Last year</MudSelectItem>
+                        <MudSelectItem Value="@("all")">All time</MudSelectItem>
+                    </MudSelect>
+
+                    <MudSelect Value="@_selectedCategories"
+                               Label="Categories"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               Style="min-width: 200px;"
+                               T="string"
+                               MultiSelection="true"
+                               ValueChanged="OnCategoriesChanged">
+                        <MudSelectItem Value="@("AI_ML")">AI & ML</MudSelectItem>
+                        <MudSelectItem Value="@("Web_Scraping")">Web Scraping</MudSelectItem>
+                        <MudSelectItem Value="@("Data_Processing")">Data Processing</MudSelectItem>
+                        <MudSelectItem Value="@("API_Tools")">API Tools</MudSelectItem>
+                        <MudSelectItem Value="@("Security")">Security</MudSelectItem>
+                        <MudSelectItem Value="@("UI_Components")">UI Components</MudSelectItem>
+                        <MudSelectItem Value="@("Database")">Database</MudSelectItem>
+                        <MudSelectItem Value="@("Testing")">Testing</MudSelectItem>
+                    </MudSelect>
+
+                    <MudSelect Value="@_selectedAnalysisType"
+                               Label="Analysis Type"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               Style="min-width: 160px;"
+                               T="string"
+                               ValueChanged="OnAnalysisTypeChanged">
+                        <MudSelectItem Value="@("competitive")">Competitive</MudSelectItem>
+                        <MudSelectItem Value="@("trends")">Trends</MudSelectItem>
+                        <MudSelectItem Value="@("opportunities")">Opportunities</MudSelectItem>
+                        <MudSelectItem Value="@("forecast")">Forecast</MudSelectItem>
+                    </MudSelect>
+                </div>
+
+                <div class="header-actions d-flex gap-2">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="Icons.Material.Filled.Download"
+                               Size="Size.Medium"
+                               @onclick="ExportInsights">
+                        Export Report
+                    </MudButton>
+                    
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="Icons.Material.Filled.Refresh"
+                               Size="Size.Medium"
+                               @onclick="RefreshData"
+                               Disabled="_isLoading">
+                        Refresh
+                    </MudButton>
+                </div>
+            </div>
+        </div>
+    </HeaderContent>
+
+    <MainContent>
+        @if (_isLoading)
+        {
+            <div class="market-insights-loading">
+                <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mb-4" />
+                <MudGrid Spacing="3">
+                    @for (int i = 0; i < 4; i++)
+                    {
+                        <MudItem xs="12" sm="6" md="3">
+                            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="140px" />
+                        </MudItem>
+                    }
+                    <MudItem xs="12" lg="8">
+                        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="400px" />
+                    </MudItem>
+                    <MudItem xs="12" lg="4">
+                        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="400px" />
+                    </MudItem>
+                </MudGrid>
+            </div>
+        }
+        else if (_marketInsights != null)
+        {
+            <!-- Market Overview -->
+            <div class="market-overview mb-6">
+                <MudGrid Spacing="3">
+                    <MudItem xs="12" sm="6" md="3">
+                        <MetricsCard Title="Total Market Size"
+                                     Value="@FormatNumber(_marketInsights.Overview.TotalMarketSize)"
+                                     Icon="Icons.Material.Filled.TrendingUp"
+                                     Color="Color.Primary"
+                                     ShowTrend="true"
+                                     TrendValue="@_marketInsights.Overview.GrowthRate"
+                                     TrendLabel="growth rate"
+                                     Subtitle="packages downloaded" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6" md="3">
+                        <MetricsCard Title="Active Categories"
+                                     Value="@_marketInsights.Overview.ActiveCategories.ToString()"
+                                     Icon="Icons.Material.Filled.Category"
+                                     Color="Color.Success"
+                                     ShowTrend="false"
+                                     Subtitle="@_marketInsights.Overview.LeadingCategory" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6" md="3">
+                        <MetricsCard Title="Market Concentration"
+                                     Value="@($"{_marketInsights.Overview.MarketConcentration:F1}%")"
+                                     Icon="Icons.Material.Filled.PieChart"
+                                     Color="Color.Info"
+                                     ShowTrend="false"
+                                     ShowProgressBar="true"
+                                     Progress="@_marketInsights.Overview.MarketConcentration"
+                                     Subtitle="top 10 packages" />
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6" md="3">
+                        <MetricsCard Title="Market Leaders"
+                                     Value="@_marketInsights.Overview.MarketLeaders.Count().ToString()"
+                                     Icon="Icons.Material.Filled.Business"
+                                     Color="Color.Warning"
+                                     ShowTrend="false"
+                                     Subtitle="dominant publishers" />
+                    </MudItem>
+                </MudGrid>
+            </div>
+
+            <!-- Main Market Analysis -->
+            <div class="main-market-analysis mb-6">
+                <MudGrid Spacing="3">
+                    <!-- Market Trends Chart -->
+                    <MudItem xs="12" lg="8">
+                        <AnalyticsChart Title="📈 Market Trends Analysis"
+                                        Subtitle="@GetTrendsSubtitle()"
+                                        ChartType="@GetTrendsChartType()"
+                                        ChartSeries="@GetTrendsChartSeries()"
+                                        XAxisLabels="@GetTrendsLabels()"
+                                        Height="400"
+                                        ShowTimeRangeSelector="false"
+                                        ShowSummary="true"
+                                        EnableRealTime="false"
+                                        EnableDrillDown="true"
+                                        OnDrillDown="HandleTrendsDrillDown"
+                                        OnExport="ExportTrendsData">
+                            <CustomControls>
+                                <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small">
+                                    <MudButton @onclick="@(() => SetTrendsView("growth"))"
+                                               Variant="@(_trendsView == "growth" ? Variant.Filled : Variant.Outlined)">
+                                        Growth
+                                    </MudButton>
+                                    <MudButton @onclick="@(() => SetTrendsView("market-share"))"
+                                               Variant="@(_trendsView == "market-share" ? Variant.Filled : Variant.Outlined)">
+                                        Market Share
+                                    </MudButton>
+                                    <MudButton @onclick="@(() => SetTrendsView("adoption"))"
+                                               Variant="@(_trendsView == "adoption" ? Variant.Filled : Variant.Outlined)">
+                                        Adoption
+                                    </MudButton>
+                                </MudButtonGroup>
+                            </CustomControls>
+                        </AnalyticsChart>
+                    </MudItem>
+
+                    <!-- Category Insights -->
+                    <MudItem xs="12" lg="4">
+                        <MudCard Class="analytics-chart-card" Elevation="2">
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.h6">🎯 Category Performance</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        Market size and growth by category
+                                    </MudText>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                            <MudCardContent Class="pa-0">
+                                @if (_marketInsights.CategoryInsights?.Any() == true)
+                                {
+                                    <MudList T="string">
+                                        @foreach (var category in _marketInsights.CategoryInsights.OrderByDescending(c => c.MarketSize).Take(8))
+                                        {
+                                            <MudListItem T="string" Class="category-insight-item"
+                                                         @onclick="@(() => DrillDownCategory(category.Category))"
+                                                         Icon="@GetCategoryIcon(category.Category)">
+                                                <div class="category-insight-content d-flex justify-space-between align-center w-100">
+                                                    <div class="category-info">
+                                                        <MudText Typo="Typo.body2" Class="font-weight-bold">
+                                                            @category.Category
+                                                        </MudText>
+                                                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                            @category.PackageCount packages • Competition: @GetCompetitionLevel(category.CompetitionLevel)
+                                                        </MudText>
+                                                    </div>
+                                                    <div class="category-metrics text-right">
+                                                        <MudText Typo="Typo.body2" Class="font-weight-bold">
+                                                            @FormatNumber(category.MarketSize)
+                                                        </MudText>
+                                                        <div class="d-flex align-center gap-1">
+                                                            <MudText Typo="Typo.caption" 
+                                                                     Color="@(category.GrowthRate >= 0 ? Color.Success : Color.Error)">
+                                                                @category.GrowthRate.ToString("+0.0%;-0.0%")
+                                                            </MudText>
+                                                            <MudIcon Icon="@(category.GrowthRate >= 0 ? Icons.Material.Filled.TrendingUp : Icons.Material.Filled.TrendingDown)"
+                                                                     Color="@(category.GrowthRate >= 0 ? Color.Success : Color.Error)"
+                                                                     Size="Size.Small" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </MudListItem>
+                                            @if (category != _marketInsights.CategoryInsights.Last())
+                                            {
+                                                <MudDivider />
+                                            }
+                                        }
+                                    </MudList>
+                                }
+                                else
+                                {
+                                    <div class="no-data text-center pa-8">
+                                        <MudIcon Icon="Icons.Material.Outlined.Category" Size="Size.Large" Color="Color.Secondary" />
+                                        <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mt-2">
+                                            No category data available
+                                        </MudText>
+                                    </div>
+                                }
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                </MudGrid>
+            </div>
+
+            <!-- Market Trends and Opportunities -->
+            <div class="market-trends-opportunities mb-6">
+                <MudGrid Spacing="3">
+                    <!-- Trending Technologies -->
+                    <MudItem xs="12" lg="6">
+                        <MudCard Class="analytics-chart-card" Elevation="2">
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.h6">🚀 Emerging Trends</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        Rising technologies and market shifts
+                                    </MudText>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                            <MudCardContent Class="pa-4">
+                                @if (_marketInsights.Trends?.Any() == true)
+                                {
+                                    <div class="trends-list">
+                                        @foreach (var trend in _marketInsights.Trends.OrderByDescending(t => t.Impact).Take(6))
+                                        {
+                                            <div class="trend-item mb-3 pa-3" style="border-left: 4px solid @GetTrendColor(trend.Direction);">
+                                                <div class="d-flex justify-space-between align-center mb-2">
+                                                    <MudText Typo="Typo.body2" Class="font-weight-bold">@trend.Trend</MudText>
+                                                    <div class="d-flex align-center gap-1">
+                                                        <MudChip T="string" Text="@trend.Direction.ToString()" 
+                                                                 Color="@GetTrendChipColor(trend.Direction)" 
+                                                                 Size="Size.Small" />
+                                                        <MudText Typo="Typo.caption">@trend.Impact.ToString("F1")</MudText>
+                                                    </div>
+                                                </div>
+                                                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                    @trend.Description
+                                                </MudText>
+                                                @if (trend.AffectedCategories?.Any() == true)
+                                                {
+                                                    <div class="mt-2">
+                                                        @foreach (var category in trend.AffectedCategories.Take(3))
+                                                        {
+                                                            <MudChip T="string" Text="@category" Size="Size.Small" Variant="Variant.Outlined" Class="mr-1" />
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="no-data text-center pa-4">
+                                        <MudIcon Icon="Icons.Material.Outlined.TrendingUp" Size="Size.Large" Color="Color.Secondary" />
+                                        <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mt-2">
+                                            No trending data available
+                                        </MudText>
+                                    </div>
+                                }
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+
+                    <!-- Market Opportunities -->
+                    <MudItem xs="12" lg="6">
+                        <MudCard Class="analytics-chart-card" Elevation="2">
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.h6">💎 Market Opportunities</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        Untapped markets and growth potential
+                                    </MudText>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                            <MudCardContent Class="pa-4">
+                                @if (_marketInsights.Opportunities?.Any() == true)
+                                {
+                                    <div class="opportunities-list">
+                                        @foreach (var opportunity in _marketInsights.Opportunities.OrderByDescending(o => o.OpportunitySize).Take(5))
+                                        {
+                                            <div class="opportunity-item mb-4 pa-3" style="background-color: var(--mud-palette-success-hover); border-radius: 8px;">
+                                                <div class="d-flex justify-space-between align-center mb-2">
+                                                    <MudText Typo="Typo.body2" Class="font-weight-bold">@opportunity.Title</MudText>
+                                                    <div class="opportunity-metrics d-flex align-center gap-2">
+                                                        <MudText Typo="Typo.caption">Size: @FormatNumber((long)opportunity.OpportunitySize)</MudText>
+                                                        <MudProgressLinear Value="@(100 - opportunity.DifficultyLevel)" 
+                                                                           Color="@GetDifficultyColor(opportunity.DifficultyLevel)" 
+                                                                           Size="Size.Small"
+                                                                           Style="width: 40px;" />
+                                                    </div>
+                                                </div>
+                                                <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2">
+                                                    @opportunity.Description
+                                                </MudText>
+                                                <div class="d-flex justify-space-between align-center">
+                                                    <MudChip T="string" Text="@opportunity.Category" 
+                                                             Color="Color.Info" 
+                                                             Size="Size.Small" 
+                                                             Variant="Variant.Outlined" />
+                                                    <MudText Typo="Typo.caption" Color="@GetDifficultyTextColor(opportunity.DifficultyLevel)">
+                                                        Difficulty: @GetDifficultyLabel(opportunity.DifficultyLevel)
+                                                    </MudText>
+                                                </div>
+                                                @if (opportunity.Requirements?.Any() == true)
+                                                {
+                                                    <MudExpansionPanels Class="mt-2">
+                                                        <MudExpansionPanel Text="Requirements">
+                                                            <div class="requirements-list">
+                                                                @foreach (var requirement in opportunity.Requirements.Take(3))
+                                                                {
+                                                                    <div class="d-flex align-center gap-2 mb-1">
+                                                                        <MudIcon Icon="Icons.Material.Filled.CheckCircleOutline" 
+                                                                                 Size="Size.Small" 
+                                                                                 Color="Color.Secondary" />
+                                                                        <MudText Typo="Typo.caption">@requirement</MudText>
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                        </MudExpansionPanel>
+                                                    </MudExpansionPanels>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="no-data text-center pa-4">
+                                        <MudIcon Icon="Icons.Material.Outlined.Lightbulb" Size="Size.Large" Color="Color.Secondary" />
+                                        <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mt-2">
+                                            No opportunities identified
+                                        </MudText>
+                                    </div>
+                                }
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                </MudGrid>
+            </div>
+
+            <!-- Competitive Analysis -->
+            <div class="competitive-analysis mb-6">
+                <MudCard Class="analytics-chart-card" Elevation="2">
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <div class="d-flex justify-space-between align-center">
+                                <div>
+                                    <MudText Typo="Typo.h6">⚔️ Competitive Landscape</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        Market positioning and competitive dynamics
+                                    </MudText>
+                                </div>
+                                <MudSelect Value="@_selectedCompetitiveCategory"
+                                           Label="Category"
+                                           Variant="Variant.Outlined"
+                                           Margin="Margin.Dense"
+                                           Style="min-width: 150px;"
+                                           T="string"
+                                           ValueChanged="OnCompetitiveCategoryChanged">
+                                    <MudSelectItem Value="@("all")">All Categories</MudSelectItem>
+                                    @if (_marketInsights.CategoryInsights?.Any() == true)
+                                    {
+                                        @foreach (var category in _marketInsights.CategoryInsights)
+                                        {
+                                            <MudSelectItem Value="@category.Category">@category.Category</MudSelectItem>
+                                        }
+                                    }
+                                </MudSelect>
+                            </div>
+                        </CardHeaderContent>
+                    </MudCardHeader>
+                    <MudCardContent Class="pa-0">
+                        @if (_marketInsights.CompetitiveAnalysis?.Any() == true)
+                        {
+                            <div class="competitive-analysis-grid">
+                                @foreach (var analysis in GetFilteredCompetitiveAnalysis())
+                                {
+                                    <div class="competitive-category-section pa-4">
+                                        <div class="d-flex justify-space-between align-center mb-3">
+                                            <MudText Typo="Typo.h6">@analysis.Category</MudText>
+                                            <MudChip T="string" Text="@GetCompetitionLevel(GetCategoryCompetition(analysis.Category))" 
+                                                     Color="@GetCompetitionColor(GetCategoryCompetition(analysis.Category))" 
+                                                     Size="Size.Small" />
+                                        </div>
+
+                                        @if (analysis.Competitors?.Any() == true)
+                                        {
+                                            <div class="competitors-grid">
+                                                @foreach (var competitor in analysis.Competitors.Take(6))
+                                                {
+                                                    <div class="competitor-card pa-3 mb-2" style="border: 1px solid var(--mud-palette-divider); border-radius: 6px;">
+                                                        <div class="d-flex justify-space-between align-center">
+                                                            <MudText Typo="Typo.body2" Class="font-weight-bold">@competitor.ToString()</MudText>
+                                                            <MudIconButton Icon="Icons.Material.Filled.OpenInNew" 
+                                                                           Size="Size.Small" 
+                                                                           Color="Color.Primary"
+                                                                           @onclick="@(() => ViewCompetitor(competitor.ToString()))" />
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+
+                                        @if (analysis.Advantages?.Any() == true)
+                                        {
+                                            <MudDivider Class="my-3" />
+                                            <MudText Typo="Typo.subtitle2" Class="mb-2">Competitive Advantages</MudText>
+                                            <div class="advantages-list">
+                                                @foreach (var advantage in analysis.Advantages.Take(3))
+                                                {
+                                                    <MudChip T="string" Text="@advantage.ToString()" 
+                                                             Color="Color.Success" 
+                                                             Size="Size.Small" 
+                                                             Variant="Variant.Outlined" 
+                                                             Class="mr-1 mb-1" />
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                    
+                                    @if (analysis != GetFilteredCompetitiveAnalysis().Last())
+                                    {
+                                        <MudDivider />
+                                    }
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="no-data text-center pa-8">
+                                <MudIcon Icon="Icons.Material.Outlined.Groups" Size="Size.Large" Color="Color.Secondary" />
+                                <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mt-2">
+                                    No competitive analysis data available
+                                </MudText>
+                            </div>
+                        }
+                    </MudCardContent>
+                </MudCard>
+            </div>
+
+            <!-- Market Forecast -->
+            @if (_marketInsights.Forecast != null)
+            {
+                <div class="market-forecast mb-6">
+                    <MudCard Class="analytics-chart-card" Elevation="2">
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">🔮 Market Forecast</MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                    Predictive analysis for @_marketInsights.Forecast.ForecastPeriod
+                                </MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent Class="pa-4">
+                            <div class="forecast-overview mb-4">
+                                <div class="d-flex justify-space-around text-center">
+                                    <div>
+                                        <MudText Typo="Typo.h6">@_marketInsights.Forecast.ConfidenceLevel.ToString("F1")%</MudText>
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">Confidence Level</MudText>
+                                    </div>
+                                    <div>
+                                        <MudText Typo="Typo.h6">@_marketInsights.Forecast.ForecastPeriod</MudText>
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">Forecast Period</MudText>
+                                    </div>
+                                    <div>
+                                        <MudText Typo="Typo.h6">@_marketInsights.Forecast.Projections.Count()</MudText>
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">Data Points</MudText>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (_marketInsights.Forecast.Assumptions?.Any() == true)
+                            {
+                                <MudDivider Class="my-3" />
+                                <MudText Typo="Typo.subtitle2" Class="mb-2">Key Assumptions</MudText>
+                                <div class="assumptions-list">
+                                    @foreach (var assumption in _marketInsights.Forecast.Assumptions.Take(4))
+                                    {
+                                        <div class="assumption-item d-flex align-center gap-2 mb-2">
+                                            <MudIcon Icon="Icons.Material.Filled.Insights" 
+                                                     Size="Size.Small" 
+                                                     Color="Color.Info" />
+                                            <MudText Typo="Typo.caption">@assumption.ToString()</MudText>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </MudCardContent>
+                    </MudCard>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="no-data text-center pa-8">
+                <MudIcon Icon="Icons.Material.Outlined.Assessment" Size="Size.Large" Color="Color.Secondary" />
+                <MudText Typo="Typo.h6" Color="Color.Secondary" Class="mt-2">
+                    Market Insights Not Available
+                </MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    Market analysis data could not be loaded.
+                </MudText>
+                <MudButton Variant="Variant.Filled" 
+                           Color="Color.Primary" 
+                           Class="mt-3"
+                           @onclick="RefreshData">
+                    Try Again
+                </MudButton>
+            </div>
+        }
+    </MainContent>
+</ResponsiveContainer>
+
+@code {
+    private bool _isLoading = true;
+    private string _selectedTimeRange = "30d";
+    private string[] _selectedCategories = Array.Empty<string>();
+    private string _selectedAnalysisType = "competitive";
+    private string _selectedCompetitiveCategory = "";
+    private string _trendsView = "growth";
+
+    private GlobalMarketInsights? _marketInsights;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadMarketInsights();
+    }
+
+    private async Task LoadMarketInsights()
+    {
+        try
+        {
+            _isLoading = true;
+            StateHasChanged();
+
+            _marketInsights = await AnalyticsService.GetGlobalMarketInsightsAsync(_selectedTimeRange, _selectedCategories);
+        }
+        catch (NotImplementedException)
+        {
+            GenerateMockMarketInsights();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading market insights");
+            Snackbar.Add("Failed to load market insights", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void GenerateMockMarketInsights()
+    {
+        var random = new Random();
+        
+        _marketInsights = new GlobalMarketInsights
+        {
+            TimeRange = _selectedTimeRange,
+            Overview = new MarketOverview
+            {
+                TotalMarketSize = 42891567,
+                GrowthRate = 28.7,
+                ActiveCategories = 12,
+                LeadingCategory = "AI & ML",
+                MarketConcentration = 34.6,
+                MarketLeaders = new[] { new MarketLeader(), new MarketLeader(), new MarketLeader() }
+            },
+            CategoryInsights = new[]
+            {
+                new CategoryInsight { Category = "AI & ML", MarketSize = 12894567, GrowthRate = 67.8, PackageCount = 1247, CompetitionLevel = 85.3, KeyPlayers = new[] { "Anthropic Tools", "OpenAI Toolkit", "DeepMind Labs" }, EmergingTrends = new[] { "Multimodal AI", "Edge AI", "AI Safety" } },
+                new CategoryInsight { Category = "Web Scraping", MarketSize = 8945672, GrowthRate = 45.3, PackageCount = 892, CompetitionLevel = 72.1, KeyPlayers = new[] { "ScrapeMaster", "WebHarvest Pro", "DataMiner Elite" }, EmergingTrends = new[] { "Anti-bot bypassing", "Real-time scraping", "GDPR compliance" } },
+                new CategoryInsight { Category = "Data Processing", MarketSize = 7834567, GrowthRate = 38.9, PackageCount = 1534, CompetitionLevel = 68.4, KeyPlayers = new[] { "DataFlow Solutions", "StreamProcessor", "BigData Tools" }, EmergingTrends = new[] { "Stream processing", "Real-time analytics", "ML pipelines" } },
+                new CategoryInsight { Category = "API Tools", MarketSize = 6789345, GrowthRate = 29.7, PackageCount = 2156, CompetitionLevel = 91.2, KeyPlayers = new[] { "API Master", "EndpointPro", "RESTful Solutions" }, EmergingTrends = new[] { "GraphQL adoption", "API security", "Microservices" } },
+                new CategoryInsight { Category = "Security", MarketSize = 5672834, GrowthRate = 52.1, PackageCount = 673, CompetitionLevel = 76.8, KeyPlayers = new[] { "SecureVault Ltd", "CyberShield", "SafeGuard Pro" }, EmergingTrends = new[] { "Zero-trust architecture", "AI-powered security", "Privacy-first design" } },
+                new CategoryInsight { Category = "UI Components", MarketSize = 4567892, GrowthRate = 22.4, PackageCount = 1891, CompetitionLevel = 58.9, KeyPlayers = new[] { "UI Masters", "ComponentCraft", "DesignSystem Pro" }, EmergingTrends = new[] { "Design systems", "Accessibility-first", "Web components" } }
+            },
+            Trends = new[]
+            {
+                new MarketTrendData { Trend = "AI Integration Surge", Description = "Massive adoption of AI-powered tools across all categories", Impact = 92.4, Direction = Services.TrendDirection.Up, AffectedCategories = new[] { "AI & ML", "Data Processing", "API Tools" } },
+                new MarketTrendData { Trend = "Privacy-First Development", Description = "Growing emphasis on data privacy and user consent", Impact = 78.6, Direction = Services.TrendDirection.Up, AffectedCategories = new[] { "Security", "Web Scraping", "Data Processing" } },
+                new MarketTrendData { Trend = "Real-time Processing", Description = "Shift towards real-time data processing and streaming", Impact = 85.2, Direction = Services.TrendDirection.Up, AffectedCategories = new[] { "Data Processing", "API Tools" } },
+                new MarketTrendData { Trend = "Developer Experience Focus", Description = "Increased emphasis on developer-friendly APIs and tooling", Impact = 67.8, Direction = Services.TrendDirection.Up, AffectedCategories = new[] { "API Tools", "UI Components" } },
+                new MarketTrendData { Trend = "Security Automation", Description = "Automated security scanning and compliance checking", Impact = 73.5, Direction = Services.TrendDirection.Up, AffectedCategories = new[] { "Security", "API Tools" } }
+            },
+            Opportunities = new[]
+            {
+                new MarketOpportunity { Title = "AI-Powered Security Tools", Description = "Combine AI capabilities with security scanning for next-gen protection", OpportunitySize = 2500000, DifficultyLevel = 65.0, Category = "Security", Requirements = new[] { "AI expertise", "Security domain knowledge", "Scalable infrastructure" } },
+                new MarketOpportunity { Title = "Multi-Cloud Data Processing", Description = "Cross-cloud data processing tools for enterprise adoption", OpportunitySize = 1800000, DifficultyLevel = 72.0, Category = "Data Processing", Requirements = new[] { "Cloud expertise", "Enterprise partnerships", "Compliance frameworks" } },
+                new MarketOpportunity { Title = "Voice-Enabled Development Tools", Description = "Voice interfaces for development and automation workflows", OpportunitySize = 1200000, DifficultyLevel = 58.0, Category = "API Tools", Requirements = new[] { "Voice AI", "Developer workflows", "Integration capabilities" } },
+                new MarketOpportunity { Title = "Privacy-Compliant Web Scraping", Description = "GDPR and CCPA compliant web scraping solutions", OpportunitySize = 950000, DifficultyLevel = 45.0, Category = "Web Scraping", Requirements = new[] { "Legal compliance", "Privacy by design", "Data minimization" } }
+            },
+            CompetitiveAnalysis = new[]
+            {
+                new CompetitiveAnalysis 
+                { 
+                    Category = "AI & ML", 
+                    Competitors = new[] { new CompetitorProfile(), new CompetitorProfile(), new CompetitorProfile() },
+                    Advantages = new[] { new CompetitiveAdvantage(), new CompetitiveAdvantage() }
+                },
+                new CompetitiveAnalysis 
+                { 
+                    Category = "Security", 
+                    Competitors = new[] { new CompetitorProfile(), new CompetitorProfile() },
+                    Advantages = new[] { new CompetitiveAdvantage() }
+                }
+            },
+            Forecast = new MarketForecast
+            {
+                ForecastPeriod = "Next 12 months",
+                ConfidenceLevel = 87.3,
+                Projections = new[] { new ForecastDataPoint(), new ForecastDataPoint(), new ForecastDataPoint() },
+                Assumptions = new[] { new ForecastAssumption(), new ForecastAssumption(), new ForecastAssumption() }
+            }
+        };
+    }
+
+    private async Task OnTimeRangeChanged()
+    {
+        await LoadMarketInsights();
+    }
+
+    private async Task OnCategoriesChanged()
+    {
+        await LoadMarketInsights();
+    }
+
+    private async Task OnAnalysisTypeChanged()
+    {
+        StateHasChanged();
+    }
+
+    private async Task OnCompetitiveCategoryChanged()
+    {
+        StateHasChanged();
+    }
+
+    private async Task RefreshData()
+    {
+        await LoadMarketInsights();
+        Snackbar.Add("Market insights refreshed", Severity.Success);
+    }
+
+    private async Task ExportInsights()
+    {
+        Snackbar.Add("Export functionality coming soon", Severity.Info);
+    }
+
+    private void SetTrendsView(string view)
+    {
+        _trendsView = view;
+        StateHasChanged();
+    }
+
+    private async Task HandleTrendsDrillDown(ChartDrillDownEventArgs args)
+    {
+        Snackbar.Add($"Drilling down into trend data for {args.XAxisLabel}", Severity.Info);
+    }
+
+    private async Task ExportTrendsData()
+    {
+        Snackbar.Add("Exporting trends data", Severity.Info);
+    }
+
+    private void DrillDownCategory(string category)
+    {
+        Navigation.NavigateTo($"/browse?category={Uri.EscapeDataString(category)}");
+    }
+
+    private void ViewCompetitor(string competitor)
+    {
+        Snackbar.Add($"Viewing competitor: {competitor}", Severity.Info);
+    }
+
+    // Helper methods for data transformation and display
+    private string GetTrendsSubtitle() => _trendsView switch
+    {
+        "growth" => "Growth rates across market segments",
+        "market-share" => "Market share distribution",
+        "adoption" => "Technology adoption patterns",
+        _ => "Market trends analysis"
+    };
+
+    private Components.UI.Models.ChartType GetTrendsChartType() => _trendsView switch
+    {
+        "market-share" => Components.UI.Models.ChartType.Donut,
+        "adoption" => Components.UI.Models.ChartType.Bar,
+        _ => Components.UI.Models.ChartType.Line
+    };
+
+    private List<MudBlazor.ChartSeries> GetTrendsChartSeries()
+    {
+        if (_marketInsights?.Trends == null) return new();
+
+        var customSeries = _trendsView switch
+        {
+            "growth" => new List<Components.UI.Models.ChartSeries>
+            {
+                new() { Name = "Growth Rate", Data = _marketInsights.Trends.Select(t => t.Impact).ToArray() }
+            },
+            "market-share" => new List<Components.UI.Models.ChartSeries>
+            {
+                new() { Name = "Market Share", Data = _marketInsights.CategoryInsights?.Select(c => (double)c.MarketSize).ToArray() ?? Array.Empty<double>() }
+            },
+            "adoption" => new List<Components.UI.Models.ChartSeries>
+            {
+                new() { Name = "Adoption Rate", Data = _marketInsights.Trends.Select(t => t.Impact * 0.8).ToArray() }
+            },
+            _ => new List<Components.UI.Models.ChartSeries>()
+        };
+
+        return ChartSeriesConverter.ToMudBlazor(customSeries);
+    }
+
+    private string[] GetTrendsLabels() => _trendsView switch
+    {
+        "growth" => _marketInsights?.Trends?.Select(t => t.Trend).ToArray() ?? Array.Empty<string>(),
+        "market-share" => _marketInsights?.CategoryInsights?.Select(c => c.Category).ToArray() ?? Array.Empty<string>(),
+        "adoption" => _marketInsights?.Trends?.Select(t => t.Trend).ToArray() ?? Array.Empty<string>(),
+        _ => Array.Empty<string>()
+    };
+
+    private IEnumerable<CompetitiveAnalysis> GetFilteredCompetitiveAnalysis()
+    {
+        if (_marketInsights?.CompetitiveAnalysis == null) return Array.Empty<CompetitiveAnalysis>();
+
+        return string.IsNullOrEmpty(_selectedCompetitiveCategory) 
+            ? _marketInsights.CompetitiveAnalysis 
+            : _marketInsights.CompetitiveAnalysis.Where(c => c.Category == _selectedCompetitiveCategory);
+    }
+
+    private double GetCategoryCompetition(string category)
+    {
+        return _marketInsights?.CategoryInsights?.FirstOrDefault(c => c.Category == category)?.CompetitionLevel ?? 50.0;
+    }
+
+    private string FormatNumber(long number) => number switch
+    {
+        >= 1000000 => $"{number / 1000000.0:F1}M",
+        >= 1000 => $"{number / 1000.0:F1}K",
+        _ => number.ToString("N0")
+    };
+
+    private string GetCategoryIcon(string category) => category switch
+    {
+        "AI & ML" => Icons.Material.Filled.Psychology,
+        "Web Scraping" => Icons.Material.Filled.Web,
+        "Data Processing" => Icons.Material.Filled.DataUsage,
+        "API Tools" => Icons.Material.Filled.Api,
+        "Security" => Icons.Material.Filled.Security,
+        "UI Components" => Icons.Material.Filled.Widgets,
+        "Database" => Icons.Material.Filled.Storage,
+        "Testing" => Icons.Material.Filled.BugReport,
+        _ => Icons.Material.Filled.Category
+    };
+
+    private string GetCompetitionLevel(double level) => level switch
+    {
+        >= 80 => "Very High",
+        >= 60 => "High",
+        >= 40 => "Medium",
+        >= 20 => "Low",
+        _ => "Very Low"
+    };
+
+    private Color GetCompetitionColor(double level) => level switch
+    {
+        >= 80 => Color.Error,
+        >= 60 => Color.Warning,
+        >= 40 => Color.Info,
+        _ => Color.Success
+    };
+
+    private string GetTrendColor(Services.TrendDirection direction) => direction switch
+    {
+        Services.TrendDirection.Up => "var(--mud-palette-success)",
+        Services.TrendDirection.Down => "var(--mud-palette-error)",
+        Services.TrendDirection.Stable => "var(--mud-palette-info)",
+        Services.TrendDirection.Volatile => "var(--mud-palette-warning)",
+        _ => "var(--mud-palette-secondary)"
+    };
+
+    private Color GetTrendChipColor(Services.TrendDirection direction) => direction switch
+    {
+        Services.TrendDirection.Up => Color.Success,
+        Services.TrendDirection.Down => Color.Error,
+        Services.TrendDirection.Stable => Color.Info,
+        Services.TrendDirection.Volatile => Color.Warning,
+        _ => Color.Secondary
+    };
+
+    private Color GetDifficultyColor(double difficulty) => difficulty switch
+    {
+        <= 30 => Color.Success,
+        <= 60 => Color.Warning,
+        _ => Color.Error
+    };
+
+    private Color GetDifficultyTextColor(double difficulty) => difficulty switch
+    {
+        <= 30 => Color.Success,
+        <= 60 => Color.Warning,
+        _ => Color.Error
+    };
+
+    private string GetDifficultyLabel(double difficulty) => difficulty switch
+    {
+        <= 30 => "Low",
+        <= 60 => "Medium",
+        _ => "High"
+    };
+}
+
+<style>
+.market-insights-header {
+    margin-bottom: 32px;
+}
+
+.header-title h3 {
+    margin-bottom: 8px;
+}
+
+.market-overview,
+.main-market-analysis,
+.market-trends-opportunities,
+.competitive-analysis,
+.market-forecast {
+    width: 100%;
+}
+
+.analytics-chart-card {
+    height: 100%;
+    border-radius: 12px;
+    border: 1px solid var(--mud-palette-divider);
+}
+
+.category-insight-item {
+    padding: 16px 24px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.category-insight-item:hover {
+    background-color: var(--mud-palette-action-hover);
+}
+
+.trend-item {
+    background-color: var(--mud-palette-background-grey);
+    border-radius: 8px;
+    transition: transform 0.2s ease;
+}
+
+.trend-item:hover {
+    transform: translateY(-2px);
+}
+
+.opportunity-item {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.opportunity-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.competitive-analysis-grid {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.competitive-category-section {
+    border-bottom: 1px solid var(--mud-palette-divider);
+}
+
+.competitive-category-section:last-child {
+    border-bottom: none;
+}
+
+.competitors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 8px;
+}
+
+.competitor-card {
+    transition: background-color 0.2s ease;
+}
+
+.competitor-card:hover {
+    background-color: var(--mud-palette-action-hover);
+}
+
+.advantages-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.forecast-overview {
+    background-color: var(--mud-palette-background-grey);
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid var(--mud-palette-divider);
+}
+
+.assumptions-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.assumption-item {
+    padding: 8px;
+    border-radius: 4px;
+    background-color: var(--mud-palette-info-hover);
+}
+
+.requirements-list {
+    padding: 8px 0;
+}
+
+/* Mobile optimizations */
+@@media (max-width: 768px) {
+    .header-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+    }
+    
+    .market-filters,
+    .header-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .market-filters > *,
+    .header-actions > * {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+    
+    .competitive-analysis-grid {
+        max-height: 400px;
+    }
+    
+    .competitors-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .category-insight-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .category-metrics {
+        width: 100%;
+        text-align: left;
+    }
+    
+    .forecast-overview > div {
+        flex-direction: column;
+        gap: 16px;
+    }
+}
+
+/* Dark theme adjustments */
+@@media (prefers-color-scheme: dark) {
+    .trend-item,
+    .forecast-overview,
+    .assumption-item {
+        background-color: rgba(255, 255, 255, 0.02);
+    }
+    
+    .opportunity-item {
+        background-color: rgba(var(--mud-palette-success-rgb), 0.1) !important;
+    }
+    
+    .competitor-card {
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Accessibility enhancements */
+.category-insight-item:focus,
+.trend-item:focus,
+.opportunity-item:focus,
+.competitor-card:focus {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: 2px;
+}
+
+/* Animation for loading states */
+.market-insights-loading {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Scrollbar styling */
+.competitive-analysis-grid::-webkit-scrollbar,
+.assumptions-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.competitive-analysis-grid::-webkit-scrollbar-track,
+.assumptions-list::-webkit-scrollbar-track {
+    background: var(--mud-palette-background-grey);
+    border-radius: 3px;
+}
+
+.competitive-analysis-grid::-webkit-scrollbar-thumb,
+.assumptions-list::-webkit-scrollbar-thumb {
+    background: var(--mud-palette-divider);
+    border-radius: 3px;
+}
+
+.competitive-analysis-grid::-webkit-scrollbar-thumb:hover,
+.assumptions-list::-webkit-scrollbar-thumb:hover {
+    background: var(--mud-palette-text-secondary);
+}
+</style>

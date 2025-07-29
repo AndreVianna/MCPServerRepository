@@ -7,8 +7,7 @@ namespace MCPHub.Domain.Contracts.Services;
 /// <summary>
 /// Service for publishing MCP packages and managing versions
 /// </summary>
-public interface IPackagePublishingService
-{
+public interface IPackagePublishingService {
     /// <summary>
     /// Validates a package manifest without publishing
     /// </summary>
@@ -16,7 +15,7 @@ public interface IPackagePublishingService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Validation result with detailed feedback</returns>
     Task<PublishResult> ValidateManifestAsync(
-        string manifestContent, 
+        string manifestContent,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -27,8 +26,8 @@ public interface IPackagePublishingService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Publishing result with package details or errors</returns>
     Task<PublishResult> PublishPackageAsync(
-        PublishRequest request, 
-        Guid userId, 
+        PublishRequest request,
+        Guid userId,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -41,8 +40,8 @@ public interface IPackagePublishingService
     /// <returns>Publishing result with version details or errors</returns>
     Task<PublishResult> PublishPackageVersionAsync(
         string packageName,
-        PublishVersionRequest request, 
-        Guid userId, 
+        PublishVersionRequest request,
+        Guid userId,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -53,8 +52,8 @@ public interface IPackagePublishingService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Validation result with all checks performed</returns>
     Task<ValidationSummary> PrePublishValidationAsync(
-        PublishRequest request, 
-        Guid userId, 
+        PublishRequest request,
+        Guid userId,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -65,8 +64,8 @@ public interface IPackagePublishingService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>List of package versions</returns>
     Task<IEnumerable<PackageVersionInfo>> GetPackageVersionsAsync(
-        string packageName, 
-        bool includePrerelease = false, 
+        string packageName,
+        bool includePrerelease = false,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -77,8 +76,8 @@ public interface IPackagePublishingService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>True if available, false if taken or user lacks permission</returns>
     Task<bool> IsPackageNameAvailableAsync(
-        string packageName, 
-        Guid userId, 
+        string packageName,
+        Guid userId,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -90,9 +89,9 @@ public interface IPackagePublishingService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Secure download URL</returns>
     Task<string> GenerateDownloadUrlAsync(
-        string packageName, 
-        string version, 
-        int expirationMinutes = 60, 
+        string packageName,
+        string version,
+        int expirationMinutes = 60,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -105,18 +104,17 @@ public interface IPackagePublishingService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>True if unpublished successfully</returns>
     Task<bool> UnpublishPackageVersionAsync(
-        string packageName, 
-        string version, 
-        Guid userId, 
-        string reason, 
+        string packageName,
+        string version,
+        Guid userId,
+        string reason,
         CancellationToken cancellationToken = default);
 }
 
 /// <summary>
 /// Information about a package version
 /// </summary>
-public class PackageVersionInfo
-{
+public class PackageVersionInfo {
     /// <summary>
     /// Version string
     /// </summary>

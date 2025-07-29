@@ -7,18 +7,15 @@ namespace MCPHub.PublicApi.UnitTests.Services;
 /// <summary>
 /// Unit tests for JwtService
 /// </summary>
-public class JwtServiceTests
-{
+public class JwtServiceTests {
     private readonly JwtService _jwtService;
     private readonly ILogger<JwtService> _logger;
     private readonly JwtOptions _jwtOptions;
 
-    public JwtServiceTests()
-    {
+    public JwtServiceTests() {
         _logger = Substitute.For<ILogger<JwtService>>();
-        
-        _jwtOptions = new JwtOptions
-        {
+
+        _jwtOptions = new JwtOptions {
             SecretKey = "TEST_SECRET_KEY_THAT_IS_LONG_ENOUGH_FOR_HMAC_SHA256_ALGORITHM_1234567890",
             Issuer = "MCPHub.Test",
             Audience = "MCPHub.Test.Clients",
@@ -38,8 +35,7 @@ public class JwtServiceTests
     }
 
     [Fact]
-    public async Task GenerateAccessTokenAsync_WithValidUser_ShouldReturnValidJwtToken()
-    {
+    public async Task GenerateAccessTokenAsync_WithValidUser_ShouldReturnValidJwtToken() {
         // Arrange
         var user = CreateTestUser();
 
@@ -48,10 +44,10 @@ public class JwtServiceTests
 
         // Assert
         token.Should().NotBeNullOrEmpty();
-        
+
         var tokenHandler = new JwtSecurityTokenHandler();
         var jsonToken = tokenHandler.ReadJwtToken(token);
-        
+
         jsonToken.Issuer.Should().Be(_jwtOptions.Issuer);
         jsonToken.Audiences.Should().Contain(_jwtOptions.Audience);
         jsonToken.Claims.Should().Contain(c => c.Type == JwtRegisteredClaimNames.Sub && c.Value == user.Id.ToString());
@@ -60,8 +56,7 @@ public class JwtServiceTests
     }
 
     [Fact]
-    public async Task GenerateAccessTokenAsync_WithPublisherUser_ShouldIncludePublisherClaim()
-    {
+    public async Task GenerateAccessTokenAsync_WithPublisherUser_ShouldIncludePublisherClaim() {
         // Arrange
         var user = CreateTestUser();
         user.IsPublisher = true;
@@ -72,13 +67,12 @@ public class JwtServiceTests
         // Assert
         var tokenHandler = new JwtSecurityTokenHandler();
         var jsonToken = tokenHandler.ReadJwtToken(token);
-        
+
         jsonToken.Claims.Should().Contain(c => c.Type == "is_publisher" && c.Value == "true");
     }
 
     [Fact]
-    public async Task GenerateAccessTokenAsync_WithDisplayName_ShouldIncludeDisplayNameClaim()
-    {
+    public async Task GenerateAccessTokenAsync_WithDisplayName_ShouldIncludeDisplayNameClaim() {
         // Arrange
         var user = CreateTestUser();
         user.DisplayName = "Test Display Name";
@@ -89,21 +83,18 @@ public class JwtServiceTests
         // Assert
         var tokenHandler = new JwtSecurityTokenHandler();
         var jsonToken = tokenHandler.ReadJwtToken(token);
-        
+
         jsonToken.Claims.Should().Contain(c => c.Type == "display_name" && c.Value == "Test Display Name");
     }
 
     [Fact]
-    public async Task GenerateAccessTokenAsync_WithNullUser_ShouldThrowArgumentNullException()
-    {
+    public async Task GenerateAccessTokenAsync_WithNullUser_ShouldThrowArgumentNullException() =>
         // Act & Assert
         await FluentActions.Invoking(() => _jwtService.GenerateAccessTokenAsync(null!))
             .Should().ThrowAsync<ArgumentNullException>();
-    }
 
     [Fact]
-    public async Task GenerateRefreshTokenAsync_WithValidUser_ShouldReturnBase64String()
-    {
+    public async Task GenerateRefreshTokenAsync_WithValidUser_ShouldReturnBase64String() {
         // Arrange
         var user = CreateTestUser();
 
@@ -113,23 +104,20 @@ public class JwtServiceTests
         // Assert
         refreshToken.Should().NotBeNullOrEmpty();
         refreshToken.Length.Should().BeGreaterThan(0);
-        
+
         // Should be valid base64
         FluentActions.Invoking(() => Convert.FromBase64String(refreshToken))
             .Should().NotThrow();
     }
 
     [Fact]
-    public async Task GenerateRefreshTokenAsync_WithNullUser_ShouldThrowArgumentNullException()
-    {
+    public async Task GenerateRefreshTokenAsync_WithNullUser_ShouldThrowArgumentNullException() =>
         // Act & Assert
         await FluentActions.Invoking(() => _jwtService.GenerateRefreshTokenAsync(null!))
             .Should().ThrowAsync<ArgumentNullException>();
-    }
 
     [Fact]
-    public async Task ValidateAccessTokenAsync_WithValidToken_ShouldReturnClaimsPrincipal()
-    {
+    public async Task ValidateAccessTokenAsync_WithValidToken_ShouldReturnClaimsPrincipal() {
         // Arrange
         var user = CreateTestUser();
         var token = await _jwtService.GenerateAccessTokenAsync(user);
@@ -145,8 +133,7 @@ public class JwtServiceTests
     }
 
     [Fact]
-    public async Task ValidateAccessTokenAsync_WithInvalidToken_ShouldReturnNull()
-    {
+    public async Task ValidateAccessTokenAsync_WithInvalidToken_ShouldReturnNull() {
         // Arrange
         var invalidToken = "invalid.jwt.token";
 
@@ -158,8 +145,7 @@ public class JwtServiceTests
     }
 
     [Fact]
-    public async Task ValidateAccessTokenAsync_WithEmptyToken_ShouldReturnNull()
-    {
+    public async Task ValidateAccessTokenAsync_WithEmptyToken_ShouldReturnNull() {
         // Act
         var principal = await _jwtService.ValidateAccessTokenAsync(string.Empty);
 
@@ -168,12 +154,10 @@ public class JwtServiceTests
     }
 
     [Fact]
-    public async Task ValidateAccessTokenAsync_WithExpiredToken_ShouldReturnNull()
-    {
+    public async Task ValidateAccessTokenAsync_WithExpiredToken_ShouldReturnNull() {
         // Arrange
         var user = CreateTestUser();
-        var expiredOptions = new JwtOptions
-        {
+        var expiredOptions = new JwtOptions {
             SecretKey = _jwtOptions.SecretKey,
             Issuer = _jwtOptions.Issuer,
             Audience = _jwtOptions.Audience,
@@ -196,8 +180,7 @@ public class JwtServiceTests
     }
 
     [Fact]
-    public async Task RevokeRefreshTokenAsync_WithValidToken_ShouldReturnTrue()
-    {
+    public async Task RevokeRefreshTokenAsync_WithValidToken_ShouldReturnTrue() {
         // Arrange
         var user = CreateTestUser();
         var refreshToken = await _jwtService.GenerateRefreshTokenAsync(user);
@@ -210,8 +193,7 @@ public class JwtServiceTests
     }
 
     [Fact]
-    public async Task RevokeRefreshTokenAsync_WithEmptyToken_ShouldReturnFalse()
-    {
+    public async Task RevokeRefreshTokenAsync_WithEmptyToken_ShouldReturnFalse() {
         // Act
         var result = await _jwtService.RevokeRefreshTokenAsync(string.Empty);
 
@@ -220,8 +202,7 @@ public class JwtServiceTests
     }
 
     [Fact]
-    public async Task GetUserIdFromToken_WithValidToken_ShouldReturnUserId()
-    {
+    public async Task GetUserIdFromToken_WithValidToken_ShouldReturnUserId() {
         // Arrange
         var user = CreateTestUser();
         var token = await _jwtService.GenerateAccessTokenAsync(user);
@@ -234,8 +215,7 @@ public class JwtServiceTests
     }
 
     [Fact]
-    public void GetUserIdFromToken_WithInvalidToken_ShouldReturnNull()
-    {
+    public void GetUserIdFromToken_WithInvalidToken_ShouldReturnNull() {
         // Arrange
         var invalidToken = "invalid.jwt.token";
 
@@ -247,8 +227,7 @@ public class JwtServiceTests
     }
 
     [Fact]
-    public void GetUserIdFromToken_WithEmptyToken_ShouldReturnNull()
-    {
+    public void GetUserIdFromToken_WithEmptyToken_ShouldReturnNull() {
         // Act
         var userId = _jwtService.GetUserIdFromToken(string.Empty);
 
@@ -257,8 +236,7 @@ public class JwtServiceTests
     }
 
     [Fact]
-    public async Task GetTokenExpiration_WithValidToken_ShouldReturnExpirationTime()
-    {
+    public async Task GetTokenExpiration_WithValidToken_ShouldReturnExpirationTime() {
         // Arrange
         var user = CreateTestUser();
         var beforeGeneration = DateTime.UtcNow;
@@ -274,8 +252,7 @@ public class JwtServiceTests
     }
 
     [Fact]
-    public void GetTokenExpiration_WithInvalidToken_ShouldReturnNull()
-    {
+    public void GetTokenExpiration_WithInvalidToken_ShouldReturnNull() {
         // Arrange
         var invalidToken = "invalid.jwt.token";
 
@@ -287,8 +264,7 @@ public class JwtServiceTests
     }
 
     [Fact]
-    public void GetTokenExpiration_WithEmptyToken_ShouldReturnNull()
-    {
+    public void GetTokenExpiration_WithEmptyToken_ShouldReturnNull() {
         // Act
         var expiration = _jwtService.GetTokenExpiration(string.Empty);
 
@@ -297,8 +273,7 @@ public class JwtServiceTests
     }
 
     [Fact]
-    public async Task ValidateRefreshTokenAsync_WithRevokedToken_ShouldReturnNull()
-    {
+    public async Task ValidateRefreshTokenAsync_WithRevokedToken_ShouldReturnNull() {
         // Arrange
         var user = CreateTestUser();
         var refreshToken = await _jwtService.GenerateRefreshTokenAsync(user);
@@ -312,8 +287,7 @@ public class JwtServiceTests
     }
 
     [Fact]
-    public async Task ValidateRefreshTokenAsync_WithEmptyToken_ShouldReturnNull()
-    {
+    public async Task ValidateRefreshTokenAsync_WithEmptyToken_ShouldReturnNull() {
         // Act
         var userId = await _jwtService.ValidateRefreshTokenAsync(string.Empty);
 
@@ -321,14 +295,10 @@ public class JwtServiceTests
         userId.Should().BeNull();
     }
 
-    private static ApplicationUser CreateTestUser()
-    {
-        return new ApplicationUser("testuser", "test@example.com")
-        {
-            Id = Guid.NewGuid(),
-            UserName = "testuser",
-            Email = "test@example.com",
-            EmailConfirmed = true
-        };
-    }
+    private static ApplicationUser CreateTestUser() => new ApplicationUser("testuser", "test@example.com") {
+        Id = Guid.NewGuid(),
+        UserName = "testuser",
+        Email = "test@example.com",
+        EmailConfirmed = true
+    };
 }

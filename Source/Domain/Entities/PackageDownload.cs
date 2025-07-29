@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+
 using MCPHub.Domain.Common;
 
 namespace MCPHub.Domain.Entities;
@@ -6,8 +7,7 @@ namespace MCPHub.Domain.Entities;
 /// <summary>
 /// Represents a package download record for analytics and tracking
 /// </summary>
-public class PackageDownload : BaseEntity
-{
+public class PackageDownload : BaseEntity {
     /// <summary>
     /// Gets or sets the package identifier that was downloaded
     /// </summary>
@@ -63,8 +63,7 @@ public class PackageDownload : BaseEntity
         string userAgent,
         string downloadMethod,
         Guid? userId = null,
-        Dictionary<string, object>? metadata = null)
-    {
+        Dictionary<string, object>? metadata = null) {
         ArgumentException.ThrowIfNullOrWhiteSpace(version);
         ArgumentException.ThrowIfNullOrWhiteSpace(ipAddress);
         ArgumentException.ThrowIfNullOrWhiteSpace(userAgent);
@@ -79,8 +78,7 @@ public class PackageDownload : BaseEntity
         DownloadedAt = DateTimeOffset.UtcNow;
         Metadata = metadata ?? new Dictionary<string, object>();
 
-        AuditTrail.Add(new AuditEntry
-        {
+        AuditTrail.Add(new AuditEntry {
             Action = "Downloaded",
             UserId = userId ?? Guid.Empty,
             DateTime = DateTimeOffset.UtcNow
@@ -92,17 +90,14 @@ public class PackageDownload : BaseEntity
     /// </summary>
     /// <param name="metadata">New metadata to add or update</param>
     /// <param name="userId">User performing the update</param>
-    public void UpdateMetadata(Dictionary<string, object> metadata, Guid? userId = null)
-    {
+    public void UpdateMetadata(Dictionary<string, object> metadata, Guid? userId = null) {
         ArgumentNullException.ThrowIfNull(metadata);
 
-        foreach (var kvp in metadata)
-        {
+        foreach (var kvp in metadata) {
             Metadata[kvp.Key] = kvp.Value;
         }
 
-        AuditTrail.Add(new AuditEntry
-        {
+        AuditTrail.Add(new AuditEntry {
             Action = "Metadata Updated",
             UserId = userId ?? Guid.Empty,
             DateTime = DateTimeOffset.UtcNow

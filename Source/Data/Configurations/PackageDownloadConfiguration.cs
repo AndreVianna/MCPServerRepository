@@ -1,5 +1,7 @@
 using System.Text.Json;
+
 using MCPHub.Domain.Entities;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -8,10 +10,8 @@ namespace MCPHub.Data.Configurations;
 /// <summary>
 /// Entity Framework configuration for PackageDownload entity
 /// </summary>
-public class PackageDownloadConfiguration : IEntityTypeConfiguration<PackageDownload>
-{
-    public void Configure(EntityTypeBuilder<PackageDownload> builder)
-    {
+public class PackageDownloadConfiguration : IEntityTypeConfiguration<PackageDownload> {
+    public void Configure(EntityTypeBuilder<PackageDownload> builder) {
         builder.HasKey(pd => pd.Id);
 
         builder.Property(pd => pd.Version)
@@ -62,8 +62,7 @@ public class PackageDownloadConfiguration : IEntityTypeConfiguration<PackageDown
             .HasDatabaseName("IX_PackageDownloads_DownloadMethod");
 
         // Configure AuditTrail as JSON column
-        builder.OwnsMany(pd => pd.AuditTrail, auditBuilder =>
-        {
+        builder.OwnsMany(pd => pd.AuditTrail, auditBuilder => {
             auditBuilder.ToJson();
             auditBuilder.Property(a => a.Action).IsRequired();
             auditBuilder.Property(a => a.UserId).IsRequired();

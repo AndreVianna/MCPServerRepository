@@ -5,8 +5,7 @@ namespace MCPHub.Domain.Contracts.Responses;
 /// <summary>
 /// Represents the summary of a trust tier recalculation operation
 /// </summary>
-public class TrustTierRecalculationSummary
-{
+public class TrustTierRecalculationSummary {
     /// <summary>
     /// Gets or sets the total number of packages processed
     /// </summary>
@@ -70,15 +69,14 @@ public class TrustTierRecalculationSummary
     /// <summary>
     /// Gets the success rate as a percentage
     /// </summary>
-    public decimal SuccessRate => TotalPackagesProcessed > 0 ? 
+    public decimal SuccessRate => TotalPackagesProcessed > 0 ?
         (decimal)(TotalPackagesProcessed - Errors) / TotalPackagesProcessed * 100 : 100;
 }
 
 /// <summary>
 /// Represents the count of changes for a specific trust tier
 /// </summary>
-public class TrustTierChangeCount
-{
+public class TrustTierChangeCount {
     /// <summary>
     /// Gets or sets the number of packages promoted to this tier
     /// </summary>

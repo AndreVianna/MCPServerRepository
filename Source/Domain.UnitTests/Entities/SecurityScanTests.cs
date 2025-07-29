@@ -170,7 +170,8 @@ public class SecurityScanTests {
         // Assert
         securityScan.VersionId.Should().Be(serverVersionId);
         securityScan.ServerVersionId.Should().Be(serverVersionId);
-        securityScan.VersionId.Should().Be(securityScan.ServerVersionId);
+        securityScan.ServerVersionId.Should().NotBeNull();
+        securityScan.VersionId.Should().Be(securityScan.ServerVersionId.Value);
     }
 
     [Fact]

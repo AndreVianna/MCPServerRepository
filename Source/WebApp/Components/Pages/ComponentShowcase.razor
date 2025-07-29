@@ -1,0 +1,429 @@
+@page "/components"
+@using MudBlazor
+@using MCPHub.Domain.Entities
+@using MCPHub.WebApp.Components.UI.Models
+
+<PageTitle>Component Showcase - MCP Hub</PageTitle>
+
+<ResponsiveContainer MaxWidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
+    <HeaderContent>
+        <div class="d-flex justify-space-between align-center">
+            <div>
+                <MudText Typo="Typo.h4">🎨 Component Library Showcase</MudText>
+                <MudText Typo="Typo.body1" Class="text-secondary">
+                    Interactive demonstration of MCP Hub's enhanced component library
+                </MudText>
+            </div>
+            <MudButton Color="Color.Primary" 
+                       Variant="Variant.Outlined"
+                       StartIcon="Icons.Material.Filled.Code"
+                       Href="https://github.com/your-repo"
+                       Target="_blank">
+                View Source
+            </MudButton>
+        </div>
+    </HeaderContent>
+
+    <MainContent>
+        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+            
+            <!-- Security Components Tab -->
+            <MudTabPanel Text="🔒 Security Components" Icon="Icons.Material.Filled.Security">
+                <MudText Typo="Typo.h5" Class="mb-4">Security Components</MudText>
+                
+                <MudGrid>
+                    <MudItem xs="12" md="6">
+                        <MudPaper Class="pa-4" Elevation="2">
+                            <MudText Typo="Typo.h6" Class="mb-3">Security Grade Badges</MudText>
+                            
+                            <div class="d-flex flex-wrap gap-3 mb-4">
+                                <SecurityGradeBadge Grade="A+" Score="9.8" OnDetailClick="@ShowSecurityDetail" />
+                                <SecurityGradeBadge Grade="A" Score="9.2" OnDetailClick="@ShowSecurityDetail" />
+                                <SecurityGradeBadge Grade="B+" Score="8.5" OnDetailClick="@ShowSecurityDetail" />
+                                <SecurityGradeBadge Grade="B" Score="8.0" OnDetailClick="@ShowSecurityDetail" />
+                                <SecurityGradeBadge Grade="C" Score="7.2" OnDetailClick="@ShowSecurityDetail" />
+                                <SecurityGradeBadge Grade="F" Score="4.1" OnDetailClick="@ShowSecurityDetail" />
+                            </div>
+                            
+                            <MudText Typo="Typo.body2" Class="text-secondary">
+                                Interactive security grade indicators with detailed reports and accessibility support.
+                            </MudText>
+                        </MudPaper>
+                    </MudItem>
+                    
+                    <MudItem xs="12" md="6">
+                        <MudPaper Class="pa-4" Elevation="2">
+                            <MudText Typo="Typo.h6" Class="mb-3">Trust Tier Indicators</MudText>
+                            
+                            <div class="d-flex flex-column gap-3 mb-4">
+                                <TrustTierIndicator Tier="TrustTier.Enterprise" 
+                                                   ShowProgressIndicator="false"
+                                                   OnDetailsClick="@ShowTrustDetail" />
+                                <TrustTierIndicator Tier="TrustTier.CommunityTrusted" 
+                                                   ShowProgressIndicator="true"
+                                                   Progress="@GetSampleProgress()"
+                                                   OnDetailsClick="@ShowTrustDetail" />
+                                <TrustTierIndicator Tier="TrustTier.Verified" 
+                                                   ShowProgressBar="true"
+                                                   Progress="@GetSampleProgress()"
+                                                   OnDetailsClick="@ShowTrustDetail" />
+                                <TrustTierIndicator Tier="TrustTier.Unverified" 
+                                                   OnDetailsClick="@ShowTrustDetail" />
+                            </div>
+                            
+                            <MudText Typo="Typo.body2" Class="text-secondary">
+                                Trust tier visualization with progression tracking and publisher verification status.
+                            </MudText>
+                        </MudPaper>
+                    </MudItem>
+                </MudGrid>
+            </MudTabPanel>
+
+            <!-- Package Components Tab -->
+            <MudTabPanel Text="📦 Package Display" Icon="Icons.Material.Filled.Inventory">
+                <MudText Typo="Typo.h5" Class="mb-4">Package Display Components</MudText>
+                
+                <MudGrid>
+                    <MudItem xs="12" lg="8">
+                        <MudText Typo="Typo.h6" Class="mb-3">Package Cards</MudText>
+                        
+                        <MudGrid>
+                            <MudItem xs="12" md="6">
+                                <PackageCard Package="@GetSamplePackage(true, true)" 
+                                           IsFeatured="true"
+                                           ShowAIInsights="true"
+                                           OnInstallClick="@HandleInstall"
+                                           OnDetailsClick="@HandleDetails"
+                                           OnStarClick="@HandleStar"
+                                           OnShareClick="@HandleShare"
+                                           OnMoreClick="@HandleMore"
+                                           OnTagClick="@HandleTagClick" />
+                            </MudItem>
+                            
+                            <MudItem xs="12" md="6">
+                                <PackageCard Package="@GetSamplePackage(false, false)" 
+                                           OnInstallClick="@HandleInstall"
+                                           OnDetailsClick="@HandleDetails"
+                                           OnStarClick="@HandleStar"
+                                           OnShareClick="@HandleShare"
+                                           OnMoreClick="@HandleMore"
+                                           OnTagClick="@HandleTagClick" />
+                            </MudItem>
+                        </MudGrid>
+                    </MudItem>
+                    
+                    <MudItem xs="12" lg="4">
+                        <MudPaper Class="pa-4" Elevation="2">
+                            <MudText Typo="Typo.h6" Class="mb-3">Package Features</MudText>
+                            <MudList T="string" Dense="true">
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.Security" Text="Security grade badges" />
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.Shield" Text="Trust tier indicators" />
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.TrendingUp" Text="Trending indicators" />
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.Star" Text="Rating and favorites" />
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.Psychology" Text="AI relevance scoring" />
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.Tag" Text="Interactive tags" />
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.Share" Text="Social sharing" />
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.AccessibilityNew" Text="Full accessibility support" />
+                            </MudList>
+                        </MudPaper>
+                    </MudItem>
+                </MudGrid>
+            </MudTabPanel>
+
+            <!-- Search Components Tab -->
+            <MudTabPanel Text="🔍 Search & Filters" Icon="Icons.Material.Filled.Search">
+                <MudText Typo="Typo.h5" Class="mb-4">Search & Filter Components</MudText>
+                
+                <MudGrid>
+                    <MudItem xs="12">
+                        <MudPaper Class="pa-4" Elevation="2">
+                            <MudText Typo="Typo.h6" Class="mb-3">Enhanced Search Bar</MudText>
+                            
+                            <EnhancedSearchBar Placeholder="Try searching for 'AI tools' or 'data processing'..."
+                                             EnableVoiceSearch="true"
+                                             EnableAdvancedSearch="true"
+                                             Categories="@GetSampleCategories()"
+                                             OnSearch="@HandleSearch"
+                                             Class="mb-4" />
+                            
+                            <MudText Typo="Typo.body2" Class="text-secondary mb-3">
+                                AI-powered search with voice input, advanced filtering, and intelligent suggestions.
+                            </MudText>
+                            
+                            <MudAlert Severity="Severity.Info">
+                                <MudText>
+                                    <strong>Features:</strong> Voice search, AI suggestions, category filtering, 
+                                    security grade filtering, trust tier filtering, and timeframe selection.
+                                </MudText>
+                            </MudAlert>
+                        </MudPaper>
+                    </MudItem>
+                </MudGrid>
+            </MudTabPanel>
+
+            <!-- Analytics Components Tab -->
+            <MudTabPanel Text="📊 Analytics" Icon="Icons.Material.Filled.Analytics">
+                <MudText Typo="Typo.h5" Class="mb-4">Analytics & Visualization</MudText>
+                
+                <MudGrid>
+                    <MudItem xs="12" md="8">
+                        <AnalyticsChart Title="Download Trends"
+                                       Subtitle="Package downloads over the last 30 days"
+                                       ChartType="ChartTypeConverter.FromMudBlazor(MudBlazor.ChartType.Line)"
+                                       ChartSeries="@GetSampleChartData()"
+                                       XAxisLabels="@GetSampleLabels()"
+                                       ShowTimeRangeSelector="true"
+                                       ShowSummary="true"
+                                       OnRefresh="@RefreshChartData"
+                                       OnExport="@ExportChartData" />
+                    </MudItem>
+                    
+                    <MudItem xs="12" md="4">
+                        <AnalyticsChart Title="Security Distribution"
+                                       ChartType="ChartTypeConverter.FromMudBlazor(MudBlazor.ChartType.Donut)"
+                                       ChartSeries="@GetSecurityDistributionData()"
+                                       ShowTimeRangeSelector="false"
+                                       ShowSummary="false"
+                                       Height="300" />
+                    </MudItem>
+                </MudGrid>
+            </MudTabPanel>
+
+            <!-- Layout Components Tab -->
+            <MudTabPanel Text="📱 Responsive Layout" Icon="Icons.Material.Filled.ViewQuilt">
+                <MudText Typo="Typo.h5" Class="mb-4">Responsive Layout Components</MudText>
+                
+                <MudPaper Class="pa-4" Elevation="2">
+                    <MudText Typo="Typo.h6" Class="mb-3">ResponsiveContainer Features</MudText>
+                    
+                    <MudGrid>
+                        <MudItem xs="12" md="6">
+                            <MudList T="string" Dense="true">
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.Smartphone" Text="Mobile-first responsive design" />
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.Tablet" Text="Tablet-optimized layouts" />
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.Computer" Text="Desktop multi-column layouts" />
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.SwapHoriz" Text="Configurable sidebar positioning" />
+                            </MudList>
+                        </MudItem>
+                        <MudItem xs="12" md="6">
+                            <MudList T="string" Dense="true">
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.Fullscreen" Text="Full-height container support" />
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.Tune" Text="Flexible max-width options" />
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.AccessibilityNew" Text="Built-in accessibility features" />
+                                <MudListItem T="string" Icon="@Icons.Material.Filled.Speed" Text="Performance optimized" />
+                            </MudList>
+                        </MudItem>
+                    </MudGrid>
+                    
+                    <MudDivider Class="my-4" />
+                    
+                    <MudText Typo="Typo.body2" Class="text-secondary">
+                        This showcase page itself uses the ResponsiveContainer component with adaptive layouts 
+                        that automatically adjust based on screen size and device capabilities.
+                    </MudText>
+                </MudPaper>
+            </MudTabPanel>
+        </MudTabs>
+    </MainContent>
+
+    <SidebarContent>
+        <MudPaper Class="pa-4 mb-4" Elevation="2">
+            <MudText Typo="Typo.h6" Class="mb-2">💡 Component Tips</MudText>
+            <MudList T="string" Dense="true">
+                <MudListItem T="string" Icon="@Icons.Material.Filled.Keyboard" Text="All components support keyboard navigation" />
+                <MudListItem T="string" Icon="@Icons.Material.Filled.RecordVoiceOver" Text="Screen reader compatible" />
+                <MudListItem T="string" Icon="@Icons.Material.Filled.Palette" Text="Automatic dark mode support" />
+                <MudListItem T="string" Icon="@Icons.Material.Filled.PhoneAndroid" Text="Touch-friendly interactions" />
+            </MudList>
+        </MudPaper>
+        
+        <MudPaper Class="pa-4" Elevation="2">
+            <MudText Typo="Typo.h6" Class="mb-2">🚀 Quick Actions</MudText>
+            <div class="d-flex flex-column gap-2">
+                <MudButton Color="Color.Primary" 
+                           Variant="Variant.Filled"
+                           StartIcon="@Icons.Material.Filled.Home"
+                           Href="/"
+                           FullWidth="true">
+                    Back to Home
+                </MudButton>
+                <MudButton Color="Color.Secondary" 
+                           Variant="Variant.Outlined"
+                           StartIcon="@Icons.Material.Filled.Search"
+                           Href="/search"
+                           FullWidth="true">
+                    Try Search
+                </MudButton>
+                <MudButton Color="Color.Info" 
+                           Variant="Variant.Text"
+                           StartIcon="@Icons.Material.Filled.Help"
+                           @onclick="ShowComponentHelp"
+                           FullWidth="true">
+                    Component Help
+                </MudButton>
+            </div>
+        </MudPaper>
+    </SidebarContent>
+</ResponsiveContainer>
+
+@code {
+    private PackageInfo GetSamplePackage(bool isTrending, bool isFeatured)
+    {
+        return new PackageInfo
+        {
+            Name = isFeatured ? "ai-super-tools" : "data-processor",
+            LatestVersion = isFeatured ? "2.1.0" : "1.5.3",
+            Description = isFeatured 
+                ? "A comprehensive AI toolkit for developers with machine learning capabilities, natural language processing, and computer vision features." 
+                : "Efficient data processing utilities for handling large datasets with built-in compression and transformation tools.",
+            Publisher = new PublisherInfo 
+            { 
+                Name = isFeatured ? "ai-innovations" : "data-corp",
+                DisplayName = isFeatured ? "AI Innovations Ltd" : "DataCorp Solutions",
+                Type = PublisherType.Organization,
+                IsVerified = true
+            },
+            SecurityGrade = isFeatured ? "A+" : "A",
+            SecurityScore = isFeatured ? 9.8 : 9.2,
+            TrustTier = isFeatured ? TrustTier.Enterprise : TrustTier.CommunityTrusted,
+            WeeklyDownloads = isFeatured ? 125000 : 45000,
+            Rating = isFeatured ? 4.9 : 4.6,
+            LastUpdated = DateTime.UtcNow.AddDays(isFeatured ? -2 : -7),
+            Tags = isFeatured 
+                ? new List<string> { "AI", "ML", "Computer Vision", "NLP", "Data Science" }
+                : new List<string> { "Data", "Processing", "ETL", "Performance" },
+            IsTrending = isTrending,
+            IsStarred = isFeatured,
+            AIRelevanceScore = isFeatured ? 95.0 : null,
+            IsFeatured = isFeatured
+        };
+    }
+
+    private TrustTierProgress GetSampleProgress()
+    {
+        return new TrustTierProgress
+        {
+            CanAdvance = true,
+            CompletionPercentage = 75.0,
+            Requirements = new List<Components.UI.Models.TrustTierRequirement>
+            {
+                new() { Name = "Security Audit", IsCompleted = true },
+                new() { Name = "Community Reviews", IsCompleted = true },
+                new() { Name = "Enterprise Usage", IsCompleted = false }
+            }
+        };
+    }
+
+    private Dictionary<string, string> GetSampleCategories()
+    {
+        return new Dictionary<string, string>
+        {
+            { "ai", "Artificial Intelligence" },
+            { "data", "Data Processing" },
+            { "web", "Web Development" },
+            { "security", "Security Tools" },
+            { "automation", "Automation" }
+        };
+    }
+
+    private List<MudBlazor.ChartSeries> GetSampleChartData()
+    {
+        return new List<MudBlazor.ChartSeries>
+        {
+            new MudBlazor.ChartSeries { Name = "Downloads", Data = new double[] { 1200, 1450, 1600, 1800, 2100, 2350, 2500 } },
+            new MudBlazor.ChartSeries { Name = "Installs", Data = new double[] { 980, 1200, 1350, 1500, 1750, 1950, 2100 } }
+        };
+    }
+
+    private List<MudBlazor.ChartSeries> GetSecurityDistributionData()
+    {
+        return new List<MudBlazor.ChartSeries>
+        {
+            new MudBlazor.ChartSeries { Name = "A+", Data = new double[] { 35 } },
+            new MudBlazor.ChartSeries { Name = "A", Data = new double[] { 28 } },
+            new MudBlazor.ChartSeries { Name = "B", Data = new double[] { 22 } },
+            new MudBlazor.ChartSeries { Name = "C", Data = new double[] { 12 } },
+            new MudBlazor.ChartSeries { Name = "F", Data = new double[] { 3 } }
+        };
+    }
+
+    private string[] GetSampleLabels()
+    {
+        return new string[] { "Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6", "Day 7" };
+    }
+
+    // Event handlers
+    private async Task ShowSecurityDetail()
+    {
+        // Implementation would show security detail modal
+        await Task.CompletedTask;
+    }
+
+    private async Task ShowTrustDetail()
+    {
+        // Implementation would show trust tier detail modal
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleInstall(PackageInfo package)
+    {
+        // Implementation would handle package installation
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleDetails(PackageInfo package)
+    {
+        // Implementation would navigate to package details
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleStar(PackageInfo package)
+    {
+        // Implementation would toggle package star
+        package.IsStarred = !package.IsStarred;
+        StateHasChanged();
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleShare(PackageInfo package)
+    {
+        // Implementation would share package
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleMore(PackageInfo package)
+    {
+        // Implementation would show more options
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleTagClick(string tag)
+    {
+        // Implementation would filter by tag
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleSearch(SearchQuery query)
+    {
+        // Implementation would perform search
+        await Task.CompletedTask;
+    }
+
+    private async Task RefreshChartData()
+    {
+        // Implementation would refresh chart data
+        await Task.CompletedTask;
+    }
+
+    private async Task ExportChartData()
+    {
+        // Implementation would export chart data
+        await Task.CompletedTask;
+    }
+
+    private async Task ShowComponentHelp()
+    {
+        // Implementation would show help dialog
+        await Task.CompletedTask;
+    }
+}

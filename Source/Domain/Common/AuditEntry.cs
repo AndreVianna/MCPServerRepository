@@ -7,6 +7,6 @@ public record AuditEntry : IAuditEntry, IValidatableObject {
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext) {
         if (string.IsNullOrWhiteSpace(Action))
-            yield return new ValidationResult("Action cannot be null or empty.", [ nameof(Action) ]);
+            yield return new ValidationResult("Action cannot be null or empty.", [nameof(Action)]);
     }
 }

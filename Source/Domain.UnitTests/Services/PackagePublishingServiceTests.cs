@@ -8,22 +8,15 @@ namespace MCPHub.Domain.UnitTests.Services;
 /// <summary>
 /// Unit tests for PackagePublishingService
 /// </summary>
-[TestClass]
-public class PackagePublishingServiceTests
-{
+public class PackagePublishingServiceTests {
     private PackagePublishingService _service;
 
-    [TestInitialize]
-    public void Initialize()
-    {
-        _service = new PackagePublishingService();
-    }
+        public PackagePublishingServiceTests() => _service = new PackagePublishingService();
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("PackagePublishingService")]
-    public async Task ValidateManifestAsync_WithValidManifest_ShouldThrowNotImplementedException()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "PackagePublishingService")]
+    public async Task ValidateManifestAsync_WithValidManifest_ShouldThrowNotImplementedException() {
         // Arrange
         var manifestContent = """
         {
@@ -36,18 +29,16 @@ public class PackagePublishingServiceTests
         """;
 
         // Act & Assert
-        await Assert.ThrowsExceptionAsync<NotImplementedException>(() =>
+        await Assert.ThrowsAsync<NotImplementedException>(() =>
             _service.ValidateManifestAsync(manifestContent));
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("PackagePublishingService")]
-    public async Task PublishPackageAsync_WithValidRequest_ShouldThrowNotImplementedException()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "PackagePublishingService")]
+    public async Task PublishPackageAsync_WithValidRequest_ShouldThrowNotImplementedException() {
         // Arrange
-        var request = new PublishRequest
-        {
+        var request = new PublishRequest {
             ManifestContent = """
             {
                 "name": "test-package",
@@ -64,19 +55,17 @@ public class PackagePublishingServiceTests
         var userId = Guid.NewGuid();
 
         // Act & Assert
-        await Assert.ThrowsExceptionAsync<NotImplementedException>(() =>
+        await Assert.ThrowsAsync<NotImplementedException>(() =>
             _service.PublishPackageAsync(request, userId));
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("PackagePublishingService")]
-    public async Task PublishPackageVersionAsync_WithValidRequest_ShouldThrowNotImplementedException()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "PackagePublishingService")]
+    public async Task PublishPackageVersionAsync_WithValidRequest_ShouldThrowNotImplementedException() {
         // Arrange
         var packageName = "test-package";
-        var request = new PublishVersionRequest
-        {
+        var request = new PublishVersionRequest {
             Version = "1.1.0",
             ManifestContent = """
             {
@@ -93,18 +82,16 @@ public class PackagePublishingServiceTests
         var userId = Guid.NewGuid();
 
         // Act & Assert
-        await Assert.ThrowsExceptionAsync<NotImplementedException>(() =>
+        await Assert.ThrowsAsync<NotImplementedException>(() =>
             _service.PublishPackageVersionAsync(packageName, request, userId));
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("PackagePublishingService")]
-    public async Task PrePublishValidationAsync_WithValidRequest_ShouldThrowNotImplementedException()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "PackagePublishingService")]
+    public async Task PrePublishValidationAsync_WithValidRequest_ShouldThrowNotImplementedException() {
         // Arrange
-        var request = new PublishRequest
-        {
+        var request = new PublishRequest {
             ManifestContent = """
             {
                 "name": "test-package",
@@ -119,56 +106,52 @@ public class PackagePublishingServiceTests
         var userId = Guid.NewGuid();
 
         // Act & Assert
-        await Assert.ThrowsExceptionAsync<NotImplementedException>(() =>
+        await Assert.ThrowsAsync<NotImplementedException>(() =>
             _service.PrePublishValidationAsync(request, userId));
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("PackagePublishingService")]
-    public async Task GetPackageVersionsAsync_WithValidPackageName_ShouldThrowNotImplementedException()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "PackagePublishingService")]
+    public async Task GetPackageVersionsAsync_WithValidPackageName_ShouldThrowNotImplementedException() {
         // Arrange
         var packageName = "test-package";
 
         // Act & Assert
-        await Assert.ThrowsExceptionAsync<NotImplementedException>(() =>
+        await Assert.ThrowsAsync<NotImplementedException>(() =>
             _service.GetPackageVersionsAsync(packageName));
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("PackagePublishingService")]
-    public async Task IsPackageNameAvailableAsync_WithValidPackageName_ShouldThrowNotImplementedException()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "PackagePublishingService")]
+    public async Task IsPackageNameAvailableAsync_WithValidPackageName_ShouldThrowNotImplementedException() {
         // Arrange
         var packageName = "test-package";
         var userId = Guid.NewGuid();
 
         // Act & Assert
-        await Assert.ThrowsExceptionAsync<NotImplementedException>(() =>
+        await Assert.ThrowsAsync<NotImplementedException>(() =>
             _service.IsPackageNameAvailableAsync(packageName, userId));
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("PackagePublishingService")]
-    public async Task GenerateDownloadUrlAsync_WithValidParameters_ShouldThrowNotImplementedException()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "PackagePublishingService")]
+    public async Task GenerateDownloadUrlAsync_WithValidParameters_ShouldThrowNotImplementedException() {
         // Arrange
         var packageName = "test-package";
         var version = "1.0.0";
 
         // Act & Assert
-        await Assert.ThrowsExceptionAsync<NotImplementedException>(() =>
+        await Assert.ThrowsAsync<NotImplementedException>(() =>
             _service.GenerateDownloadUrlAsync(packageName, version));
     }
 
-    [TestMethod]
-    [TestCategory("Unit")]
-    [TestCategory("PackagePublishingService")]
-    public async Task UnpublishPackageVersionAsync_WithValidParameters_ShouldThrowNotImplementedException()
-    {
+    [Fact]
+    [Trait("Category", "Unit")]
+    [Trait("Category", "PackagePublishingService")]
+    public async Task UnpublishPackageVersionAsync_WithValidParameters_ShouldThrowNotImplementedException() {
         // Arrange
         var packageName = "test-package";
         var version = "1.0.0";
@@ -176,7 +159,7 @@ public class PackagePublishingServiceTests
         var reason = "Security vulnerability";
 
         // Act & Assert
-        await Assert.ThrowsExceptionAsync<NotImplementedException>(() =>
+        await Assert.ThrowsAsync<NotImplementedException>(() =>
             _service.UnpublishPackageVersionAsync(packageName, version, userId, reason));
     }
 }

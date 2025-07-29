@@ -5,8 +5,7 @@ namespace MCPHub.CommandLineApp.Models;
 /// <summary>
 /// Base API response model
 /// </summary>
-public class ApiResponse<T>
-{
+public class ApiResponse<T> {
     /// <summary>
     /// Indicates if the request was successful
     /// </summary>
@@ -35,8 +34,7 @@ public class ApiResponse<T>
 /// <summary>
 /// Search request parameters
 /// </summary>
-public class SearchRequest
-{
+public class SearchRequest {
     /// <summary>
     /// Search query string
     /// </summary>
@@ -76,8 +74,7 @@ public class SearchRequest
 /// <summary>
 /// Search result response
 /// </summary>
-public class SearchResultResponse
-{
+public class SearchResultResponse {
     /// <summary>
     /// Search results
     /// </summary>
@@ -118,8 +115,7 @@ public class SearchResultResponse
 /// <summary>
 /// Package search result item
 /// </summary>
-public class PackageSearchResult
-{
+public class PackageSearchResult {
     /// <summary>
     /// Package ID
     /// </summary>
@@ -196,8 +192,7 @@ public class PackageSearchResult
 /// <summary>
 /// Package information response
 /// </summary>
-public class PackageInfoResponse
-{
+public class PackageInfoResponse {
     /// <summary>
     /// Package ID
     /// </summary>
@@ -280,8 +275,7 @@ public class PackageInfoResponse
 /// <summary>
 /// Publisher information
 /// </summary>
-public class PublisherInfo
-{
+public class PublisherInfo {
     /// <summary>
     /// Publisher ID
     /// </summary>
@@ -322,8 +316,7 @@ public class PublisherInfo
 /// <summary>
 /// Package manifest information
 /// </summary>
-public class PackageManifest
-{
+public class PackageManifest {
     /// <summary>
     /// MCP protocol version
     /// </summary>
@@ -382,8 +375,7 @@ public class PackageManifest
 /// <summary>
 /// Package capabilities information
 /// </summary>
-public class CapabilitiesInfo
-{
+public class CapabilitiesInfo {
     /// <summary>
     /// Number of tools
     /// </summary>
@@ -424,8 +416,7 @@ public class CapabilitiesInfo
 /// <summary>
 /// Package list response
 /// </summary>
-public class PackageListResponse
-{
+public class PackageListResponse {
     /// <summary>
     /// List of packages
     /// </summary>
@@ -460,8 +451,7 @@ public class PackageListResponse
 /// <summary>
 /// Package versions response
 /// </summary>
-public class PackageVersionsResponse
-{
+public class PackageVersionsResponse {
     /// <summary>
     /// Package versions
     /// </summary>
@@ -472,8 +462,7 @@ public class PackageVersionsResponse
 /// <summary>
 /// Package version information
 /// </summary>
-public class PackageVersionInfo
-{
+public class PackageVersionInfo {
     /// <summary>
     /// Version ID
     /// </summary>
@@ -520,8 +509,7 @@ public class PackageVersionInfo
 /// <summary>
 /// Security summary response
 /// </summary>
-public class SecuritySummaryResponse
-{
+public class SecuritySummaryResponse {
     /// <summary>
     /// Overall security grade
     /// </summary>
@@ -556,8 +544,7 @@ public class SecuritySummaryResponse
 /// <summary>
 /// Vulnerability count information
 /// </summary>
-public class VulnerabilityCount
-{
+public class VulnerabilityCount {
     /// <summary>
     /// Critical vulnerabilities
     /// </summary>
@@ -586,8 +573,7 @@ public class VulnerabilityCount
 /// <summary>
 /// Trust tier response
 /// </summary>
-public class TrustTierResponse
-{
+public class TrustTierResponse {
     /// <summary>
     /// Current trust tier
     /// </summary>
@@ -622,8 +608,7 @@ public class TrustTierResponse
 /// <summary>
 /// Package publishing request
 /// </summary>
-public class PublishPackageRequest
-{
+public class PublishPackageRequest {
     /// <summary>
     /// Package manifest content as JSON string
     /// </summary>
@@ -664,8 +649,7 @@ public class PublishPackageRequest
 /// <summary>
 /// Package publishing response
 /// </summary>
-public class PublishPackageResponse
-{
+public class PublishPackageResponse {
     /// <summary>
     /// Indicates if the publishing was successful
     /// </summary>
@@ -712,8 +696,7 @@ public class PublishPackageResponse
 /// <summary>
 /// Package information for publish response
 /// </summary>
-public class PackageInfo
-{
+public class PackageInfo {
     /// <summary>
     /// Package ID
     /// </summary>
@@ -742,8 +725,7 @@ public class PackageInfo
 /// <summary>
 /// Manifest validation request
 /// </summary>
-public class ValidateManifestRequest
-{
+public class ValidateManifestRequest {
     /// <summary>
     /// Manifest content to validate
     /// </summary>
@@ -760,8 +742,7 @@ public class ValidateManifestRequest
 /// <summary>
 /// Manifest validation response
 /// </summary>
-public class ValidateManifestResponse
-{
+public class ValidateManifestResponse {
     /// <summary>
     /// Whether the manifest is valid
     /// </summary>
@@ -790,8 +771,7 @@ public class ValidateManifestResponse
 /// <summary>
 /// Download package request
 /// </summary>
-public class DownloadPackageRequest
-{
+public class DownloadPackageRequest {
     /// <summary>
     /// User agent for tracking
     /// </summary>
@@ -820,8 +800,7 @@ public class DownloadPackageRequest
 /// <summary>
 /// Download package response
 /// </summary>
-public class DownloadPackageResponse
-{
+public class DownloadPackageResponse {
     /// <summary>
     /// Whether the download request was successful
     /// </summary>
@@ -874,8 +853,7 @@ public class DownloadPackageResponse
 /// <summary>
 /// Install package request
 /// </summary>
-public class InstallPackageRequest
-{
+public class InstallPackageRequest {
     /// <summary>
     /// Installation path
     /// </summary>
@@ -910,8 +888,7 @@ public class InstallPackageRequest
 /// <summary>
 /// Install package response
 /// </summary>
-public class InstallPackageResponse
-{
+public class InstallPackageResponse {
     /// <summary>
     /// Whether the installation request was successful
     /// </summary>
@@ -946,8 +923,7 @@ public class InstallPackageResponse
 /// <summary>
 /// Package dependencies response
 /// </summary>
-public class PackageDependenciesResponse
-{
+public class PackageDependenciesResponse {
     /// <summary>
     /// Package dependencies
     /// </summary>
@@ -982,8 +958,7 @@ public class PackageDependenciesResponse
 /// <summary>
 /// Package dependency information
 /// </summary>
-public class PackageDependency
-{
+public class PackageDependency {
     /// <summary>
     /// Dependency package name
     /// </summary>

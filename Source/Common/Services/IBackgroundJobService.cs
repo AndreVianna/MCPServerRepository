@@ -6,38 +6,37 @@ namespace MCPHub.Common.Services;
 /// Background job processing service
 /// Supports: In-Process → Hangfire → Azure Service Bus
 /// </summary>
-public interface IBackgroundJobService
-{
+public interface IBackgroundJobService {
     /// <summary>
     /// Enqueues a job for immediate processing
     /// </summary>
     Task<string> EnqueueAsync<T>(Expression<Func<T, Task>> methodCall, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Schedules a job for future execution
     /// </summary>
     Task<string> ScheduleAsync<T>(Expression<Func<T, Task>> methodCall, DateTimeOffset scheduleAt, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Schedules a recurring job
     /// </summary>
     Task<string> RecurringAsync<T>(string jobId, Expression<Func<T, Task>> methodCall, string cronExpression, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Cancels a scheduled job
     /// </summary>
     Task<bool> CancelAsync(string jobId, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets job status and details
     /// </summary>
     Task<JobInfo> GetJobAsync(string jobId, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Lists jobs with filtering
     /// </summary>
     Task<IEnumerable<JobInfo>> ListJobsAsync(JobStatus? status = null, int maxCount = 100, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets processing statistics
     /// </summary>
@@ -62,8 +61,7 @@ public record JobInfo(
 /// <summary>
 /// Job status enumeration
 /// </summary>
-public enum JobStatus
-{
+public enum JobStatus {
     Pending,
     Processing,
     Completed,

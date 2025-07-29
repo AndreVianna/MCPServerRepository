@@ -5,8 +5,7 @@ namespace MCPHub.Domain.Contracts.Responses;
 /// <summary>
 /// Represents a historical record of trust tier changes for a package
 /// </summary>
-public class TrustTierHistory
-{
+public class TrustTierHistory {
     /// <summary>
     /// Gets or sets the unique identifier for this history record
     /// </summary>
@@ -81,8 +80,7 @@ public class TrustTierHistory
 /// <summary>
 /// Represents the type of trust tier change
 /// </summary>
-public enum TierChangeType
-{
+public enum TierChangeType {
     /// <summary>
     /// Initial tier assignment for a new package
     /// </summary>

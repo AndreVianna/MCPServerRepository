@@ -16,7 +16,7 @@ public static class WebApplicationExtensions {
     /// </summary>
     public static IServiceCollection AddObservabilityServices(this IServiceCollection services) {
         // Note: Service implementations removed - only interfaces and configuration available
-        
+
         // Add health check services
         services.AddInfrastructureHealthChecks();
 

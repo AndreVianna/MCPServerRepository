@@ -1,4 +1,5 @@
 using FluentAssertions;
+
 using MCPHub.Domain.Contracts.Responses;
 using MCPHub.Domain.Entities;
 
@@ -7,14 +8,11 @@ namespace MCPHub.Domain.UnitTests.Contracts.Responses;
 /// <summary>
 /// Unit tests for the TrustTierAssessment response model
 /// </summary>
-public class TrustTierAssessmentTests
-{
+public class TrustTierAssessmentTests {
     [Fact]
-    public void ScorePercentage_ShouldReturnZero_WhenMaxScoreIsZero()
-    {
+    public void ScorePercentage_ShouldReturnZero_WhenMaxScoreIsZero() {
         // Arrange
-        var assessment = new TrustTierAssessment
-        {
+        var assessment = new TrustTierAssessment {
             TotalScore = 50,
             MaxScore = 0
         };
@@ -24,11 +22,9 @@ public class TrustTierAssessmentTests
     }
 
     [Fact]
-    public void ScorePercentage_ShouldReturnCorrectPercentage_WhenMaxScoreIsGreaterThanZero()
-    {
+    public void ScorePercentage_ShouldReturnCorrectPercentage_WhenMaxScoreIsGreaterThanZero() {
         // Arrange
-        var assessment = new TrustTierAssessment
-        {
+        var assessment = new TrustTierAssessment {
             TotalScore = 75,
             MaxScore = 100
         };
@@ -38,11 +34,9 @@ public class TrustTierAssessmentTests
     }
 
     [Fact]
-    public void ScorePercentage_ShouldHandleDecimalCalculation_WhenScoresDoNotDivideEvenly()
-    {
+    public void ScorePercentage_ShouldHandleDecimalCalculation_WhenScoresDoNotDivideEvenly() {
         // Arrange
-        var assessment = new TrustTierAssessment
-        {
+        var assessment = new TrustTierAssessment {
             TotalScore = 33,
             MaxScore = 100
         };
@@ -52,8 +46,7 @@ public class TrustTierAssessmentTests
     }
 
     [Fact]
-    public void DefaultValues_ShouldBeSetCorrectly()
-    {
+    public void DefaultValues_ShouldBeSetCorrectly() {
         // Arrange & Act
         var assessment = new TrustTierAssessment();
 
@@ -74,12 +67,10 @@ public class TrustTierAssessmentTests
     }
 
     [Fact]
-    public void Properties_ShouldBeSettableAndGettable()
-    {
+    public void Properties_ShouldBeSettableAndGettable() {
         // Arrange
         var assessment = new TrustTierAssessment();
-        var factors = new Dictionary<string, TrustTierFactor>
-        {
+        var factors = new Dictionary<string, TrustTierFactor> {
             ["security"] = new TrustTierFactor { Name = "Security", Score = 85, MaxScore = 100 }
         };
         var positiveFactors = new[] { "High download count", "Good user ratings" };

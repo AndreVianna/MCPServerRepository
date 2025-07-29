@@ -5,8 +5,7 @@ namespace MCPHub.Domain.Repositories;
 /// <summary>
 /// Repository interface for package download tracking operations
 /// </summary>
-public interface IPackageDownloadRepository : IRepository<PackageDownload>
-{
+public interface IPackageDownloadRepository : IRepository<PackageDownload> {
     /// <summary>
     /// Gets all downloads for a specific package
     /// </summary>

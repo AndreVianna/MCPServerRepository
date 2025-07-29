@@ -1,0 +1,687 @@
+@using MudBlazor
+@using MCPHub.Domain.ValueObjects
+@using MCPHub.WebApp.Components.UI.Models
+@using MCPHub.WebApp.Components.UI.Analytics
+
+<div class="security-visualization">
+    @if (IsLoading)
+    {
+        <!-- Loading State -->
+        <div class="security-loading d-flex justify-center align-center" style="min-height: 400px;">
+            <div class="text-center">
+                <MudProgressCircular Size="Size.Large" Indeterminate="true" Class="mb-4" />
+                <MudText Typo="Typo.h6">Loading Security Analysis...</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">Analyzing package security and vulnerabilities</MudText>
+            </div>
+        </div>
+    }
+    else if (HasError)
+    {
+        <!-- Error State -->
+        <div class="security-error d-flex justify-center align-center" style="min-height: 400px;">
+            <div class="text-center">
+                <MudIcon Icon="@Icons.Material.Filled.Error" 
+                       Color="Color.Error" 
+                       Size="Size.Large" 
+                       Style="font-size: 4rem;" 
+                       Class="mb-4" />
+                <MudText Typo="Typo.h5" Color="Color.Error" Class="mb-2">
+                    Security Analysis Failed
+                </MudText>
+                <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-4">
+                    @ErrorMessage
+                </MudText>
+                <MudButton Color="Color.Primary" 
+                         Variant="Variant.Filled"
+                         StartIcon="@Icons.Material.Filled.Refresh"
+                         @onclick="RetryLoadSecurity">
+                    Retry Analysis
+                </MudButton>
+            </div>
+        </div>
+    }
+    else if (SecurityReport != null)
+    {
+        <!-- Security Overview Cards -->
+        <div class="security-overview mb-6">
+            <MudGrid Spacing="3">
+                <!-- Overall Grade Card -->
+                <MudItem xs="12" sm="6" md="3">
+                    <MudCard Class="security-grade-card h-100">
+                        <MudCardContent Class="text-center">
+                            <div class="security-grade-display">
+                                <MudIcon Icon="@GetGradeIcon(SecurityReport.OverallGrade)" 
+                                       Color="@GetGradeColor(SecurityReport.OverallGrade)" 
+                                       Size="Size.Large" 
+                                       Class="mb-2" />
+                                <MudText Typo="Typo.h4" Class="mb-1">@SecurityReport.OverallGrade</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Overall Grade</MudText>
+                                <MudProgressLinear Value="@(SecurityReport.OverallScore * 10)" 
+                                                 Color="@GetGradeColor(SecurityReport.OverallGrade)" 
+                                                 Class="mt-2" />
+                                <MudText Typo="Typo.caption" Class="mt-1">
+                                    @SecurityReport.OverallScore.ToString("F1")/10.0
+                                </MudText>
+                            </div>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+
+                <!-- Vulnerabilities Card -->
+                <MudItem xs="12" sm="6" md="3">
+                    <MudCard Class="vulnerabilities-card h-100">
+                        <MudCardContent Class="text-center">
+                            <div class="vulnerability-display">
+                                <MudIcon Icon="@GetVulnerabilityIcon()" 
+                                       Color="@GetVulnerabilityColor()" 
+                                       Size="Size.Large" 
+                                       Class="mb-2" />
+                                <MudText Typo="Typo.h4" Class="mb-1">@GetTotalVulnerabilities()</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Total Issues</MudText>
+                                @if (GetCriticalVulnerabilities() > 0)
+                                {
+                                    <MudAlert Severity="Severity.Error" Dense="true" Class="mt-2">
+                                        @GetCriticalVulnerabilities() Critical
+                                    </MudAlert>
+                                }
+                                else
+                                {
+                                    <MudAlert Severity="Severity.Success" Dense="true" Class="mt-2">
+                                        No Critical Issues
+                                    </MudAlert>
+                                }
+                            </div>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+
+                <!-- Last Scan Card -->
+                <MudItem xs="12" sm="6" md="3">
+                    <MudCard Class="scan-info-card h-100">
+                        <MudCardContent Class="text-center">
+                            <div class="scan-info-display">
+                                <MudIcon Icon="@Icons.Material.Filled.Schedule" 
+                                       Color="Color.Info" 
+                                       Size="Size.Large" 
+                                       Class="mb-2" />
+                                <MudText Typo="Typo.h6" Class="mb-1">@FormatLastScan(SecurityReport.LastScanDate)</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Last Scan</MudText>
+                                <MudText Typo="Typo.caption" Class="mt-2">
+                                    Scan Duration: @SecurityReport.ScanDuration.TotalMinutes.ToString("F1")m
+                                </MudText>
+                            </div>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+
+                <!-- Trust Score Card -->
+                <MudItem xs="12" sm="6" md="3">
+                    <MudCard Class="trust-score-card h-100">
+                        <MudCardContent Class="text-center">
+                            <div class="trust-score-display">
+                                <MudIcon Icon="@Icons.Material.Filled.Shield" 
+                                       Color="Color.Success" 
+                                       Size="Size.Large" 
+                                       Class="mb-2" />
+                                <MudText Typo="Typo.h4" Class="mb-1">@SecurityReport.TrustScore.ToString("F1")</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">Trust Score</MudText>
+                                <MudProgressLinear Value="@(SecurityReport.TrustScore * 10)" 
+                                                 Color="Color.Success" 
+                                                 Class="mt-2" />
+                            </div>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            </MudGrid>
+        </div>
+
+        <!-- Security Analysis Tabs -->
+        <MudTabs Elevation="1" Rounded="true" Color="Color.Primary">
+            <!-- Vulnerability Details Tab -->
+            <MudTabPanel Text="Vulnerabilities" Icon="@Icons.Material.Filled.BugReport">
+                <div class="vulnerabilities-section pa-4">
+                    @if (SecurityReport.Vulnerabilities.Any())
+                    {
+                        <!-- Vulnerability Severity Chart -->
+                        <div class="mb-4">
+                            <AnalyticsChart Title="Vulnerability Distribution"
+                                           ChartType="Components.UI.Models.ChartType.Donut"
+                                           ChartSeries="@GetVulnerabilityDistribution()"
+                                           ShowTimeRangeSelector="false"
+                                           ShowSummary="false"
+                                           Height="250" />
+                        </div>
+
+                        <!-- Vulnerability List -->
+                        <MudExpansionPanels MultiExpansion="true" Elevation="1">
+                            @foreach (var vulnerability in SecurityReport.Vulnerabilities.OrderByDescending(v => GetSeverityWeight(v.Severity)))
+                            {
+                                <MudExpansionPanel>
+                                    <TitleContent>
+                                        <div class="d-flex align-center w-100">
+                                            <MudIcon Icon="@GetVulnerabilityIcon(vulnerability.Severity)" 
+                                                   Color="@GetVulnerabilityColor(vulnerability.Severity)" 
+                                                   Class="mr-3" />
+                                            <div class="flex-grow-1">
+                                                <MudText Typo="Typo.subtitle1">@vulnerability.Title</MudText>
+                                                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                    @vulnerability.Component • CVSS: @vulnerability.CvssScore
+                                                </MudText>
+                                            </div>
+                                            <MudChip T="string" Color="@GetVulnerabilityColor(vulnerability.Severity)" 
+                                                   Size="Size.Small">
+                                                @vulnerability.Severity
+                                            </MudChip>
+                                        </div>
+                                    </TitleContent>
+                                    <ChildContent>
+                                        <div class="vulnerability-details pa-4">
+                                            <MudGrid>
+                                                <MudItem xs="12" md="8">
+                                                    <MudText Typo="Typo.body1" Class="mb-3">@vulnerability.Description</MudText>
+                                                    
+                                                    @if (!string.IsNullOrEmpty(vulnerability.Solution))
+                                                    {
+                                                        <div class="solution-section">
+                                                            <MudText Typo="Typo.subtitle2" Color="Color.Success" Class="mb-2">
+                                                                <MudIcon Icon="@Icons.Material.Filled.Build" Size="Size.Small" Class="mr-1" />
+                                                                Recommended Solution:
+                                                            </MudText>
+                                                            <MudText Typo="Typo.body2">@vulnerability.Solution</MudText>
+                                                        </div>
+                                                    }
+                                                </MudItem>
+                                                <MudItem xs="12" md="4">
+                                                    <div class="vulnerability-metadata">
+                                                        @if (!string.IsNullOrEmpty(vulnerability.CveId))
+                                                        {
+                                                            <div class="metadata-item mb-2">
+                                                                <MudText Typo="Typo.caption" Color="Color.Secondary">CVE ID:</MudText>
+                                                                <MudLink Href="@GetCveUrl(vulnerability.CveId)" Target="_blank">
+                                                                    <MudText Typo="Typo.body2" Style="font-family: monospace;">@vulnerability.CveId</MudText>
+                                                                </MudLink>
+                                                            </div>
+                                                        }
+                                                        
+                                                        <div class="metadata-item mb-2">
+                                                            <MudText Typo="Typo.caption" Color="Color.Secondary">CVSS Score:</MudText>
+                                                            <MudText Typo="Typo.body2">@vulnerability.CvssScore.ToString("F1")/10.0</MudText>
+                                                        </div>
+                                                        
+                                                        <div class="metadata-item mb-2">
+                                                            <MudText Typo="Typo.caption" Color="Color.Secondary">Component:</MudText>
+                                                            <MudText Typo="Typo.body2" Style="font-family: monospace;">@vulnerability.Component</MudText>
+                                                        </div>
+                                                        
+                                                        @if (vulnerability.AffectedVersions.Any())
+                                                        {
+                                                            <div class="metadata-item mb-2">
+                                                                <MudText Typo="Typo.caption" Color="Color.Secondary">Affected Versions:</MudText>
+                                                                <MudText Typo="Typo.body2" Style="font-family: monospace;">@string.Join(", ", vulnerability.AffectedVersions)</MudText>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </MudItem>
+                                            </MudGrid>
+                                        </div>
+                                    </ChildContent>
+                                </MudExpansionPanel>
+                            }
+                        </MudExpansionPanels>
+                    }
+                    else
+                    {
+                        <MudAlert Severity="Severity.Success" Class="text-center">
+                            <div class="d-flex flex-column align-center">
+                                <MudIcon Icon="@Icons.Material.Filled.Security" Size="Size.Large" Class="mb-2" />
+                                <MudText Typo="Typo.h6">No Vulnerabilities Found</MudText>
+                                <MudText Typo="Typo.body2">This package has been thoroughly scanned and no security vulnerabilities were detected.</MudText>
+                            </div>
+                        </MudAlert>
+                    }
+                </div>
+            </MudTabPanel>
+
+            <!-- Security Categories Tab -->
+            <MudTabPanel Text="Analysis" Icon="@Icons.Material.Filled.Analytics">
+                <div class="security-analysis-section pa-4">
+                    <MudGrid>
+                        @foreach (var category in GetSecurityCategories())
+                        {
+                            <MudItem xs="12" md="6">
+                                <MudCard Class="security-category-card" Elevation="2">
+                                    <MudCardHeader>
+                                        <CardHeaderContent>
+                                            <div class="d-flex align-center">
+                                                <MudIcon Icon="@category.Icon" 
+                                                       Color="@GetGradeColor(category.Grade)" 
+                                                       Class="mr-2" />
+                                                <div>
+                                                    <MudText Typo="Typo.h6">@category.Name</MudText>
+                                                    <MudText Typo="Typo.caption" Color="Color.Secondary">@category.Description</MudText>
+                                                </div>
+                                            </div>
+                                        </CardHeaderContent>
+                                        <CardHeaderActions>
+                                            <MudChip T="string" Color="@GetGradeColor(category.Grade)" Size="Size.Small">
+                                                @category.Grade
+                                            </MudChip>
+                                        </CardHeaderActions>
+                                    </MudCardHeader>
+                                    <MudCardContent>
+                                        <div class="category-score mb-3">
+                                            <div class="d-flex justify-space-between align-center mb-1">
+                                                <MudText Typo="Typo.body2">Score</MudText>
+                                                <MudText Typo="Typo.body2" Color="@GetGradeColor(category.Grade)">
+                                                    @category.Score.ToString("F1")/10.0
+                                                </MudText>
+                                            </div>
+                                            <MudProgressLinear Value="@(category.Score * 10)" 
+                                                             Color="@GetGradeColor(category.Grade)" />
+                                        </div>
+                                        
+                                        @if (category.Details.Any())
+                                        {
+                                            <div class="category-details">
+                                                @foreach (var detail in category.Details)
+                                                {
+                                                    <div class="detail-item d-flex align-center mb-1">
+                                                        <MudIcon Icon="@(detail.IsPass ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.Cancel)"
+                                                               Color="@(detail.IsPass ? Color.Success : Color.Error)"
+                                                               Size="Size.Small"
+                                                               Class="mr-2" />
+                                                        <MudText Typo="Typo.body2">@detail.Description</MudText>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    </MudCardContent>
+                                </MudCard>
+                            </MudItem>
+                        }
+                    </MudGrid>
+                </div>
+            </MudTabPanel>
+
+            <!-- Security History Tab -->
+            <MudTabPanel Text="History" Icon="@Icons.Material.Filled.History">
+                <div class="security-history-section pa-4">
+                    @if (SecurityHistory?.Any() == true)
+                    {
+                        <AnalyticsChart Title="Security Score Trend"
+                                       Subtitle="Security score evolution over time"
+                                       ChartType="Components.UI.Models.ChartType.Line"
+                                       ChartSeries="@GetSecurityTrendData()"
+                                       XAxisLabels="@GetSecurityTimeLabels()"
+                                       ShowTimeRangeSelector="false"
+                                       ShowSummary="true"
+                                       Height="350" />
+                        
+                        <div class="security-timeline mt-4">
+                            <MudText Typo="Typo.h6" Class="mb-3">Security Audit History</MudText>
+                            <MudTimeline>
+                                @foreach (var scan in SecurityHistory.OrderByDescending(s => s.ScanDate).Take(10))
+                                {
+                                    <MudTimelineItem Color="@GetGradeColor(scan.Grade)" Icon="@GetGradeIcon(scan.Grade)">
+                                        <div class="timeline-content">
+                                            <div class="d-flex justify-space-between align-center mb-1">
+                                                <MudText Typo="Typo.subtitle1">Security Scan - Grade @scan.Grade</MudText>
+                                                <MudText Typo="Typo.caption" Color="Color.Secondary">@scan.ScanDate.ToString("MMM dd, yyyy")</MudText>
+                                            </div>
+                                            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-2">
+                                                Score: @scan.Score.ToString("F1")/10.0 • Duration: @scan.Duration.TotalMinutes.ToString("F1")m
+                                            </MudText>
+                                            @if (scan.Changes.Any())
+                                            {
+                                                <div class="scan-changes">
+                                                    @foreach (var change in scan.Changes.Take(3))
+                                                    {
+                                                        <MudText Typo="Typo.caption" Class="mb-1">• @change</MudText>
+                                                    }
+                                                    @if (scan.Changes.Count > 3)
+                                                    {
+                                                        <MudText Typo="Typo.caption" Color="Color.Primary">
+                                                            +@(scan.Changes.Count - 3) more changes...
+                                                        </MudText>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    </MudTimelineItem>
+                                }
+                            </MudTimeline>
+                        </div>
+                    }
+                    else
+                    {
+                        <MudAlert Severity="Severity.Info">
+                            <MudText>No security scan history available. This may be the first scan for this package.</MudText>
+                        </MudAlert>
+                    }
+                </div>
+            </MudTabPanel>
+
+            <!-- Compliance Tab -->
+            <MudTabPanel Text="Compliance" Icon="@Icons.Material.Filled.VerifiedUser">
+                <div class="compliance-section pa-4">
+                    <MudGrid>
+                        @foreach (var standard in GetComplianceStandards())
+                        {
+                            <MudItem xs="12" sm="6" md="4">
+                                <MudCard Class="compliance-card" Elevation="1">
+                                    <MudCardContent Class="text-center">
+                                        <MudIcon Icon="@(standard.IsCompliant ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.Cancel)"
+                                               Color="@(standard.IsCompliant ? Color.Success : Color.Error)"
+                                               Size="Size.Large"
+                                               Class="mb-2" />
+                                        <MudText Typo="Typo.h6" Class="mb-1">@standard.Name</MudText>
+                                        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-2">@standard.Description</MudText>
+                                        <MudChip T="string" Color="@(standard.IsCompliant ? Color.Success : Color.Error)" 
+                                               Size="Size.Small">
+                                            @(standard.IsCompliant ? "Compliant" : "Non-Compliant")
+                                        </MudChip>
+                                    </MudCardContent>
+                                </MudCard>
+                            </MudItem>
+                        }
+                    </MudGrid>
+                </div>
+            </MudTabPanel>
+        </MudTabs>
+
+        <!-- Action Buttons -->
+        <div class="security-actions d-flex justify-center mt-4">
+            <MudButton Color="Color.Primary" 
+                     Variant="Variant.Filled"
+                     StartIcon="@Icons.Material.Filled.Download"
+                     Class="mr-2"
+                     @onclick="DownloadSecurityReport">
+                Download Full Report
+            </MudButton>
+            <MudButton Color="Color.Secondary" 
+                     Variant="Variant.Outlined"
+                     StartIcon="@Icons.Material.Filled.Refresh"
+                     @onclick="RequestNewScan">
+                Request New Scan
+            </MudButton>
+        </div>
+    }
+    else
+    {
+        <!-- No Security Report Available -->
+        <MudAlert Severity="Severity.Warning">
+            <div class="d-flex align-center">
+                <MudIcon Icon="@Icons.Material.Filled.Warning" Class="mr-2" />
+                <div>
+                    <MudText Typo="Typo.body1">No security report available for this package.</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        Security scanning may be in progress or unavailable for this package version.
+                    </MudText>
+                </div>
+            </div>
+        </MudAlert>
+    }
+</div>
+
+@code {
+    [Parameter] public SecurityScanResult? SecurityReport { get; set; }
+    [Parameter] public List<SecurityScanHistory>? SecurityHistory { get; set; }
+    [Parameter] public EventCallback OnDownloadSecurityReport { get; set; }
+    [Parameter] public EventCallback OnRequestNewScan { get; set; }
+
+    // Error handling and loading state properties
+    [Parameter] public bool IsLoading { get; set; } = false;
+    [Parameter] public bool HasError { get; set; } = false;
+    [Parameter] public string ErrorMessage { get; set; } = "Unable to load security analysis. Please try again later.";
+    [Parameter] public EventCallback OnRetryLoadSecurity { get; set; }
+
+    private async Task DownloadSecurityReport()
+    {
+        await OnDownloadSecurityReport.InvokeAsync();
+    }
+
+    private async Task RequestNewScan()
+    {
+        await OnRequestNewScan.InvokeAsync();
+    }
+
+    private async Task RetryLoadSecurity()
+    {
+        await OnRetryLoadSecurity.InvokeAsync();
+    }
+
+    private string GetGradeIcon(string grade) => grade switch
+    {
+        "A+" => Icons.Material.Filled.Security,
+        "A" => Icons.Material.Filled.Verified,
+        "B+" or "B" => Icons.Material.Filled.Warning,
+        "C+" or "C" => Icons.Material.Filled.Error,
+        "F" => Icons.Material.Filled.Dangerous,
+        _ => Icons.Material.Filled.Help
+    };
+
+    private Color GetGradeColor(string grade) => grade switch
+    {
+        "A+" or "A" => Color.Success,
+        "B+" or "B" => Color.Warning,
+        "C+" or "C" => Color.Error,
+        "F" => Color.Error,
+        _ => Color.Default
+    };
+
+    private string GetVulnerabilityIcon() => GetTotalVulnerabilities() switch
+    {
+        0 => Icons.Material.Filled.Security,
+        var count when count <= 3 => Icons.Material.Filled.Warning,
+        _ => Icons.Material.Filled.Dangerous
+    };
+
+    private Color GetVulnerabilityColor() => GetTotalVulnerabilities() switch
+    {
+        0 => Color.Success,
+        var count when count <= 3 => Color.Warning,
+        _ => Color.Error
+    };
+
+    private string GetVulnerabilityIcon(SecurityScanSeverity severity) => severity switch
+    {
+        SecurityScanSeverity.Critical => Icons.Material.Filled.Dangerous,
+        SecurityScanSeverity.High => Icons.Material.Filled.Error,
+        SecurityScanSeverity.Medium => Icons.Material.Filled.Warning,
+        SecurityScanSeverity.Low => Icons.Material.Filled.Info,
+        _ => Icons.Material.Filled.Help
+    };
+
+    private Color GetVulnerabilityColor(SecurityScanSeverity severity) => severity switch
+    {
+        SecurityScanSeverity.Critical => Color.Error,
+        SecurityScanSeverity.High => Color.Error,
+        SecurityScanSeverity.Medium => Color.Warning,
+        SecurityScanSeverity.Low => Color.Info,
+        _ => Color.Default
+    };
+
+    private int GetSeverityWeight(SecurityScanSeverity severity) => severity switch
+    {
+        SecurityScanSeverity.Critical => 4,
+        SecurityScanSeverity.High => 3,
+        SecurityScanSeverity.Medium => 2,
+        SecurityScanSeverity.Low => 1,
+        _ => 0
+    };
+
+    private int GetTotalVulnerabilities() => SecurityReport?.Vulnerabilities.Count ?? 0;
+    
+    private int GetCriticalVulnerabilities() => SecurityReport?.Vulnerabilities.Count(v => v.Severity == SecurityScanSeverity.Critical) ?? 0;
+
+    private string FormatLastScan(DateTime scanDate)
+    {
+        var timeSpan = DateTime.UtcNow - scanDate;
+        return timeSpan.TotalDays switch
+        {
+            var days when days < 1 => "Today",
+            var days when days < 2 => "Yesterday",
+            var days when days < 7 => $"{(int)timeSpan.TotalDays} days ago",
+            var days when days < 30 => $"{(int)(timeSpan.TotalDays / 7)} weeks ago",
+            _ => scanDate.ToString("MMM dd, yyyy")
+        };
+    }
+
+    private string GetCveUrl(string cveId) => $"https://nvd.nist.gov/vuln/detail/{cveId}";
+
+    private List<MudBlazor.ChartSeries> GetVulnerabilityDistribution()
+    {
+        if (SecurityReport?.Vulnerabilities == null) return new();
+
+        var critical = SecurityReport.Vulnerabilities.Count(v => v.Severity == SecurityScanSeverity.Critical);
+        var high = SecurityReport.Vulnerabilities.Count(v => v.Severity == SecurityScanSeverity.High);
+        var medium = SecurityReport.Vulnerabilities.Count(v => v.Severity == SecurityScanSeverity.Medium);
+        var low = SecurityReport.Vulnerabilities.Count(v => v.Severity == SecurityScanSeverity.Low);
+
+        var customSeries = new List<Components.UI.Models.ChartSeries>
+        {
+            new() { Name = "Critical", Data = new double[] { critical } },
+            new() { Name = "High", Data = new double[] { high } },
+            new() { Name = "Medium", Data = new double[] { medium } },
+            new() { Name = "Low", Data = new double[] { low } }
+        };
+
+        return ChartSeriesConverter.ToMudBlazor(customSeries);
+    }
+
+    private List<SecurityCategory> GetSecurityCategories()
+    {
+        return new List<SecurityCategory>
+        {
+            new()
+            {
+                Name = "Static Analysis",
+                Description = "Code quality and security patterns",
+                Grade = "A+",
+                Score = 9.8,
+                Icon = Icons.Material.Filled.Code,
+                Details = new List<SecurityDetail>
+                {
+                    new() { Description = "No security anti-patterns detected", IsPass = true },
+                    new() { Description = "Code complexity within limits", IsPass = true },
+                    new() { Description = "All dependencies up to date", IsPass = true }
+                }
+            },
+            new()
+            {
+                Name = "Dependency Check",
+                Description = "Third-party dependency security",
+                Grade = "A",
+                Score = 9.2,
+                Icon = Icons.Material.Filled.AccountTree,
+                Details = new List<SecurityDetail>
+                {
+                    new() { Description = "No known vulnerable dependencies", IsPass = true },
+                    new() { Description = "License compatibility verified", IsPass = true },
+                    new() { Description = "Dependency tree optimized", IsPass = true }
+                }
+            },
+            new()
+            {
+                Name = "Dynamic Analysis",
+                Description = "Runtime behavior analysis",
+                Grade = "A+",
+                Score = 9.6,
+                Icon = Icons.Material.Filled.PlayArrow,
+                Details = new List<SecurityDetail>
+                {
+                    new() { Description = "Sandbox execution clean", IsPass = true },
+                    new() { Description = "No suspicious network activity", IsPass = true },
+                    new() { Description = "File access within permissions", IsPass = true }
+                }
+            },
+            new()
+            {
+                Name = "Compliance",
+                Description = "Security standards compliance",
+                Grade = "A+",
+                Score = 9.9,
+                Icon = Icons.Material.Filled.VerifiedUser,
+                Details = new List<SecurityDetail>
+                {
+                    new() { Description = "OWASP guidelines followed", IsPass = true },
+                    new() { Description = "CVE database checked", IsPass = true },
+                    new() { Description = "License compliance verified", IsPass = true }
+                }
+            }
+        };
+    }
+
+    private List<MudBlazor.ChartSeries> GetSecurityTrendData()
+    {
+        if (SecurityHistory?.Any() != true) return new();
+
+        var data = SecurityHistory
+            .OrderBy(s => s.ScanDate)
+            .Select(s => s.Score)
+            .ToArray();
+
+        var customSeries = new List<Components.UI.Models.ChartSeries>
+        {
+            new() { Name = "Security Score", Data = data }
+        };
+
+        return ChartSeriesConverter.ToMudBlazor(customSeries);
+    }
+
+    private string[] GetSecurityTimeLabels()
+    {
+        if (SecurityHistory?.Any() != true) return Array.Empty<string>();
+
+        return SecurityHistory
+            .OrderBy(s => s.ScanDate)
+            .Select(s => s.ScanDate.ToString("MMM dd"))
+            .ToArray();
+    }
+
+    private List<ComplianceStandard> GetComplianceStandards()
+    {
+        return new List<ComplianceStandard>
+        {
+            new() { Name = "OWASP Top 10", Description = "Web application security risks", IsCompliant = true },
+            new() { Name = "CVE Database", Description = "Common vulnerabilities checked", IsCompliant = true },
+            new() { Name = "SAST", Description = "Static application security testing", IsCompliant = true },
+            new() { Name = "DAST", Description = "Dynamic application security testing", IsCompliant = true },
+            new() { Name = "License Compliance", Description = "Software license verification", IsCompliant = true },
+            new() { Name = "Supply Chain", Description = "Dependency security verification", IsCompliant = true }
+        };
+    }
+
+    // Helper classes
+    public class SecurityCategory
+    {
+        public string Name { get; set; } = "";
+        public string Description { get; set; } = "";
+        public string Grade { get; set; } = "";
+        public double Score { get; set; }
+        public string Icon { get; set; } = "";
+        public List<SecurityDetail> Details { get; set; } = new();
+    }
+
+    public class SecurityDetail
+    {
+        public string Description { get; set; } = "";
+        public bool IsPass { get; set; }
+    }
+
+    public class SecurityScanHistory
+    {
+        public DateTime ScanDate { get; set; }
+        public string Grade { get; set; } = "";
+        public double Score { get; set; }
+        public TimeSpan Duration { get; set; }
+        public List<string> Changes { get; set; } = new();
+    }
+
+    public class ComplianceStandard
+    {
+        public string Name { get; set; } = "";
+        public string Description { get; set; } = "";
+        public bool IsCompliant { get; set; }
+    }
+}

@@ -1,4 +1,5 @@
 using System.Security.Claims;
+
 using MCPHub.Domain.Entities;
 
 namespace MCPHub.PublicApi.Services;
@@ -6,8 +7,7 @@ namespace MCPHub.PublicApi.Services;
 /// <summary>
 /// Interface for JWT token operations in PublicApi
 /// </summary>
-public interface IJwtService
-{
+public interface IJwtService {
     /// <summary>
     /// Generates a JWT access token for the specified user
     /// </summary>

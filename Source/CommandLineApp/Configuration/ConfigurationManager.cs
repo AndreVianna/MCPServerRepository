@@ -1,4 +1,5 @@
 using System.Text.Json;
+
 using Microsoft.Extensions.Logging;
 
 namespace MCPHub.CommandLineApp.Configuration;
@@ -6,8 +7,7 @@ namespace MCPHub.CommandLineApp.Configuration;
 /// <summary>
 /// Manages MCPM CLI configuration loading, saving, and validation
 /// </summary>
-public interface IMcpmConfigurationManager
-{
+public interface IMcpmConfigurationManager {
     /// <summary>
     /// Loads the configuration from file and environment variables
     /// </summary>
@@ -39,52 +39,45 @@ public interface IMcpmConfigurationManager
 /// <summary>
 /// Implementation of configuration management for MCPM CLI
 /// </summary>
-public class McpmConfigurationManager : IMcpmConfigurationManager
-{
+public class McpmConfigurationManager : IMcpmConfigurationManager {
     private readonly ILogger<McpmConfigurationManager> _logger;
     private readonly JsonSerializerOptions _jsonOptions;
     private readonly string _configurationPath;
 
-    public McpmConfigurationManager(ILogger<McpmConfigurationManager> logger)
-    {
+    public McpmConfigurationManager(ILogger<McpmConfigurationManager> logger) {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        
-        _jsonOptions = new JsonSerializerOptions
-        {
+
+        _jsonOptions = new JsonSerializerOptions {
             WriteIndented = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            PropertyNameCaseInsensitive = true
+            PropertyNameCaseInsensitive = true,
+            // Enable reflection fallback for JSON serialization
+            TypeInfoResolver = new System.Text.Json.Serialization.Metadata.DefaultJsonTypeInfoResolver()
         };
 
         _configurationPath = GetConfigurationPath();
     }
 
     /// <inheritdoc />
-    public async Task<McpmConfiguration> LoadConfigurationAsync(CancellationToken cancellationToken = default)
-    {
-        try
-        {
+    public async Task<McpmConfiguration> LoadConfigurationAsync(CancellationToken cancellationToken = default) {
+        try {
             _logger.LogDebug("Loading configuration from: {ConfigPath}", _configurationPath);
 
             var configuration = new McpmConfiguration();
 
             // Load from file if it exists
-            if (File.Exists(_configurationPath))
-            {
+            if (File.Exists(_configurationPath)) {
                 var jsonContent = await File.ReadAllTextAsync(_configurationPath, cancellationToken);
-                
-                if (!string.IsNullOrWhiteSpace(jsonContent))
-                {
+
+                if (!string.IsNullOrWhiteSpace(jsonContent)) {
                     var fileConfig = JsonSerializer.Deserialize<McpmConfiguration>(jsonContent, _jsonOptions);
-                    if (fileConfig != null)
-                    {
+                    if (fileConfig != null) {
                         configuration = fileConfig;
                         _logger.LogDebug("Configuration loaded from file successfully");
                     }
                 }
             }
-            else
-            {
+            else {
                 _logger.LogDebug("Configuration file not found, using defaults");
             }
 
@@ -97,30 +90,26 @@ public class McpmConfigurationManager : IMcpmConfigurationManager
             _logger.LogInformation("Configuration loaded successfully");
             return configuration;
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Failed to load configuration from: {ConfigPath}", _configurationPath);
-            
+
             // Return default configuration on error
             var defaultConfig = new McpmConfiguration();
             ApplyEnvironmentVariables(defaultConfig);
             await ValidateConfigurationAsync(defaultConfig, cancellationToken);
-            
+
             return defaultConfig;
         }
     }
 
     /// <inheritdoc />
-    public async Task SaveConfigurationAsync(McpmConfiguration configuration, CancellationToken cancellationToken = default)
-    {
-        try
-        {
+    public async Task SaveConfigurationAsync(McpmConfiguration configuration, CancellationToken cancellationToken = default) {
+        try {
             _logger.LogDebug("Saving configuration to: {ConfigPath}", _configurationPath);
 
             // Ensure directory exists
             var configDir = Path.GetDirectoryName(_configurationPath);
-            if (!string.IsNullOrEmpty(configDir) && !Directory.Exists(configDir))
-            {
+            if (!string.IsNullOrEmpty(configDir) && !Directory.Exists(configDir)) {
                 Directory.CreateDirectory(configDir);
                 _logger.LogDebug("Created configuration directory: {ConfigDir}", configDir);
             }
@@ -130,28 +119,24 @@ public class McpmConfigurationManager : IMcpmConfigurationManager
 
             _logger.LogInformation("Configuration saved successfully to: {ConfigPath}", _configurationPath);
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Failed to save configuration to: {ConfigPath}", _configurationPath);
             throw;
         }
     }
 
     /// <inheritdoc />
-    public string GetConfigurationPath()
-    {
+    public string GetConfigurationPath() {
         var homeDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         return Path.Combine(homeDir, ".mcpm", "config.json");
     }
 
     /// <inheritdoc />
-    public async Task ValidateConfigurationAsync(McpmConfiguration configuration, CancellationToken cancellationToken = default)
-    {
+    public async Task ValidateConfigurationAsync(McpmConfiguration configuration, CancellationToken cancellationToken = default) {
         _logger.LogDebug("Validating configuration");
 
         // Validate registry URL
-        if (!Uri.TryCreate(configuration.Registry.Url, UriKind.Absolute, out var registryUri))
-        {
+        if (!Uri.TryCreate(configuration.Registry.Url, UriKind.Absolute, out var registryUri)) {
             _logger.LogWarning("Invalid registry URL: {Url}, using default", configuration.Registry.Url);
             configuration.Registry.Url = "https://api.mcphub.dev";
         }
@@ -165,43 +150,35 @@ public class McpmConfigurationManager : IMcpmConfigurationManager
             configuration.Paths.Config
         };
 
-        foreach (var path in paths)
-        {
-            try
-            {
-                if (!Directory.Exists(path))
-                {
+        foreach (var path in paths) {
+            try {
+                if (!Directory.Exists(path)) {
                     Directory.CreateDirectory(path);
                     _logger.LogDebug("Created directory: {Path}", path);
                 }
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
                 _logger.LogWarning(ex, "Failed to create directory: {Path}", path);
             }
         }
 
         // Validate numeric ranges
-        if (configuration.Registry.Timeout < 1000 || configuration.Registry.Timeout > 300000)
-        {
+        if (configuration.Registry.Timeout < 1000 || configuration.Registry.Timeout > 300000) {
             _logger.LogWarning("Invalid timeout value: {Timeout}, using default", configuration.Registry.Timeout);
             configuration.Registry.Timeout = 30000;
         }
 
-        if (configuration.Registry.Retries < 0 || configuration.Registry.Retries > 10)
-        {
+        if (configuration.Registry.Retries < 0 || configuration.Registry.Retries > 10) {
             _logger.LogWarning("Invalid retries value: {Retries}, using default", configuration.Registry.Retries);
             configuration.Registry.Retries = 3;
         }
 
-        if (configuration.Security.SandboxTimeout < 30 || configuration.Security.SandboxTimeout > 3600)
-        {
+        if (configuration.Security.SandboxTimeout < 30 || configuration.Security.SandboxTimeout > 3600) {
             _logger.LogWarning("Invalid sandbox timeout: {Timeout}, using default", configuration.Security.SandboxTimeout);
             configuration.Security.SandboxTimeout = 300;
         }
 
-        if (configuration.Ui.DefaultPageSize < 1 || configuration.Ui.DefaultPageSize > 100)
-        {
+        if (configuration.Ui.DefaultPageSize < 1 || configuration.Ui.DefaultPageSize > 100) {
             _logger.LogWarning("Invalid default page size: {PageSize}, using default", configuration.Ui.DefaultPageSize);
             configuration.Ui.DefaultPageSize = 20;
         }
@@ -210,56 +187,48 @@ public class McpmConfigurationManager : IMcpmConfigurationManager
         await Task.CompletedTask;
     }
 
-    private void ApplyEnvironmentVariables(McpmConfiguration configuration)
-    {
+    private void ApplyEnvironmentVariables(McpmConfiguration configuration) {
         _logger.LogDebug("Applying environment variable overrides");
 
         // Registry configuration
-        if (Environment.GetEnvironmentVariable("MCPM_API_URL") is string apiUrl && !string.IsNullOrWhiteSpace(apiUrl))
-        {
+        if (Environment.GetEnvironmentVariable("MCPM_API_URL") is string apiUrl && !string.IsNullOrWhiteSpace(apiUrl)) {
             configuration.Registry.Url = apiUrl;
             _logger.LogDebug("Registry URL overridden by environment variable");
         }
 
-        if (Environment.GetEnvironmentVariable("MCPM_API_TIMEOUT") is string timeoutStr && 
-            int.TryParse(timeoutStr, out var timeout))
-        {
+        if (Environment.GetEnvironmentVariable("MCPM_API_TIMEOUT") is string timeoutStr &&
+            int.TryParse(timeoutStr, out var timeout)) {
             configuration.Registry.Timeout = timeout;
             _logger.LogDebug("Registry timeout overridden by environment variable");
         }
 
         // Authentication configuration
-        if (Environment.GetEnvironmentVariable("MCPM_AUTH_TOKEN") is string authToken && !string.IsNullOrWhiteSpace(authToken))
-        {
+        if (Environment.GetEnvironmentVariable("MCPM_AUTH_TOKEN") is string authToken && !string.IsNullOrWhiteSpace(authToken)) {
             configuration.Auth.Token = authToken;
             _logger.LogDebug("Auth token overridden by environment variable");
         }
 
         // Security configuration
-        if (Environment.GetEnvironmentVariable("MCPM_TRUST_TIER_MINIMUM") is string trustTier && !string.IsNullOrWhiteSpace(trustTier))
-        {
+        if (Environment.GetEnvironmentVariable("MCPM_TRUST_TIER_MINIMUM") is string trustTier && !string.IsNullOrWhiteSpace(trustTier)) {
             configuration.Security.TrustTierMinimum = trustTier;
             _logger.LogDebug("Minimum trust tier overridden by environment variable");
         }
 
-        if (Environment.GetEnvironmentVariable("MCPM_ALLOW_INSECURE") is string allowInsecureStr && 
-            bool.TryParse(allowInsecureStr, out var allowInsecure))
-        {
+        if (Environment.GetEnvironmentVariable("MCPM_ALLOW_INSECURE") is string allowInsecureStr &&
+            bool.TryParse(allowInsecureStr, out var allowInsecure)) {
             configuration.Security.AllowInsecureConnections = allowInsecure;
             _logger.LogDebug("Allow insecure connections overridden by environment variable");
         }
 
         // UI configuration
-        if (Environment.GetEnvironmentVariable("MCPM_NO_COLOR") is string noColorStr && 
-            bool.TryParse(noColorStr, out var noColor))
-        {
+        if (Environment.GetEnvironmentVariable("MCPM_NO_COLOR") is string noColorStr &&
+            bool.TryParse(noColorStr, out var noColor)) {
             configuration.Ui.ColorOutput = !noColor;
             _logger.LogDebug("Color output overridden by environment variable");
         }
 
-        if (Environment.GetEnvironmentVariable("MCPM_VERBOSE") is string verboseStr && 
-            bool.TryParse(verboseStr, out var verbose))
-        {
+        if (Environment.GetEnvironmentVariable("MCPM_VERBOSE") is string verboseStr &&
+            bool.TryParse(verboseStr, out var verbose)) {
             configuration.Ui.VerboseErrors = verbose;
             _logger.LogDebug("Verbose errors overridden by environment variable");
         }

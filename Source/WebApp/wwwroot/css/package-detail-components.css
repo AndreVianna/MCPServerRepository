@@ -1,0 +1,650 @@
+/* Package Detail Components Enhanced Styles */
+/* Phase 2B Web Application Foundation CSS */
+
+/* === Manifest Visualization Component === */
+.manifest-visualization {
+    --manifest-primary: #2563eb;
+    --manifest-success: #10b981;
+    --manifest-warning: #f59e0b;
+    --manifest-info: #06b6d4;
+    --manifest-border: #e5e7eb;
+    --manifest-bg-light: #f8fafc;
+    --manifest-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.manifest-header {
+    border-bottom: 1px solid var(--manifest-border);
+    padding-bottom: 1rem;
+}
+
+.manifest-actions .mud-button {
+    transition: all 0.2s ease-in-out;
+}
+
+.manifest-actions .mud-button:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--manifest-shadow);
+}
+
+.manifest-stat {
+    padding: 0.5rem;
+    border-radius: 8px;
+    background: var(--manifest-bg-light);
+    transition: all 0.2s ease-in-out;
+}
+
+.manifest-stat:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--manifest-shadow);
+}
+
+.tools-section .mud-table,
+.resources-section .mud-table {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--manifest-shadow);
+}
+
+.prompt-card {
+    transition: all 0.2s ease-in-out;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.prompt-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.prompt-arguments .mud-chip {
+    margin: 2px;
+    font-size: 0.75rem;
+}
+
+.configuration-section .config-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--manifest-border);
+}
+
+.configuration-section .config-item:last-child {
+    border-bottom: none;
+}
+
+.capabilities-list .capability-item {
+    padding: 0.25rem 0;
+    transition: all 0.2s ease-in-out;
+}
+
+.capabilities-list .capability-item:hover {
+    background: var(--manifest-bg-light);
+    border-radius: 6px;
+    padding-left: 0.5rem;
+}
+
+/* === Security Visualization Component === */
+.security-visualization {
+    --security-success: #10b981;
+    --security-warning: #f59e0b;
+    --security-error: #ef4444;
+    --security-info: #06b6d4;
+    --security-bg: #f8fafc;
+    --security-border: #e5e7eb;
+    --security-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.security-overview .mud-card {
+    transition: all 0.2s ease-in-out;
+    border-radius: 12px;
+}
+
+.security-overview .mud-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--security-shadow);
+}
+
+.security-grade-card {
+    background: linear-gradient(135deg, var(--security-success), #059669);
+    color: white;
+}
+
+.vulnerabilities-card {
+    background: linear-gradient(135deg, var(--security-info), #0891b2);
+    color: white;
+}
+
+.scan-info-card {
+    background: linear-gradient(135deg, var(--security-info), #0891b2);
+    color: white;
+}
+
+.trust-score-card {
+    background: linear-gradient(135deg, var(--security-success), #059669);
+    color: white;
+}
+
+.security-category-card {
+    transition: all 0.2s ease-in-out;
+    border-radius: 12px;
+}
+
+.security-category-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--security-shadow);
+}
+
+.category-score .mud-progress-linear {
+    border-radius: 4px;
+    height: 8px;
+}
+
+.security-feature {
+    padding: 0.25rem 0;
+    transition: all 0.2s ease-in-out;
+}
+
+.security-feature:hover {
+    background: var(--security-bg);
+    border-radius: 6px;
+    padding-left: 0.5rem;
+}
+
+.vulnerability-details {
+    background: var(--security-bg);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 0.5rem;
+}
+
+.timeline-content {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.compliance-card {
+    text-align: center;
+    transition: all 0.2s ease-in-out;
+    border-radius: 12px;
+}
+
+.compliance-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--security-shadow);
+}
+
+/* === Version Comparison Component === */
+.version-comparison {
+    --version-primary: #2563eb;
+    --version-success: #10b981;
+    --version-warning: #f59e0b;
+    --version-error: #ef4444;
+    --version-bg: #f8fafc;
+    --version-border: #e5e7eb;
+    --version-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.version-selection .mud-select {
+    border-radius: 8px;
+}
+
+.version-header {
+    padding: 1rem;
+    border-radius: 12px;
+    background: var(--version-bg);
+}
+
+.version-badges .mud-chip {
+    margin: 0 0.25rem;
+}
+
+.comparison-results .mud-table {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--version-shadow);
+}
+
+.security-metrics {
+    background: var(--version-bg);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.security-grade {
+    margin-bottom: 1rem;
+}
+
+.metric-item {
+    padding: 0.25rem 0;
+}
+
+.change-list .change-item {
+    padding: 0.5rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.change-list .change-item:hover {
+    background: var(--version-bg);
+    transform: translateX(4px);
+}
+
+.dependency-item {
+    padding: 0.5rem;
+    border-radius: 6px;
+    background: var(--version-bg);
+    margin-bottom: 0.5rem;
+}
+
+.dependency-change {
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+}
+
+.dependency-change:hover {
+    background: var(--version-bg);
+    transform: translateX(4px);
+}
+
+/* === Installation Instructions Component === */
+.installation-instructions {
+    --install-primary: #2563eb;
+    --install-success: #10b981;
+    --install-warning: #f59e0b;
+    --install-bg: #f8fafc;
+    --install-border: #e5e7eb;
+    --install-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.quick-install-header {
+    border-bottom: 1px solid var(--install-border);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.installation-steps .mud-stepper {
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--install-shadow);
+}
+
+.step-content {
+    padding: 1rem;
+}
+
+.step-content .mud-text-field {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+.configuration-options .mud-text-field,
+.configuration-options .mud-switch {
+    margin-bottom: 1rem;
+}
+
+.docker-compose-content {
+    background: #1e293b;
+    color: #f1f5f9;
+    padding: 1rem;
+    border-radius: 8px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    overflow-x: auto;
+}
+
+.integration-code {
+    background: #1e293b;
+    color: #f1f5f9;
+    padding: 0.75rem;
+    border-radius: 6px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    overflow-x: auto;
+    max-height: 200px;
+}
+
+.integration-examples .mud-card {
+    transition: all 0.2s ease-in-out;
+    border-radius: 12px;
+}
+
+.integration-examples .mud-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--install-shadow);
+}
+
+.manual-steps .timeline-content {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.troubleshooting-content .issue-item {
+    padding: 1rem;
+    border-radius: 8px;
+    background: var(--install-bg);
+    margin-bottom: 1rem;
+}
+
+.help-content .mud-list-item {
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.help-content .mud-list-item:hover {
+    background: var(--install-bg);
+    transform: translateX(4px);
+}
+
+/* === Enhanced Package Detail Styles === */
+.package-detail-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.package-title-info {
+    flex: 1;
+}
+
+.package-metadata .metadata-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    margin-right: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.security-indicators {
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.package-tags .mud-chip {
+    margin: 0.25rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.package-tags .mud-chip:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.package-actions {
+    min-width: 300px;
+}
+
+.install-section {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.secondary-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.installation-command {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+}
+
+.command-text {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    color: #10b981;
+    font-weight: 600;
+}
+
+/* === Publisher Profile Enhancements === */
+.publisher-profile {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+.publisher-contact .contact-links .mud-button {
+    justify-content: flex-start;
+    text-align: left;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.publisher-contact .contact-links .mud-button:hover {
+    transform: translateX(4px);
+    background: rgba(37, 99, 235, 0.1);
+}
+
+.publisher-stats {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.maintainer {
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+}
+
+.maintainer:hover {
+    background: rgba(37, 99, 235, 0.05);
+    transform: translateX(2px);
+}
+
+/* === Responsive Design === */
+@media (max-width: 768px) {
+    .package-detail-header {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .package-title-section {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .package-actions {
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .security-indicators {
+        justify-content: center;
+    }
+    
+    .manifest-stat {
+        text-align: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .version-comparison .mud-grid {
+        gap: 1rem;
+    }
+    
+    .security-overview .mud-grid {
+        gap: 0.5rem;
+    }
+    
+    .installation-instructions .integration-examples .mud-grid {
+        gap: 1rem;
+    }
+    
+    .publisher-profile {
+        padding: 0.75rem;
+    }
+    
+    .docker-compose-content,
+    .integration-code {
+        font-size: 0.75rem;
+        padding: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .package-metadata {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .metadata-item {
+        margin-right: 0;
+        justify-content: center;
+    }
+    
+    .secondary-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .manifest-header .manifest-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .version-selection .mud-grid {
+        gap: 0.5rem;
+    }
+    
+    .security-overview .mud-item {
+        margin-bottom: 1rem;
+    }
+}
+
+/* === Accessibility Enhancements === */
+.manifest-visualization [tabindex]:focus,
+.security-visualization [tabindex]:focus,
+.version-comparison [tabindex]:focus,
+.installation-instructions [tabindex]:focus {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+.manifest-visualization .mud-button:focus-visible,
+.security-visualization .mud-button:focus-visible,
+.version-comparison .mud-button:focus-visible,
+.installation-instructions .mud-button:focus-visible {
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+}
+
+/* === Animation Classes === */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(37, 99, 235, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(37, 99, 235, 0.6);
+    }
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.animate-slide-in-left {
+    animation: slideInLeft 0.3s ease-out;
+}
+
+.animate-pulse-glow {
+    animation: pulse-glow 2s infinite;
+}
+
+/* === Dark Mode Support === */
+@media (prefers-color-scheme: dark) {
+    .manifest-visualization {
+        --manifest-bg-light: #1e293b;
+        --manifest-border: #374151;
+    }
+    
+    .security-visualization {
+        --security-bg: #1e293b;
+        --security-border: #374151;
+    }
+    
+    .version-comparison {
+        --version-bg: #1e293b;
+        --version-border: #374151;
+    }
+    
+    .installation-instructions {
+        --install-bg: #1e293b;
+        --install-border: #374151;
+    }
+    
+    .publisher-profile {
+        background: linear-gradient(135deg, #1e293b 0%, #374151 100%);
+    }
+    
+    .publisher-stats {
+        background: #0f172a;
+    }
+    
+    .timeline-content {
+        background: #1e293b;
+        color: #f1f5f9;
+    }
+}
+
+/* === Print Styles === */
+@media print {
+    .manifest-visualization,
+    .security-visualization,
+    .version-comparison,
+    .installation-instructions {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+    
+    .mud-tabs,
+    .mud-button,
+    .mud-icon-button {
+        display: none;
+    }
+    
+    .mud-tab-panel {
+        display: block !important;
+    }
+    
+    .package-detail-header {
+        background: white !important;
+        color: black !important;
+        border: 1px solid #000;
+    }
+}

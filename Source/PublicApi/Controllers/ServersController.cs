@@ -1,8 +1,8 @@
 using MCPHub.Common.Messaging;
 using MCPHub.Domain.Commands;
-using MCPHub.Domain.Events;
 using MCPHub.Domain.Contracts.Requests;
 using MCPHub.Domain.Contracts.Responses;
+using MCPHub.Domain.Events;
 
 namespace MCPHub.PublicApi.Controllers;
 
@@ -22,7 +22,7 @@ public class ServersController(IMessagePublisher messagePublisher, ILogger<Serve
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The registration result</returns>
     [HttpPost]
-    public Task<IActionResult> RegisterServer([FromBody] RegisterServerRequest request, CancellationToken cancellationToken) 
+    public Task<IActionResult> RegisterServer([FromBody] RegisterServerRequest request, CancellationToken cancellationToken)
         => throw new NotImplementedException("Server registration will be implemented when persistence layer is available");
 
     /// <summary>
@@ -33,7 +33,7 @@ public class ServersController(IMessagePublisher messagePublisher, ILogger<Serve
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The scan result</returns>
     [HttpPost("{serverId}/scan")]
-    public Task<IActionResult> ScanServer(string serverId, [FromBody] ScanServerRequest request, CancellationToken cancellationToken) 
+    public Task<IActionResult> ScanServer(string serverId, [FromBody] ScanServerRequest request, CancellationToken cancellationToken)
         => throw new NotImplementedException("Manual security scanning will be implemented when security service integration is available");
 
     /// <summary>
@@ -44,7 +44,6 @@ public class ServersController(IMessagePublisher messagePublisher, ILogger<Serve
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The index result</returns>
     [HttpPost("{serverId}/index")]
-    public Task<IActionResult> IndexServer(string serverId, [FromBody] IndexServerRequest request, CancellationToken cancellationToken) 
+    public Task<IActionResult> IndexServer(string serverId, [FromBody] IndexServerRequest request, CancellationToken cancellationToken)
         => throw new NotImplementedException("Manual indexing will be implemented when search service integration is available");
 }
-

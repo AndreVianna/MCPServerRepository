@@ -1,0 +1,158 @@
+@using MudBlazor
+@using MCPHub.Domain.Entities
+@using Microsoft.AspNetCore.Components.Web
+
+<MudTooltip Text="@GetTooltipText()" Placement="Placement.Top" Arrow="true">
+    <MudChip T="string" 
+             Size="@GetChipSize()" 
+             Color="@GetTierColor()" 
+             Variant="@GetTierVariant()"
+             Class="@GetTierClass()"
+             @onclick="ShowTierDetails"
+             @onkeypress="HandleKeyPress"
+             tabindex="0"
+             role="button"
+             aria-label="@GetAriaLabel()"
+             aria-describedby="@($"trust-tier-help-{UniqueId}")">
+        <MudIcon Icon="@GetTierIcon()" Size="Size.Small" Class="mr-1" />
+        @GetTierDisplayName()
+        @if (ShowProgressIndicator && CanProgress())
+        {
+            <MudIcon Icon="Icons.Material.Filled.TrendingUp" 
+                     Size="Size.Small" 
+                     Class="ml-1 tier-progress-icon" 
+                     Title="Can advance to next tier" />
+        }
+    </MudChip>
+</MudTooltip>
+
+@if (ShowProgressBar)
+{
+    <MudProgressLinear Value="@GetProgressValue()" 
+                       Color="@GetTierColor()" 
+                       Size="Size.Small"
+                       Class="mt-1 tier-progress-bar"
+                       aria-label="@($"Trust tier progress: {GetProgressValue():F0}% complete")" />
+}
+
+@if (ShowProgressDetails && Progress != null)
+{
+    <div class="trust-tier-details mt-2">
+        <MudText Typo="Typo.caption" Class="text-muted">
+            Progress to next tier: @(GetProgressValue().ToString("F0"))%
+        </MudText>
+        @if (Progress.PendingFactors.Any())
+        {
+            <div class="pending-requirements mt-1">
+                <MudText Typo="Typo.caption" Class="text-warning">
+                    Pending: @string.Join(", ", Progress.PendingFactors.Take(2).Select(f => f.Name))
+                    @if (Progress.PendingFactors.Count > 2)
+                    {
+                        <span> and @(Progress.PendingFactors.Count - 2) more</span>
+                    }
+                </MudText>
+            </div>
+        }
+    </div>
+}
+
+@if (ShowHelperText)
+{
+    <div id="@($"trust-tier-help-{UniqueId}")" class="sr-only">
+        @GetTooltipText() Click for detailed trust tier information and progression requirements.
+    </div>
+}
+
+@code {
+    [Parameter] public TrustTier Tier { get; set; } = TrustTier.Unverified;
+    [Parameter] public bool ShowProgressIndicator { get; set; } = false;
+    [Parameter] public bool ShowProgressBar { get; set; } = false;
+    [Parameter] public bool ShowProgressDetails { get; set; } = false;
+    [Parameter] public bool ShowHelperText { get; set; } = true;
+    [Parameter] public TrustTierProgress? Progress { get; set; }
+    [Parameter] public TrustTierStyle Style { get; set; } = TrustTierStyle.Badge;
+    [Parameter] public EventCallback OnDetailsClick { get; set; }
+    [Parameter] public string Class { get; set; } = "";
+
+    private string UniqueId { get; set; } = Guid.NewGuid().ToString("N")[..8];
+
+    private string GetTooltipText() => Tier switch
+    {
+        TrustTier.Unverified => "Unverified publisher - Package available but publisher identity not confirmed",
+        TrustTier.Verified => "Verified publisher - Identity confirmed, basic package validation",
+        TrustTier.CommunityTrusted => "Trusted publisher - Proven track record, community endorsed",
+        TrustTier.Enterprise => "Enterprise publisher - Full security audit, SLA available",
+        _ => "Unknown trust tier"
+    };
+
+    private string GetAriaLabel() => $"Trust tier {GetTierDisplayName()}, {GetTooltipText()}";
+
+    private Color GetTierColor() => Tier switch
+    {
+        TrustTier.Unverified => Color.Default,
+        TrustTier.Verified => Color.Primary,
+        TrustTier.CommunityTrusted => Color.Success,
+        TrustTier.Enterprise => Color.Secondary,
+        _ => Color.Default
+    };
+
+    private Variant GetTierVariant() => Tier switch
+    {
+        TrustTier.Unverified => Variant.Outlined,
+        _ => Variant.Filled
+    };
+
+    private Size GetChipSize() => Style switch
+    {
+        TrustTierStyle.Badge => Size.Small,
+        TrustTierStyle.Card => Size.Medium,
+        _ => Size.Small
+    };
+
+    private string GetTierClass() 
+    {
+        var baseClass = $"trust-tier trust-tier-{Tier.ToString().ToLower()} {Class}";
+        
+        return Style switch
+        {
+            TrustTierStyle.Card => $"{baseClass} trust-tier-card",
+            TrustTierStyle.Inline => $"{baseClass} trust-tier-inline",
+            _ => baseClass
+        };
+    }
+
+    private string GetTierIcon() => Tier switch
+    {
+        TrustTier.Unverified => Icons.Material.Outlined.Help,
+        TrustTier.Verified => Icons.Material.Filled.Verified,
+        TrustTier.CommunityTrusted => Icons.Material.Filled.Shield,
+        TrustTier.Enterprise => Icons.Material.Filled.BusinessCenter,
+        _ => Icons.Material.Outlined.Help
+    };
+
+    private string GetTierDisplayName() => Tier switch
+    {
+        TrustTier.Unverified => "Unverified",
+        TrustTier.Verified => "Verified",
+        TrustTier.CommunityTrusted => "Trusted",
+        TrustTier.Enterprise => "Enterprise",
+        _ => "Unknown"
+    };
+
+    private bool CanProgress() => Tier != TrustTier.Enterprise && Progress?.CanAdvance == true;
+
+    private double GetProgressValue() => Progress?.CompletionPercentage ?? 0;
+
+    private async Task ShowTierDetails()
+    {
+        await OnDetailsClick.InvokeAsync();
+    }
+
+    private async Task HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" || e.Key == " ")
+        {
+            await ShowTierDetails();
+        }
+    }
+}

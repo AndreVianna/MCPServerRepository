@@ -1,13 +1,12 @@
-using MCPHub.Domain.Messaging;
 using MCPHub.Domain.Entities;
+using MCPHub.Domain.Messaging;
 
 namespace MCPHub.Domain.Events;
 
 /// <summary>
 /// Domain event triggered when a package installation is completed successfully
 /// </summary>
-public record PackageInstalledEvent : BaseMessage
-{
+public record PackageInstalledEvent : BaseMessage {
     /// <summary>
     /// Gets or sets the installation tracking identifier
     /// </summary>
@@ -75,10 +74,7 @@ public record PackageInstalledEvent : BaseMessage
         string installationPath,
         DateTimeOffset installedAt,
         string clientVersion,
-        Dictionary<string, object>? installationOptions = null)
-    {
-        return new PackageInstalledEvent
-        {
+        Dictionary<string, object>? installationOptions = null) => new PackageInstalledEvent {
             InstallationId = installationId,
             PackageId = packageId,
             PackageName = packageName,
@@ -89,5 +85,4 @@ public record PackageInstalledEvent : BaseMessage
             ClientVersion = clientVersion,
             InstallationOptions = installationOptions
         };
-    }
 }

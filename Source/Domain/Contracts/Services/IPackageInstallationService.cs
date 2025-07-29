@@ -7,8 +7,7 @@ namespace MCPHub.Domain.Contracts.Services;
 /// <summary>
 /// Service interface for package download and installation tracking operations
 /// </summary>
-public interface IPackageInstallationService
-{
+public interface IPackageInstallationService {
     /// <summary>
     /// Records a package download and generates a secure download URL
     /// </summary>

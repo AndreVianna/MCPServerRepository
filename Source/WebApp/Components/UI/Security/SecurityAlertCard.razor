@@ -1,0 +1,339 @@
+@using MCPHub.WebApp.Services
+@using MCPHub.Domain.ValueObjects
+@using MudBlazor
+
+<MudCard Class="@GetCardClass()" Elevation="1">
+    <MudCardContent Class="pa-3">
+        <div class="alert-header d-flex align-center mb-2">
+            <MudIcon Icon="@GetSeverityIcon()" 
+                     Color="@GetSeverityColor()" 
+                     Size="Size.Small" 
+                     Class="severity-icon mr-2" />
+            
+            <div class="alert-title-section flex-grow-1">
+                <MudText Typo="Typo.body2" Class="alert-title">
+                    @Alert.Title
+                </MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary" Class="alert-package">
+                    @Alert.PackageName
+                </MudText>
+            </div>
+
+            <MudChip T="string" Size="Size.Small" 
+                     Color="@GetSeverityColor()" 
+                     Variant="Variant.Filled" 
+                     Class="severity-chip">
+                @Alert.Severity
+            </MudChip>
+        </div>
+
+        <MudText Typo="Typo.caption" 
+                 Color="Color.Secondary" 
+                 Class="alert-description mb-2">
+            @Alert.Description
+        </MudText>
+
+        <div class="alert-meta d-flex justify-space-between align-center mb-2">
+            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                📅 @FormatDetectedTime()
+            </MudText>
+            
+            @if (Alert.CanAutoFix)
+            {
+                <MudChip T="string" Size="Size.Small" 
+                         Color="Color.Info" 
+                         Variant="Variant.Text"
+                         Class="auto-fix-chip">
+                    🔧 Auto-fixable
+                </MudChip>
+            }
+        </div>
+
+        @if (!string.IsNullOrEmpty(Alert.RecommendedAction))
+        {
+            <MudAlert Severity="Severity.Info" 
+                      Dense="true" 
+                      NoIcon="false"
+                      Class="recommended-action mb-2">
+                <MudText Typo="Typo.caption">
+                    💡 @Alert.RecommendedAction
+                </MudText>
+            </MudAlert>
+        }
+
+        @if (!string.IsNullOrEmpty(Alert.CveId))
+        {
+            <div class="cve-info mb-2">
+                <MudChip T="string" Size="Size.Small" 
+                         Color="Color.Warning" 
+                         Variant="Variant.Outlined"
+                         Icon="Icons.Material.Filled.BugReport">
+                    @Alert.CveId
+                </MudChip>
+            </div>
+        }
+    </MudCardContent>
+
+    @if (ShowActions)
+    {
+        <MudCardActions Class="pa-2">
+            <div class="alert-actions d-flex flex-wrap gap-2">
+                @if (Alert.CanAutoFix)
+                {
+                    <MudButton Size="Size.Small" 
+                               Color="Color.Success" 
+                               Variant="Variant.Filled"
+                               StartIcon="Icons.Material.Filled.AutoFixHigh"
+                               @onclick="@(() => HandleAction("fix"))">
+                        Fix Now
+                    </MudButton>
+                }
+                
+                <MudButton Size="Size.Small" 
+                           Color="Color.Info" 
+                           Variant="Variant.Outlined"
+                           StartIcon="Icons.Material.Filled.Info"
+                           @onclick="@(() => HandleAction("learn"))">
+                    Learn More
+                </MudButton>
+                
+                <MudButton Size="Size.Small" 
+                           Color="Color.Default" 
+                           Variant="Variant.Text"
+                           StartIcon="Icons.Material.Filled.Schedule"
+                           @onclick="@(() => HandleAction("remind"))">
+                    Remind Later
+                </MudButton>
+                
+                @if (ShowDismiss)
+                {
+                    <MudButton Size="Size.Small" 
+                               Color="Color.Secondary" 
+                               Variant="Variant.Text"
+                               StartIcon="Icons.Material.Filled.Close"
+                               @onclick="@(() => HandleAction("dismiss"))">
+                        Dismiss
+                    </MudButton>
+                }
+            </div>
+        </MudCardActions>
+    }
+</MudCard>
+
+@code {
+    [Parameter] public SecurityAlert Alert { get; set; } = null!;
+    [Parameter] public bool ShowActions { get; set; } = true;
+    [Parameter] public bool ShowDismiss { get; set; } = false;
+    [Parameter] public EventCallback<(SecurityAlert Alert, string Action)> OnActionClick { get; set; }
+    [Parameter] public string Class { get; set; } = string.Empty;
+
+    private string GetCardClass()
+    {
+        var classes = new List<string> { "security-alert-card" };
+        
+        classes.Add($"alert-severity-{Alert.Severity.ToString().ToLower()}");
+        
+        if (!string.IsNullOrEmpty(Class))
+            classes.Add(Class);
+            
+        return string.Join(" ", classes);
+    }
+
+    private string GetSeverityIcon()
+    {
+        return Alert.Severity switch
+        {
+            SecurityScanSeverity.Critical => Icons.Material.Filled.Dangerous,
+            SecurityScanSeverity.High => Icons.Material.Filled.Error,
+            SecurityScanSeverity.Medium => Icons.Material.Filled.Warning,
+            SecurityScanSeverity.Low => Icons.Material.Filled.Info,
+            _ => Icons.Material.Filled.Help
+        };
+    }
+
+    private Color GetSeverityColor()
+    {
+        return Alert.Severity switch
+        {
+            SecurityScanSeverity.Critical => Color.Error,
+            SecurityScanSeverity.High => Color.Error,
+            SecurityScanSeverity.Medium => Color.Warning,
+            SecurityScanSeverity.Low => Color.Info,
+            _ => Color.Default
+        };
+    }
+
+    private string FormatDetectedTime()
+    {
+        var timeSpan = DateTime.UtcNow - Alert.DetectedAt;
+        return timeSpan.TotalDays switch
+        {
+            var days when days < 1 && timeSpan.TotalHours < 1 => $"Detected {(int)timeSpan.TotalMinutes}m ago",
+            var days when days < 1 => $"Detected {(int)timeSpan.TotalHours}h ago",
+            var days when days < 7 => $"Detected {(int)timeSpan.TotalDays}d ago",
+            _ => $"Detected on {Alert.DetectedAt:MMM dd}"
+        };
+    }
+
+    private async Task HandleAction(string action)
+    {
+        if (OnActionClick.HasDelegate)
+        {
+            await OnActionClick.InvokeAsync((Alert, action));
+        }
+    }
+}
+
+<style>
+.security-alert-card {
+    border-radius: 8px;
+    border-left: 4px solid transparent;
+    transition: all 0.2s ease-in-out;
+}
+
+.security-alert-card:hover {
+    box-shadow: var(--mud-elevation-4);
+}
+
+.alert-severity-critical {
+    border-left-color: var(--mud-palette-error);
+    background-color: rgba(244, 67, 54, 0.02);
+}
+
+.alert-severity-high {
+    border-left-color: var(--mud-palette-error);
+    background-color: rgba(244, 67, 54, 0.02);
+}
+
+.alert-severity-medium {
+    border-left-color: var(--mud-palette-warning);
+    background-color: rgba(255, 152, 0, 0.02);
+}
+
+.alert-severity-low {
+    border-left-color: var(--mud-palette-info);
+    background-color: rgba(33, 150, 243, 0.02);
+}
+
+.alert-header {
+    min-height: 32px;
+}
+
+.alert-title {
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.alert-package {
+    font-family: var(--mud-typography-font-family-monospace, monospace);
+    font-size: 0.7rem;
+}
+
+.alert-description {
+    line-height: 1.4;
+    margin-bottom: 8px;
+}
+
+.severity-icon {
+    flex-shrink: 0;
+}
+
+.severity-chip {
+    font-size: 0.7rem;
+    height: 20px;
+    font-weight: 600;
+}
+
+.auto-fix-chip {
+    font-size: 0.65rem;
+    height: 18px;
+}
+
+.recommended-action {
+    border-radius: 6px;
+}
+
+.recommended-action .mud-alert-message {
+    font-size: 0.75rem;
+}
+
+.cve-info {
+    display: flex;
+    align-items: center;
+}
+
+.alert-actions {
+    width: 100%;
+}
+
+.alert-actions .mud-button {
+    text-transform: none;
+    font-size: 0.75rem;
+    min-width: auto;
+    padding: 4px 8px;
+}
+
+/* Responsive adjustments */
+@@media (max-width: 768px) {
+    .alert-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .severity-chip {
+        align-self: flex-start;
+    }
+    
+    .alert-actions {
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .alert-actions .mud-button {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
+@@media (max-width: 480px) {
+    .security-alert-card .mud-card-content {
+        padding: 12px;
+    }
+    
+    .security-alert-card .mud-card-actions {
+        padding: 8px 12px;
+    }
+    
+    .alert-title {
+        font-size: 0.85rem;
+    }
+    
+    .alert-package {
+        font-size: 0.65rem;
+    }
+    
+    .alert-description {
+        font-size: 0.75rem;
+    }
+}
+
+/* Dark theme adjustments */
+@@media (prefers-color-scheme: dark) {
+    .alert-severity-critical {
+        background-color: rgba(244, 67, 54, 0.05);
+    }
+    
+    .alert-severity-high {
+        background-color: rgba(244, 67, 54, 0.05);
+    }
+    
+    .alert-severity-medium {
+        background-color: rgba(255, 152, 0, 0.05);
+    }
+    
+    .alert-severity-low {
+        background-color: rgba(33, 150, 243, 0.05);
+    }
+}
+</style>

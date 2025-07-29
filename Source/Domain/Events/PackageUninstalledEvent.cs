@@ -5,8 +5,7 @@ namespace MCPHub.Domain.Events;
 /// <summary>
 /// Domain event triggered when a package is uninstalled
 /// </summary>
-public record PackageUninstalledEvent : BaseMessage
-{
+public record PackageUninstalledEvent : BaseMessage {
     /// <summary>
     /// Gets or sets the installation tracking identifier
     /// </summary>
@@ -81,10 +80,7 @@ public record PackageUninstalledEvent : BaseMessage
         DateTimeOffset originalInstalledAt,
         DateTimeOffset uninstalledAt,
         string? uninstallReason = null,
-        string? clientVersion = null)
-    {
-        return new PackageUninstalledEvent
-        {
+        string? clientVersion = null) => new PackageUninstalledEvent {
             InstallationId = installationId,
             PackageId = packageId,
             PackageName = packageName,
@@ -96,5 +92,4 @@ public record PackageUninstalledEvent : BaseMessage
             UninstallReason = uninstallReason,
             ClientVersion = clientVersion
         };
-    }
 }

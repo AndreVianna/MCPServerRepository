@@ -6,8 +6,7 @@ namespace MCPHub.Domain.Repositories;
 /// <summary>
 /// Repository interface for trust tier history operations
 /// </summary>
-public interface ITrustTierHistoryRepository : IRepository<TrustTierHistoryEntry>
-{
+public interface ITrustTierHistoryRepository : IRepository<TrustTierHistoryEntry> {
     /// <summary>
     /// Gets the trust tier change history for a specific package
     /// </summary>
@@ -16,8 +15,8 @@ public interface ITrustTierHistoryRepository : IRepository<TrustTierHistoryEntry
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Chronological history of trust tier changes</returns>
     Task<IEnumerable<TrustTierHistoryEntry>> GetPackageHistoryAsync(
-        Guid packageId, 
-        int limit = 50, 
+        Guid packageId,
+        int limit = 50,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -27,7 +26,7 @@ public interface ITrustTierHistoryRepository : IRepository<TrustTierHistoryEntry
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The most recent trust tier change or null if none exists</returns>
     Task<TrustTierHistoryEntry?> GetLatestHistoryEntryAsync(
-        Guid packageId, 
+        Guid packageId,
         CancellationToken cancellationToken = default);
 
     /// <summary>

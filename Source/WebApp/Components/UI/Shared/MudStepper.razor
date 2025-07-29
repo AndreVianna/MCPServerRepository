@@ -1,0 +1,20 @@
+@namespace MudBlazor
+
+@* Placeholder implementation of MudStepper for compilation - will be replaced with actual implementation when needed *@
+
+<div class="mud-stepper">
+    @ChildContent
+</div>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public int ActiveIndex { get; set; }
+    [Parameter] public EventCallback<int> ActiveIndexChanged { get; set; }
+    [Parameter] public EventCallback<StepChangeDirection> OnStepChanged { get; set; }
+    
+    public Task SetActive(int index)
+    {
+        ActiveIndex = index;
+        return ActiveIndexChanged.InvokeAsync(index);
+    }
+}

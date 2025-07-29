@@ -4,43 +4,42 @@ namespace MCPHub.Common.Services;
 /// Telemetry and observability service
 /// Supports: Console → Application Insights → OpenTelemetry
 /// </summary>
-public interface ITelemetryService
-{
+public interface ITelemetryService {
     /// <summary>
     /// Records a custom metric
     /// </summary>
     void RecordMetric(string name, double value, IDictionary<string, string>? tags = null);
-    
+
     /// <summary>
     /// Tracks an event
     /// </summary>
     void TrackEvent(string name, IDictionary<string, string>? properties = null, IDictionary<string, double>? metrics = null);
-    
+
     /// <summary>
     /// Tracks a dependency call
     /// </summary>
     void TrackDependency(string dependencyType, string target, string command, DateTimeOffset startTime, TimeSpan duration, bool success);
-    
+
     /// <summary>
     /// Tracks an exception
     /// </summary>
     void TrackException(Exception exception, IDictionary<string, string>? properties = null);
-    
+
     /// <summary>
     /// Starts a traced operation
     /// </summary>
     ITracedOperation StartOperation(string operationName, IDictionary<string, string>? properties = null);
-    
+
     /// <summary>
     /// Creates a timer for duration tracking
     /// </summary>
     IDisposable TrackDuration(string metricName, IDictionary<string, string>? tags = null);
-    
+
     /// <summary>
     /// Gets collected metrics for analysis
     /// </summary>
     Task<IEnumerable<MetricSnapshot>> GetMetricsAsync(string metricName, TimeSpan period, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Configures alerts on metrics
     /// </summary>
@@ -50,8 +49,7 @@ public interface ITelemetryService
 /// <summary>
 /// Traced operation interface
 /// </summary>
-public interface ITracedOperation : IDisposable
-{
+public interface ITracedOperation : IDisposable {
     string OperationId { get; }
     void SetProperty(string key, string value);
     void SetMetric(string key, double value);
@@ -79,8 +77,7 @@ public record MetricAlert(
 /// <summary>
 /// Metric alert conditions
 /// </summary>
-public enum MetricAlertCondition
-{
+public enum MetricAlertCondition {
     GreaterThan,
     LessThan,
     EqualTo,

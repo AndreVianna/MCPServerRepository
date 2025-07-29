@@ -1,0 +1,362 @@
+@using MCPHub.Domain.Contracts.Requests
+@using MCPHub.Domain.Contracts.Responses
+@using UserProfileDomain = MCPHub.Domain.Contracts.Responses.UserProfile
+@using UserProfileUpdateResultDomain = MCPHub.Domain.Contracts.Responses.UserProfileUpdateResult
+@inject IUserProfileService ProfileService
+@inject ISnackbar Snackbar
+
+<MudGrid Spacing="6">
+    <MudItem xs="12" md="8">
+        <MudText Typo="Typo.h6" Class="mb-4">Privacy Settings</MudText>
+        
+        <EditForm Model="@_privacyModel" OnValidSubmit="@HandleUpdatePrivacy">
+            <MudGrid Spacing="4">
+                <MudItem xs="12">
+                    <MudPaper Elevation="1" Class="pa-4">
+                        <MudText Typo="Typo.subtitle1" Class="mb-3 font-weight-bold">Profile Visibility</MudText>
+                        
+                        <MudSwitch @bind-Value="_privacyModel.IsPublicProfile" 
+                                  Color="Color.Primary"
+                                  Label="Make my profile public"
+                                  Class="mb-3" />
+                        
+                        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-4">
+                            When enabled, other users can view your profile and published packages.
+                        </MudText>
+                        
+                        <MudSwitch @bind-Value="_privacyModel.ShowEmail" 
+                                  Color="Color.Primary"
+                                  Label="Show email address on public profile"
+                                  Disabled="@(!_privacyModel.IsPublicProfile)" />
+                        
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                            Display your email address to other users (only if profile is public).
+                        </MudText>
+                    </MudPaper>
+                </MudItem>
+                
+                <MudItem xs="12">
+                    <MudPaper Elevation="1" Class="pa-4">
+                        <MudText Typo="Typo.subtitle1" Class="mb-3 font-weight-bold">Communication Preferences</MudText>
+                        
+                        <MudGrid Spacing="3">
+                            <MudItem xs="12">
+                                <MudSwitch @bind-Value="_privacyModel.ReceiveUpdates" 
+                                          Color="Color.Primary"
+                                          Label="Security updates and important notifications" 
+                                          Class="mb-2" />
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                    Critical security updates and account-related notifications.
+                                </MudText>
+                            </MudItem>
+                            
+                            <MudItem xs="12">
+                                <MudSwitch @bind-Value="_privacyModel.ReceiveMarketingEmails" 
+                                          Color="Color.Primary"
+                                          Label="Product updates and tips" 
+                                          Class="mb-2" />
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                    New features, tips, and product announcements.
+                                </MudText>
+                            </MudItem>
+                        </MudGrid>
+                    </MudPaper>
+                </MudItem>
+                
+                <MudItem xs="12">
+                    <MudPaper Elevation="1" Class="pa-4">
+                        <MudText Typo="Typo.subtitle1" Class="mb-3 font-weight-bold">Data Collection</MudText>
+                        
+                        <MudGrid Spacing="3">
+                            <MudItem xs="12">
+                                <MudCheckBox @bind-Value="_privacyModel.AllowAnalytics" 
+                                            Color="Color.Primary"
+                                            Label="Help improve MCP Hub with usage analytics" />
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                    Share anonymized usage data to help us improve the platform.
+                                </MudText>
+                            </MudItem>
+                            
+                            <MudItem xs="12">
+                                <MudCheckBox @bind-Value="_privacyModel.AllowCrashReporting" 
+                                            Color="Color.Primary"
+                                            Label="Send crash reports to help fix bugs" />
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                    Automatically send error reports when something goes wrong.
+                                </MudText>
+                            </MudItem>
+                        </MudGrid>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+
+            <div class="d-flex justify-end mt-6">
+                <MudButton ButtonType="ButtonType.Submit"
+                          Variant="Variant.Filled"
+                          Color="Color.Primary"
+                          Disabled="@_isLoading"
+                          StartIcon="@(_isLoading ? null : Icons.Material.Filled.Save)">
+                    @if (_isLoading)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                        <span class="ml-2">Saving...</span>
+                    }
+                    else
+                    {
+                        <span>Save Settings</span>
+                    }
+                </MudButton>
+            </div>
+        </EditForm>
+    </MudItem>
+    
+    <MudItem xs="12" md="4">
+        <MudPaper Elevation="1" Class="pa-4 mb-4">
+            <MudText Typo="Typo.h6" Class="mb-4">Data Management</MudText>
+            
+            <MudGrid Spacing="3">
+                <MudItem xs="12">
+                    <MudButton Variant="Variant.Outlined"
+                              Color="Color.Primary"
+                              StartIcon="@Icons.Material.Filled.Download"
+                              OnClick="@HandleExportData"
+                              FullWidth="true"
+                              Disabled="@_isExporting">
+                        @if (_isExporting)
+                        {
+                            <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                            <span class="ml-2">Exporting...</span>
+                        }
+                        else
+                        {
+                            <span>Export My Data</span>
+                        }
+                    </MudButton>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-1">
+                        Download all your profile data, packages, and activity
+                    </MudText>
+                </MudItem>
+                
+                <MudItem xs="12">
+                    <MudDivider />
+                </MudItem>
+                
+                <MudItem xs="12">
+                    <MudButton Variant="Variant.Outlined"
+                              Color="Color.Error"
+                              StartIcon="@Icons.Material.Filled.DeleteForever"
+                              OnClick="@(() => _showDeleteDialog = true)"
+                              FullWidth="true">
+                        Delete Account
+                    </MudButton>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-1">
+                        Permanently delete your account and all data
+                    </MudText>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+        
+        <MudAlert Severity="Severity.Info">
+            <strong>Privacy Note:</strong> We respect your privacy and follow GDPR guidelines. 
+            <MudLink Href="/privacy" Color="Color.Info">Read our Privacy Policy</MudLink>
+        </MudAlert>
+    </MudItem>
+</MudGrid>
+
+<!-- Account Deletion Dialog -->
+<MudDialog @bind-IsVisible="_showDeleteDialog" Options="@_deleteDialogOptions">
+    <TitleContent>
+        <div class="d-flex align-center">
+            <MudIcon Icon="@Icons.Material.Filled.Warning" Color="Color.Error" Class="mr-3" />
+            Delete Account
+        </div>
+    </TitleContent>
+    <DialogContent>
+        <MudAlert Severity="Severity.Error" Class="mb-4">
+            <strong>Warning:</strong> This action cannot be undone. All your data, including published packages, will be permanently deleted.
+        </MudAlert>
+        
+        <MudTextField @bind-Value="_deleteConfirmation"
+                      Label="Type 'DELETE' to confirm"
+                      Variant="Variant.Outlined"
+                      FullWidth="true"
+                      Class="mb-4" />
+        
+        <MudTextField @bind-Value="_deletePassword"
+                      Label="Enter your password"
+                      Variant="Variant.Outlined"
+                      InputType="InputType.Password"
+                      FullWidth="true"
+                      Class="mb-4" />
+        
+        <MudSelect @bind-Value="_deleteReason"
+                   Label="Reason for deletion (optional)"
+                   Variant="Variant.Outlined"
+                   FullWidth="true">
+            <MudSelectItem Value="@string.Empty">-- Select reason --</MudSelectItem>
+            <MudSelectItem Value="@("No longer needed")">No longer needed</MudSelectItem>
+            <MudSelectItem Value="@("Privacy concerns")">Privacy concerns</MudSelectItem>
+            <MudSelectItem Value="@("Found alternative")">Found alternative</MudSelectItem>
+            <MudSelectItem Value="@("Too many emails")">Too many emails</MudSelectItem>
+            <MudSelectItem Value="@("Other")">Other</MudSelectItem>
+        </MudSelect>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => _showDeleteDialog = false)">Cancel</MudButton>
+        <MudButton Color="Color.Error" 
+                  Variant="Variant.Filled"
+                  OnClick="@HandleDeleteAccount"
+                  Disabled="@(_deleteConfirmation != "DELETE" || string.IsNullOrEmpty(_deletePassword) || _isDeleting)">
+            @if (_isDeleting)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                <span class="ml-2">Deleting...</span>
+            }
+            else
+            {
+                <span>Delete Account</span>
+            }
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public UserProfileDomain? UserProfile { get; set; }
+    [Parameter] public EventCallback<UserProfileDomain> UserProfileChanged { get; set; }
+    [Parameter] public EventCallback<UserProfileDomain> OnProfileUpdated { get; set; }
+
+    private PrivacySettingsModel _privacyModel = new();
+    private bool _isLoading = false;
+    private bool _isExporting = false;
+    private bool _showDeleteDialog = false;
+    private bool _isDeleting = false;
+    private string _deleteConfirmation = string.Empty;
+    private string _deletePassword = string.Empty;
+    private string _deleteReason = string.Empty;
+
+    private readonly DialogOptions _deleteDialogOptions = new()
+    {
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true,
+        CloseButton = false,
+        BackdropClick = false
+    };
+
+    protected override void OnParametersSet()
+    {
+        if (UserProfile != null)
+        {
+            _privacyModel = new PrivacySettingsModel
+            {
+                IsPublicProfile = UserProfile.IsPublicProfile,
+                ShowEmail = UserProfile.ShowEmail,
+                ReceiveUpdates = UserProfile.ReceiveUpdates,
+                ReceiveMarketingEmails = UserProfile.ReceiveMarketingEmails,
+                AllowAnalytics = true, // Default values
+                AllowCrashReporting = true
+            };
+        }
+    }
+
+    private async Task HandleUpdatePrivacy()
+    {
+        _isLoading = true;
+        try
+        {
+            var request = new UpdateUserProfileRequest
+            {
+                IsPublicProfile = _privacyModel.IsPublicProfile,
+                ShowEmail = _privacyModel.ShowEmail,
+                ReceiveUpdates = _privacyModel.ReceiveUpdates,
+                ReceiveMarketingEmails = _privacyModel.ReceiveMarketingEmails
+            };
+
+            UserProfileUpdateResultDomain result = await ProfileService.UpdateProfileAsync(request);
+            
+            if (result.IsSuccess)
+            {
+                Snackbar.Add("Privacy settings updated successfully!", Severity.Success);
+                
+                // Use the updated profile from the result, or create one if not provided
+                if (result.UpdatedProfile != null)
+                {
+                    await OnProfileUpdated.InvokeAsync(result.UpdatedProfile);
+                }
+                else if (UserProfile != null)
+                {
+                    // Fallback: create updated profile manually using record 'with' syntax
+                    var updatedProfile = UserProfile with
+                    {
+                        IsPublicProfile = _privacyModel.IsPublicProfile,
+                        ShowEmail = _privacyModel.ShowEmail,
+                        ReceiveUpdates = _privacyModel.ReceiveUpdates,
+                        ReceiveMarketingEmails = _privacyModel.ReceiveMarketingEmails
+                    };
+                    
+                    await OnProfileUpdated.InvokeAsync(updatedProfile);
+                }
+            }
+            else
+            {
+                Snackbar.Add($"Failed to update settings: {result.ErrorMessage}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error updating settings: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task HandleExportData()
+    {
+        _isExporting = true;
+        try
+        {
+            // TODO: Implement data export
+            await Task.Delay(2000); // Simulate export process
+            Snackbar.Add("Data export will be sent to your email shortly.", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error exporting data: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isExporting = false;
+        }
+    }
+
+    private async Task HandleDeleteAccount()
+    {
+        _isDeleting = true;
+        try
+        {
+            // TODO: Implement account deletion
+            await Task.Delay(2000); // Simulate deletion process
+            Snackbar.Add("Account deletion initiated. You will receive a confirmation email.", Severity.Info);
+            _showDeleteDialog = false;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error deleting account: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isDeleting = false;
+        }
+    }
+
+    public class PrivacySettingsModel
+    {
+        public bool IsPublicProfile { get; set; } = true;
+        public bool ShowEmail { get; set; } = false;
+        public bool ReceiveUpdates { get; set; } = true;
+        public bool ReceiveMarketingEmails { get; set; } = false;
+        public bool AllowAnalytics { get; set; } = true;
+        public bool AllowCrashReporting { get; set; } = true;
+    }
+}

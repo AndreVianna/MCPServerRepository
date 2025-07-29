@@ -1,0 +1,368 @@
+@using MCPHub.Domain.Contracts.Requests
+@using MCPHub.Domain.Contracts.Responses
+@using UserProfileDomain = MCPHub.Domain.Contracts.Responses.UserProfile
+@using UserProfileUpdateResultDomain = MCPHub.Domain.Contracts.Responses.UserProfileUpdateResult
+@inject IUserProfileService ProfileService
+@inject ISnackbar Snackbar
+
+<MudGrid Spacing="6">
+    <MudItem xs="12" md="8">
+        <MudText Typo="Typo.h6" Class="mb-4">Basic Information</MudText>
+        
+        <EditForm Model="@_profileModel" OnValidSubmit="@HandleUpdateProfile">
+            <DataAnnotationsValidator />
+            <MudGrid Spacing="4">
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="_profileModel.FirstName"
+                                  Label="First Name"
+                                  Variant="Variant.Outlined"
+                                  For="@(() => _profileModel.FirstName)"
+                                  FullWidth="true"
+                                  Immediate="true" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="_profileModel.LastName"
+                                  Label="Last Name"
+                                  Variant="Variant.Outlined"
+                                  For="@(() => _profileModel.LastName)"
+                                  FullWidth="true"
+                                  Immediate="true" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_profileModel.DisplayName"
+                                  Label="Display Name"
+                                  Variant="Variant.Outlined"
+                                  For="@(() => _profileModel.DisplayName)"
+                                  HelperText="This is how your name will appear to other users"
+                                  FullWidth="true"
+                                  Immediate="true" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_profileModel.Bio"
+                                  Label="Bio"
+                                  Variant="Variant.Outlined"
+                                  Lines="3"
+                                  For="@(() => _profileModel.Bio)"
+                                  HelperText="Tell others about yourself"
+                                  FullWidth="true"
+                                  Immediate="true" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="_profileModel.JobTitle"
+                                  Label="Job Title"
+                                  Variant="Variant.Outlined"
+                                  For="@(() => _profileModel.JobTitle)"
+                                  FullWidth="true"
+                                  Immediate="true" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="_profileModel.Company"
+                                  Label="Company"
+                                  Variant="Variant.Outlined"
+                                  For="@(() => _profileModel.Company)"
+                                  FullWidth="true"
+                                  Immediate="true" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="_profileModel.Location"
+                                  Label="Location"
+                                  Variant="Variant.Outlined"
+                                  For="@(() => _profileModel.Location)"
+                                  FullWidth="true"
+                                  Immediate="true" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="_profileModel.PhoneNumber"
+                                  Label="Phone Number"
+                                  Variant="Variant.Outlined"
+                                  InputType="InputType.Telephone"
+                                  For="@(() => _profileModel.PhoneNumber)"
+                                  FullWidth="true"
+                                  Immediate="true" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_profileModel.Website"
+                                  Label="Website"
+                                  Variant="Variant.Outlined"
+                                  InputType="InputType.Url"
+                                  For="@(() => _profileModel.Website)"
+                                  FullWidth="true"
+                                  Immediate="true" />
+                </MudItem>
+            </MudGrid>
+
+            <MudDivider Class="my-6" />
+
+            <MudText Typo="Typo.h6" Class="mb-4">Social Links</MudText>
+            <MudGrid Spacing="4">
+                <MudItem xs="12" md="4">
+                    <MudTextField @bind-Value="_profileModel.GitHubUrl"
+                                  Label="GitHub URL"
+                                  Variant="Variant.Outlined"
+                                  InputType="InputType.Url"
+                                  StartIcon="@Icons.Custom.Brands.GitHub"
+                                  For="@(() => _profileModel.GitHubUrl)"
+                                  FullWidth="true"
+                                  Immediate="true" />
+                </MudItem>
+                <MudItem xs="12" md="4">
+                    <MudTextField @bind-Value="_profileModel.TwitterUrl"
+                                  Label="Twitter/X URL"
+                                  Variant="Variant.Outlined"
+                                  InputType="InputType.Url"
+                                  StartIcon="@Icons.Custom.Brands.Twitter"
+                                  For="@(() => _profileModel.TwitterUrl)"
+                                  FullWidth="true"
+                                  Immediate="true" />
+                </MudItem>
+                <MudItem xs="12" md="4">
+                    <MudTextField @bind-Value="_profileModel.LinkedInUrl"
+                                  Label="LinkedIn URL"
+                                  Variant="Variant.Outlined"
+                                  InputType="InputType.Url"
+                                  StartIcon="@Icons.Custom.Brands.LinkedIn"
+                                  For="@(() => _profileModel.LinkedInUrl)"
+                                  FullWidth="true"
+                                  Immediate="true" />
+                </MudItem>
+            </MudGrid>
+
+            <div class="d-flex justify-end mt-6">
+                <MudButton ButtonType="ButtonType.Submit"
+                          Variant="Variant.Filled"
+                          Color="Color.Primary"
+                          Disabled="@_isLoading"
+                          StartIcon="@(_isLoading ? null : Icons.Material.Filled.Save)">
+                    @if (_isLoading)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                        <span class="ml-2">Saving...</span>
+                    }
+                    else
+                    {
+                        <span>Save Changes</span>
+                    }
+                </MudButton>
+            </div>
+        </EditForm>
+    </MudItem>
+    
+    <MudItem xs="12" md="4">
+        <MudPaper Elevation="1" Class="pa-4">
+            <MudText Typo="Typo.h6" Class="mb-4">Account Information</MudText>
+            
+            <div class="account-info-item mb-3">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Email Address</MudText>
+                <div class="d-flex align-center">
+                    <MudText Typo="Typo.body2">@(UserProfile?.Email ?? "")</MudText>
+                    @if (UserProfile?.IsEmailVerified == true)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Verified" 
+                                Color="Color.Success" 
+                                Size="Size.Small" 
+                                Class="ml-2" 
+                                Title="Email Verified" />
+                    }
+                    else
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Warning" 
+                                Color="Color.Warning" 
+                                Size="Size.Small" 
+                                Class="ml-2" 
+                                Title="Email Not Verified" />
+                    }
+                </div>
+            </div>
+            
+            <div class="account-info-item mb-3">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Username</MudText>
+                <MudText Typo="Typo.body2">@(UserProfile?.UserName ?? "")</MudText>
+            </div>
+            
+            <div class="account-info-item mb-3">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Account Type</MudText>
+                <MudChip T="string" Size="Size.Small" Color="Color.Primary">
+                    @(UserProfile?.AccountType ?? "")
+                </MudChip>
+            </div>
+            
+            <div class="account-info-item mb-3">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Member Since</MudText>
+                <MudText Typo="Typo.body2">
+                    @(UserProfile?.CreatedAt.ToString("MMMM yyyy") ?? "")
+                </MudText>
+            </div>
+            
+            @if (UserProfile?.LastLoginAt != null)
+            {
+                <div class="account-info-item">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Last Login</MudText>
+                    <MudText Typo="Typo.body2">
+                        @UserProfile.LastLoginAt.Value.ToString("MMM dd, yyyy 'at' HH:mm")
+                    </MudText>
+                </div>
+            }
+        </MudPaper>
+
+        @if (!UserProfile?.IsEmailVerified == true)
+        {
+            <MudAlert Severity="Severity.Warning" Class="mt-4">
+                <strong>Email not verified!</strong>
+                <MudLink Href="/email-verification" Color="Color.Warning" Class="ml-2">
+                    Verify now
+                </MudLink>
+            </MudAlert>
+        }
+    </MudItem>
+</MudGrid>
+
+<style>
+    .account-info-item {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--mud-palette-lines-default);
+    }
+
+    .account-info-item:last-child {
+        border-bottom: none;
+    }
+</style>
+
+@code {
+    [Parameter] public UserProfileDomain? UserProfile { get; set; }
+    [Parameter] public EventCallback<UserProfileDomain> UserProfileChanged { get; set; }
+    [Parameter] public EventCallback<UserProfileDomain> OnProfileUpdated { get; set; }
+
+    private ProfileUpdateModel _profileModel = new();
+    private bool _isLoading = false;
+
+    protected override void OnParametersSet()
+    {
+        if (UserProfile != null && (_profileModel.FirstName != UserProfile.FirstName))
+        {
+            // Update the form model when the UserProfile parameter changes
+            _profileModel = new ProfileUpdateModel
+            {
+                FirstName = UserProfile.FirstName ?? string.Empty,
+                LastName = UserProfile.LastName ?? string.Empty,
+                DisplayName = UserProfile.DisplayName ?? string.Empty,
+                Bio = UserProfile.Bio ?? string.Empty,
+                JobTitle = UserProfile.JobTitle ?? string.Empty,
+                Company = UserProfile.Company ?? string.Empty,
+                Location = UserProfile.Location ?? string.Empty,
+                Website = UserProfile.Website ?? string.Empty,
+                GitHubUrl = UserProfile.GitHubUrl ?? string.Empty,
+                TwitterUrl = UserProfile.TwitterUrl ?? string.Empty,
+                LinkedInUrl = UserProfile.LinkedInUrl ?? string.Empty,
+                PhoneNumber = UserProfile.PhoneNumber ?? string.Empty
+            };
+        }
+    }
+
+    private async Task HandleUpdateProfile()
+    {
+        _isLoading = true;
+        try
+        {
+            var request = new UpdateUserProfileRequest
+            {
+                FirstName = _profileModel.FirstName,
+                LastName = _profileModel.LastName,
+                DisplayName = _profileModel.DisplayName,
+                Bio = _profileModel.Bio,
+                JobTitle = _profileModel.JobTitle,
+                Company = _profileModel.Company,
+                Location = _profileModel.Location,
+                Website = _profileModel.Website,
+                GitHubUrl = _profileModel.GitHubUrl,
+                TwitterUrl = _profileModel.TwitterUrl,
+                LinkedInUrl = _profileModel.LinkedInUrl,
+                PhoneNumber = _profileModel.PhoneNumber
+            };
+
+            UserProfileUpdateResultDomain result = await ProfileService.UpdateProfileAsync(request);
+            
+            if (result.IsSuccess)
+            {
+                Snackbar.Add("Profile updated successfully!", Severity.Success);
+                
+                // Use the updated profile from the result, or create one if not provided
+                if (result.UpdatedProfile != null)
+                {
+                    await OnProfileUpdated.InvokeAsync(result.UpdatedProfile);
+                }
+                else if (UserProfile != null)
+                {
+                    // Fallback: create updated profile manually using record 'with' syntax
+                    var updatedProfile = UserProfile with
+                    {
+                        DisplayName = _profileModel.DisplayName,
+                        FirstName = _profileModel.FirstName,
+                        LastName = _profileModel.LastName,
+                        Bio = _profileModel.Bio,
+                        JobTitle = _profileModel.JobTitle,
+                        Company = _profileModel.Company,
+                        Location = _profileModel.Location,
+                        Website = _profileModel.Website,
+                        GitHubUrl = _profileModel.GitHubUrl,
+                        TwitterUrl = _profileModel.TwitterUrl,
+                        LinkedInUrl = _profileModel.LinkedInUrl,
+                        PhoneNumber = _profileModel.PhoneNumber
+                    };
+                    
+                    await OnProfileUpdated.InvokeAsync(updatedProfile);
+                }
+            }
+            else
+            {
+                Snackbar.Add($"Failed to update profile: {result.ErrorMessage}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error updating profile: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    public class ProfileUpdateModel
+    {
+        [StringLength(50)]
+        public string FirstName { get; set; } = string.Empty;
+
+        [StringLength(50)]
+        public string LastName { get; set; } = string.Empty;
+
+        [StringLength(100)]
+        public string DisplayName { get; set; } = string.Empty;
+
+        [StringLength(500)]
+        public string Bio { get; set; } = string.Empty;
+
+        [StringLength(100)]
+        public string JobTitle { get; set; } = string.Empty;
+
+        [StringLength(100)]
+        public string Company { get; set; } = string.Empty;
+
+        [StringLength(100)]
+        public string Location { get; set; } = string.Empty;
+
+        [Url]
+        public string Website { get; set; } = string.Empty;
+
+        [Url]
+        public string GitHubUrl { get; set; } = string.Empty;
+
+        [Url]
+        public string TwitterUrl { get; set; } = string.Empty;
+
+        [Url]
+        public string LinkedInUrl { get; set; } = string.Empty;
+
+        [Phone]
+        public string PhoneNumber { get; set; } = string.Empty;
+    }
+}

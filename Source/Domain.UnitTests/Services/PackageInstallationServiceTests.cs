@@ -3,31 +3,27 @@ using MCPHub.Domain.Contracts.Responses;
 using MCPHub.Domain.Contracts.Services;
 using MCPHub.Domain.Entities;
 using MCPHub.Domain.Services;
-using MCPHub.Domain.UnitTests.TestUtilities;
+using MCPHub.Domain.TestUtilities;
 
 namespace MCPHub.Domain.UnitTests.Services;
 
 /// <summary>
 /// Unit tests for PackageInstallationService
 /// </summary>
-[TestCategory(DomainTestCategories.Services)]
-public class PackageInstallationServiceTests
-{
+[Trait("Category", DomainTestCategories.Services)]
+public class PackageInstallationServiceTests {
     private readonly IPackageInstallationService _service;
 
-    public PackageInstallationServiceTests()
-    {
+    public PackageInstallationServiceTests() {
         _service = new PackageInstallationService();
     }
 
     [Fact]
-    public async Task RecordDownloadAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task RecordDownloadAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var packageId = Guid.NewGuid();
         const string version = "1.0.0";
-        var request = new DownloadRequest
-        {
+        var request = new DownloadRequest {
             UserAgent = "Test Client",
             DownloadMethod = "CLI"
         };
@@ -39,13 +35,11 @@ public class PackageInstallationServiceTests
     }
 
     [Fact]
-    public async Task RecordInstallationAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task RecordInstallationAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var packageId = Guid.NewGuid();
         const string version = "1.0.0";
-        var request = new InstallationRequest
-        {
+        var request = new InstallationRequest {
             InstallationPath = "/path/to/install",
             ClientVersion = "1.0.0"
         };
@@ -57,8 +51,7 @@ public class PackageInstallationServiceTests
     }
 
     [Fact]
-    public async Task UpdateInstallationStatusAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task UpdateInstallationStatusAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var installationId = Guid.NewGuid();
         const InstallationStatus status = InstallationStatus.Completed;
@@ -69,8 +62,7 @@ public class PackageInstallationServiceTests
     }
 
     [Fact]
-    public async Task GetUserInstallationsAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetUserInstallationsAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var userId = Guid.NewGuid();
 
@@ -80,8 +72,7 @@ public class PackageInstallationServiceTests
     }
 
     [Fact]
-    public async Task GetPackageDownloadStatsAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetPackageDownloadStatsAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var packageId = Guid.NewGuid();
 
@@ -91,8 +82,7 @@ public class PackageInstallationServiceTests
     }
 
     [Fact]
-    public async Task GetInstallationAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetInstallationAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var installationId = Guid.NewGuid();
         var userId = Guid.NewGuid();
@@ -103,8 +93,7 @@ public class PackageInstallationServiceTests
     }
 
     [Fact]
-    public async Task IsPackageInstalledAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task IsPackageInstalledAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var packageId = Guid.NewGuid();
         var userId = Guid.NewGuid();
@@ -115,8 +104,7 @@ public class PackageInstallationServiceTests
     }
 
     [Fact]
-    public async Task ValidatePackageAvailabilityAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task ValidatePackageAvailabilityAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var packageId = Guid.NewGuid();
         const string version = "1.0.0";
@@ -127,12 +115,10 @@ public class PackageInstallationServiceTests
     }
 
     [Fact]
-    public async Task GetInstallationStatsAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetInstallationStatsAsync_WhenCalled_ThrowsNotImplementedException() =>
         // Arrange & Act & Assert
         await Assert.ThrowsAsync<NotImplementedException>(() =>
             _service.GetInstallationStatsAsync());
-    }
 
     // TODO: When implementation is added, replace these tests with actual behavior tests:
     // - Test successful download recording with valid parameters

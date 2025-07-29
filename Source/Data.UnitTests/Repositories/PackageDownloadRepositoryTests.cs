@@ -7,21 +7,18 @@ namespace MCPHub.Data.UnitTests.Repositories;
 /// <summary>
 /// Unit tests for PackageDownloadRepository
 /// </summary>
-public class PackageDownloadRepositoryTests : IDisposable
-{
+public class PackageDownloadRepositoryTests : IDisposable {
     private readonly McpHubContext _context;
     private readonly IPackageDownloadRepository _repository;
 
-    public PackageDownloadRepositoryTests()
-    {
+    public PackageDownloadRepositoryTests() {
         // TODO: Replace with proper test database setup when implementation is ready
         _context = null!; // Placeholder for in-memory database context
         _repository = new PackageDownloadRepository(_context);
     }
 
     [Fact]
-    public async Task GetByPackageIdAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetByPackageIdAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var packageId = Guid.NewGuid();
 
@@ -31,8 +28,7 @@ public class PackageDownloadRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task GetByPackageVersionAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetByPackageVersionAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var packageId = Guid.NewGuid();
         const string version = "1.0.0";
@@ -43,8 +39,7 @@ public class PackageDownloadRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task GetByUserIdAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetByUserIdAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var userId = Guid.NewGuid();
 
@@ -54,8 +49,7 @@ public class PackageDownloadRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task GetDownloadCountAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetDownloadCountAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var packageId = Guid.NewGuid();
 
@@ -65,8 +59,7 @@ public class PackageDownloadRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task GetUniqueDownloadCountAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetUniqueDownloadCountAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var packageId = Guid.NewGuid();
 
@@ -76,8 +69,7 @@ public class PackageDownloadRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task GetDownloadsInDateRangeAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetDownloadsInDateRangeAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var packageId = Guid.NewGuid();
         var startDate = DateTimeOffset.UtcNow.AddDays(-30);
@@ -89,8 +81,7 @@ public class PackageDownloadRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task GetDownloadsByVersionAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetDownloadsByVersionAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var packageId = Guid.NewGuid();
 
@@ -100,8 +91,7 @@ public class PackageDownloadRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task GetDownloadsByMethodAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetDownloadsByMethodAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var packageId = Guid.NewGuid();
 
@@ -111,8 +101,7 @@ public class PackageDownloadRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task GetDownloadsByDayAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetDownloadsByDayAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var packageId = Guid.NewGuid();
 
@@ -122,8 +111,7 @@ public class PackageDownloadRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task GetMostRecentDownloadAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task GetMostRecentDownloadAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var packageId = Guid.NewGuid();
 
@@ -133,8 +121,7 @@ public class PackageDownloadRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task HasRecentDownloadFromIpAsync_WhenCalled_ThrowsNotImplementedException()
-    {
+    public async Task HasRecentDownloadFromIpAsync_WhenCalled_ThrowsNotImplementedException() {
         // Arrange
         var packageId = Guid.NewGuid();
         const string ipAddress = "192.168.1.1";
@@ -144,10 +131,7 @@ public class PackageDownloadRepositoryTests : IDisposable
             _repository.HasRecentDownloadFromIpAsync(packageId, ipAddress));
     }
 
-    public void Dispose()
-    {
-        _context?.Dispose();
-    }
+    public void Dispose() => _context?.Dispose();
 
     // TODO: When implementation is added, replace these tests with actual behavior tests:
     // - Test download retrieval by package ID with valid and empty results

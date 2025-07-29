@@ -5,8 +5,7 @@ namespace MCPHub.Domain.Contracts.Requests;
 /// <summary>
 /// Request model for publishing a new MCP package
 /// </summary>
-public class PublishRequest
-{
+public class PublishRequest {
     /// <summary>
     /// Package manifest content (mcp-manifest.json)
     /// </summary>
@@ -46,8 +45,5 @@ public class PublishRequest
     /// <summary>
     /// Validates that either PackageArchive or PackageUrl is provided
     /// </summary>
-    public bool IsValid()
-    {
-        return PackageArchive?.Length > 0 || !string.IsNullOrWhiteSpace(PackageUrl);
-    }
+    public bool IsValid() => PackageArchive?.Length > 0 || !string.IsNullOrWhiteSpace(PackageUrl);
 }

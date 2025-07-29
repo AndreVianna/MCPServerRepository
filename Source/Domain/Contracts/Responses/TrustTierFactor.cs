@@ -3,8 +3,7 @@ namespace MCPHub.Domain.Contracts.Responses;
 /// <summary>
 /// Represents a specific factor that contributes to trust tier calculation
 /// </summary>
-public class TrustTierFactor
-{
+public class TrustTierFactor {
     /// <summary>
     /// Gets or sets the name of the trust factor
     /// </summary>
@@ -64,8 +63,7 @@ public class TrustTierFactor
 /// <summary>
 /// Represents the status of a trust tier factor
 /// </summary>
-public enum FactorStatus
-{
+public enum FactorStatus {
     /// <summary>
     /// Factor status is unknown or not yet evaluated
     /// </summary>
@@ -95,8 +93,7 @@ public enum FactorStatus
 /// <summary>
 /// Represents the impact level of a trust tier factor
 /// </summary>
-public enum FactorImpact
-{
+public enum FactorImpact {
     /// <summary>
     /// Low impact on overall trust score
     /// </summary>

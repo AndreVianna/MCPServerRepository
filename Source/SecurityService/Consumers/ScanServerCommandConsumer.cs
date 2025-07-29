@@ -16,6 +16,6 @@ public class ScanServerCommandConsumer(
     /// <summary>
     /// Processes a ScanServerCommand message
     /// </summary>
-    public Task ConsumeAsync(ScanServerCommand message, CancellationToken cancellationToken = default) 
+    public Task ConsumeAsync(ScanServerCommand message, CancellationToken cancellationToken = default)
         => throw new NotImplementedException("Security scanning command processing will be implemented when security infrastructure is available");
 }

@@ -1,7 +1,8 @@
 ﻿using System.Text.Json;
+
+using MCPHub.Domain.Common;
 using MCPHub.Domain.Entities;
 using MCPHub.Domain.ValueObjects;
-using MCPHub.Domain.Common;
 
 namespace MCPHub.Data.Configurations;
 
@@ -31,7 +32,6 @@ public class ServerVersionConfiguration : IEntityTypeConfiguration<ServerVersion
             .IsRequired()
             .HasConversion<string>();
 
-
         builder.Property(v => v.SecurityScan)
             .HasConversion(
                 v => v == null ? null : JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
@@ -45,7 +45,6 @@ public class ServerVersionConfiguration : IEntityTypeConfiguration<ServerVersion
         builder.HasIndex(v => v.ServerId);
 
         builder.HasIndex(v => v.Status);
-
 
         // Configure AuditTrail as JSON column
         builder.OwnsMany(v => v.AuditTrail, auditBuilder => {

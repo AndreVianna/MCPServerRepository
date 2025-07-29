@@ -1,7 +1,8 @@
 using System.Text.Json;
+
+using MCPHub.Domain.Common;
 using MCPHub.Domain.Entities;
 using MCPHub.Domain.ValueObjects;
-using MCPHub.Domain.Common;
 
 namespace MCPHub.Data.Configurations;
 
@@ -45,7 +46,6 @@ public class PackageConfiguration : IEntityTypeConfiguration<Package> {
                     c => c.ToList()))
             .HasColumnType("jsonb");
 
-
         // Indexes
         builder.HasIndex(p => p.Name)
             .IsUnique();
@@ -55,7 +55,6 @@ public class PackageConfiguration : IEntityTypeConfiguration<Package> {
         builder.HasIndex(p => p.Status);
 
         builder.HasIndex(p => p.TrustTier);
-
 
         // Full-text search index for PostgreSQL
         builder.HasIndex(p => new { p.Name, p.Description })

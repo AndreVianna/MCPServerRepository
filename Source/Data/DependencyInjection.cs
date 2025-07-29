@@ -6,14 +6,13 @@ using MCPHub.Data.Repositories;
 using MCPHub.Domain.Entities;
 using MCPHub.Domain.Repositories;
 
-
 namespace MCPHub.Data;
 
 public static class DependencyInjection {
     public static IServiceCollection AddDataServices(this IServiceCollection services, IConfiguration configuration) {
         // Add database configuration
         services.AddDatabaseConfiguration(configuration);
-        
+
         // Get database options from configuration
         var databaseOptions = configuration.GetSection(DatabaseOptions.SectionName).Get<DatabaseOptions>()
             ?? throw new InvalidOperationException("Database configuration not found.");
@@ -22,8 +21,8 @@ public static class DependencyInjection {
             options.UseNpgsql(databaseOptions.ConnectionString, npgsqlOptions => {
                 npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                 npgsqlOptions.EnableRetryOnFailure(
-                    maxRetryCount: databaseOptions.MaxRetryCount, 
-                    maxRetryDelay: TimeSpan.FromSeconds(5), 
+                    maxRetryCount: databaseOptions.MaxRetryCount,
+                    maxRetryDelay: TimeSpan.FromSeconds(5),
                     errorCodesToAdd: null);
                 npgsqlOptions.CommandTimeout((int)databaseOptions.CommandTimeout.TotalSeconds);
             })
@@ -47,6 +46,8 @@ public static class DependencyInjection {
         services.AddScoped<PackageVersionRepository>();
         services.AddScoped<SecurityScanRepository>();
         services.AddScoped<TrustTierHistoryRepository>();
+        services.AddScoped<PackageDownloadRepository>();
+        services.AddScoped<PackageInstallationRepository>();
 
         // Register repository interfaces with cached decorators
         services.AddScoped<IApplicationUserRepository, ApplicationUserRepository>();
@@ -61,6 +62,8 @@ public static class DependencyInjection {
         services.AddScoped<IPackageVersionRepository, PackageVersionRepository>();
         services.AddScoped<ISecurityScanRepository, SecurityScanRepository>();
         services.AddScoped<ITrustTierHistoryRepository, TrustTierHistoryRepository>();
+        services.AddScoped<IPackageDownloadRepository, PackageDownloadRepository>();
+        services.AddScoped<IPackageInstallationRepository, PackageInstallationRepository>();
 
         return services;
     }

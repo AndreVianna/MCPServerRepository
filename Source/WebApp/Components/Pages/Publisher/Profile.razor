@@ -1,0 +1,1187 @@
+@page "/publisher/profile"
+@using MCPHub.WebApp.Services
+@using MCPHub.WebApp.Components.UI.Layout
+@using MCPHub.WebApp.Components.UI.Security
+@using MCPHub.Domain.Entities
+@using MudBlazor
+@using Microsoft.AspNetCore.Authorization
+@inject IPublisherProfileService ProfileService
+@inject ISnackbar Snackbar
+@inject ILogger<Profile> Logger
+@attribute [Authorize]
+
+<PageTitle>Publisher Profile - MCP Hub</PageTitle>
+
+<ResponsiveContainer MaxWidth="ContainerMaxWidth.Large" FullHeight="true">
+    <HeaderContent>
+        <div class="profile-header">
+            <div class="header-title mb-4">
+                <MudText Typo="Typo.h4">👤 Publisher Profile</MudText>
+                <MudText Typo="Typo.body1" Color="Color.Secondary">
+                    Manage your publisher profile and verification status
+                </MudText>
+            </div>
+        </div>
+    </HeaderContent>
+
+    <MainContent>
+        @if (_isLoading)
+        {
+            <div class="profile-loading">
+                <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mb-4" />
+                <MudGrid Spacing="3">
+                    <MudItem xs="12" md="4">
+                        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="300px" />
+                    </MudItem>
+                    <MudItem xs="12" md="8">
+                        <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="400px" />
+                    </MudItem>
+                </MudGrid>
+            </div>
+        }
+        else
+        {
+            <MudGrid Spacing="4">
+                <!-- Publisher Overview Card -->
+                <MudItem xs="12" md="4">
+                    <MudCard Class="publisher-overview-card" Elevation="2">
+                        <MudCardContent Class="text-center pa-6">
+                            <div class="publisher-avatar mb-4">
+                                <MudAvatar Size="Size.Large" 
+                                           Color="Color.Primary"
+                                           Style="width: 100px; height: 100px; font-size: 2rem;">
+                                    @GetAvatarInitials()
+                                </MudAvatar>
+                                <MudButton Variant="Variant.Text" 
+                                           Size="Size.Small" 
+                                           StartIcon="Icons.Material.Filled.Edit"
+                                           Class="mt-2"
+                                           @onclick="ChangeAvatar">
+                                    Change Avatar
+                                </MudButton>
+                            </div>
+
+                            <MudText Typo="Typo.h5" Class="mb-2">
+                                @_profile?.DisplayName
+                            </MudText>
+                            
+                            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
+                                @_profile?.Username
+                            </MudText>
+
+                            <!-- Verification Status -->
+                            <div class="verification-status mb-4">
+                                <MudChip T="string" Size="Size.Medium"
+                                         Color="@GetVerificationColor()"
+                                         Icon="@GetVerificationIcon()"
+                                         Variant="Variant.Filled"
+                                         Class="verification-chip">
+                                    @GetVerificationText()
+                                </MudChip>
+                                
+                                @if (_profile?.VerificationStatus != VerificationStatus.Verified)
+                                {
+                                    <MudButton Variant="Variant.Text"
+                                               Color="Color.Primary"
+                                               Size="Size.Small"
+                                               StartIcon="Icons.Material.Filled.VerifiedUser"
+                                               Class="mt-2"
+                                               @onclick="StartVerification">
+                                        Start Verification
+                                    </MudButton>
+                                }
+                            </div>
+
+                            <!-- Trust Tier -->
+                            <div class="trust-tier mb-4">
+                                <MudText Typo="Typo.subtitle2" Class="mb-2">Trust Tier</MudText>
+                                <MudChip T="string" Size="Size.Large"
+                                         Color="@GetTrustTierColor()"
+                                         Variant="Variant.Filled">
+                                    @_profile?.TrustTier
+                                </MudChip>
+                                <MudProgressLinear Value="@GetTrustTierProgress()" 
+                                                   Color="@GetTrustTierColor()" 
+                                                   Size="Size.Small"
+                                                   Class="mt-2" />
+                                <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-1">
+                                    @_profile?.TrustScore points
+                                </MudText>
+                            </div>
+
+                            <!-- Quick Stats -->
+                            <div class="quick-stats">
+                                <MudGrid Spacing="1">
+                                    <MudItem xs="4">
+                                        <div class="stat-item text-center">
+                                            <MudText Typo="Typo.h6">@_profile?.TotalPackages</MudText>
+                                            <MudText Typo="Typo.caption" Color="Color.Secondary">Packages</MudText>
+                                        </div>
+                                    </MudItem>
+                                    <MudItem xs="4">
+                                        <div class="stat-item text-center">
+                                            <MudText Typo="Typo.h6">@FormatNumber(_profile?.TotalDownloads ?? 0)</MudText>
+                                            <MudText Typo="Typo.caption" Color="Color.Secondary">Downloads</MudText>
+                                        </div>
+                                    </MudItem>
+                                    <MudItem xs="4">
+                                        <div class="stat-item text-center">
+                                            <MudText Typo="Typo.h6">@_profile?.AverageRating.ToString("F1")</MudText>
+                                            <MudText Typo="Typo.caption" Color="Color.Secondary">Rating</MudText>
+                                        </div>
+                                    </MudItem>
+                                </MudGrid>
+                            </div>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+
+                <!-- Profile Settings -->
+                <MudItem xs="12" md="8">
+                    <MudTabs Elevation="2" 
+                             Rounded="true" 
+                             PanelClass="pa-4"
+                             @bind-ActivePanelIndex="_activeTabIndex">
+                        
+                        <!-- Basic Information Tab -->
+                        <MudTabPanel Text="Basic Info" Icon="Icons.Material.Filled.Person">
+                            <MudForm @ref="_basicInfoForm" @bind-IsValid="_isBasicInfoValid">
+                                <MudGrid Spacing="3">
+                                    <MudItem xs="12" sm="6">
+                                        <MudTextField @bind-Value="_profile.DisplayName"
+                                                      Label="Display Name"
+                                                      Variant="Variant.Outlined"
+                                                      Required="true"
+                                                      RequiredError="Display name is required"
+                                                      MaxLength="100" />
+                                    </MudItem>
+
+                                    <MudItem xs="12" sm="6">
+                                        <MudTextField @bind-Value="_profile.Username"
+                                                      Label="Username"
+                                                      Variant="Variant.Outlined"
+                                                      Required="true"
+                                                      RequiredError="Username is required"
+                                                      MaxLength="50"
+                                                      HelperText="Username cannot be changed after verification" />
+                                    </MudItem>
+
+                                    <MudItem xs="12">
+                                        <MudTextField @bind-Value="_profile.Email"
+                                                      Label="Email Address"
+                                                      Variant="Variant.Outlined"
+                                                      InputType="InputType.Email"
+                                                      Required="true"
+                                                      RequiredError="Email is required" />
+                                    </MudItem>
+
+                                    <MudItem xs="12">
+                                        <MudTextField @bind-Value="_profile.Bio"
+                                                      Label="Biography"
+                                                      Variant="Variant.Outlined"
+                                                      Lines="3"
+                                                      MaxLength="500"
+                                                      HelperText="Tell users about yourself and your packages" />
+                                    </MudItem>
+
+                                    <MudItem xs="12" sm="6">
+                                        <MudTextField @bind-Value="_profile.Website"
+                                                      Label="Website"
+                                                      Variant="Variant.Outlined"
+                                                      InputType="InputType.Url"
+                                                      HelperText="Your personal or company website" />
+                                    </MudItem>
+
+                                    <MudItem xs="12" sm="6">
+                                        <MudTextField @bind-Value="_profile.GitHubProfile"
+                                                      Label="GitHub Profile"
+                                                      Variant="Variant.Outlined"
+                                                      HelperText="Link to your GitHub profile" />
+                                    </MudItem>
+
+                                    <MudItem xs="12">
+                                        <div class="form-actions d-flex justify-end gap-2">
+                                            <MudButton Variant="Variant.Text" 
+                                                       @onclick="ResetBasicInfo">
+                                                Reset
+                                            </MudButton>
+                                            <MudButton Variant="Variant.Filled" 
+                                                       Color="Color.Primary"
+                                                       @onclick="SaveBasicInfo"
+                                                       Disabled="!_isBasicInfoValid || _isSaving">
+                                                @if (_isSaving)
+                                                {
+                                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                                                    <span class="ml-2">Saving...</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>Save Changes</span>
+                                                }
+                                            </MudButton>
+                                        </div>
+                                    </MudItem>
+                                </MudGrid>
+                            </MudForm>
+                        </MudTabPanel>
+
+                        <!-- Security Settings Tab -->
+                        <MudTabPanel Text="Security" Icon="Icons.Material.Filled.Security">
+                            <div class="security-settings">
+                                <!-- Two-Factor Authentication -->
+                                <MudCard Class="security-card mb-4" Elevation="1">
+                                    <MudCardContent Class="pa-4">
+                                        <div class="security-setting d-flex justify-space-between align-center">
+                                            <div class="setting-info">
+                                                <MudText Typo="Typo.h6" Class="mb-1">
+                                                    Two-Factor Authentication
+                                                </MudText>
+                                                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                                    Add an extra layer of security to your account
+                                                </MudText>
+                                                @if (_profile?.TwoFactorEnabled == true)
+                                                {
+                                                    <MudChip T="string" Size="Size.Small" 
+                                                             Color="Color.Success" 
+                                                             Icon="Icons.Material.Filled.CheckCircle"
+                                                             Class="mt-2">
+                                                        Enabled
+                                                    </MudChip>
+                                                }
+                                            </div>
+                                            <div class="setting-controls">
+                                                @if (_profile?.TwoFactorEnabled == true)
+                                                {
+                                                    <MudButton Variant="Variant.Outlined"
+                                                               Color="Color.Secondary"
+                                                               @onclick="DisableTwoFactor">
+                                                        Disable
+                                                    </MudButton>
+                                                }
+                                                else
+                                                {
+                                                    <MudButton Variant="Variant.Filled"
+                                                               Color="Color.Success"
+                                                               @onclick="EnableTwoFactor">
+                                                        Enable 2FA
+                                                    </MudButton>
+                                                }
+                                            </div>
+                                        </div>
+                                    </MudCardContent>
+                                </MudCard>
+
+                                <!-- API Keys -->
+                                <MudCard Class="security-card mb-4" Elevation="1">
+                                    <MudCardContent Class="pa-4">
+                                        <div class="api-keys-section">
+                                            <div class="section-header d-flex justify-space-between align-center mb-3">
+                                                <div>
+                                                    <MudText Typo="Typo.h6" Class="mb-1">API Keys</MudText>
+                                                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                                        Manage API keys for package publishing
+                                                    </MudText>
+                                                </div>
+                                                <MudButton Variant="Variant.Filled"
+                                                           Color="Color.Primary"
+                                                           StartIcon="Icons.Material.Filled.Add"
+                                                           Size="Size.Small"
+                                                           @onclick="CreateApiKey">
+                                                    New API Key
+                                                </MudButton>
+                                            </div>
+
+                                            @if (_apiKeys?.Any() == true)
+                                            {
+                                                @foreach (var apiKey in _apiKeys)
+                                                {
+                                                    <div class="api-key-item d-flex justify-space-between align-center pa-3 mb-2"
+                                                         style="background-color: var(--mud-palette-background-grey); border-radius: 8px;">
+                                                        <div class="api-key-info">
+                                                            <MudText Typo="Typo.body2" Class="font-weight-bold">
+                                                                @apiKey.Name
+                                                            </MudText>
+                                                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                                                Created @apiKey.CreatedAt.ToString("MMM dd, yyyy") • 
+                                                                Last used @(apiKey.LastUsed?.ToString("MMM dd, yyyy") ?? "Never")
+                                                            </MudText>
+                                                        </div>
+                                                        <div class="api-key-actions d-flex gap-2">
+                                                            <MudIconButton Icon="Icons.Material.Filled.ContentCopy"
+                                                                           Size="Size.Small"
+                                                                           Color="Color.Primary"
+                                                                           Title="Copy Key"
+                                                                           @onclick="@(() => CopyApiKey(apiKey))" />
+                                                            <MudIconButton Icon="Icons.Material.Filled.Delete"
+                                                                           Size="Size.Small"
+                                                                           Color="Color.Error"
+                                                                           Title="Delete Key"
+                                                                           @onclick="@(() => DeleteApiKey(apiKey))" />
+                                                        </div>
+                                                    </div>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <MudAlert Severity="Severity.Info" Class="mb-3">
+                                                    No API keys created yet. Create an API key to publish packages programmatically.
+                                                </MudAlert>
+                                            }
+                                        </div>
+                                    </MudCardContent>
+                                </MudCard>
+
+                                <!-- Password Change -->
+                                <MudCard Class="security-card" Elevation="1">
+                                    <MudCardContent Class="pa-4">
+                                        <MudText Typo="Typo.h6" Class="mb-3">Change Password</MudText>
+                                        <MudForm @ref="_passwordForm" @bind-IsValid="_isPasswordValid">
+                                            <MudGrid Spacing="3">
+                                                <MudItem xs="12">
+                                                    <MudTextField @bind-Value="_currentPassword"
+                                                                  Label="Current Password"
+                                                                  Variant="Variant.Outlined"
+                                                                  InputType="InputType.Password"
+                                                                  Required="true"
+                                                                  RequiredError="Current password is required" />
+                                                </MudItem>
+                                                <MudItem xs="12" sm="6">
+                                                    <MudTextField @bind-Value="_newPassword"
+                                                                  Label="New Password"
+                                                                  Variant="Variant.Outlined"
+                                                                  InputType="InputType.Password"
+                                                                  Required="true"
+                                                                  RequiredError="New password is required" />
+                                                </MudItem>
+                                                <MudItem xs="12" sm="6">
+                                                    <MudTextField @bind-Value="_confirmPassword"
+                                                                  Label="Confirm New Password"
+                                                                  Variant="Variant.Outlined"
+                                                                  InputType="InputType.Password"
+                                                                  Required="true"
+                                                                  RequiredError="Password confirmation is required" />
+                                                </MudItem>
+                                                <MudItem xs="12">
+                                                    <MudButton Variant="Variant.Filled"
+                                                               Color="Color.Primary"
+                                                               @onclick="ChangePassword"
+                                                               Disabled="!_isPasswordValid || _isChangingPassword">
+                                                        @if (_isChangingPassword)
+                                                        {
+                                                            <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                                                            <span class="ml-2">Changing Password...</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>Change Password</span>
+                                                        }
+                                                    </MudButton>
+                                                </MudItem>
+                                            </MudGrid>
+                                        </MudForm>
+                                    </MudCardContent>
+                                </MudCard>
+                            </div>
+                        </MudTabPanel>
+
+                        <!-- Verification Tab -->
+                        <MudTabPanel Text="Verification" Icon="Icons.Material.Filled.VerifiedUser">
+                            <div class="verification-section">
+                                @if (_profile?.VerificationStatus == VerificationStatus.Verified)
+                                {
+                                    <MudAlert Severity="Severity.Success" Class="mb-4">
+                                        <div class="d-flex align-center">
+                                            <MudIcon Icon="Icons.Material.Filled.CheckCircle" Class="mr-2" />
+                                            <div>
+                                                <MudText Typo="Typo.body1" Class="font-weight-bold">
+                                                    Your publisher account is verified!
+                                                </MudText>
+                                                <MudText Typo="Typo.body2">
+                                                    Verified on @_profile.VerifiedAt?.ToString("MMMM dd, yyyy")
+                                                </MudText>
+                                            </div>
+                                        </div>
+                                    </MudAlert>
+                                }
+                                else
+                                {
+                                    <MudCard Class="verification-progress-card mb-4" Elevation="1">
+                                        <MudCardContent Class="pa-4">
+                                            <MudText Typo="Typo.h6" Class="mb-3">Verification Progress</MudText>
+                                            
+                                            <div class="verification-steps">
+                                                @foreach (var step in GetVerificationSteps())
+                                                {
+                                                    <div class="verification-step d-flex align-center mb-3">
+                                                        <MudIcon Icon="@(step.IsCompleted ? Icons.Material.Filled.CheckCircle : Icons.Material.Outlined.Circle)"
+                                                                 Color="@(step.IsCompleted ? Color.Success : Color.Secondary)"
+                                                                 Size="Size.Medium"
+                                                                 Class="mr-3" />
+                                                        <div class="flex-grow-1">
+                                                            <MudText Typo="Typo.body1" Class="@(step.IsCompleted ? "font-weight-bold" : "")">
+                                                                @step.Title
+                                                            </MudText>
+                                                            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                                                @step.Description
+                                                            </MudText>
+                                                        </div>
+                                                        @if (!step.IsCompleted && !string.IsNullOrEmpty(step.ActionText))
+                                                        {
+                                                            <MudButton Variant="Variant.Text"
+                                                                       Color="Color.Primary"
+                                                                       Size="Size.Small"
+                                                                       @onclick="@(() => HandleVerificationAction(step.ActionType))">
+                                                                @step.ActionText
+                                                            </MudButton>
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
+
+                                            <MudProgressLinear Value="@GetVerificationProgress()" 
+                                                               Color="Color.Primary" 
+                                                               Size="Size.Medium"
+                                                               Class="mt-4" />
+                                            <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-2">
+                                                @GetCompletedStepsCount() of @GetVerificationSteps().Count() steps completed
+                                            </MudText>
+                                        </MudCardContent>
+                                    </MudCard>
+                                }
+
+                                <!-- Verification Benefits -->
+                                <MudCard Class="verification-benefits-card" Elevation="1">
+                                    <MudCardContent Class="pa-4">
+                                        <MudText Typo="Typo.h6" Class="mb-3">Verification Benefits</MudText>
+                                        <MudList T="object">
+                                            <MudListItem T="object" Icon="Icons.Material.Filled.Verified" IconColor="Color.Success">
+                                                <div>
+                                                    <MudText Typo="Typo.body2" Class="font-weight-bold">Verified Badge</MudText>
+                                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Display verified status on your packages</MudText>
+                                                </div>
+                                            </MudListItem>
+                                            <MudListItem T="object" Icon="Icons.Material.Filled.TrendingUp" IconColor="Color.Primary">
+                                                <div>
+                                                    <MudText Typo="Typo.body2" Class="font-weight-bold">Higher Trust Tier</MudText>
+                                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Qualify for Trusted and Enterprise tiers</MudText>
+                                                </div>
+                                            </MudListItem>
+                                            <MudListItem T="object" Icon="Icons.Material.Filled.Search" IconColor="Color.Info">
+                                                <div>
+                                                    <MudText Typo="Typo.body2" Class="font-weight-bold">Better Discovery</MudText>
+                                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Priority placement in search results</MudText>
+                                                </div>
+                                            </MudListItem>
+                                            <MudListItem T="object" Icon="Icons.Material.Filled.Support" IconColor="Color.Warning">
+                                                <div>
+                                                    <MudText Typo="Typo.body2" Class="font-weight-bold">Priority Support</MudText>
+                                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Faster response times for support requests</MudText>
+                                                </div>
+                                            </MudListItem>
+                                        </MudList>
+                                    </MudCardContent>
+                                </MudCard>
+                            </div>
+                        </MudTabPanel>
+
+                        <!-- Notifications Tab -->
+                        <MudTabPanel Text="Notifications" Icon="Icons.Material.Filled.Notifications">
+                            <div class="notification-settings">
+                                <MudText Typo="Typo.h6" Class="mb-4">Notification Preferences</MudText>
+                                
+                                @foreach (var category in GetNotificationCategories())
+                                {
+                                    <MudCard Class="notification-category mb-3" Elevation="1">
+                                        <MudCardContent Class="pa-4">
+                                            <MudText Typo="Typo.subtitle1" Class="mb-3">@category.Name</MudText>
+                                            
+                                            @foreach (var setting in category.Settings)
+                                            {
+                                                <div class="notification-setting d-flex justify-space-between align-center mb-2">
+                                                    <div class="setting-info">
+                                                        <MudText Typo="Typo.body2">@setting.Name</MudText>
+                                                        <MudText Typo="Typo.caption" Color="Color.Secondary">@setting.Description</MudText>
+                                                    </div>
+                                                    <div class="setting-controls d-flex gap-2">
+                                                        <MudSwitch @bind-Value="setting.EmailEnabled" 
+                                                                   Label="Email" 
+                                                                   Color="Color.Primary" 
+                                                                   Size="Size.Small" />
+                                                        <MudSwitch @bind-Value="setting.PushEnabled" 
+                                                                   Label="Push" 
+                                                                   Color="Color.Primary" 
+                                                                   Size="Size.Small" />
+                                                    </div>
+                                                </div>
+                                            }
+                                        </MudCardContent>
+                                    </MudCard>
+                                }
+
+                                <div class="notification-actions mt-4">
+                                    <MudButton Variant="Variant.Filled"
+                                               Color="Color.Primary"
+                                               @onclick="SaveNotificationSettings"
+                                               Disabled="_isSavingNotifications">
+                                        @if (_isSavingNotifications)
+                                        {
+                                            <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                                            <span class="ml-2">Saving...</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Save Notification Settings</span>
+                                        }
+                                    </MudButton>
+                                </div>
+                            </div>
+                        </MudTabPanel>
+                    </MudTabs>
+                </MudItem>
+            </MudGrid>
+        }
+    </MainContent>
+</ResponsiveContainer>
+
+@code {
+    private bool _isLoading = true;
+    private int _activeTabIndex = 0;
+    
+    private PublisherProfile? _profile;
+    private IEnumerable<ApiKey>? _apiKeys;
+    
+    // Form states
+    private MudForm? _basicInfoForm;
+    private MudForm? _passwordForm;
+    private bool _isBasicInfoValid;
+    private bool _isPasswordValid;
+    private bool _isSaving;
+    private bool _isChangingPassword;
+    private bool _isSavingNotifications;
+    
+    // Password fields
+    private string _currentPassword = string.Empty;
+    private string _newPassword = string.Empty;
+    private string _confirmPassword = string.Empty;
+
+    [Inject] private NavigationManager Navigation { get; set; } = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProfileData();
+    }
+
+    private async Task LoadProfileData()
+    {
+        try
+        {
+            _isLoading = true;
+            StateHasChanged();
+
+            var publisherId = Guid.NewGuid(); // TODO: Get from authentication context
+            var serviceProfile = await ProfileService.GetPublisherProfileAsync(publisherId);
+            var serviceApiKeys = await ProfileService.GetApiKeysAsync(publisherId);
+            
+            // Map service models to component models
+            _profile = MapServiceProfileToComponentProfile(serviceProfile);
+            _apiKeys = MapServiceApiKeysToComponentApiKeys(serviceApiKeys);
+        }
+        catch (NotImplementedException)
+        {
+            // Generate mock data for development
+            GenerateMockProfileData();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading profile data");
+            Snackbar.Add("Failed to load profile data", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void GenerateMockProfileData()
+    {
+        _profile = new PublisherProfile
+        {
+            Id = Guid.NewGuid(),
+            DisplayName = "John Developer",
+            Username = "john.dev",
+            Email = "john@example.com",
+            Bio = "Passionate developer creating tools for the MCP ecosystem. Focused on AI integration and developer productivity.",
+            Website = "https://johndev.com",
+            GitHubProfile = "https://github.com/johndev",
+            VerificationStatus = VerificationStatus.Pending,
+            TrustTier = TrustTier.Verified,
+            TrustScore = 750,
+            TotalPackages = 5,
+            TotalDownloads = 128500,
+            AverageRating = 4.6,
+            TwoFactorEnabled = false,
+            CreatedAt = DateTime.UtcNow.AddMonths(-8)
+        };
+
+        _apiKeys = new[]
+        {
+            new ApiKey { Id = Guid.NewGuid(), Name = "CI/CD Pipeline", CreatedAt = DateTime.UtcNow.AddMonths(-2), LastUsed = DateTime.UtcNow.AddDays(-1) },
+            new ApiKey { Id = Guid.NewGuid(), Name = "Development Publishing", CreatedAt = DateTime.UtcNow.AddDays(-21), LastUsed = DateTime.UtcNow.AddDays(-7) }
+        };
+    }
+
+    private string GetAvatarInitials()
+    {
+        if (string.IsNullOrEmpty(_profile?.DisplayName)) return "U";
+        
+        var names = _profile.DisplayName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (names.Length >= 2)
+            return $"{names[0][0]}{names[1][0]}".ToUpper();
+        
+        return names[0][0].ToString().ToUpper();
+    }
+
+    private Color GetVerificationColor()
+    {
+        return _profile?.VerificationStatus switch
+        {
+            VerificationStatus.Verified => Color.Success,
+            VerificationStatus.Pending => Color.Warning,
+            VerificationStatus.Rejected => Color.Error,
+            _ => Color.Secondary
+        };
+    }
+
+    private string GetVerificationIcon()
+    {
+        return _profile?.VerificationStatus switch
+        {
+            VerificationStatus.Verified => Icons.Material.Filled.Verified,
+            VerificationStatus.Pending => Icons.Material.Filled.Schedule,
+            VerificationStatus.Rejected => Icons.Material.Filled.Error,
+            _ => Icons.Material.Filled.Help
+        };
+    }
+
+    private string GetVerificationText()
+    {
+        return _profile?.VerificationStatus switch
+        {
+            VerificationStatus.Verified => "Verified Publisher",
+            VerificationStatus.Pending => "Verification Pending",
+            VerificationStatus.Rejected => "Verification Rejected",
+            _ => "Not Verified"
+        };
+    }
+
+    private Color GetTrustTierColor()
+    {
+        return _profile?.TrustTier switch
+        {
+            TrustTier.Enterprise => Color.Success,
+            TrustTier.CommunityTrusted => Color.Primary,
+            TrustTier.Verified => Color.Info,
+            _ => Color.Secondary
+        };
+    }
+
+    private double GetTrustTierProgress()
+    {
+        return _profile?.TrustTier switch
+        {
+            TrustTier.Enterprise => 100,
+            TrustTier.CommunityTrusted => 75,
+            TrustTier.Verified => 50,
+            _ => 25
+        };
+    }
+
+    private string FormatNumber(long number)
+    {
+        return number switch
+        {
+            >= 1000000 => $"{number / 1000000.0:F1}M",
+            >= 1000 => $"{number / 1000.0:F1}K",
+            _ => number.ToString("N0")
+        };
+    }
+
+    private IEnumerable<VerificationStep> GetVerificationSteps()
+    {
+        return new[]
+        {
+            new VerificationStep { Title = "Email Verification", Description = "Verify your email address", IsCompleted = true },
+            new VerificationStep { Title = "Profile Completion", Description = "Complete your publisher profile", IsCompleted = _profile?.Bio?.Length > 50, ActionText = "Complete", ActionType = "profile" },
+            new VerificationStep { Title = "Package Publishing", Description = "Publish at least one package", IsCompleted = (_profile?.TotalPackages ?? 0) > 0, ActionText = "Publish", ActionType = "package" },
+            new VerificationStep { Title = "Identity Verification", Description = "Submit identity documents", IsCompleted = false, ActionText = "Upload", ActionType = "identity" },
+            new VerificationStep { Title = "Review Process", Description = "Manual review by MCP Hub team", IsCompleted = false }
+        };
+    }
+
+    private double GetVerificationProgress()
+    {
+        var steps = GetVerificationSteps();
+        var completedSteps = steps.Count(s => s.IsCompleted);
+        return (completedSteps / (double)steps.Count()) * 100;
+    }
+
+    private int GetCompletedStepsCount()
+    {
+        return GetVerificationSteps().Count(s => s.IsCompleted);
+    }
+
+    private IEnumerable<NotificationCategory> GetNotificationCategories()
+    {
+        return new[]
+        {
+            new NotificationCategory
+            {
+                Name = "Package Activity",
+                Settings = new[]
+                {
+                    new NotificationSetting { Name = "New Downloads", Description = "When someone downloads your packages", EmailEnabled = true, PushEnabled = false },
+                    new NotificationSetting { Name = "New Reviews", Description = "When someone reviews your packages", EmailEnabled = true, PushEnabled = true },
+                    new NotificationSetting { Name = "Package Issues", Description = "When issues are reported", EmailEnabled = true, PushEnabled = true }
+                }
+            },
+            new NotificationCategory
+            {
+                Name = "Security Alerts",
+                Settings = new[]
+                {
+                    new NotificationSetting { Name = "Security Scans", Description = "Results from security scans", EmailEnabled = true, PushEnabled = true },
+                    new NotificationSetting { Name = "Vulnerability Alerts", Description = "New vulnerabilities detected", EmailEnabled = true, PushEnabled = true },
+                    new NotificationSetting { Name = "Trust Tier Changes", Description = "Changes to your trust tier", EmailEnabled = true, PushEnabled = false }
+                }
+            },
+            new NotificationCategory
+            {
+                Name = "Account Updates",
+                Settings = new[]
+                {
+                    new NotificationSetting { Name = "Verification Status", Description = "Updates on verification process", EmailEnabled = true, PushEnabled = true },
+                    new NotificationSetting { Name = "Policy Changes", Description = "Updates to MCP Hub policies", EmailEnabled = true, PushEnabled = false },
+                    new NotificationSetting { Name = "Marketing Updates", Description = "Product updates and announcements", EmailEnabled = false, PushEnabled = false }
+                }
+            }
+        };
+    }
+
+    // Event handlers
+    private async Task SaveBasicInfo()
+    {
+        if (!_isBasicInfoValid) return;
+
+        try
+        {
+            _isSaving = true;
+            StateHasChanged();
+
+            var updateRequest = new ProfileUpdateRequest
+            {
+                DisplayName = _profile!.DisplayName,
+                Bio = _profile.Bio,
+                Website = _profile.Website
+            };
+            await ProfileService.UpdateProfileAsync(_profile.Id, updateRequest);
+            Snackbar.Add("Profile updated successfully", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error saving profile");
+            Snackbar.Add("Failed to save profile", Severity.Error);
+        }
+        finally
+        {
+            _isSaving = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ResetBasicInfo()
+    {
+        // TODO: Reset form to original values
+        Snackbar.Add("Form reset", Severity.Info);
+    }
+
+    private async Task ChangePassword()
+    {
+        if (!_isPasswordValid) return;
+
+        if (_newPassword != _confirmPassword)
+        {
+            Snackbar.Add("Passwords do not match", Severity.Error);
+            return;
+        }
+
+        try
+        {
+            _isChangingPassword = true;
+            StateHasChanged();
+
+            // TODO: Implement password change
+            await Task.Delay(1000); // Simulate API call
+            
+            Snackbar.Add("Password changed successfully", Severity.Success);
+            _currentPassword = _newPassword = _confirmPassword = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error changing password");
+            Snackbar.Add("Failed to change password", Severity.Error);
+        }
+        finally
+        {
+            _isChangingPassword = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task EnableTwoFactor()
+    {
+        // TODO: Implement 2FA setup
+        Snackbar.Add("Two-factor authentication setup coming soon", Severity.Info);
+    }
+
+    private async Task DisableTwoFactor()
+    {
+        // TODO: Implement 2FA disable
+        Snackbar.Add("Two-factor authentication disabled", Severity.Success);
+    }
+
+    private async Task CreateApiKey()
+    {
+        // TODO: Implement API key creation
+        Snackbar.Add("API key creation coming soon", Severity.Info);
+    }
+
+    private async Task CopyApiKey(ApiKey apiKey)
+    {
+        // TODO: Implement clipboard copy
+        Snackbar.Add($"API key '{apiKey.Name}' copied to clipboard", Severity.Success);
+    }
+
+    private async Task DeleteApiKey(ApiKey apiKey)
+    {
+        // TODO: Implement API key deletion with confirmation
+        Snackbar.Add($"API key '{apiKey.Name}' deleted", Severity.Success);
+    }
+
+    private async Task ChangeAvatar()
+    {
+        // TODO: Implement avatar change
+        Snackbar.Add("Avatar change coming soon", Severity.Info);
+    }
+
+    private async Task StartVerification()
+    {
+        _activeTabIndex = 2; // Switch to verification tab
+        Snackbar.Add("Complete the verification steps to get verified", Severity.Info);
+    }
+
+    private async Task HandleVerificationAction(string actionType)
+    {
+        switch (actionType)
+        {
+            case "profile":
+                _activeTabIndex = 0; // Switch to basic info tab
+                break;
+            case "package":
+                Navigation.NavigateTo("/publisher/packages/publish");
+                break;
+            case "identity":
+                Snackbar.Add("Identity verification coming soon", Severity.Info);
+                break;
+        }
+    }
+
+    private async Task SaveNotificationSettings()
+    {
+        try
+        {
+            _isSavingNotifications = true;
+            StateHasChanged();
+
+            // TODO: Implement notification settings save
+            await Task.Delay(1000); // Simulate API call
+            
+            Snackbar.Add("Notification settings saved", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error saving notification settings");
+            Snackbar.Add("Failed to save notification settings", Severity.Error);
+        }
+        finally
+        {
+            _isSavingNotifications = false;
+            StateHasChanged();
+        }
+    }
+
+    // Data classes for mock data
+    public enum VerificationStatus
+    {
+        NotStarted,
+        Pending,
+        Verified,
+        Rejected
+    }
+
+    private PublisherProfile MapServiceProfileToComponentProfile(Services.PublisherProfile serviceProfile)
+    {
+        return new PublisherProfile
+        {
+            Id = serviceProfile.Id,
+            DisplayName = serviceProfile.DisplayName,
+            Username = serviceProfile.Name, // Map Name to Username
+            Email = serviceProfile.Email,
+            Bio = serviceProfile.Bio ?? string.Empty,
+            Website = serviceProfile.Website ?? string.Empty,
+            GitHubProfile = serviceProfile.SocialLinks?.FirstOrDefault(s => s.Platform == SocialPlatform.GitHub)?.Url ?? string.Empty,
+            VerificationStatus = MapToVerificationStatus(serviceProfile.VerificationStatus.IsVerified),
+            TrustTier = serviceProfile.TrustTier,
+            TrustScore = CalculateTrustScore(serviceProfile.TrustTier),
+            TotalPackages = serviceProfile.Statistics.TotalPackages,
+            TotalDownloads = serviceProfile.Statistics.TotalDownloads,
+            AverageRating = serviceProfile.Statistics.AverageRating,
+            TwoFactorEnabled = false, // TODO: Get from security settings
+            CreatedAt = serviceProfile.CreatedAt
+        };
+    }
+
+    private IEnumerable<ApiKey> MapServiceApiKeysToComponentApiKeys(Services.ApiKeyInfo serviceApiKeys)
+    {
+        return serviceApiKeys.ApiKeys.Select(key => new ApiKey
+        {
+            Id = key.Id,
+            Name = key.Name,
+            CreatedAt = key.CreatedAt,
+            LastUsed = key.LastUsed
+        });
+    }
+
+    private VerificationStatus MapToVerificationStatus(bool isVerified)
+    {
+        return isVerified ? VerificationStatus.Verified : VerificationStatus.Pending;
+    }
+
+    private int CalculateTrustScore(TrustTier trustTier)
+    {
+        return trustTier switch
+        {
+            TrustTier.Enterprise => 900,
+            TrustTier.CommunityTrusted => 750,
+            TrustTier.Verified => 600,
+            _ => 300
+        };
+    }
+
+    public class PublisherProfile
+    {
+        public Guid Id { get; set; }
+        public string DisplayName { get; set; } = string.Empty;
+        public string Username { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Bio { get; set; } = string.Empty;
+        public string Website { get; set; } = string.Empty;
+        public string GitHubProfile { get; set; } = string.Empty;
+        public VerificationStatus VerificationStatus { get; set; }
+        public DateTime? VerifiedAt { get; set; }
+        public TrustTier TrustTier { get; set; }
+        public int TrustScore { get; set; }
+        public int TotalPackages { get; set; }
+        public long TotalDownloads { get; set; }
+        public double AverageRating { get; set; }
+        public bool TwoFactorEnabled { get; set; }
+        public DateTime CreatedAt { get; set; }
+    }
+
+    public class ApiKey
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; }
+        public DateTime? LastUsed { get; set; }
+    }
+
+    public class VerificationStep
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public bool IsCompleted { get; set; }
+        public string? ActionText { get; set; }
+        public string? ActionType { get; set; }
+    }
+
+    public class NotificationCategory
+    {
+        public string Name { get; set; } = string.Empty;
+        public IEnumerable<NotificationSetting> Settings { get; set; } = Array.Empty<NotificationSetting>();
+    }
+
+    public class NotificationSetting
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public bool EmailEnabled { get; set; }
+        public bool PushEnabled { get; set; }
+    }
+}
+
+<style>
+.profile-header {
+    margin-bottom: 24px;
+}
+
+.header-title h4 {
+    margin-bottom: 8px;
+}
+
+.profile-loading {
+    margin-bottom: 24px;
+}
+
+.publisher-overview-card {
+    height: fit-content;
+    border-radius: 12px;
+    border: 1px solid var(--mud-palette-divider);
+}
+
+.publisher-avatar {
+    position: relative;
+}
+
+.verification-status,
+.trust-tier {
+    margin-bottom: 24px;
+}
+
+.verification-chip {
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.quick-stats {
+    background-color: var(--mud-palette-background-grey);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.stat-item {
+    padding: 8px;
+}
+
+.security-settings {
+    max-width: 100%;
+}
+
+.security-card {
+    border-radius: 8px;
+    border: 1px solid var(--mud-palette-divider);
+}
+
+.security-setting {
+    width: 100%;
+}
+
+.api-key-item {
+    border: 1px solid var(--mud-palette-divider);
+}
+
+.verification-section {
+    max-width: 100%;
+}
+
+.verification-progress-card,
+.verification-benefits-card {
+    border-radius: 8px;
+    border: 1px solid var(--mud-palette-divider);
+}
+
+.verification-step {
+    padding: 8px 0;
+}
+
+.notification-settings {
+    max-width: 100%;
+}
+
+.notification-category {
+    border-radius: 8px;
+    border: 1px solid var(--mud-palette-divider);
+}
+
+.notification-setting {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--mud-palette-divider-light);
+}
+
+.notification-setting:last-child {
+    border-bottom: none;
+}
+
+.form-actions {
+    padding-top: 16px;
+    border-top: 1px solid var(--mud-palette-divider);
+}
+
+/* Responsive adjustments */
+@@media (max-width: 768px) {
+    .security-setting,
+    .notification-setting {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .setting-controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .api-key-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .api-key-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+@@media (max-width: 480px) {
+    .profile-header {
+        margin-bottom: 16px;
+    }
+    
+    .header-title h4 {
+        font-size: 1.5rem;
+    }
+    
+    .publisher-overview-card .mud-card-content {
+        padding: 24px 16px;
+    }
+    
+    .quick-stats {
+        padding: 12px;
+    }
+    
+    .verification-step {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}
+
+/* Dark theme adjustments */
+@@media (prefers-color-scheme: dark) {
+    .quick-stats,
+    .api-key-item {
+        background-color: rgba(255, 255, 255, 0.02);
+    }
+}
+</style>

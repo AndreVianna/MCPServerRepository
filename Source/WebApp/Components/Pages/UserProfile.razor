@@ -1,0 +1,266 @@
+@page "/profile"
+@page "/profile/{Tab}"
+@using Microsoft.AspNetCore.Authorization
+@using MCPHub.Domain.Contracts.Responses
+@using UserProfileDomain = MCPHub.Domain.Contracts.Responses.UserProfile
+@inject IUserProfileService ProfileService
+@inject ISecurityService SecurityService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@attribute [Authorize]
+
+<PageTitle>My Profile - MCP Hub</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-8">
+    <!-- Profile Header -->
+    <MudPaper Elevation="2" Class="pa-6 mb-6">
+        <MudGrid Spacing="4" AlignItems="Center">
+            <MudItem xs="12" sm="3" Class="text-center">
+                <div class="profile-avatar-section">
+                    <MudAvatar Size="Size.Large" 
+                              Style="width: 120px; height: 120px; font-size: 3rem;"
+                              Class="mb-4">
+                        @if (!string.IsNullOrEmpty(_userProfile?.AvatarUrl))
+                        {
+                            <MudImage Src="@_userProfile.AvatarUrl" Alt="Profile Avatar" />
+                        }
+                        else
+                        {
+                            @GetInitials()
+                        }
+                    </MudAvatar>
+                    
+                    <MudButton Variant="Variant.Outlined" 
+                              Size="Size.Small" 
+                              StartIcon="@Icons.Material.Filled.PhotoCamera"
+                              OnClick="@(() => _avatarUploadDialog = true)">
+                        Change Avatar
+                    </MudButton>
+                </div>
+            </MudItem>
+            <MudItem xs="12" sm="9">
+                <div class="profile-info">
+                    <MudText Typo="Typo.h4" Class="font-weight-bold mb-2">
+                        @(_userProfile?.DisplayName ?? _userProfile?.UserName ?? "Loading...")
+                    </MudText>
+                    <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-2">
+                        @(_userProfile?.UserName ?? "")
+                    </MudText>
+                    @if (!string.IsNullOrEmpty(_userProfile?.Bio))
+                    {
+                        <MudText Typo="Typo.body2" Class="mb-3">
+                            @_userProfile.Bio
+                        </MudText>
+                    }
+                    
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        @if (!string.IsNullOrEmpty(_userProfile?.Location))
+                        {
+                            <MudChip T="string" Size="Size.Small" Icon="@Icons.Material.Filled.LocationOn" Color="Color.Secondary">
+                                @_userProfile.Location
+                            </MudChip>
+                        }
+                        @if (!string.IsNullOrEmpty(_userProfile?.Company))
+                        {
+                            <MudChip T="string" Size="Size.Small" Icon="@Icons.Material.Filled.Business" Color="Color.Secondary">
+                                @_userProfile.Company
+                            </MudChip>
+                        }
+                        <MudChip T="string" Size="Size.Small" Icon="@Icons.Material.Filled.AccountBox" Color="Color.Primary">
+                            @(_userProfile?.AccountType ?? "")
+                        </MudChip>
+                        @if (_userProfile?.IsEmailVerified == true)
+                        {
+                            <MudChip T="string" Size="Size.Small" Icon="@Icons.Material.Filled.Verified" Color="Color.Success">
+                                Verified
+                            </MudChip>
+                        }
+                    </div>
+
+                    @if (_userProfile?.Statistics != null)
+                    {
+                        <div class="d-flex flex-wrap gap-4">
+                            <div class="stat-item">
+                                <MudText Typo="Typo.h6" Class="font-weight-bold">@_userProfile.Statistics.PackagesInstalled</MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">Packages Installed</MudText>
+                            </div>
+                            <div class="stat-item">
+                                <MudText Typo="Typo.h6" Class="font-weight-bold">@_userProfile.Statistics.PackagesFavorited</MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">Favorites</MudText>
+                            </div>
+                            <div class="stat-item">
+                                <MudText Typo="Typo.h6" Class="font-weight-bold">@_userProfile.Statistics.PackagesPublished</MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">Published</MudText>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    <!-- Profile Navigation Tabs -->
+    <MudTabs Elevation="2" Rounded="true" PanelClass="pa-6" @bind-ActivePanelIndex="_activeTabIndex">
+        <MudTabPanel Text="General" Icon="@Icons.Material.Filled.Person">
+            <UserProfileGeneral UserProfile="_userProfile" OnProfileUpdated="@HandleProfileUpdated" />
+        </MudTabPanel>
+        
+        <MudTabPanel Text="Security" Icon="@Icons.Material.Filled.Security">
+            <UserProfileSecurity />
+        </MudTabPanel>
+        
+        <MudTabPanel Text="Privacy" Icon="@Icons.Material.Filled.Shield">
+            <UserProfilePrivacy UserProfile="_userProfile" OnProfileUpdated="@HandleProfileUpdated" />
+        </MudTabPanel>
+        
+        <MudTabPanel Text="Activity" Icon="@Icons.Material.Filled.History">
+            <UserProfileActivity />
+        </MudTabPanel>
+        
+        <MudTabPanel Text="API Keys" Icon="@Icons.Material.Filled.VpnKey">
+            <UserProfileApiKeys />
+        </MudTabPanel>
+    </MudTabs>
+</MudContainer>
+
+<!-- Avatar Upload Dialog -->
+<MudDialog @bind-IsVisible="_avatarUploadDialog" Options="@_dialogOptions">
+    <TitleContent>
+        <div class="d-flex align-center">
+            <MudIcon Icon="@Icons.Material.Filled.PhotoCamera" Class="mr-3" />
+            Update Profile Avatar
+        </div>
+    </TitleContent>
+    <DialogContent>
+        <AvatarUploadComponent OnAvatarUploaded="@HandleAvatarUploaded" />
+    </DialogContent>
+</MudDialog>
+
+<style>
+    .profile-avatar-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .profile-info {
+        padding-left: 1rem;
+    }
+
+    @@media (max-width: 600px) {
+        .profile-info {
+            padding-left: 0;
+            text-align: center;
+        }
+    }
+</style>
+
+@code {
+    [Parameter] public string? Tab { get; set; }
+
+    private UserProfileDomain? _userProfile;
+    private int _activeTabIndex = 0;
+    private bool _avatarUploadDialog = false;
+    private bool _isLoading = true;
+
+    private readonly DialogOptions _dialogOptions = new()
+    {
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true,
+        CloseButton = true,
+        BackdropClick = true
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUserProfile();
+        SetActiveTabFromParameter();
+    }
+
+    protected override void OnParametersSet()
+    {
+        SetActiveTabFromParameter();
+    }
+
+    private void SetActiveTabFromParameter()
+    {
+        _activeTabIndex = Tab?.ToLower() switch
+        {
+            "security" => 1,
+            "privacy" => 2,
+            "activity" => 3,
+            "apikeys" or "api-keys" => 4,
+            _ => 0
+        };
+    }
+
+    private async Task LoadUserProfile()
+    {
+        _isLoading = true;
+        try
+        {
+            var result = await ProfileService.GetProfileAsync();
+            if (result.IsSuccess && result.Profile != null)
+            {
+                _userProfile = result.Profile;
+            }
+            else
+            {
+                Snackbar.Add($"Failed to load profile: {result.ErrorMessage}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading profile: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task HandleProfileUpdated(UserProfileDomain updatedProfile)
+    {
+        _userProfile = updatedProfile;
+        StateHasChanged();
+    }
+
+    private async Task HandleAvatarUploaded(string avatarUrl)
+    {
+        if (_userProfile != null)
+        {
+            // Update the avatar URL in the profile
+            _userProfile = _userProfile with { AvatarUrl = avatarUrl };
+            StateHasChanged();
+        }
+        
+        _avatarUploadDialog = false;
+        Snackbar.Add("Avatar updated successfully!", Severity.Success);
+    }
+
+    private string GetInitials()
+    {
+        if (_userProfile == null) return "?";
+        
+        if (!string.IsNullOrEmpty(_userProfile.FirstName) && !string.IsNullOrEmpty(_userProfile.LastName))
+        {
+            return $"{_userProfile.FirstName[0]}{_userProfile.LastName[0]}".ToUpper();
+        }
+        
+        if (!string.IsNullOrEmpty(_userProfile.DisplayName))
+        {
+            var parts = _userProfile.DisplayName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length >= 2)
+            {
+                return $"{parts[0][0]}{parts[1][0]}".ToUpper();
+            }
+            return _userProfile.DisplayName[0].ToString().ToUpper();
+        }
+        
+        return _userProfile.UserName[0].ToString().ToUpper();
+    }
+}

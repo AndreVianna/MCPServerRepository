@@ -1,5 +1,6 @@
 using MCPHub.AuthenticationService.Services;
 using MCPHub.Domain.Contracts.Requests;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace MCPHub.AuthenticationService.Controllers;
@@ -18,7 +19,7 @@ public class UserProfileController(IUserProfileService userProfileService) : Con
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>User profile information</returns>
     [HttpGet("me")]
-    public Task<IActionResult> GetMyProfileAsync(CancellationToken cancellationToken = default) 
+    public Task<IActionResult> GetMyProfileAsync(CancellationToken cancellationToken = default)
         => throw new NotImplementedException("Get profile endpoint will be implemented when first consumer requires it");
 
     /// <summary>
@@ -28,7 +29,7 @@ public class UserProfileController(IUserProfileService userProfileService) : Con
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>User profile information</returns>
     [HttpGet("{userId:guid}")]
-    public Task<IActionResult> GetProfileAsync(Guid userId, CancellationToken cancellationToken = default) 
+    public Task<IActionResult> GetProfileAsync(Guid userId, CancellationToken cancellationToken = default)
         => throw new NotImplementedException("Get user profile endpoint will be implemented when first consumer requires it");
 
     /// <summary>
@@ -38,7 +39,7 @@ public class UserProfileController(IUserProfileService userProfileService) : Con
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Profile update result</returns>
     [HttpPut("me")]
-    public Task<IActionResult> UpdateMyProfileAsync([FromBody] UpdateProfileRequest request, CancellationToken cancellationToken = default) 
+    public Task<IActionResult> UpdateMyProfileAsync([FromBody] UpdateProfileRequest request, CancellationToken cancellationToken = default)
         => throw new NotImplementedException("Update profile endpoint will be implemented when first consumer requires it");
 
     /// <summary>
@@ -48,7 +49,7 @@ public class UserProfileController(IUserProfileService userProfileService) : Con
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Password change result</returns>
     [HttpPost("change-password")]
-    public Task<IActionResult> ChangePasswordAsync([FromBody] ChangePasswordRequest request, CancellationToken cancellationToken = default) 
+    public Task<IActionResult> ChangePasswordAsync([FromBody] ChangePasswordRequest request, CancellationToken cancellationToken = default)
         => throw new NotImplementedException("Change password endpoint will be implemented when first consumer requires it");
 
     /// <summary>
@@ -58,7 +59,6 @@ public class UserProfileController(IUserProfileService userProfileService) : Con
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Email verification result</returns>
     [HttpPost("verify-email")]
-    public Task<IActionResult> VerifyEmailAsync([FromBody] VerifyEmailRequest request, CancellationToken cancellationToken = default) 
+    public Task<IActionResult> VerifyEmailAsync([FromBody] VerifyEmailRequest request, CancellationToken cancellationToken = default)
         => throw new NotImplementedException("Email verification endpoint will be implemented when first consumer requires it");
 }
-

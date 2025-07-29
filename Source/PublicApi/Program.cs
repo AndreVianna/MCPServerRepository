@@ -1,19 +1,22 @@
 using System.Text;
+
+using Asp.Versioning;
+
+using MCPHub.Common.Messaging;
+using MCPHub.Common.Services;
 using MCPHub.Data;
 using MCPHub.Domain;
 using MCPHub.Domain.Entities;
+using MCPHub.Domain.Messaging;
 using MCPHub.PublicApi.Configuration;
 using MCPHub.PublicApi.Consumers;
-using MCPHub.PublicApi.Services;
 using MCPHub.PublicApi.Middleware;
-using MCPHub.Common.Services;
-using Asp.Versioning;
+using MCPHub.PublicApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add API versioning
-builder.Services.AddApiVersioning(options =>
-{
+builder.Services.AddApiVersioning(options => {
     options.AssumeDefaultVersionWhenUnspecified = true;
     options.DefaultApiVersion = new ApiVersion(1, 0);
     options.ReportApiVersions = true;
@@ -22,8 +25,7 @@ builder.Services.AddApiVersioning(options =>
         new HeaderApiVersionReader("X-API-Version"),
         new HeaderApiVersionReader("Accept-Version")
     );
-}).AddApiExplorer(setup =>
-{
+}).AddApiExplorer(setup => {
     setup.GroupNameFormat = "'v'VVV";
     setup.SubstituteApiVersionInUrl = true;
 });
@@ -44,23 +46,22 @@ builder.Services.AddDataServices(builder.Configuration);
 builder.Services.AddDomainServices();
 
 // Add ASP.NET Core Identity
-builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
-{
+builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options => {
     // Password requirements
     options.Password.RequireDigit = true;
     options.Password.RequiredLength = 8;
     options.Password.RequireNonAlphanumeric = true;
     options.Password.RequireUppercase = true;
     options.Password.RequireLowercase = true;
-    
+
     // Lockout settings
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.Lockout.AllowedForNewUsers = true;
-    
+
     // User settings
     options.User.RequireUniqueEmail = true;
-    
+
     // Sign-in settings
     options.SignIn.RequireConfirmedEmail = false; // Will be enabled when email service is implemented
 })
@@ -69,23 +70,20 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
 
 // Add JWT Authentication
 var jwtSection = builder.Configuration.GetSection(JwtOptions.SectionName);
-var secretKey = jwtSection.GetValue<string>("SecretKey") ?? 
+var secretKey = jwtSection.GetValue<string>("SecretKey") ??
     throw new InvalidOperationException("JWT SecretKey is not configured");
-var issuer = jwtSection.GetValue<string>("Issuer") ?? 
+var issuer = jwtSection.GetValue<string>("Issuer") ??
     throw new InvalidOperationException("JWT Issuer is not configured");
-var audience = jwtSection.GetValue<string>("Audience") ?? 
+var audience = jwtSection.GetValue<string>("Audience") ??
     throw new InvalidOperationException("JWT Audience is not configured");
 
-builder.Services.AddAuthentication(options =>
-{
+builder.Services.AddAuthentication(options => {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
+.AddJwtBearer(options => {
+    options.TokenValidationParameters = new TokenValidationParameters {
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
@@ -95,17 +93,14 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
         ClockSkew = TimeSpan.FromMinutes(5)
     };
-    
-    options.Events = new JwtBearerEvents
-    {
-        OnAuthenticationFailed = context =>
-        {
+
+    options.Events = new JwtBearerEvents {
+        OnAuthenticationFailed = context => {
             var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
             logger.LogWarning("JWT authentication failed: {Error}", context.Exception.Message);
             return Task.CompletedTask;
         },
-        OnChallenge = context =>
-        {
+        OnChallenge = context => {
             var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
             logger.LogWarning("JWT authentication challenge triggered for path: {Path}", context.Request.Path);
             return Task.CompletedTask;
@@ -119,10 +114,18 @@ builder.Services.AddAuthorization();
 // Register JWT service
 builder.Services.AddScoped<IJwtService, JwtService>();
 
+// Add caching services for rate limiting  
+builder.Services.AddMemoryCache();
+builder.Services.AddDistributedMemoryCache(); // Simple in-memory distributed cache
+
 // Register rate limiting service
 builder.Services.AddSingleton<IRateLimitingService, RateLimitingService>();
 
 // Note: Messaging implementations removed - only interfaces available
+// Add minimal stub implementations for messaging
+builder.Services.AddScoped<IMessagePublisher>(provider => 
+    new StubMessagePublisher(provider.GetRequiredService<ILogger<StubMessagePublisher>>()));
+
 // Register consumer services
 builder.Services.AddScoped<ServerRegisteredEventConsumer>();
 
@@ -132,8 +135,7 @@ builder.Services.AddLogging();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
-if (app.Environment.IsDevelopment()) 
-{
+if (app.Environment.IsDevelopment()) {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
@@ -150,3 +152,22 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+// Temporary stub implementation for messaging
+public class StubMessagePublisher : IMessagePublisher {
+    private readonly ILogger<StubMessagePublisher> _logger;
+
+    public StubMessagePublisher(ILogger<StubMessagePublisher> logger) {
+        _logger = logger;
+    }
+
+    public Task PublishAsync<T>(T message, CancellationToken cancellationToken = default) where T : BaseMessage {
+        _logger.LogInformation("Stub: Publishing message of type {MessageType}", typeof(T).Name);
+        return Task.CompletedTask;
+    }
+
+    public Task PublishAsync<T>(T message, string routingKey, CancellationToken cancellationToken = default) where T : BaseMessage {
+        _logger.LogInformation("Stub: Publishing message of type {MessageType} with routing key {RoutingKey}", typeof(T).Name, routingKey);
+        return Task.CompletedTask;
+    }
+}

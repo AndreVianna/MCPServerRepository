@@ -6,8 +6,7 @@ namespace MCPHub.Domain.Services;
 /// <summary>
 /// Static analyzer for package dependencies and vulnerabilities
 /// </summary>
-public class DependencyScanner : IStaticAnalyzer
-{
+public class DependencyScanner : IStaticAnalyzer {
     public string Name => "Dependency Vulnerability Scanner";
     public string Version => "1.0.0";
     public IReadOnlyList<string> SupportedScanTypes => ["dependencies", "vulnerabilities", "npm", "pypi", "nuget"];
@@ -21,13 +20,10 @@ public class DependencyScanner : IStaticAnalyzer
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Analysis result</returns>
     public Task<SecurityAnalysisResult> AnalyzeAsync(
-        string content, 
-        string contentType, 
-        Dictionary<string, object>? options = null, 
-        CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException("Dependency vulnerability analysis logic will be implemented when first consumer requires it");
-    }
+        string content,
+        string contentType,
+        Dictionary<string, object>? options = null,
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Dependency vulnerability analysis logic will be implemented when first consumer requires it");
 
     /// <summary>
     /// Analyzes a dependency file for security issues
@@ -37,28 +33,19 @@ public class DependencyScanner : IStaticAnalyzer
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Analysis result</returns>
     public Task<SecurityAnalysisResult> AnalyzeFileAsync(
-        string filePath, 
-        Dictionary<string, object>? options = null, 
-        CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException("Dependency file analysis logic will be implemented when first consumer requires it");
-    }
+        string filePath,
+        Dictionary<string, object>? options = null,
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Dependency file analysis logic will be implemented when first consumer requires it");
 
     /// <summary>
     /// Validates the analyzer configuration
     /// </summary>
     /// <returns>True if properly configured</returns>
-    public Task<bool> ValidateConfigurationAsync()
-    {
-        throw new NotImplementedException("Configuration validation logic will be implemented when first consumer requires it");
-    }
+    public Task<bool> ValidateConfigurationAsync() => throw new NotImplementedException("Configuration validation logic will be implemented when first consumer requires it");
 
     /// <summary>
     /// Gets the health status of the analyzer
     /// </summary>
     /// <returns>Health status information</returns>
-    public Task<Dictionary<string, object>> GetHealthStatusAsync()
-    {
-        throw new NotImplementedException("Health status logic will be implemented when first consumer requires it");
-    }
+    public Task<Dictionary<string, object>> GetHealthStatusAsync() => throw new NotImplementedException("Health status logic will be implemented when first consumer requires it");
 }

@@ -1,5 +1,5 @@
-using MCPHub.Domain.Entities;
 using MCPHub.Domain.Common;
+using MCPHub.Domain.Entities;
 
 namespace MCPHub.Data.Configurations;
 
@@ -24,7 +24,6 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
         builder.Property(u => u.AvatarUrl)
             .HasMaxLength(500);
 
-
         builder.Property(u => u.IsEmailVerified)
             .IsRequired()
             .HasDefaultValue(false);
@@ -43,7 +42,6 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
             .HasFilter($"[{nameof(ApplicationUser.TwitterHandle)}] IS NOT NULL");
 
         builder.HasIndex(u => u.IsPublisher);
-
 
         // Configure AuditTrail as JSON column
         builder.OwnsMany(u => u.AuditTrail, auditBuilder => {

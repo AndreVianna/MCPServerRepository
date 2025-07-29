@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+
 using MCPHub.Domain.Common;
 
 namespace MCPHub.Domain.Entities;
@@ -6,8 +7,7 @@ namespace MCPHub.Domain.Entities;
 /// <summary>
 /// Represents a package installation record for tracking and management
 /// </summary>
-public class PackageInstallation : BaseEntity
-{
+public class PackageInstallation : BaseEntity {
     /// <summary>
     /// Gets or sets the package identifier that was installed
     /// </summary>
@@ -72,8 +72,7 @@ public class PackageInstallation : BaseEntity
         Guid userId,
         string installationPath,
         string clientVersion,
-        Dictionary<string, object>? installationOptions = null)
-    {
+        Dictionary<string, object>? installationOptions = null) {
         ArgumentException.ThrowIfNullOrWhiteSpace(version);
         ArgumentException.ThrowIfNullOrWhiteSpace(installationPath);
         ArgumentException.ThrowIfNullOrWhiteSpace(clientVersion);
@@ -87,8 +86,7 @@ public class PackageInstallation : BaseEntity
         InstalledAt = DateTimeOffset.UtcNow;
         InstallationOptions = installationOptions ?? new Dictionary<string, object>();
 
-        AuditTrail.Add(new AuditEntry
-        {
+        AuditTrail.Add(new AuditEntry {
             Action = "Installation Initiated",
             UserId = userId,
             DateTime = DateTimeOffset.UtcNow
@@ -101,19 +99,16 @@ public class PackageInstallation : BaseEntity
     /// <param name="status">New installation status</param>
     /// <param name="errorMessage">Error message if status is Failed</param>
     /// <param name="userId">User performing the update</param>
-    public void UpdateStatus(InstallationStatus status, string? errorMessage = null, Guid? userId = null)
-    {
+    public void UpdateStatus(InstallationStatus status, string? errorMessage = null, Guid? userId = null) {
         var previousStatus = Status;
         Status = status;
         ErrorMessage = errorMessage;
 
-        if (status == InstallationStatus.Uninstalled)
-        {
+        if (status == InstallationStatus.Uninstalled) {
             UninstalledAt = DateTimeOffset.UtcNow;
         }
 
-        AuditTrail.Add(new AuditEntry
-        {
+        AuditTrail.Add(new AuditEntry {
             Action = $"Status Updated from {previousStatus} to {status}",
             UserId = userId ?? UserId,
             DateTime = DateTimeOffset.UtcNow
@@ -124,18 +119,14 @@ public class PackageInstallation : BaseEntity
     /// Marks the installation as completed successfully
     /// </summary>
     /// <param name="userId">User completing the installation</param>
-    public void MarkCompleted(Guid? userId = null)
-    {
-        UpdateStatus(InstallationStatus.Completed, null, userId);
-    }
+    public void MarkCompleted(Guid? userId = null) => UpdateStatus(InstallationStatus.Completed, null, userId);
 
     /// <summary>
     /// Marks the installation as failed with an error message
     /// </summary>
     /// <param name="errorMessage">Description of the failure</param>
     /// <param name="userId">User reporting the failure</param>
-    public void MarkFailed(string errorMessage, Guid? userId = null)
-    {
+    public void MarkFailed(string errorMessage, Guid? userId = null) {
         ArgumentException.ThrowIfNullOrWhiteSpace(errorMessage);
         UpdateStatus(InstallationStatus.Failed, errorMessage, userId);
     }
@@ -144,27 +135,21 @@ public class PackageInstallation : BaseEntity
     /// Marks the package as uninstalled
     /// </summary>
     /// <param name="userId">User performing the uninstallation</param>
-    public void MarkUninstalled(Guid? userId = null)
-    {
-        UpdateStatus(InstallationStatus.Uninstalled, null, userId);
-    }
+    public void MarkUninstalled(Guid? userId = null) => UpdateStatus(InstallationStatus.Uninstalled, null, userId);
 
     /// <summary>
     /// Updates the installation options
     /// </summary>
     /// <param name="options">New options to add or update</param>
     /// <param name="userId">User updating the options</param>
-    public void UpdateInstallationOptions(Dictionary<string, object> options, Guid? userId = null)
-    {
+    public void UpdateInstallationOptions(Dictionary<string, object> options, Guid? userId = null) {
         ArgumentNullException.ThrowIfNull(options);
 
-        foreach (var kvp in options)
-        {
+        foreach (var kvp in options) {
             InstallationOptions[kvp.Key] = kvp.Value;
         }
 
-        AuditTrail.Add(new AuditEntry
-        {
+        AuditTrail.Add(new AuditEntry {
             Action = "Installation Options Updated",
             UserId = userId ?? UserId,
             DateTime = DateTimeOffset.UtcNow

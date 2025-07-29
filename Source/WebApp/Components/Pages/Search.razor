@@ -1,0 +1,933 @@
+@page "/search"
+@page "/search/{searchQuery?}"
+@inject IApiClientService ApiClient
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@using MCPHub.WebApp.Components.UI.Search
+@using MCPHub.WebApp.Components.UI.Packages
+@using MCPHub.WebApp.Components.UI.Layout
+@using MCPHub.WebApp.Components.UI.Models
+@using MCPHub.WebApp.Services
+@using MCPHub.Domain.Entities
+@using System.Web
+
+<PageTitle>Search Packages - MCP Hub</PageTitle>
+
+<ResponsiveContainer MaxWidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
+    <HeaderContent>
+        <div class="search-page-header">
+            <MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-2">
+                Search MCP Packages
+            </MudText>
+            <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-4">
+                Discover AI-powered tools and services with enterprise-grade security
+            </MudText>
+            
+            <EnhancedSearchBar Placeholder="Search for packages, tools, publishers..."
+                             EnableVoiceSearch="true"
+                             EnableAdvancedSearch="true"
+                             Categories="@PackageCategories"
+                             Size="@SearchBarSize.Large"
+                             OnSearch="@HandleSearch"
+                             Class="search-main-bar" />
+        </div>
+    </HeaderContent>
+
+    <MainContent>
+        <!-- Search Results Header -->
+        @if (_hasSearched)
+        {
+            <div class="search-results-header d-flex justify-space-between align-center mb-4">
+                <div class="results-info">
+                    <MudText Typo="Typo.h6" Class="mb-1">
+                        @(_searchResults.Count) results 
+                        @if (!string.IsNullOrEmpty(_currentQuery?.Text))
+                        {
+                            <span>for "@_currentQuery.Text"</span>
+                        }
+                    </MudText>
+                    @if (_isLoading)
+                    {
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                            Searching...
+                        </MudText>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                            Search completed in @_searchDurationMs ms
+                        </MudText>
+                    }
+                </div>
+                
+                <div class="search-controls d-flex align-center">
+                    <!-- View Mode Toggle -->
+                    <MudToggleIconButton @bind-Toggled="@_isGridView"
+                                       Icon="@Icons.Material.Filled.ViewList"
+                                       ToggledIcon="@Icons.Material.Filled.GridView"
+                                       Color="Color.Primary"
+                                       Title="@(_isGridView ? "Switch to list view" : "Switch to grid view")"
+                                       Class="mr-2" />
+                    
+                    <!-- Sort Options -->
+                    <MudSelect T="string" 
+                             Value="@_selectedSortOption"
+                             Variant="Variant.Outlined"
+                             Dense="true"
+                             Style="min-width: 180px;"
+                             Label="Sort by"
+                             ValueChanged="@OnSortChanged">
+                        <MudSelectItem Value="@("relevance")">🤖 AI Relevance</MudSelectItem>
+                        <MudSelectItem Value="@("trending")">📈 Trending</MudSelectItem>
+                        <MudSelectItem Value="@("downloads")">📥 Downloads</MudSelectItem>
+                        <MudSelectItem Value="@("rating")">⭐ Rating</MudSelectItem>
+                        <MudSelectItem Value="@("updated")">📅 Recently Updated</MudSelectItem>
+                        <MudSelectItem Value="@("security")">🔒 Security Score</MudSelectItem>
+                        <MudSelectItem Value="@("name")">📝 Name A-Z</MudSelectItem>
+                    </MudSelect>
+                </div>
+            </div>
+
+            <!-- AI Insights Panel -->
+            @if (_showAIInsights && _aiInsights != null)
+            {
+                <MudPaper Class="ai-insights-panel pa-4 mb-4" Style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-left: 4px solid var(--mud-palette-primary);">
+                    <div class="d-flex align-center mb-2">
+                        <MudIcon Icon="@Icons.Material.Filled.Psychology" Color="Color.Primary" Class="mr-2" />
+                        <MudText Typo="Typo.h6" Color="Color.Primary">AI Search Insights</MudText>
+                    </div>
+                    <MudText Typo="Typo.body2" Class="mb-2">@_aiInsights.SummaryText</MudText>
+                    @if (_aiInsights.SuggestedQueries?.Any() == true)
+                    {
+                        <div class="suggested-queries">
+                            <MudText Typo="Typo.caption" Class="mb-2">💡 You might also want to search for:</MudText>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var suggestion in _aiInsights.SuggestedQueries)
+                                {
+                                    <MudChip T="string" 
+                                           Color="Color.Primary" 
+                                           Variant="Variant.Outlined"
+                                           Size="Size.Small"
+                                           OnClick="@(() => HandleSuggestedQuery(suggestion))">
+                                        @suggestion
+                                    </MudChip>
+                                }
+                            </div>
+                        </div>
+                    }
+                </MudPaper>
+            }
+
+            <!-- Search Results -->
+            <div class="search-results">
+                @if (_isLoading)
+                {
+                    <!-- Loading State -->
+                    <div class="search-loading">
+                        @for (int i = 0; i < 6; i++)
+                        {
+                            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="200px" Class="mb-3" />
+                        }
+                    </div>
+                }
+                else if (_searchResults.Any())
+                {
+                    @if (_isGridView)
+                    {
+                        <!-- Grid View -->
+                        <MudGrid Spacing="3">
+                            @foreach (var package in GetPagedResults())
+                            {
+                                <MudItem xs="12" sm="6" md="4" lg="3">
+                                    <PackageCard Package="@package" 
+                                               ShowAIInsights="@_showAIRelevanceScores"
+                                               OnInstallClick="@HandleInstall"
+                                               OnDetailsClick="@HandleDetails"
+                                               OnStarClick="@HandleStar"
+                                               OnShareClick="@HandleShare"
+                                               OnMoreClick="@HandleMore" />
+                                </MudItem>
+                            }
+                        </MudGrid>
+                    }
+                    else
+                    {
+                        <!-- List View -->
+                        <div class="package-list">
+                            @foreach (var package in GetPagedResults())
+                            {
+                                <PackageCard Package="@package" 
+                                           ShowAIInsights="@_showAIRelevanceScores"
+                                           OnInstallClick="@HandleInstall"
+                                           OnDetailsClick="@HandleDetails"
+                                           OnStarClick="@HandleStar"
+                                           OnShareClick="@HandleShare"
+                                           OnMoreClick="@HandleMore"
+                                           Class="mb-3 package-list-item" />
+                            }
+                        </div>
+                    }
+
+                    <!-- Pagination -->
+                    @if (_totalPages > 1)
+                    {
+                        <div class="pagination-container d-flex justify-center mt-6">
+                            <MudPagination Count="_totalPages" 
+                                         Selected="_currentPage"
+                                         SelectedChanged="@OnPageChanged"
+                                         ShowFirstButton="true"
+                                         ShowLastButton="true"
+                                         Class="search-pagination" />
+                        </div>
+                    }
+                }
+                else if (!_isLoading)
+                {
+                    <!-- No Results State -->
+                    <div class="no-results text-center py-12">
+                        <MudIcon Icon="@Icons.Material.Filled.SearchOff" 
+                               Size="Size.Large" 
+                               Color="Color.Secondary" 
+                               Class="mb-4" 
+                               Style="font-size: 4rem;" />
+                        <MudText Typo="Typo.h5" Color="Color.Secondary" Class="mb-2">
+                            No packages found
+                        </MudText>
+                        <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-4">
+                            @if (!string.IsNullOrEmpty(_currentQuery?.Text))
+                            {
+                                <span>We couldn't find any packages matching "@_currentQuery.Text"</span>
+                            }
+                            else
+                            {
+                                <span>Try adjusting your search criteria or browse our categories</span>
+                            }
+                        </MudText>
+                        
+                        <div class="no-results-actions">
+                            <MudButton Color="Color.Primary" 
+                                     Variant="Variant.Filled"
+                                     StartIcon="@Icons.Material.Filled.Clear"
+                                     @onclick="ClearSearch"
+                                     Class="mr-2">
+                                Clear Search
+                            </MudButton>
+                            <MudButton Color="Color.Primary" 
+                                     Variant="Variant.Outlined"
+                                     StartIcon="@Icons.Material.Filled.Explore"
+                                     @onclick="@(() => Navigation.NavigateTo("/browse"))">
+                                Browse Categories
+                            </MudButton>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <!-- Initial Search State -->
+            <div class="search-suggestions">
+                <!-- Popular Categories -->
+                <div class="popular-categories mb-6">
+                    <MudText Typo="Typo.h6" Class="mb-3">🔥 Popular Categories</MudText>
+                    <MudGrid Spacing="2">
+                        @foreach (var category in GetPopularCategories())
+                        {
+                            <MudItem xs="6" sm="4" md="3" lg="2">
+                                <MudButton Variant="Variant.Outlined" 
+                                         Color="Color.Primary"
+                                         FullWidth="true"
+                                         StartIcon="@category.Icon"
+                                         @onclick="@(() => SearchByCategory(category.Key))"
+                                         Class="category-button">
+                                    @category.Name
+                                </MudButton>
+                            </MudItem>
+                        }
+                    </MudGrid>
+                </div>
+
+                <!-- Trending Searches -->
+                <div class="trending-searches mb-6">
+                    <MudText Typo="Typo.h6" Class="mb-3">📈 Trending Searches</MudText>
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var trend in GetTrendingSearches())
+                        {
+                            <MudChip T="string" 
+                                   Color="Color.Primary" 
+                                   Variant="Variant.Filled"
+                                   OnClick="@(() => SearchByTrend(trend))">
+                                @trend
+                            </MudChip>
+                        }
+                    </div>
+                </div>
+
+                <!-- Recent Packages -->
+                <div class="recent-packages">
+                    <MudText Typo="Typo.h6" Class="mb-3">⚡ Recently Published</MudText>
+                    <MudGrid Spacing="3">
+                        @foreach (var package in GetRecentPackages())
+                        {
+                            <MudItem xs="12" sm="6" md="4">
+                                <PackageCard Package="@package" 
+                                           OnInstallClick="@HandleInstall"
+                                           OnDetailsClick="@HandleDetails"
+                                           OnStarClick="@HandleStar"
+                                           OnShareClick="@HandleShare"
+                                           OnMoreClick="@HandleMore" />
+                            </MudItem>
+                        }
+                    </MudGrid>
+                </div>
+            </div>
+        }
+    </MainContent>
+
+    <SidebarContent>
+        <!-- Advanced Filters Sidebar -->
+        <div class="filters-sidebar">
+            <MudText Typo="Typo.h6" Class="mb-4">🔧 Filters</MudText>
+            
+            <!-- Active Filters -->
+            @if (GetActiveFilters().Any())
+            {
+                <div class="active-filters mb-4">
+                    <MudText Typo="Typo.subtitle2" Class="mb-2">Active Filters</MudText>
+                    <div class="d-flex flex-wrap gap-2 mb-2">
+                        @foreach (var filter in GetActiveFilters())
+                        {
+                            <MudChip T="string" 
+                                   Color="Color.Primary" 
+                                   Variant="Variant.Filled"
+                                   OnClose="@(() => RemoveFilter(filter.Key))"
+                                   CloseIcon="@Icons.Material.Filled.Close">
+                                @filter.Value
+                            </MudChip>
+                        }
+                    </div>
+                    <MudButton Size="Size.Small" 
+                             Variant="Variant.Text"
+                             StartIcon="@Icons.Material.Filled.Clear"
+                             @onclick="ClearAllFilters">
+                        Clear All
+                    </MudButton>
+                </div>
+                <MudDivider Class="mb-4" />
+            }
+
+            <!-- Category Filter -->
+            <div class="filter-section mb-4">
+                <MudText Typo="Typo.subtitle2" Class="mb-2">📂 Category</MudText>
+                <MudSelect T="string" 
+                         Value="@_selectedCategory"
+                         Placeholder="All Categories"
+                         Variant="Variant.Outlined"
+                         Dense="true"
+                         FullWidth="true"
+                         ValueChanged="@OnCategoryChanged">
+                    <MudSelectItem Value="@("all_categories")">All Categories</MudSelectItem>
+                    @foreach (var category in PackageCategories)
+                    {
+                        <MudSelectItem Value="@category.Key">@category.Value</MudSelectItem>
+                    }
+                </MudSelect>
+            </div>
+
+            <!-- Security Grade Filter -->
+            <div class="filter-section mb-4">
+                <MudText Typo="Typo.subtitle2" Class="mb-2">🔒 Security Grade</MudText>
+                <MudSelect T="string" 
+                         Value="@_selectedSecurityGrade"
+                         Placeholder="Any Grade"
+                         Variant="Variant.Outlined"
+                         Dense="true"
+                         FullWidth="true"
+                         ValueChanged="@OnSecurityGradeChanged">
+                    <MudSelectItem Value="@("any_grade")">Any Grade</MudSelectItem>
+                    <MudSelectItem Value="@("A_plus")">A+ and above</MudSelectItem>
+                    <MudSelectItem Value="@("A")">A and above</MudSelectItem>
+                    <MudSelectItem Value="@("B")">B and above</MudSelectItem>
+                    <MudSelectItem Value="@("C")">C and above</MudSelectItem>
+                </MudSelect>
+            </div>
+
+            <!-- Trust Tier Filter -->
+            <div class="filter-section mb-4">
+                <MudText Typo="Typo.subtitle2" Class="mb-2">🛡️ Trust Tier</MudText>
+                <MudSelect T="TrustTier?" 
+                         Value="@_selectedTrustTier"
+                         Placeholder="Any Trust Level"
+                         Variant="Variant.Outlined"
+                         Dense="true"
+                         FullWidth="true"
+                         ValueChanged="@OnTrustTierChanged">
+                    <MudSelectItem Value="@((TrustTier?)null)">Any Trust Level</MudSelectItem>
+                    <MudSelectItem Value="@("TrustTier.Enterprise")">Enterprise</MudSelectItem>
+                    <MudSelectItem Value="@("TrustTier.CommunityTrusted")">Trusted</MudSelectItem>
+                    <MudSelectItem Value="@("TrustTier.Verified")">Verified</MudSelectItem>
+                    <MudSelectItem Value="@("TrustTier.Unverified")">Unverified</MudSelectItem>
+                </MudSelect>
+            </div>
+
+            <!-- Download Range Filter -->
+            <div class="filter-section mb-4">
+                <MudText Typo="Typo.subtitle2" Class="mb-2">📥 Weekly Downloads</MudText>
+                <MudSelect T="string" 
+                         Value="@_selectedDownloadRange"
+                         Placeholder="Any Volume"
+                         Variant="Variant.Outlined"
+                         Dense="true"
+                         FullWidth="true"
+                         ValueChanged="@OnDownloadRangeChanged">
+                    <MudSelectItem Value="@("any_volume")">Any Volume</MudSelectItem>
+                    <MudSelectItem Value="@("thousand_plus")">1K+ downloads</MudSelectItem>
+                    <MudSelectItem Value="@("ten_thousand_plus")">10K+ downloads</MudSelectItem>
+                    <MudSelectItem Value="@("fifty_thousand_plus")">50K+ downloads</MudSelectItem>
+                    <MudSelectItem Value="@("hundred_thousand_plus")">100K+ downloads</MudSelectItem>
+                </MudSelect>
+            </div>
+
+            <!-- Last Updated Filter -->
+            <div class="filter-section mb-4">
+                <MudText Typo="Typo.subtitle2" Class="mb-2">📅 Last Updated</MudText>
+                <MudSelect T="string" 
+                         Value="@_selectedTimeframe"
+                         Placeholder="Any Time"
+                         Variant="Variant.Outlined"
+                         Dense="true"
+                         FullWidth="true"
+                         ValueChanged="@OnTimeframeChanged">
+                    <MudSelectItem Value="@("any_time")">Any Time</MudSelectItem>
+                    <MudSelectItem Value="@("day")">Today</MudSelectItem>
+                    <MudSelectItem Value="@("week")">This Week</MudSelectItem>
+                    <MudSelectItem Value="@("month")">This Month</MudSelectItem>
+                    <MudSelectItem Value="@("three_months")">Last 3 Months</MudSelectItem>
+                </MudSelect>
+            </div>
+
+            <!-- Options Toggle -->
+            <div class="filter-options mb-4">
+                <MudCheckBox @bind-Value="@_showAIRelevanceScores" 
+                           Label="Show AI relevance scores"
+                           Dense="true" />
+                <MudCheckBox @bind-Value="@_showAIInsights" 
+                           Label="Show AI search insights"
+                           Dense="true" />
+                <MudCheckBox @bind-Value="@_includePrerelease" 
+                           Label="Include prerelease versions"
+                           Dense="true" />
+            </div>
+        </div>
+    </SidebarContent>
+</ResponsiveContainer>
+
+@code {
+    [Parameter] public string? SearchQuery { get; set; }
+
+    // Search state
+    private SearchQuery? _currentQuery;
+    private List<PackageInfo> _searchResults = new();
+    private List<PackageInfo> _allResults = new();
+    private bool _isLoading = false;
+    private bool _hasSearched = false;
+    private long _searchDurationMs = 0;
+    private AISearchInsights? _aiInsights;
+
+    // UI state
+    private bool _isGridView = true;
+    private bool _showAIRelevanceScores = true;
+    private bool _showAIInsights = true;
+    private bool _includePrerelease = false;
+
+    // Pagination
+    private int _currentPage = 1;
+    private int _pageSize = 20;
+    private int _totalPages = 1;
+    private int _totalResults = 0;
+
+    // Filters
+    private string _selectedSortOption = "relevance";
+    private string _selectedCategory = "";
+    private string _selectedSecurityGrade = "";
+    private TrustTier? _selectedTrustTier;
+    private string _selectedDownloadRange = "";
+    private string _selectedTimeframe = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Parse initial search query from URL if provided
+        if (!string.IsNullOrEmpty(SearchQuery))
+        {
+            var decodedQuery = HttpUtility.UrlDecode(SearchQuery);
+            await PerformSearch(new SearchQuery { Text = decodedQuery });
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Handle URL query parameters
+        var uri = new Uri(Navigation.Uri);
+        var queryParams = HttpUtility.ParseQueryString(uri.Query);
+        
+        if (queryParams["q"] != null && queryParams["q"] != _currentQuery?.Text)
+        {
+            await PerformSearch(new SearchQuery { Text = queryParams["q"]! });
+        }
+    }
+
+    private Dictionary<string, string> PackageCategories { get; } = new()
+    {
+        { "ai", "🤖 AI & Machine Learning" },
+        { "data", "📊 Data Processing" },
+        { "web", "🌐 Web Development" },
+        { "automation", "⚙️ Automation Tools" },
+        { "security", "🔒 Security & Privacy" },
+        { "productivity", "📝 Productivity" },
+        { "analytics", "📈 Analytics" },
+        { "communication", "💬 Communication" },
+        { "media", "🎵 Media Processing" },
+        { "database", "🗄️ Database Tools" }
+    };
+
+    // Event Handlers
+    private async Task HandleSearch(SearchQuery query)
+    {
+        await PerformSearch(query);
+    }
+
+    private async Task PerformSearch(SearchQuery query)
+    {
+        _isLoading = true;
+        _hasSearched = true;
+        _currentQuery = query;
+        _currentPage = 1;
+        
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        
+        try
+        {
+            // Apply current filters to the query
+            ApplyCurrentFiltersToQuery(query);
+            
+            // Call the actual API for search results
+            var searchRequest = new AdvancedSearchRequest
+            {
+                Query = string.IsNullOrEmpty(query.Text) ? "*" : query.Text,
+                Categories = !string.IsNullOrEmpty(query.Category) ? new List<string> { query.Category } : null,
+                TrustTier = query.TrustTier?.ToString(),
+                SecurityGrade = query.SecurityGrade,
+                Timeframe = query.Timeframe,
+                Page = _currentPage,
+                PageSize = _pageSize,
+                SortBy = GetApiSortField(_selectedSortOption),
+                SortDirection = GetApiSortDirection(_selectedSortOption)
+            };
+            
+            var searchResult = await ApiClient.SearchPackagesAdvancedAsync(searchRequest);
+            
+            // Convert API results to UI model
+            _allResults = ConvertApiResultsToPackageInfo(searchResult.Items);
+            _totalResults = (int)searchResult.TotalCount;
+            _totalPages = (int)Math.Ceiling((double)_totalResults / _pageSize);
+            _searchResults = _allResults;
+            
+            // Generate AI insights for relevant searches (mock for now)
+            if (!string.IsNullOrEmpty(query.Text) && _showAIInsights)
+            {
+                _aiInsights = GenerateMockAIInsights(query);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log error and show mock data as fallback
+            Console.WriteLine($"Search API error: {ex.Message}");
+            _allResults = GenerateMockSearchResults(query);
+            ApplySorting();
+            UpdatePagination();
+        }
+        finally
+        {
+            stopwatch.Stop();
+            _searchDurationMs = stopwatch.ElapsedMilliseconds;
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ApplyCurrentFiltersToQuery(SearchQuery query)
+    {
+        query.Category = _selectedCategory;
+        query.SecurityGrade = _selectedSecurityGrade;
+        query.TrustTier = _selectedTrustTier;
+        query.Timeframe = _selectedTimeframe;
+        query.IncludePrerelease = _includePrerelease;
+    }
+
+    private void ApplySorting()
+    {
+        _searchResults = _selectedSortOption switch
+        {
+            "trending" => _allResults.OrderByDescending(p => p.IsTrending).ThenByDescending(p => p.WeeklyDownloads).ToList(),
+            "downloads" => _allResults.OrderByDescending(p => p.WeeklyDownloads).ToList(),
+            "rating" => _allResults.OrderByDescending(p => p.Rating).ToList(),
+            "updated" => _allResults.OrderByDescending(p => p.LastUpdated).ToList(),
+            "security" => _allResults.OrderByDescending(p => p.SecurityScore).ToList(),
+            "name" => _allResults.OrderBy(p => p.Name).ToList(),
+            _ => _allResults.OrderByDescending(p => p.AIRelevanceScore ?? 0).ToList()
+        };
+    }
+
+    private void UpdatePagination()
+    {
+        _totalPages = (int)Math.Ceiling((double)_searchResults.Count / _pageSize);
+        if (_currentPage > _totalPages) _currentPage = 1;
+    }
+
+    private IEnumerable<PackageInfo> GetPagedResults()
+    {
+        var skip = (_currentPage - 1) * _pageSize;
+        return _searchResults.Skip(skip).Take(_pageSize);
+    }
+
+    // Filter event handlers
+    private async Task OnSortChanged(string sortOption)
+    {
+        _selectedSortOption = sortOption;
+        ApplySorting();
+        UpdatePagination();
+        StateHasChanged();
+    }
+
+    private async Task OnCategoryChanged(string category)
+    {
+        _selectedCategory = category;
+        if (_hasSearched) await PerformSearch(_currentQuery!);
+    }
+
+    private async Task OnSecurityGradeChanged(string grade)
+    {
+        _selectedSecurityGrade = grade;
+        if (_hasSearched) await PerformSearch(_currentQuery!);
+    }
+
+    private async Task OnTrustTierChanged(TrustTier? tier)
+    {
+        _selectedTrustTier = tier;
+        if (_hasSearched) await PerformSearch(_currentQuery!);
+    }
+
+    private async Task OnDownloadRangeChanged(string range)
+    {
+        _selectedDownloadRange = range;
+        if (_hasSearched) await PerformSearch(_currentQuery!);
+    }
+
+    private async Task OnTimeframeChanged(string timeframe)
+    {
+        _selectedTimeframe = timeframe;
+        if (_hasSearched) await PerformSearch(_currentQuery!);
+    }
+
+    private async Task OnPageChanged(int page)
+    {
+        _currentPage = page;
+        StateHasChanged();
+        
+        // Scroll to top of results
+        await JSRuntime.InvokeVoidAsync("window.scrollTo", 0, 0);
+    }
+
+    // Action handlers
+    private async Task HandleInstall(PackageInfo package)
+    {
+        // Implementation for package installation
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleDetails(PackageInfo package)
+    {
+        Navigation.NavigateTo($"/package/{package.Publisher.Name}/{package.Name}");
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleStar(PackageInfo package)
+    {
+        package.IsStarred = !package.IsStarred;
+        StateHasChanged();
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleShare(PackageInfo package)
+    {
+        // Implementation for package sharing
+        await Task.CompletedTask;
+    }
+
+    private async Task HandleMore(PackageInfo package)
+    {
+        // Implementation for more options
+        await Task.CompletedTask;
+    }
+
+    // Helper methods
+    private void ClearSearch()
+    {
+        _hasSearched = false;
+        _currentQuery = null;
+        _searchResults.Clear();
+        _allResults.Clear();
+        _aiInsights = null;
+        StateHasChanged();
+    }
+
+    private void ClearAllFilters()
+    {
+        _selectedCategory = "";
+        _selectedSecurityGrade = "";
+        _selectedTrustTier = null;
+        _selectedDownloadRange = "";
+        _selectedTimeframe = "";
+        StateHasChanged();
+    }
+
+    private Dictionary<string, string> GetActiveFilters()
+    {
+        var filters = new Dictionary<string, string>();
+        
+        if (!string.IsNullOrEmpty(_selectedCategory))
+            filters.Add("category", PackageCategories[_selectedCategory]);
+        if (!string.IsNullOrEmpty(_selectedSecurityGrade))
+            filters.Add("security", $"Grade {_selectedSecurityGrade}+");
+        if (_selectedTrustTier.HasValue)
+            filters.Add("trust", _selectedTrustTier.Value.ToString());
+        if (!string.IsNullOrEmpty(_selectedDownloadRange))
+            filters.Add("downloads", _selectedDownloadRange);
+        if (!string.IsNullOrEmpty(_selectedTimeframe))
+            filters.Add("timeframe", _selectedTimeframe);
+            
+        return filters;
+    }
+
+    private void RemoveFilter(string filterKey)
+    {
+        switch (filterKey)
+        {
+            case "category": _selectedCategory = ""; break;
+            case "security": _selectedSecurityGrade = ""; break;
+            case "trust": _selectedTrustTier = null; break;
+            case "downloads": _selectedDownloadRange = ""; break;
+            case "timeframe": _selectedTimeframe = ""; break;
+        }
+        StateHasChanged();
+    }
+
+    private async Task SearchByCategory(string categoryKey)
+    {
+        _selectedCategory = categoryKey;
+        await PerformSearch(new SearchQuery { Category = categoryKey });
+    }
+
+    private async Task SearchByTrend(string trend)
+    {
+        await PerformSearch(new SearchQuery { Text = trend });
+    }
+
+    private async Task HandleSuggestedQuery(string query)
+    {
+        await PerformSearch(new SearchQuery { Text = query });
+    }
+
+    // Mock data generation methods
+    private List<PackageInfo> GenerateMockSearchResults(SearchQuery query)
+    {
+        var random = new Random();
+        var results = new List<PackageInfo>();
+        
+        var basePackages = new[]
+        {
+            ("ai-assistant", "AI Assistant Tools", "Advanced AI assistant capabilities"),
+            ("data-analyzer", "Data Analysis Suite", "Comprehensive data analysis tools"),
+            ("web-scraper", "Web Scraping Tools", "Efficient web scraping utilities"),
+            ("file-processor", "File Processing Engine", "High-performance file processing"),
+            ("api-connector", "API Integration Hub", "Seamless API integrations"),
+            ("security-scanner", "Security Analysis Tools", "Advanced security scanning"),
+            ("automation-bot", "Automation Framework", "Powerful automation capabilities"),
+            ("ml-toolkit", "Machine Learning Kit", "Complete ML development tools"),
+            ("cloud-deployer", "Cloud Deployment Tools", "Easy cloud deployments"),
+            ("database-manager", "Database Management", "Comprehensive database tools")
+        };
+
+        var publishers = new[]
+        {
+            new PublisherInfo { Name = "ai-innovations", DisplayName = "AI Innovations Ltd", Type = PublisherType.Organization, IsVerified = true },
+            new PublisherInfo { Name = "data-solutions", DisplayName = "DataSolutions Corp", Type = PublisherType.Organization, IsVerified = true },
+            new PublisherInfo { Name = "dev-tools", DisplayName = "DevTools Inc", Type = PublisherType.Organization, IsVerified = false },
+            new PublisherInfo { Name = "open-source", DisplayName = "OpenSource Community", Type = PublisherType.Individual, IsVerified = true },
+            new PublisherInfo { Name = "enterprise-tech", DisplayName = "Enterprise Tech Solutions", Type = PublisherType.Organization, IsVerified = true }
+        };
+
+        for (int i = 0; i < Math.Min(50, basePackages.Length * 5); i++)
+        {
+            var basePackage = basePackages[i % basePackages.Length];
+            var package = new PackageInfo
+            {
+                Name = $"{basePackage.Item1}-{random.Next(1, 100)}",
+                LatestVersion = $"{random.Next(1, 5)}.{random.Next(0, 10)}.{random.Next(0, 10)}",
+                Description = $"{basePackage.Item3} with enhanced features and improved performance.",
+                Publisher = publishers[random.Next(publishers.Length)],
+                SecurityGrade = new[] { "A+", "A", "B+", "B", "C" }[random.Next(5)],
+                SecurityScore = random.NextDouble() * 3 + 7,
+                TrustTier = (TrustTier)random.Next(4),
+                WeeklyDownloads = random.Next(100, 200000),
+                Rating = random.NextDouble() * 2 + 3,
+                LastUpdated = DateTime.UtcNow.AddDays(-random.Next(1, 365)),
+                Tags = GenerateRandomTags(random),
+                IsTrending = random.Next(10) < 2,
+                IsStarred = false,
+                AIRelevanceScore = string.IsNullOrEmpty(query.Text) ? null : random.NextDouble() * 30 + 70
+            };
+
+            results.Add(package);
+        }
+
+        return results;
+    }
+
+    private List<string> GenerateRandomTags(Random random)
+    {
+        var allTags = new[] { "AI", "ML", "Data", "Web", "API", "Security", "Automation", "Cloud", "Database", "Analytics" };
+        var count = random.Next(2, 6);
+        return allTags.OrderBy(x => random.Next()).Take(count).ToList();
+    }
+
+    private AISearchInsights GenerateMockAIInsights(SearchQuery query)
+    {
+        return new AISearchInsights
+        {
+            SummaryText = $"Based on your search for \"{query.Text}\", I found packages that match your criteria with high relevance scores. Consider filtering by trust tier for enterprise use.",
+            SuggestedQueries = new[] { "machine learning", "data processing", "automation tools", "security scanner" }
+        };
+    }
+
+    private List<CategoryInfo> GetPopularCategories()
+    {
+        return new List<CategoryInfo>
+        {
+            new() { Key = "ai", Name = "AI & ML", Icon = Icons.Material.Filled.Psychology },
+            new() { Key = "data", Name = "Data", Icon = Icons.Material.Filled.DataUsage },
+            new() { Key = "web", Name = "Web", Icon = Icons.Material.Filled.Web },
+            new() { Key = "automation", Name = "Automation", Icon = Icons.Material.Filled.SmartToy },
+            new() { Key = "security", Name = "Security", Icon = Icons.Material.Filled.Security },
+            new() { Key = "analytics", Name = "Analytics", Icon = Icons.Material.Filled.Analytics }
+        };
+    }
+
+    private List<string> GetTrendingSearches()
+    {
+        return new List<string>
+        {
+            "AI assistant", "data visualization", "web scraping", "API gateway",
+            "machine learning", "automation", "security scan", "file processing"
+        };
+    }
+
+    private List<PackageInfo> GetRecentPackages()
+    {
+        return GenerateMockSearchResults(new SearchQuery()).Take(6).ToList();
+    }
+
+    private string GetApiSortField(string uiSortOption)
+    {
+        return uiSortOption switch
+        {
+            "trending" => "downloads",
+            "downloads" => "downloads",
+            "rating" => "rating",
+            "updated" => "created",
+            "security" => "name", // API doesn't support security score sorting yet
+            "name" => "name",
+            _ => "downloads"
+        };
+    }
+
+    private string GetApiSortDirection(string uiSortOption)
+    {
+        return uiSortOption switch
+        {
+            "name" => "ascending",
+            _ => "descending"
+        };
+    }
+
+    private List<PackageInfo> ConvertApiResultsToPackageInfo(IEnumerable<PackageSearchResultItem> apiResults)
+    {
+        return apiResults.Select(item => new PackageInfo
+        {
+            Id = item.Id,
+            Name = item.Name,
+            LatestVersion = item.Version,
+            Description = item.Description,
+            Publisher = new PublisherInfo { Name = item.Publisher },
+            Version = item.Version,
+            LastUpdated = item.LastUpdated,
+            WeeklyDownloads = item.DownloadCount,
+            SecurityGrade = item.SecurityGrade,
+            TrustTier = Enum.TryParse<TrustTier>(item.TrustTier, out var trustTier) ? trustTier : TrustTier.Unverified,
+            Tags = item.Tags,
+            Category = item.Category,
+            License = item.License,
+            IsFeatured = item.IsFeatured,
+            IsTrending = item.IsTrending,
+            Rating = item.Rating,
+            RatingCount = item.RatingCount,
+            CreatedAt = item.CreatedAt,
+            SecurityScore = CalculateSecurityScore(item.SecurityGrade),
+            TrustScore = CalculateTrustScore(item.TrustTier),
+            AIRelevanceScore = null // API doesn't provide this yet
+        }).ToList();
+    }
+
+    private double CalculateSecurityScore(string securityGrade)
+    {
+        return securityGrade.ToUpper() switch
+        {
+            "A+" => 100,
+            "A" => 90,
+            "B+" => 85,
+            "B" => 80,
+            "C+" => 75,
+            "C" => 70,
+            "D" => 60,
+            "F" => 40,
+            _ => 50
+        };
+    }
+
+    private double CalculateTrustScore(string trustTier)
+    {
+        return trustTier.ToLower() switch
+        {
+            "enterprise" => 100,
+            "trusted" => 85,
+            "verified" => 70,
+            "unverified" => 40,
+            _ => 40
+        };
+    }
+
+    // Helper classes
+    public class AISearchInsights
+    {
+        public string SummaryText { get; set; } = "";
+        public string[] SuggestedQueries { get; set; } = Array.Empty<string>();
+    }
+
+    public class CategoryInfo
+    {
+        public string Key { get; set; } = "";
+        public string Name { get; set; } = "";
+        public string Icon { get; set; } = "";
+    }
+}

@@ -5,8 +5,7 @@ namespace MCPHub.Domain.Contracts.Responses;
 /// <summary>
 /// Result model for package installation operations
 /// </summary>
-public record InstallationResult
-{
+public record InstallationResult {
     /// <summary>
     /// Gets or sets whether the installation request was successful
     /// </summary>
@@ -39,16 +38,12 @@ public record InstallationResult
     /// <param name="status">Current installation status</param>
     /// <param name="metadata">Additional metadata</param>
     /// <returns>Successful installation result</returns>
-    public static InstallationResult CreateSuccess(Guid installationId, InstallationStatus status, Dictionary<string, object>? metadata = null)
-    {
-        return new InstallationResult
-        {
-            Success = true,
-            InstallationId = installationId,
-            Status = status,
-            Metadata = metadata
-        };
-    }
+    public static InstallationResult CreateSuccess(Guid installationId, InstallationStatus status, Dictionary<string, object>? metadata = null) => new InstallationResult {
+        Success = true,
+        InstallationId = installationId,
+        Status = status,
+        Metadata = metadata
+    };
 
     /// <summary>
     /// Creates a failed installation result
@@ -56,13 +51,9 @@ public record InstallationResult
     /// <param name="errorMessage">Error description</param>
     /// <param name="status">Current installation status (if applicable)</param>
     /// <returns>Failed installation result</returns>
-    public static InstallationResult CreateFailure(string errorMessage, InstallationStatus? status = null)
-    {
-        return new InstallationResult
-        {
-            Success = false,
-            ErrorMessage = errorMessage,
-            Status = status
-        };
-    }
+    public static InstallationResult CreateFailure(string errorMessage, InstallationStatus? status = null) => new InstallationResult {
+        Success = false,
+        ErrorMessage = errorMessage,
+        Status = status
+    };
 }

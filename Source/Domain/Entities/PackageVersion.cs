@@ -48,7 +48,7 @@ public class PackageVersion : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "Created",
             UserId = Guid.Empty, // System action
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -57,7 +57,7 @@ public class PackageVersion : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "Security Scan Updated",
             UserId = Guid.Empty, // System action
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 }

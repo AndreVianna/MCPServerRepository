@@ -42,7 +42,7 @@ public record InstallationResult {
         Success = true,
         InstallationId = installationId,
         Status = status,
-        Metadata = metadata
+        Metadata = metadata,
     };
 
     /// <summary>
@@ -54,6 +54,6 @@ public record InstallationResult {
     public static InstallationResult CreateFailure(string errorMessage, InstallationStatus? status = null) => new() {
         Success = false,
         ErrorMessage = errorMessage,
-        Status = status
+        Status = status,
     };
 }

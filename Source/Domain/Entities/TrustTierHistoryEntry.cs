@@ -62,7 +62,7 @@ public class TrustTierHistoryEntry : BaseEntity {
     /// <summary>
     /// Gets or sets additional metadata about the tier change
     /// </summary>
-    public Dictionary<string, object> Metadata { get; set; } = new();
+    public Dictionary<string, object> Metadata { get; set; } = [];
 
     /// <summary>
     /// Gets or sets the assessment ID that triggered this change
@@ -94,13 +94,13 @@ public class TrustTierHistoryEntry : BaseEntity {
         IsAutomatic = isAutomatic;
         ChangedAt = DateTimeOffset.UtcNow;
         TrustScoreAtChange = trustScoreAtChange;
-        Metadata = metadata ?? new Dictionary<string, object>();
+        Metadata = metadata ?? [];
         AssessmentId = assessmentId;
 
         AuditTrail.Add(new AuditEntry {
             Action = $"Trust Tier Changed from {fromTier} to {toTier}",
             UserId = changedByUserId ?? Guid.Empty,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -134,7 +134,7 @@ public class TrustTierHistoryEntry : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "Trust Tier History Metadata Updated",
             UserId = userId ?? Guid.Empty,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 }

@@ -90,6 +90,6 @@ public record PackageUninstalledEvent : BaseMessage {
             OriginalInstalledAt = originalInstalledAt,
             UninstalledAt = uninstalledAt,
             UninstallReason = uninstallReason,
-            ClientVersion = clientVersion
+            ClientVersion = clientVersion,
         };
 }

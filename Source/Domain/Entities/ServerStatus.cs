@@ -4,5 +4,5 @@ public enum ServerStatus {
     Pending,
     Approved,
     Rejected,
-    Suspended
+    Suspended,
 }

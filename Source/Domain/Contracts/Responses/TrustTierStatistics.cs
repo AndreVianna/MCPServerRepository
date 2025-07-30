@@ -14,12 +14,12 @@ public class TrustTierStatistics {
     /// <summary>
     /// Gets or sets the distribution of packages by trust tier
     /// </summary>
-    public Dictionary<TrustTier, int> TierDistribution { get; set; } = new();
+    public Dictionary<TrustTier, int> TierDistribution { get; set; } = [];
 
     /// <summary>
     /// Gets or sets the distribution of packages by trust tier as percentages
     /// </summary>
-    public Dictionary<TrustTier, decimal> TierPercentages { get; set; } = new();
+    public Dictionary<TrustTier, decimal> TierPercentages { get; set; } = [];
 
     /// <summary>
     /// Gets or sets the average trust score across all packages
@@ -64,12 +64,12 @@ public class TrustTierStatistics {
     /// <summary>
     /// Gets or sets trending statistics for trust tiers
     /// </summary>
-    public Dictionary<TrustTier, TrustTierTrend> TierTrends { get; set; } = new();
+    public Dictionary<TrustTier, TrustTierTrend> TierTrends { get; set; } = [];
 
     /// <summary>
     /// Gets or sets additional platform-wide trust metrics
     /// </summary>
-    public Dictionary<string, object> AdditionalMetrics { get; set; } = new();
+    public Dictionary<string, object> AdditionalMetrics { get; set; } = [];
 }
 
 /// <summary>
@@ -130,5 +130,5 @@ public enum TrendDirection {
     /// <summary>
     /// Trend is downward (decreasing)
     /// </summary>
-    Down = 2
+    Down = 2,
 }

@@ -5,5 +5,5 @@ public enum SecurityScanSeverity {
     Low,
     Medium,
     High,
-    Critical
+    Critical,
 }

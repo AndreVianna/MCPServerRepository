@@ -82,6 +82,6 @@ public record PackageInstalledEvent : BaseMessage {
             InstallationPath = installationPath,
             InstalledAt = installedAt,
             ClientVersion = clientVersion,
-            InstallationOptions = installationOptions
+            InstallationOptions = installationOptions,
         };
 }

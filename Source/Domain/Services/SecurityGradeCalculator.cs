@@ -8,11 +8,7 @@ namespace MCPHub.Domain.Services;
 /// Service for calculating security grades based on scan results
 /// </summary>
 public class SecurityGradeCalculator : ISecurityGradeCalculator {
-    private readonly Dictionary<string, GradeThreshold> _gradeThresholds;
-
-    public SecurityGradeCalculator() {
-        _gradeThresholds = InitializeGradeThresholds();
-    }
+    private readonly Dictionary<string, GradeThreshold> _gradeThresholds = InitializeGradeThresholds();
 
     /// <summary>
     /// Calculates a security grade based on vulnerabilities found
@@ -66,42 +62,42 @@ public class SecurityGradeCalculator : ISecurityGradeCalculator {
             MaxHighIssues = 0,
             MaxMediumIssues = 0,
             MaxTotalScore = 0,
-            Description = "No security issues found, excellent security practices"
+            Description = "No security issues found, excellent security practices",
         },
         ["A"] = new GradeThreshold {
             MaxCriticalIssues = 0,
             MaxHighIssues = 0,
             MaxMediumIssues = 0,
             MaxTotalScore = 5,
-            Description = "Minor low-severity issues only"
+            Description = "Minor low-severity issues only",
         },
         ["B"] = new GradeThreshold {
             MaxCriticalIssues = 0,
             MaxHighIssues = 0,
             MaxMediumIssues = 3,
             MaxTotalScore = 15,
-            Description = "Some medium-severity issues present"
+            Description = "Some medium-severity issues present",
         },
         ["C"] = new GradeThreshold {
             MaxCriticalIssues = 0,
             MaxHighIssues = 2,
             MaxMediumIssues = 5,
             MaxTotalScore = 30,
-            Description = "High-severity issues present"
+            Description = "High-severity issues present",
         },
         ["D"] = new GradeThreshold {
             MaxCriticalIssues = 1,
             MaxHighIssues = 5,
             MaxMediumIssues = 10,
             MaxTotalScore = 50,
-            Description = "Critical issues present"
+            Description = "Critical issues present",
         },
         ["F"] = new GradeThreshold {
             MaxCriticalIssues = int.MaxValue,
             MaxHighIssues = int.MaxValue,
             MaxMediumIssues = int.MaxValue,
             MaxTotalScore = int.MaxValue,
-            Description = "Severe security risks or scan failures"
-        }
+            Description = "Severe security risks or scan failures",
+        },
     };
 }

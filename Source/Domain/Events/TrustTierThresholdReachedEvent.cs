@@ -70,7 +70,7 @@ public record TrustTierThresholdReachedEvent : BaseMessage {
     /// <summary>
     /// Gets or sets additional threshold metadata
     /// </summary>
-    public Dictionary<string, object> ThresholdMetadata { get; init; } = new();
+    public Dictionary<string, object> ThresholdMetadata { get; init; } = [];
 
     /// <summary>
     /// Gets or sets the assessment ID that detected the threshold
@@ -125,5 +125,5 @@ public enum ThresholdType {
     /// <summary>
     /// Publisher verification status has changed
     /// </summary>
-    PublisherStatusChange = 6
+    PublisherStatusChange = 6,
 }

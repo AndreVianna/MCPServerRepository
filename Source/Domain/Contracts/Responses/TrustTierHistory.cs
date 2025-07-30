@@ -114,5 +114,5 @@ public enum TierChangeType {
     /// <summary>
     /// Restoration after issue resolution
     /// </summary>
-    Restoration = 6
+    Restoration = 6,
 }

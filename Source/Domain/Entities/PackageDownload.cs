@@ -51,7 +51,7 @@ public class PackageDownload : BaseEntity {
     /// <summary>
     /// Gets or sets additional metadata about the download
     /// </summary>
-    public Dictionary<string, object> Metadata { get; set; } = new();
+    public Dictionary<string, object> Metadata { get; set; } = [];
 
     private PackageDownload() { } // For EF Core
 
@@ -76,12 +76,12 @@ public class PackageDownload : BaseEntity {
         UserAgent = userAgent;
         DownloadMethod = downloadMethod;
         DownloadedAt = DateTimeOffset.UtcNow;
-        Metadata = metadata ?? new Dictionary<string, object>();
+        Metadata = metadata ?? [];
 
         AuditTrail.Add(new AuditEntry {
             Action = "Downloaded",
             UserId = userId ?? Guid.Empty,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -100,7 +100,7 @@ public class PackageDownload : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "Metadata Updated",
             UserId = userId ?? Guid.Empty,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 }

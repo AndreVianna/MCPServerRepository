@@ -38,11 +38,9 @@ public class PackageService(IUnitOfWork unitOfWork) : IPackageService {
     public async Task<SearchResult<Package>> SearchPackagesAsync(SearchRequest request, CancellationToken cancellationToken = default) {
         ArgumentNullException.ThrowIfNull(request);
 
-        if (!request.IsValid(out var errorMessage)) {
-            throw new ArgumentException(errorMessage, nameof(request));
-        }
-
-        return await _unitOfWork.Packages.SearchAsync(request, cancellationToken);
+        return !request.IsValid(out var errorMessage)
+            ? throw new ArgumentException(errorMessage, nameof(request))
+            : await _unitOfWork.Packages.SearchAsync(request, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -53,7 +51,7 @@ public class PackageService(IUnitOfWork unitOfWork) : IPackageService {
         package.AuditTrail.Add(new AuditEntry {
             Action = "Package Created via PackageService",
             UserId = Guid.Empty, // System action for now
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
 
         var createdPackage = await _unitOfWork.Packages.AddAsync(package, cancellationToken);
@@ -70,7 +68,7 @@ public class PackageService(IUnitOfWork unitOfWork) : IPackageService {
         package.AuditTrail.Add(new AuditEntry {
             Action = "Package Updated via PackageService",
             UserId = Guid.Empty, // System action for now
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
 
         var updatedPackage = await _unitOfWork.Packages.UpdateAsync(package, cancellationToken);
@@ -90,7 +88,7 @@ public class PackageService(IUnitOfWork unitOfWork) : IPackageService {
         package.AuditTrail.Add(new AuditEntry {
             Action = "Package Deleted via PackageService",
             UserId = Guid.Empty, // System action for now
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
 
         await _unitOfWork.Packages.DeleteAsync(package, cancellationToken);

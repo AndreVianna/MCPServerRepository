@@ -5,5 +5,5 @@ public enum ScanStatus {
     InProgress,
     Completed,
     Failed,
-    Cancelled
+    Cancelled,
 }

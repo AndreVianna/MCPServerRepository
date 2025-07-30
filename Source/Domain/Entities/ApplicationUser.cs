@@ -34,7 +34,7 @@ public class ApplicationUser : IdentityUser<Guid> {
         AuditTrail.Add(new AuditEntry {
             Action = "Created",
             UserId = Id,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -54,7 +54,7 @@ public class ApplicationUser : IdentityUser<Guid> {
         AuditTrail.Add(new AuditEntry {
             Action = "Profile Updated",
             UserId = Id,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -63,7 +63,7 @@ public class ApplicationUser : IdentityUser<Guid> {
         AuditTrail.Add(new AuditEntry {
             Action = "Email Verified",
             UserId = Id,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -72,7 +72,7 @@ public class ApplicationUser : IdentityUser<Guid> {
         AuditTrail.Add(new AuditEntry {
             Action = "Publisher Enabled",
             UserId = Id,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 }

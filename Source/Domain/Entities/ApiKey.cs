@@ -170,7 +170,7 @@ public class ApiKey : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "API Key Created",
             UserId = userId,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -202,7 +202,7 @@ public class ApiKey : BaseEntity {
             AuditTrail.Add(new AuditEntry {
                 Action = "API Key Scopes Updated",
                 UserId = updatedBy,
-                DateTime = DateTimeOffset.UtcNow
+                DateTime = DateTimeOffset.UtcNow,
             });
         }
     }
@@ -220,7 +220,7 @@ public class ApiKey : BaseEntity {
             AuditTrail.Add(new AuditEntry {
                 Action = "API Key Permissions Updated",
                 UserId = updatedBy,
-                DateTime = DateTimeOffset.UtcNow
+                DateTime = DateTimeOffset.UtcNow,
             });
         }
     }
@@ -236,7 +236,7 @@ public class ApiKey : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "API Key Rate Limit Updated",
             UserId = updatedBy,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -277,7 +277,7 @@ public class ApiKey : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "API Key Revoked",
             UserId = revokedBy,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -297,7 +297,7 @@ public class ApiKey : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "API Key Activated",
             UserId = activatedBy,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -320,7 +320,7 @@ public class ApiKey : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "API Key Deactivated",
             UserId = deactivatedBy,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -366,7 +366,7 @@ public class ApiKey : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "API Key IP Restrictions Updated",
             UserId = updatedBy,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -381,7 +381,7 @@ public class ApiKey : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "API Key Referrer Restrictions Updated",
             UserId = updatedBy,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -393,10 +393,7 @@ public class ApiKey : BaseEntity {
         if (Status != ApiKeyStatus.Active)
             return false;
 
-        if (ExpiresAt.HasValue && ExpiresAt.Value <= DateTimeOffset.UtcNow)
-            return false;
-
-        return true;
+        return !ExpiresAt.HasValue || ExpiresAt.Value > DateTimeOffset.UtcNow;
     }
 
     /// <summary>
@@ -430,12 +427,7 @@ public class ApiKey : BaseEntity {
     /// Gets the success rate of requests made with this API key
     /// </summary>
     /// <returns>Success rate as a percentage (0-100)</returns>
-    public double GetSuccessRate() {
-        if (RequestCount == 0)
-            return 0.0;
-
-        return (double)SuccessfulRequestCount / RequestCount * 100.0;
-    }
+    public double GetSuccessRate() => RequestCount == 0 ? 0.0 : (double)SuccessfulRequestCount / RequestCount * 100.0;
 }
 
 /// <summary>
@@ -445,7 +437,7 @@ public enum ApiKeyStatus {
     Active = 1,
     Inactive = 2,
     Expired = 3,
-    Revoked = 4
+    Revoked = 4,
 }
 
 /// <summary>

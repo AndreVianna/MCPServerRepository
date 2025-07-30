@@ -75,7 +75,7 @@ public class SecurityPolicy : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "Security Policy Created",
             UserId = Guid.Empty, // Will be set by the service
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -89,7 +89,7 @@ public class SecurityPolicy : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "Security Policy Rules Updated",
             UserId = userId,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -106,7 +106,7 @@ public class SecurityPolicy : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = $"Security Policy {(isActive ? "Activated" : "Deactivated")}",
             UserId = userId,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -122,7 +122,7 @@ public class SecurityPolicy : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "Security Policy Set as Default",
             UserId = userId,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 }

@@ -12,5 +12,5 @@ public enum SortDirection {
     /// <summary>
     /// Sort in descending order (Z-A, 9-0, newest to oldest)
     /// </summary>
-    Descending
+    Descending,
 }

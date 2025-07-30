@@ -59,9 +59,9 @@ public record PackageDownloadStats {
         TotalDownloads = 0,
         UniqueDownloads = 0,
         DownloadsLast30Days = 0,
-        DownloadsByVersion = new Dictionary<string, int>(),
-        DownloadsByMethod = new Dictionary<string, int>(),
-        DownloadsByDay = new Dictionary<string, int>(),
-        GeneratedAt = DateTimeOffset.UtcNow
+        DownloadsByVersion = [],
+        DownloadsByMethod = [],
+        DownloadsByDay = [],
+        GeneratedAt = DateTimeOffset.UtcNow,
     };
 }

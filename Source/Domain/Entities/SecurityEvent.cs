@@ -159,7 +159,7 @@ public class SecurityEvent : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "Security Event Created",
             UserId = userId ?? Guid.Empty,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -190,7 +190,7 @@ public class SecurityEvent : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "Security Event Context Updated",
             UserId = UserId ?? Guid.Empty,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -208,7 +208,7 @@ public class SecurityEvent : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "Security Event Metadata Added",
             UserId = UserId ?? Guid.Empty,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -226,7 +226,7 @@ public class SecurityEvent : BaseEntity {
             AuditTrail.Add(new AuditEntry {
                 Action = "Security Event Tag Added",
                 UserId = UserId ?? Guid.Empty,
-                DateTime = DateTimeOffset.UtcNow
+                DateTime = DateTimeOffset.UtcNow,
             });
         }
     }
@@ -243,7 +243,7 @@ public class SecurityEvent : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "Security Event Processed",
             UserId = processedBy ?? Guid.Empty,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -257,7 +257,7 @@ public class SecurityEvent : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "Security Event Correlated",
             UserId = UserId ?? Guid.Empty,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -268,7 +268,7 @@ public class SecurityEvent : BaseEntity {
     /// <param name="reason">Reason for the update</param>
     /// <param name="updatedBy">User who updated the score</param>
     public void UpdateRiskScore(int newRiskScore, string reason, Guid? updatedBy = null) {
-        if (newRiskScore < 0 || newRiskScore > 100)
+        if (newRiskScore is < 0 or > 100)
             throw new ArgumentOutOfRangeException(nameof(newRiskScore), "Risk score must be between 0 and 100");
 
         var oldScore = RiskScore;
@@ -278,13 +278,13 @@ public class SecurityEvent : BaseEntity {
             OldScore = oldScore,
             NewScore = newRiskScore,
             Reason = reason,
-            UpdatedAt = DateTimeOffset.UtcNow
+            UpdatedAt = DateTimeOffset.UtcNow,
         });
 
         AuditTrail.Add(new AuditEntry {
             Action = "Security Event Risk Score Updated",
             UserId = updatedBy ?? Guid.Empty,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -298,7 +298,7 @@ public class SecurityEvent : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "Security Event Alert Triggered",
             UserId = triggeredBy ?? Guid.Empty,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -313,7 +313,7 @@ public class SecurityEvent : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "Security Event Archived",
             UserId = archivedBy ?? Guid.Empty,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -345,7 +345,7 @@ public class SecurityEvent : BaseEntity {
             SecurityEventSeverity.Medium => 50,
             SecurityEventSeverity.High => 75,
             SecurityEventSeverity.Critical => 90,
-            _ => 10
+            _ => 10,
         };
 
         // Adjust score based on event type
@@ -356,7 +356,7 @@ public class SecurityEvent : BaseEntity {
             SecurityEventType.DataAccess => 1.0,
             SecurityEventType.Authorization => 0.9,
             SecurityEventType.Authentication => 0.9,
-            _ => 1.0
+            _ => 1.0,
         };
 
         return Math.Min(100, (int)(baseScore * typeMultiplier));
@@ -392,7 +392,7 @@ public enum SecurityEventType {
     TrustTierUpdated = 17,
     ComplianceAudit = 18,
     UserActivity = 19,
-    SystemEvent = 20
+    SystemEvent = 20,
 }
 
 /// <summary>
@@ -403,5 +403,5 @@ public enum SecurityEventSeverity {
     Low = 1,
     Medium = 2,
     High = 3,
-    Critical = 4
+    Critical = 4,
 }

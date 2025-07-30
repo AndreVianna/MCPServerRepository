@@ -5,5 +5,5 @@ public enum SecurityScanStatus {
     InProgress,
     Passed,
     Failed,
-    Error
+    Error,
 }

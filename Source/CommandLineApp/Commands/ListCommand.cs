@@ -1,5 +1,3 @@
-using System.CommandLine;
-
 using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Models;
 using MCPHub.CommandLineApp.Services;
@@ -144,7 +142,7 @@ public class ListCommand(
                     Page = page,
                     PageSize = limit,
                     SortBy = parsedSort,
-                    SortDirection = "Ascending"
+                    SortDirection = "Ascending",
                 };
 
                 var searchResults = await WithProgressAsync(
@@ -157,7 +155,7 @@ public class ListCommand(
                     TotalCount = searchResults.TotalCount,
                     Page = searchResults.Page,
                     PageSize = searchResults.PageSize,
-                    TotalPages = searchResults.TotalPages
+                    TotalPages = searchResults.TotalPages,
                 };
 
                 if (packageList.Packages.Count == 0) {

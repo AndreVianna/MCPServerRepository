@@ -1,5 +1,3 @@
-using System.CommandLine;
-
 using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Models;
 using MCPHub.CommandLineApp.Services;
@@ -137,7 +135,7 @@ public class SearchCommand(
                 Page = page,
                 PageSize = limit,
                 SortBy = parsedSort,
-                SortDirection = "Ascending"
+                SortDirection = "Ascending",
             };
 
             // Execute search with enhanced progress
@@ -250,8 +248,8 @@ public class SearchCommand(
             var options = new Dictionary<string, string> {
                 { "details", "View package details" },
                 { "filter", "Apply additional filters" },
-                { "sort", "Change sorting" }
-            };
+                { "sort", "Change sorting" },
+                                                         };
 
             if (allowInstall) {
                 options.Add("install", "Install a package");

@@ -1,7 +1,5 @@
 using MCPHub.CommandLineApp.Configuration;
 
-using Spectre.Console;
-
 namespace MCPHub.CommandLineApp.Services;
 
 /// <summary>
@@ -18,7 +16,7 @@ public class InteractionService(McpmConfiguration configuration) : IInteractionS
         }
 
         var prompt = new ConfirmationPrompt(message) {
-            DefaultValue = defaultValue
+            DefaultValue = defaultValue,
         };
 
         var result = AnsiConsole.Prompt(prompt);
@@ -107,7 +105,7 @@ public class InteractionService(McpmConfiguration configuration) : IInteractionS
         }
 
         var prompt = new TextPrompt<string>(message) {
-            IsSecret = true
+            IsSecret = true,
         };
 
         if (validator != null) {
@@ -174,7 +172,7 @@ public class InteractionService(McpmConfiguration configuration) : IInteractionS
         var panel = new Panel(BuildConsentContent(details, permissions, risks)) {
             Header = new PanelHeader(title),
             Border = BoxBorder.Rounded,
-            BorderStyle = Style.Parse("yellow")
+            BorderStyle = Style.Parse("yellow"),
         };
 
         AnsiConsole.Write(panel);
@@ -182,7 +180,7 @@ public class InteractionService(McpmConfiguration configuration) : IInteractionS
 
         // Ask for consent
         var confirmPrompt = new ConfirmationPrompt("[yellow]Do you consent to these permissions and acknowledge the risks?[/]") {
-            DefaultValue = false
+            DefaultValue = false,
         };
 
         var result = AnsiConsole.Prompt(confirmPrompt);
@@ -208,22 +206,18 @@ public class InteractionService(McpmConfiguration configuration) : IInteractionS
     }
 
     /// <inheritdoc />
-    public async Task<T> ShowSpinnerAsync<T>(string message, Func<Task<T>> operation, CancellationToken cancellationToken = default) {
-        if (_configuration.Ui.NonInteractive || !_configuration.Ui.ProgressBars) {
-            return await operation();
-        }
-
-        return await AnsiConsole.Status()
+    public async Task<T> ShowSpinnerAsync<T>(string message, Func<Task<T>> operation, CancellationToken cancellationToken = default) => _configuration.Ui.NonInteractive || !_configuration.Ui.ProgressBars
+            ? await operation()
+            : await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
             .StartAsync(message, async _ => await operation());
-    }
 
     private static string BuildConsentContent(string details, IEnumerable<string> permissions, IEnumerable<string>? risks) {
         var content = new List<string> {
             $"[bold]Details:[/] {details}",
             "",
-            "[bold]Required Permissions:[/]"
-        };
+            "[bold]Required Permissions:[/]",
+                                       };
 
         foreach (var permission in permissions) {
             content.Add($"  • {permission}");

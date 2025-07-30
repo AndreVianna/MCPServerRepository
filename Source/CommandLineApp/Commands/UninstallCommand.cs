@@ -1,11 +1,6 @@
-using System.CommandLine;
-using System.CommandLine.Invocation;
-
 using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Services;
 using MCPHub.CommandLineApp.Utilities;
-
-using Spectre.Console;
 
 namespace MCPHub.CommandLineApp.Commands;
 
@@ -233,8 +228,8 @@ public class UninstallCommand(
                 "Validating uninstall",
                 "Analyzing dependencies",
                 "Creating backup",
-                "Uninstalling package"
-            });
+                "Uninstalling package",
+                                                                                                });
 
             // Stage 1: Validate uninstall
             progress.StartStep(0, $"Validating uninstall for '{package}'...");
@@ -365,7 +360,7 @@ public class UninstallCommand(
                         Messages = purgeResult.Messages,
                         Errors = purgeResult.Errors,
                         Duration = purgeResult.Duration,
-                        FreedSpace = purgeResult.FreedSpace
+                        FreedSpace = purgeResult.FreedSpace,
                     };
                 }
                 else {
@@ -704,6 +699,6 @@ public class UninstallCommand(
         DependencyType.Development => "[blue]Development[/]",
         DependencyType.Optional => "[yellow]Optional[/]",
         DependencyType.Peer => "[purple]Peer[/]",
-        _ => type.ToString()
+        _ => type.ToString(),
     };
 }

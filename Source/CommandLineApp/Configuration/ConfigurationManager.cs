@@ -50,7 +50,7 @@ public class McpmConfigurationManager : IMcpmConfigurationManager {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             PropertyNameCaseInsensitive = true,
             // Enable reflection fallback for JSON serialization
-            TypeInfoResolver = new System.Text.Json.Serialization.Metadata.DefaultJsonTypeInfoResolver()
+            TypeInfoResolver = new System.Text.Json.Serialization.Metadata.DefaultJsonTypeInfoResolver(),
         };
 
         _configurationPath = GetConfigurationPath();
@@ -145,7 +145,7 @@ public class McpmConfigurationManager : IMcpmConfigurationManager {
             configuration.Paths.Cache,
             configuration.Paths.Packages,
             configuration.Paths.Temp,
-            configuration.Paths.Config
+            configuration.Paths.Config,
         };
 
         foreach (var path in paths) {

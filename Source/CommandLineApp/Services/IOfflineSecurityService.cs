@@ -166,7 +166,7 @@ public record VulnerabilityDataSource {
     public string Type { get; init; } = string.Empty; // "nvd", "osv", "github", "custom"
     public bool IsEnabled { get; init; } = true;
     public TimeSpan UpdateInterval { get; init; } = TimeSpan.FromHours(24);
-    public Dictionary<string, string> Configuration { get; init; } = new();
+    public Dictionary<string, string> Configuration { get; init; } = [];
 }
 
 /// <summary>
@@ -300,7 +300,7 @@ public record OfflineSecurityScore {
     public int MaxScore { get; init; }
     public decimal Percentage { get; init; }
     public string Grade { get; init; } = string.Empty;
-    public Dictionary<string, int> CategoryScores { get; init; } = new();
+    public Dictionary<string, int> CategoryScores { get; init; } = [];
 }
 
 /// <summary>
@@ -340,5 +340,5 @@ public enum VulnerabilitySource {
     Snyk,          // Snyk vulnerability database
     NPM,           // NPM security advisories
     Custom,        // Custom vulnerability feeds
-    Unknown
+    Unknown,
 }

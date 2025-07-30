@@ -26,7 +26,7 @@ public class McpHubApiClient : IMcpHubApiClient {
 
         _jsonOptions = new JsonSerializerOptions {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            PropertyNameCaseInsensitive = true
+            PropertyNameCaseInsensitive = true,
         };
 
         ConfigureHttpClient();
@@ -40,7 +40,7 @@ public class McpHubApiClient : IMcpHubApiClient {
 
             var queryParams = new List<string>
             {
-                $"q={Uri.EscapeDataString(request.Query)}"
+                $"q={Uri.EscapeDataString(request.Query)}",
             };
 
             if (request.Categories?.Any() == true) {
@@ -158,7 +158,7 @@ public class McpHubApiClient : IMcpHubApiClient {
                 TotalCount = int.TryParse(totalCount, out var count) ? count : apiResponse.Data.Count,
                 Page = page,
                 PageSize = pageSize,
-                TotalPages = int.TryParse(totalPages, out var pages) ? pages : 1
+                TotalPages = int.TryParse(totalPages, out var pages) ? pages : 1,
             };
 
             _logger.LogInformation("Retrieved {PackageCount} packages (page {Page})", result.Packages.Count, page);
@@ -195,7 +195,7 @@ public class McpHubApiClient : IMcpHubApiClient {
             }
 
             var result = new PackageVersionsResponse {
-                Versions = apiResponse.Data
+                Versions = apiResponse.Data,
             };
 
             _logger.LogInformation("Retrieved {VersionCount} versions for package: {PackageName}",
@@ -524,7 +524,7 @@ public class McpHubApiClient : IMcpHubApiClient {
             HttpStatusCode.Forbidden => new UnauthorizedAccessException("Access forbidden"),
             HttpStatusCode.NotFound => new PackageNotFoundException("Resource not found"),
             HttpStatusCode.TooManyRequests => new HttpRequestException("Rate limit exceeded"),
-            _ => new HttpRequestException(errorMessage)
+            _ => new HttpRequestException(errorMessage),
         };
     }
 

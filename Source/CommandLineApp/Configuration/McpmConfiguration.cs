@@ -14,7 +14,7 @@ public class McpmConfiguration {
     /// <summary>
     /// Multiple registry configurations (preferred approach)
     /// </summary>
-    public Dictionary<string, RegistryConfiguration> Registries { get; set; } = new();
+    public Dictionary<string, RegistryConfiguration> Registries { get; set; } = [];
 
     /// <summary>
     /// Authentication configuration settings (deprecated - use credential store instead)
@@ -133,7 +133,7 @@ public class RegistryConfiguration {
     /// <summary>
     /// Supported authentication methods
     /// </summary>
-    public IList<string> SupportedAuthMethods { get; set; } = new List<string> { "bearer", "api-key" };
+    public IList<string> SupportedAuthMethods { get; set; } = ["bearer", "api-key"];
 
     /// <summary>
     /// Whether to verify SSL certificates for this registry
@@ -143,7 +143,7 @@ public class RegistryConfiguration {
     /// <summary>
     /// Additional headers to send with requests to this registry
     /// </summary>
-    public Dictionary<string, string> Headers { get; set; } = new();
+    public Dictionary<string, string> Headers { get; set; } = [];
 
     /// <summary>
     /// Gets the effective display name for this registry
@@ -297,7 +297,7 @@ public class CacheConfiguration {
     public CacheTypeConfiguration PackageInfo { get; set; } = new() {
         Enabled = true,
         Expiration = TimeSpan.FromHours(12),
-        MaxEntries = 1000
+        MaxEntries = 1000,
     };
 
     /// <summary>
@@ -306,7 +306,7 @@ public class CacheConfiguration {
     public CacheTypeConfiguration PackageVersions { get; set; } = new() {
         Enabled = true,
         Expiration = TimeSpan.FromHours(6),
-        MaxEntries = 500
+        MaxEntries = 500,
     };
 
     /// <summary>
@@ -315,7 +315,7 @@ public class CacheConfiguration {
     public CacheTypeConfiguration SecuritySummary { get; set; } = new() {
         Enabled = true,
         Expiration = TimeSpan.FromHours(24),
-        MaxEntries = 1000
+        MaxEntries = 1000,
     };
 
     /// <summary>
@@ -324,7 +324,7 @@ public class CacheConfiguration {
     public CacheTypeConfiguration TrustTier { get; set; } = new() {
         Enabled = true,
         Expiration = TimeSpan.FromHours(12),
-        MaxEntries = 1000
+        MaxEntries = 1000,
     };
 
     /// <summary>
@@ -333,7 +333,7 @@ public class CacheConfiguration {
     public CacheTypeConfiguration SearchResults { get; set; } = new() {
         Enabled = true,
         Expiration = TimeSpan.FromMinutes(30),
-        MaxEntries = 200
+        MaxEntries = 200,
     };
 
     /// <summary>
@@ -342,7 +342,7 @@ public class CacheConfiguration {
     public CacheTypeConfiguration Dependencies { get; set; } = new() {
         Enabled = true,
         Expiration = TimeSpan.FromHours(6),
-        MaxEntries = 500
+        MaxEntries = 500,
     };
 
     /// <summary>

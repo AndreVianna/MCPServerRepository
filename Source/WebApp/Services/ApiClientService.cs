@@ -7,23 +7,15 @@ namespace MCPHub.WebApp.Services;
 /// <summary>
 /// API client service implementation
 /// </summary>
-public class ApiClientService : IApiClientService {
-    private readonly HttpClient _httpClient;
-    private readonly CustomAuthenticationStateProvider _authStateProvider;
-    private readonly ILogger<ApiClientService> _logger;
-    private readonly JsonSerializerOptions _jsonOptions;
+public class ApiClientService(HttpClient httpClient,
+                              AuthenticationStateProvider authStateProvider,
+                              ILogger<ApiClientService> logger)
+    : IApiClientService {
+    private readonly CustomAuthenticationStateProvider _authStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
 
-    public ApiClientService(
-        HttpClient httpClient,
-        AuthenticationStateProvider authStateProvider,
-        ILogger<ApiClientService> logger) {
-        _httpClient = httpClient;
-        _authStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
-        _logger = logger;
-        _jsonOptions = new JsonSerializerOptions {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
-    }
+    private readonly JsonSerializerOptions _jsonOptions = new() {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    };
 
     /// <inheritdoc />
     public async Task<SearchResult<PackageSearchResultItem>> SearchPackagesAsync(SearchRequest request, CancellationToken cancellationToken = default) {
@@ -39,7 +31,7 @@ public class ApiClientService : IApiClientService {
                 queryParams.Add($"pageIndex={request.Page - 1}"); // Convert to 0-based
 
             var queryString = queryParams.Count > 0 ? "?" + string.Join("&", queryParams) : "";
-            var response = await _httpClient.GetAsync($"/api/packages/search{queryString}", cancellationToken);
+            var response = await httpClient.GetAsync($"/api/packages/search{queryString}", cancellationToken);
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
             if (response.IsSuccessStatusCode) {
@@ -47,11 +39,11 @@ public class ApiClientService : IApiClientService {
                 return result ?? new SearchResult<PackageSearchResultItem> { Items = [], TotalCount = 0 };
             }
 
-            _logger.LogWarning("Package search failed with status {StatusCode}: {Content}", response.StatusCode, responseContent);
+            logger.LogWarning("Package search failed with status {StatusCode}: {Content}", response.StatusCode, responseContent);
             return new SearchResult<PackageSearchResultItem> { Items = [], TotalCount = 0 };
         }
         catch (Exception ex) {
-            _logger.LogError(ex, "Error searching packages");
+            logger.LogError(ex, "Error searching packages");
             return new SearchResult<PackageSearchResultItem> { Items = [], TotalCount = 0 };
         }
     }
@@ -61,7 +53,7 @@ public class ApiClientService : IApiClientService {
         try {
             await SetAuthorizationHeaderAsync();
 
-            var response = await _httpClient.GetAsync($"/api/packages/{packageId}", cancellationToken);
+            var response = await httpClient.GetAsync($"/api/packages/{packageId}", cancellationToken);
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
             if (response.IsSuccessStatusCode) {
@@ -73,7 +65,7 @@ public class ApiClientService : IApiClientService {
             return errorResult ?? new PackageDetailsResult { IsSuccess = false, Message = "Failed to get package details" };
         }
         catch (Exception ex) {
-            _logger.LogError(ex, "Error getting package details for {PackageId}", packageId);
+            logger.LogError(ex, "Error getting package details for {PackageId}", packageId);
             return new PackageDetailsResult { IsSuccess = false, Message = "An error occurred getting package details" };
         }
     }
@@ -83,7 +75,7 @@ public class ApiClientService : IApiClientService {
         try {
             await SetAuthorizationHeaderAsync();
 
-            var response = await _httpClient.GetAsync($"/api/servers/{serverId}", cancellationToken);
+            var response = await httpClient.GetAsync($"/api/servers/{serverId}", cancellationToken);
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
             if (response.IsSuccessStatusCode) {
@@ -95,7 +87,7 @@ public class ApiClientService : IApiClientService {
             return errorResult ?? new ServerDetailsResult { IsSuccess = false, Message = "Failed to get server details" };
         }
         catch (Exception ex) {
-            _logger.LogError(ex, "Error getting server details for {ServerId}", serverId);
+            logger.LogError(ex, "Error getting server details for {ServerId}", serverId);
             return new ServerDetailsResult { IsSuccess = false, Message = "An error occurred getting server details" };
         }
     }
@@ -108,14 +100,14 @@ public class ApiClientService : IApiClientService {
             var json = JsonSerializer.Serialize(request, _jsonOptions);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("/api/servers/register", content, cancellationToken);
+            var response = await httpClient.PostAsync("/api/servers/register", content, cancellationToken);
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
             var result = JsonSerializer.Deserialize<RegisterServerResponse>(responseContent, _jsonOptions);
             return result ?? new RegisterServerResponse { Status = "Failed", Message = "Server registration failed" };
         }
         catch (Exception ex) {
-            _logger.LogError(ex, "Error registering server");
+            logger.LogError(ex, "Error registering server");
             return new RegisterServerResponse { Status = "Failed", Message = "An error occurred during server registration" };
         }
     }
@@ -125,7 +117,7 @@ public class ApiClientService : IApiClientService {
         try {
             await SetAuthorizationHeaderAsync();
 
-            var response = await _httpClient.GetAsync($"/api/packages/{packageId}/stats", cancellationToken);
+            var response = await httpClient.GetAsync($"/api/packages/{packageId}/stats", cancellationToken);
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
             if (response.IsSuccessStatusCode) {
@@ -133,11 +125,11 @@ public class ApiClientService : IApiClientService {
                 return result ?? PackageDownloadStats.Empty(packageId);
             }
 
-            _logger.LogWarning("Package stats request failed with status {StatusCode}: {Content}", response.StatusCode, responseContent);
+            logger.LogWarning("Package stats request failed with status {StatusCode}: {Content}", response.StatusCode, responseContent);
             return PackageDownloadStats.Empty(packageId);
         }
         catch (Exception ex) {
-            _logger.LogError(ex, "Error getting package stats for {PackageId}", packageId);
+            logger.LogError(ex, "Error getting package stats for {PackageId}", packageId);
             return PackageDownloadStats.Empty(packageId);
         }
     }
@@ -164,7 +156,7 @@ public class ApiClientService : IApiClientService {
                 queryParams.Add($"sortDirection={Uri.EscapeDataString(request.SortDirection)}");
 
             var queryString = queryParams.Count > 0 ? "?" + string.Join("&", queryParams) : "";
-            var response = await _httpClient.GetAsync($"/api/packages/search/advanced{queryString}", cancellationToken);
+            var response = await httpClient.GetAsync($"/api/packages/search/advanced{queryString}", cancellationToken);
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
             if (response.IsSuccessStatusCode) {
@@ -172,11 +164,11 @@ public class ApiClientService : IApiClientService {
                 return result ?? new SearchResult<PackageSearchResultItem> { Items = [], TotalCount = 0 };
             }
 
-            _logger.LogWarning("Advanced package search failed with status {StatusCode}: {Content}", response.StatusCode, responseContent);
+            logger.LogWarning("Advanced package search failed with status {StatusCode}: {Content}", response.StatusCode, responseContent);
             return new SearchResult<PackageSearchResultItem> { Items = [], TotalCount = 0 };
         }
         catch (Exception ex) {
-            _logger.LogError(ex, "Error performing advanced package search");
+            logger.LogError(ex, "Error performing advanced package search");
             return new SearchResult<PackageSearchResultItem> { Items = [], TotalCount = 0 };
         }
     }
@@ -189,11 +181,11 @@ public class ApiClientService : IApiClientService {
             var queryParams = new List<string>
             {
                 $"pageIndex={page - 1}", // Convert to 0-based
-                $"pageSize={pageSize}"
+                $"pageSize={pageSize}",
             };
 
             var queryString = "?" + string.Join("&", queryParams);
-            var response = await _httpClient.GetAsync($"/api/packages{queryString}", cancellationToken);
+            var response = await httpClient.GetAsync($"/api/packages{queryString}", cancellationToken);
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
             if (response.IsSuccessStatusCode) {
@@ -203,15 +195,15 @@ public class ApiClientService : IApiClientService {
                     Items = packages ?? [],
                     TotalCount = packages?.Count ?? 0,
                     Page = page,
-                    PageSize = pageSize
+                    PageSize = pageSize,
                 };
             }
 
-            _logger.LogWarning("Get all packages failed with status {StatusCode}: {Content}", response.StatusCode, responseContent);
+            logger.LogWarning("Get all packages failed with status {StatusCode}: {Content}", response.StatusCode, responseContent);
             return new SearchResult<PackageSearchResultItem> { Items = [], TotalCount = 0 };
         }
         catch (Exception ex) {
-            _logger.LogError(ex, "Error getting all packages");
+            logger.LogError(ex, "Error getting all packages");
             return new SearchResult<PackageSearchResultItem> { Items = [], TotalCount = 0 };
         }
     }
@@ -222,7 +214,7 @@ public class ApiClientService : IApiClientService {
             await SetAuthorizationHeaderAsync();
 
             // For now, use the existing by-name endpoint
-            var response = await _httpClient.GetAsync($"/api/packages/by-name/{Uri.EscapeDataString(packageName)}", cancellationToken);
+            var response = await httpClient.GetAsync($"/api/packages/by-name/{Uri.EscapeDataString(packageName)}", cancellationToken);
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
             if (response.IsSuccessStatusCode) {
@@ -234,7 +226,7 @@ public class ApiClientService : IApiClientService {
             return errorResult ?? new PackageDetailsResult { IsSuccess = false, Message = "Failed to get package details" };
         }
         catch (Exception ex) {
-            _logger.LogError(ex, "Error getting package by name {PublisherName}/{PackageName}", publisherName, packageName);
+            logger.LogError(ex, "Error getting package by name {PublisherName}/{PackageName}", publisherName, packageName);
             return new PackageDetailsResult { IsSuccess = false, Message = "An error occurred getting package details" };
         }
     }
@@ -249,13 +241,13 @@ public class ApiClientService : IApiClientService {
                 Query = "*", // Search all packages
                 Categories = [category],
                 Page = page,
-                PageSize = pageSize
+                PageSize = pageSize,
             };
 
             return await SearchPackagesAdvancedAsync(request, cancellationToken);
         }
         catch (Exception ex) {
-            _logger.LogError(ex, "Error getting packages by category {Category}", category);
+            logger.LogError(ex, "Error getting packages by category {Category}", category);
             return new SearchResult<PackageSearchResultItem> { Items = [], TotalCount = 0 };
         }
     }
@@ -272,14 +264,14 @@ public class ApiClientService : IApiClientService {
                 SortDirection = "descending",
                 Page = 1,
                 PageSize = limit,
-                Timeframe = timeframe
+                Timeframe = timeframe,
             };
 
             var result = await SearchPackagesAdvancedAsync(request, cancellationToken);
             return result.Items.ToList();
         }
         catch (Exception ex) {
-            _logger.LogError(ex, "Error getting trending packages");
+            logger.LogError(ex, "Error getting trending packages");
             return [];
         }
     }
@@ -291,11 +283,11 @@ public class ApiClientService : IApiClientService {
 
             // For now, return mock data since the API endpoint doesn't exist yet
             // TODO: Implement actual API endpoint for featured collections
-            _logger.LogInformation("Getting featured collections - using mock data");
+            logger.LogInformation("Getting featured collections - using mock data");
             return [];
         }
         catch (Exception ex) {
-            _logger.LogError(ex, "Error getting featured collections");
+            logger.LogError(ex, "Error getting featured collections");
             return [];
         }
     }
@@ -307,11 +299,11 @@ public class ApiClientService : IApiClientService {
 
             // For now, return mock data since the API endpoint doesn't exist yet
             // TODO: Implement actual API endpoint for platform statistics
-            _logger.LogInformation("Getting platform statistics - using mock data");
+            logger.LogInformation("Getting platform statistics - using mock data");
             return new PlatformStatistics();
         }
         catch (Exception ex) {
-            _logger.LogError(ex, "Error getting platform statistics");
+            logger.LogError(ex, "Error getting platform statistics");
             return new PlatformStatistics();
         }
     }
@@ -320,12 +312,12 @@ public class ApiClientService : IApiClientService {
         try {
             var token = await _authStateProvider.GetTokenAsync();
             if (!string.IsNullOrEmpty(token)) {
-                _httpClient.DefaultRequestHeaders.Authorization =
+                httpClient.DefaultRequestHeaders.Authorization =
                     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
             }
         }
         catch (Exception ex) {
-            _logger.LogWarning(ex, "Failed to set authorization header");
+            logger.LogWarning(ex, "Failed to set authorization header");
         }
     }
 }

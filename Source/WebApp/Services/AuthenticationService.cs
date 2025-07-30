@@ -5,23 +5,15 @@ namespace MCPHub.WebApp.Services;
 /// <summary>
 /// Authentication service implementation for web application
 /// </summary>
-public class AuthenticationService : IAuthenticationService {
-    private readonly HttpClient _httpClient;
-    private readonly CustomAuthenticationStateProvider _authStateProvider;
-    private readonly ILogger<AuthenticationService> _logger;
-    private readonly JsonSerializerOptions _jsonOptions;
+public class AuthenticationService(HttpClient httpClient,
+                                   AuthenticationStateProvider authStateProvider,
+                                   ILogger<AuthenticationService> logger)
+    : IAuthenticationService {
+    private readonly CustomAuthenticationStateProvider _authStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
 
-    public AuthenticationService(
-        HttpClient httpClient,
-        AuthenticationStateProvider authStateProvider,
-        ILogger<AuthenticationService> logger) {
-        _httpClient = httpClient;
-        _authStateProvider = (CustomAuthenticationStateProvider)authStateProvider;
-        _logger = logger;
-        _jsonOptions = new JsonSerializerOptions {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
-    }
+    private readonly JsonSerializerOptions _jsonOptions = new() {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    };
 
     /// <inheritdoc />
     public async Task<AuthenticationResult> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default) {
@@ -29,7 +21,7 @@ public class AuthenticationService : IAuthenticationService {
             var json = JsonSerializer.Serialize(request, _jsonOptions);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("/api/auth/login", content, cancellationToken);
+            var response = await httpClient.PostAsync("/api/auth/login", content, cancellationToken);
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
             if (response.IsSuccessStatusCode) {
@@ -44,7 +36,7 @@ public class AuthenticationService : IAuthenticationService {
             return errorResult ?? new AuthenticationResult { IsSuccess = false, ErrorMessage = "Login failed" };
         }
         catch (Exception ex) {
-            _logger.LogError(ex, "Error during login");
+            logger.LogError(ex, "Error during login");
             return new AuthenticationResult { IsSuccess = false, ErrorMessage = "An error occurred during login" };
         }
     }
@@ -55,14 +47,14 @@ public class AuthenticationService : IAuthenticationService {
             var json = JsonSerializer.Serialize(request, _jsonOptions);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("/api/auth/register", content, cancellationToken);
+            var response = await httpClient.PostAsync("/api/auth/register", content, cancellationToken);
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
             var result = JsonSerializer.Deserialize<RegistrationResult>(responseContent, _jsonOptions);
             return result ?? new RegistrationResult { IsSuccess = false, ErrorMessage = "Registration failed" };
         }
         catch (Exception ex) {
-            _logger.LogError(ex, "Error during registration");
+            logger.LogError(ex, "Error during registration");
             return new RegistrationResult { IsSuccess = false, ErrorMessage = "An error occurred during registration" };
         }
     }
@@ -74,7 +66,7 @@ public class AuthenticationService : IAuthenticationService {
             var json = JsonSerializer.Serialize(request, _jsonOptions);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("/api/auth/refresh", content, cancellationToken);
+            var response = await httpClient.PostAsync("/api/auth/refresh", content, cancellationToken);
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
             if (response.IsSuccessStatusCode) {
@@ -89,7 +81,7 @@ public class AuthenticationService : IAuthenticationService {
             return errorResult ?? new TokenResult { IsSuccess = false, ErrorMessage = "Token refresh failed" };
         }
         catch (Exception ex) {
-            _logger.LogError(ex, "Error during token refresh");
+            logger.LogError(ex, "Error during token refresh");
             return new TokenResult { IsSuccess = false, ErrorMessage = "An error occurred during token refresh" };
         }
     }
@@ -100,12 +92,12 @@ public class AuthenticationService : IAuthenticationService {
             await _authStateProvider.MarkUserAsLoggedOutAsync();
 
             // Optionally call the server logout endpoint
-            var response = await _httpClient.PostAsync("/api/auth/logout", null, cancellationToken);
+            var response = await httpClient.PostAsync("/api/auth/logout", null, cancellationToken);
 
             return new LogoutResult { IsSuccess = true, ErrorMessage = null };
         }
         catch (Exception ex) {
-            _logger.LogError(ex, "Error during logout");
+            logger.LogError(ex, "Error during logout");
             // Even if server call fails, we still clear local state
             await _authStateProvider.MarkUserAsLoggedOutAsync();
             return new LogoutResult { IsSuccess = true, ErrorMessage = null };
@@ -120,10 +112,10 @@ public class AuthenticationService : IAuthenticationService {
                 return new UserProfileResult { IsSuccess = false, ErrorMessage = "Not authenticated" };
             }
 
-            _httpClient.DefaultRequestHeaders.Authorization =
+            httpClient.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            var response = await _httpClient.GetAsync("/api/auth/profile", cancellationToken);
+            var response = await httpClient.GetAsync("/api/auth/profile", cancellationToken);
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
             if (response.IsSuccessStatusCode) {
@@ -135,38 +127,38 @@ public class AuthenticationService : IAuthenticationService {
             return errorResult ?? new UserProfileResult { IsSuccess = false, ErrorMessage = "Failed to get profile" };
         }
         catch (Exception ex) {
-            _logger.LogError(ex, "Error getting user profile");
+            logger.LogError(ex, "Error getting user profile");
             return new UserProfileResult { IsSuccess = false, ErrorMessage = "An error occurred getting profile" };
         }
     }
 
     /// <inheritdoc />
     public Task<AuthenticationResult> SocialLoginAsync(SocialLoginRequest request, CancellationToken cancellationToken = default) {
-        _logger.LogDebug("Social login requested for provider {Provider}", request.Provider);
+        logger.LogDebug("Social login requested for provider {Provider}", request.Provider);
         throw new NotImplementedException("Social login will be implemented when first consumer requires it");
     }
 
     /// <inheritdoc />
     public Task<EmailVerificationResult> VerifyEmailAsync(VerifyEmailRequest request, CancellationToken cancellationToken = default) {
-        _logger.LogDebug("Email verification requested for token {Token}", request.Token);
+        logger.LogDebug("Email verification requested for token {Token}", request.Token);
         throw new NotImplementedException("Email verification will be implemented when first consumer requires it");
     }
 
     /// <inheritdoc />
     public Task<EmailVerificationResult> ResendVerificationAsync(ResendVerificationRequest request, CancellationToken cancellationToken = default) {
-        _logger.LogDebug("Resend email verification requested for {Email}", request.Email);
+        logger.LogDebug("Resend email verification requested for {Email}", request.Email);
         throw new NotImplementedException("Email verification resend will be implemented when first consumer requires it");
     }
 
     /// <inheritdoc />
     public Task<PasswordChangeResult> InitiatePasswordResetAsync(string email, CancellationToken cancellationToken = default) {
-        _logger.LogDebug("Password reset initiated for {Email}", email);
+        logger.LogDebug("Password reset initiated for {Email}", email);
         throw new NotImplementedException("Password reset initiation will be implemented when first consumer requires it");
     }
 
     /// <inheritdoc />
     public Task<PasswordChangeResult> CompletePasswordResetAsync(string token, string newPassword, CancellationToken cancellationToken = default) {
-        _logger.LogDebug("Password reset completion requested for token {Token}", token);
+        logger.LogDebug("Password reset completion requested for token {Token}", token);
         throw new NotImplementedException("Password reset completion will be implemented when first consumer requires it");
     }
 }

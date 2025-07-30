@@ -1,14 +1,17 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.IdentityModel.Tokens;
-using MudBlazor.Services;
 using System.Text;
+
 using MCPHub.WebApp.Components;
 using MCPHub.WebApp.Services;
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.IdentityModel.Tokens;
+
+using MudBlazor.Services;
+
 namespace MCPHub.WebApp;
 
-internal class Program {
+public class Program {
     public static void Main(string[] args) {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -24,8 +27,7 @@ internal class Program {
             .AddInteractiveServerComponents();
 
         // Add MudBlazor services
-        builder.Services.AddMudServices(config =>
-        {
+        builder.Services.AddMudServices(config => {
             config.SnackbarConfiguration.PositionClass = MudBlazor.Defaults.Classes.Position.BottomRight;
             config.SnackbarConfiguration.PreventDuplicates = false;
             config.SnackbarConfiguration.NewestOnTop = false;
@@ -39,52 +41,46 @@ internal class Program {
 
         // Add authentication services
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = jwtIssuer,
-                    ValidAudience = jwtAudience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
-                };
+            .AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = jwtIssuer,
+                ValidAudience = jwtAudience,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
             });
 
         builder.Services.AddAuthorizationCore();
 
         // Add HTTP client services
-        builder.Services.AddHttpClient<IApiClientService, ApiClientService>(client =>
-        {
+        builder.Services.AddHttpClient<IApiClientService, ApiClientService>(client => {
             client.BaseAddress = new Uri(publicApiUrl);
             client.DefaultRequestHeaders.Add("User-Agent", "MCPHub.WebApp/1.0");
         });
 
-        builder.Services.AddHttpClient<IAuthenticationService, AuthenticationService>(client =>
-        {
+        builder.Services.AddHttpClient<IAuthenticationService, AuthenticationService>(client => {
             client.BaseAddress = new Uri(publicApiUrl);
             client.DefaultRequestHeaders.Add("User-Agent", "MCPHub.WebApp/1.0");
         });
 
         // Add custom services
         builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
-        builder.Services.AddScoped<CustomAuthenticationStateProvider>(provider => 
+        builder.Services.AddScoped<CustomAuthenticationStateProvider>(provider =>
             (CustomAuthenticationStateProvider)provider.GetRequiredService<AuthenticationStateProvider>());
         builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
         builder.Services.AddScoped<IApiClientService, ApiClientService>();
-        
+
         // Add publisher dashboard services
         builder.Services.AddScoped<IPublisherDashboardService, PublisherDashboardService>();
         builder.Services.AddScoped<IPackageManagementService, PackageManagementService>();
         builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
         builder.Services.AddScoped<IPublisherProfileService, PublisherProfileService>();
-        
+
         // Add user profile and security services
         builder.Services.AddScoped<IUserProfileService, UserProfileService>();
         builder.Services.AddScoped<ISecurityService, SecurityService>();
-        
+
         // Add export service
         builder.Services.AddScoped<IExportService, ExportService>();
 

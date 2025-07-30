@@ -17,7 +17,7 @@
   },
   "bindingAssemblies": [
     {
-      "assembly": "MCPHub.BDD.IntegrationTests"
+      "assembly": "MCPHub.IntegrationTests"
     }
   ]
 }

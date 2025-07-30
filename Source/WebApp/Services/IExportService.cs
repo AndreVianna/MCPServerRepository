@@ -5,8 +5,7 @@ namespace MCPHub.WebApp.Services;
 /// <summary>
 /// Supported export formats
 /// </summary>
-public enum ExportFormat
-{
+public enum ExportFormat {
     Csv,
     Json,
     Pdf,
@@ -16,8 +15,7 @@ public enum ExportFormat
 /// <summary>
 /// Export configuration options
 /// </summary>
-public class ExportOptions
-{
+public class ExportOptions {
     public required string FileName { get; set; }
     public ExportFormat Format { get; set; } = ExportFormat.Csv;
     public string Title { get; set; } = string.Empty;
@@ -31,8 +29,7 @@ public class ExportOptions
 /// <summary>
 /// Result of an export operation
 /// </summary>
-public class ExportResult
-{
+public class ExportResult {
     public bool Success { get; set; }
     public string? FileName { get; set; }
     public byte[]? Data { get; set; }
@@ -44,8 +41,7 @@ public class ExportResult
 /// <summary>
 /// Chart data for export
 /// </summary>
-public class ExportChartData
-{
+public class ExportChartData {
     public required string Title { get; set; }
     public string Description { get; set; } = string.Empty;
     public ChartType ChartType { get; set; }
@@ -57,8 +53,7 @@ public class ExportChartData
 /// <summary>
 /// Analytics data for export
 /// </summary>
-public class ExportAnalyticsData
-{
+public class ExportAnalyticsData {
     public required string Title { get; set; }
     public string Description { get; set; } = string.Empty;
     public string TimeRange { get; set; } = string.Empty;
@@ -72,8 +67,7 @@ public class ExportAnalyticsData
 /// <summary>
 /// Service for exporting analytics data in various formats
 /// </summary>
-public interface IExportService
-{
+public interface IExportService {
     /// <summary>
     /// Exports analytics data in the specified format
     /// </summary>

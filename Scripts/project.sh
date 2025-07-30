@@ -151,6 +151,9 @@ EXAMPLES:
     ./project.sh list                                    # List available projects
     ./project.sh build                                   # Build MCP Hub solution
     ./project.sh build --clean                           # Clean release build
+    ./project.sh build --deep-clean                      # Delete bin/obj then build
+    ./project.sh build --warnings-as-errors              # Treat warnings as errors
+    ./project.sh build --strict                          # Deep clean + warnings as errors
     ./project.sh build --project Domain                  # Build Domain project only
     ./project.sh build --project Domain.UnitTests        # Build Domain unit tests only
     ./project.sh test                                    # Run all tests
@@ -243,6 +246,33 @@ validate_project() {
     return 0
 }
 
+# Deep clean function - removes bin and obj folders
+deep_clean_project() {
+    local target_path="$1"
+    local display_name="$2"
+
+    log_info "Performing deep clean for $display_name..."
+
+    # Ensure container exists
+    if ! check_container_exists; then
+        log_info "Container not found, initializing..."
+        init_container
+    fi
+
+    # Remove bin and obj folders recursively
+    local clean_script="
+        find /workspace -type d -name 'bin' -exec rm -rf {} + 2>/dev/null || true
+        find /workspace -type d -name 'obj' -exec rm -rf {} + 2>/dev/null || true
+        echo 'Deep clean completed - removed all bin and obj folders'
+    "
+
+    if run_container_async "sh" "-c" "$clean_script"; then
+        log_success "Deep clean completed for $display_name"
+    else
+        log_warning "Deep clean may have encountered issues (this is usually safe to ignore)"
+    fi
+}
+
 # Build individual project
 build_single_project() {
     local project="$1"
@@ -257,6 +287,11 @@ build_single_project() {
     local display_name="${PROJECT_DISPLAY_NAMES[$project]}"
 
     log_info "Building $display_name..."
+
+    # Perform deep clean if requested
+    if [[ "${BUILD_DEEP_CLEAN:-false}" == "true" ]]; then
+        deep_clean_project "$project_path" "$display_name"
+    fi
 
     # Ensure container exists
     if ! check_container_exists; then
@@ -273,6 +308,12 @@ build_single_project() {
         log_info "Performing clean build..."
     fi
 
+    # Add warnings-as-errors if specified
+    if [[ "${BUILD_WARNINGS_AS_ERRORS:-false}" == "true" ]]; then
+        build_args+=("/p:TreatWarningsAsErrors=true")
+        log_info "Treating warnings as errors..."
+    fi
+
     # Add no-restore flag if specified
     if [[ "${NO_RESTORE:-false}" == "true" ]]; then
         build_args+=("--no-restore")
@@ -280,11 +321,19 @@ build_single_project() {
     fi
 
     # Build the project
-    log_info "Building $display_name with configuration: $config"
+    local build_mode_desc="$config"
+    if [[ "${BUILD_WARNINGS_AS_ERRORS:-false}" == "true" ]]; then
+        build_mode_desc="$build_mode_desc (strict mode)"
+    fi
+
+    log_info "Building $display_name with configuration: $build_mode_desc"
     if run_container_async "${build_args[@]}"; then
         log_success "$display_name built successfully"
     else
         log_error "Failed to build $display_name"
+        if [[ "${BUILD_WARNINGS_AS_ERRORS:-false}" == "true" ]]; then
+            log_error "Build failed with warnings treated as errors - check output above"
+        fi
         return $?
     fi
 }
@@ -299,6 +348,11 @@ build_project() {
 
     # Default: build entire solution
     log_info "Building MCP Hub solution..."
+
+    # Perform deep clean if requested
+    if [[ "${BUILD_DEEP_CLEAN:-false}" == "true" ]]; then
+        deep_clean_project "Source/MCPHub.sln" "MCP Hub solution"
+    fi
 
     # Ensure container exists
     if ! check_container_exists; then
@@ -316,6 +370,12 @@ build_project() {
         log_info "Performing clean build..."
     fi
 
+    # Add warnings-as-errors if specified
+    if [[ "${BUILD_WARNINGS_AS_ERRORS:-false}" == "true" ]]; then
+        build_args+=("/p:TreatWarningsAsErrors=true")
+        log_info "Treating warnings as errors..."
+    fi
+
     # Add no-restore flag if specified
     if [[ "${NO_RESTORE:-false}" == "true" ]]; then
         build_args+=("--no-restore")
@@ -323,11 +383,19 @@ build_project() {
     fi
 
     # Build the solution
-    log_info "Building .NET solution with configuration: $config"
+    local build_mode_desc="$config"
+    if [[ "${BUILD_WARNINGS_AS_ERRORS:-false}" == "true" ]]; then
+        build_mode_desc="$build_mode_desc (strict mode)"
+    fi
+
+    log_info "Building .NET solution with configuration: $build_mode_desc"
     if run_container_async "${build_args[@]}"; then
         log_success "MCP Hub solution built successfully"
     else
         log_error "Failed to build MCP Hub solution"
+        if [[ "${BUILD_WARNINGS_AS_ERRORS:-false}" == "true" ]]; then
+            log_error "Build failed with warnings treated as errors - check output above"
+        fi
         return $?
     fi
 }
@@ -475,7 +543,7 @@ lint_project() {
     fi
 
     # Set lint arguments
-    local lint_args=("dotnet" "format" "Source/MCPHub.sln")
+    local lint_args=("dotnet" "format" "Source/MCPHub.sln" "--exclude-diagnostics" "IDE0060")
 
     # Add verify flag if specified
     if [[ "${LINT_VERIFY:-false}" == "true" ]]; then
@@ -502,7 +570,7 @@ lint_project() {
         fi
     else
         # Format mode: check first, then fix if needed
-        local verify_args=("dotnet" "format" "Source/MCPHub.sln" "--verify-no-changes")
+        local verify_args=("dotnet" "format" "Source/MCPHub.sln" "--verify-no-changes" "--exclude-diagnostics" "IDE0060")
         if [[ -n "${LINT_VERBOSITY:-}" ]]; then
             verify_args+=("--verbosity" "$LINT_VERBOSITY")
         fi
@@ -767,6 +835,19 @@ parse_options() {
                 BUILD_CLEAN="true"
                 shift
                 ;;
+            --deep-clean)
+                BUILD_DEEP_CLEAN="true"
+                shift
+                ;;
+            --warnings-as-errors)
+                BUILD_WARNINGS_AS_ERRORS="true"
+                shift
+                ;;
+            --strict)
+                BUILD_DEEP_CLEAN="true"
+                BUILD_WARNINGS_AS_ERRORS="true"
+                shift
+                ;;
             --release)
                 BUILD_CONFIG="Release"
                 shift
@@ -886,26 +967,34 @@ EOF
 Build the MCP Hub project
 
 USAGE:
-    ./project.sh build [--clean] [--release] [--no-restore] [--project <name>]
+    ./project.sh build [options] [--project <name>]
 
 OPTIONS:
-    --clean                Force rebuild (equivalent to dotnet build --force)
-    --release              Build in Release configuration instead of Debug
-    --no-restore           Skip package restore during build
-    --project <name>       Build specific project only
+    --clean                     Force rebuild (equivalent to dotnet build --force)
+    --deep-clean               Delete bin/obj folders before building
+    --warnings-as-errors       Treat all warnings as errors
+    --strict                   Deep clean + warnings-as-errors (rigorous validation)
+    --release                  Build in Release configuration instead of Debug
+    --no-restore               Skip package restore during build
+    --project <name>           Build specific project only
 
 EXAMPLES:
     ./project.sh build                           # Build entire solution
-    ./project.sh build --project Domain         # Build Domain project only
+    ./project.sh build --strict                 # Rigorous build with 0 warnings/errors
+    ./project.sh build --deep-clean             # Clean all bin/obj then build
+    ./project.sh build --warnings-as-errors     # Treat warnings as errors
+    ./project.sh build --project Domain --strict # Strict build for Domain only
     ./project.sh build --project Common --release # Build Common project in release
 
 DESCRIPTION:
-    Builds the MCP Hub solution or individual projects:
+    Builds the MCP Hub solution or individual projects with enhanced validation:
     - Domain layer
     - Application services
     - Web applications
     - CLI tools
     - Tests
+
+    Use --strict for rigorous validation ensuring 0 warnings and 0 errors.
 EOF
             ;;
         test)

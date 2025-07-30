@@ -26,41 +26,31 @@ public class SecurityService(
         string packageName,
         string version,
         ScanType scanType,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Package scanning will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Package scanning will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<SecurityScanResult?> GetLatestScanResultAsync(
         string packageName,
         string version,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Latest scan result retrieval will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Latest scan result retrieval will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<SecurityScanSummary> GetSecuritySummaryAsync(
         string packageName,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Security summary will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Security summary will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<SecurityPolicyValidationResult> ValidateSecurityPolicyAsync(
         string packageName,
         string version,
         SecurityPolicy? policy = null,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Security policy validation will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Security policy validation will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<string> CalculateSecurityGradeAsync(
         string packageName,
         string version,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Security grade calculation will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Security grade calculation will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public async Task<PackageVerificationResult> VerifyPackageIntegrityAsync(
@@ -101,9 +91,7 @@ public class SecurityService(
         string packageName,
         string? version = null,
         SecurityScanSeverity? severity = null,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Security advisories will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Security advisories will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public async Task<SecurityDatabaseUpdateResult> UpdateSecurityDatabaseAsync(
@@ -138,7 +126,7 @@ public class SecurityService(
     public async Task<SecurityDatabaseStatus> GetSecurityDatabaseStatusAsync() {
         try {
             var dbStatus = await _offlineSecurityService.GetVulnerabilityDatabaseStatusAsync();
-            
+
             return new SecurityDatabaseStatus {
                 IsAvailable = dbStatus.IsAvailable,
                 LastUpdate = dbStatus.LastUpdate,

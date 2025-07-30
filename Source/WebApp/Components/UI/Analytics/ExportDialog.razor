@@ -27,11 +27,11 @@
                             </CardHeaderContent>
                         </MudCardHeader>
                         <MudCardContent>
-                            <MudRadioGroup @bind-SelectedOption="_selectedFormat" T="ExportFormat">
+                            <MudRadioGroup @bind-Value="_selectedFormat" T="ExportFormat">
                                 @foreach (var format in _supportedFormats)
                                 {
                                     <div class="format-option d-flex align-center mb-2">
-                                        <MudRadio Option="@format" Value="@format" Color="Color.Primary" />
+                                        <MudRadio Value="@format" Color="Color.Primary" />
                                         <div class="format-info ml-2">
                                             <MudText Typo="Typo.body2" Class="font-weight-bold">
                                                 @GetFormatDisplayName(format)
@@ -80,14 +80,14 @@
                                               Class="mb-3" />
 
                                 <div class="export-checkboxes">
-                                    <MudCheckBox T="bool" @bind-Checked="_includeTimestamp"
+                                    <MudCheckBox T="bool" @bind-Value="_includeTimestamp"
                                                  Label="Include timestamp"
                                                  Color="Color.Primary"
                                                  Class="mb-2" />
 
                                     @if (HasChartData)
                                     {
-                                        <MudCheckBox T="bool" @bind-Checked="_includeCharts"
+                                        <MudCheckBox T="bool" @bind-Value="_includeCharts"
                                                      Label="Include chart data"
                                                      Color="Color.Primary"
                                                      Class="mb-2" />
@@ -160,7 +160,7 @@
                 
                 <MudButton Variant="Variant.Filled" 
                            Color="Color.Primary"
-                           StartIcon="@(_isExporting ? Icons.Material.Filled.HourglassEmpty : Icons.Material.Filled.Download)"
+                           starticon="@(_isExporting ? Icons.Material.Filled.HourglassEmpty : Icons.Material.Filled.Download)"
                            @onclick="StartExport"
                            Disabled="_isExporting || string.IsNullOrWhiteSpace(_fileName)">
                     @if (_isExporting)

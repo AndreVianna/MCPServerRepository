@@ -81,7 +81,7 @@ public record TrustTierRecalculatedEvent : BaseMessage {
     /// <summary>
     /// Gets or sets additional recalculation metadata
     /// </summary>
-    public new Dictionary<string, object> RecalculationMetadata { get; init; } = new();
+    public Dictionary<string, object> RecalculationMetadata { get; init; } = new();
 
     /// <summary>
     /// Gets whether the calculated tier differs from current tier

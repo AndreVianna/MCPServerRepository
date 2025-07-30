@@ -6,8 +6,7 @@ namespace MCPHub.WebApp.Services;
 /// <summary>
 /// Service interface for comprehensive package management operations
 /// </summary>
-public interface IPackageManagementService
-{
+public interface IPackageManagementService {
     /// <summary>
     /// Gets packages owned by a publisher with filtering and pagination
     /// </summary>
@@ -21,13 +20,13 @@ public interface IPackageManagementService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Paginated package listing</returns>
     Task<PackageListResult> GetPublisherPackagesAsync(
-        Guid publisherId, 
-        string? searchQuery = null, 
+        Guid publisherId,
+        string? searchQuery = null,
         PackageStatus? status = null,
         string sortBy = "updated",
         SortDirection sortDirection = SortDirection.Descending,
-        int pageNumber = 1, 
-        int pageSize = 20, 
+        int pageNumber = 1,
+        int pageSize = 20,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -180,8 +179,7 @@ public interface IPackageManagementService
 /// <summary>
 /// Paginated package listing result
 /// </summary>
-public class PackageListResult
-{
+public class PackageListResult {
     public IEnumerable<PackageListItem> Packages { get; set; } = [];
     public int TotalCount { get; set; }
     public int PageNumber { get; set; }
@@ -194,8 +192,7 @@ public class PackageListResult
 /// <summary>
 /// Package list item with management information
 /// </summary>
-public class PackageListItem
-{
+public class PackageListItem {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -218,8 +215,7 @@ public class PackageListItem
 /// <summary>
 /// Detailed package management information
 /// </summary>
-public class PackageManagementDetails
-{
+public class PackageManagementDetails {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -249,8 +245,7 @@ public class PackageManagementDetails
 /// <summary>
 /// Package update request
 /// </summary>
-public class PackageUpdateRequest
-{
+public class PackageUpdateRequest {
     public string? Description { get; set; }
     public string? LongDescription { get; set; }
     public IEnumerable<string>? Tags { get; set; }
@@ -266,8 +261,7 @@ public class PackageUpdateRequest
 /// <summary>
 /// Package update result
 /// </summary>
-public class PackageUpdateResult
-{
+public class PackageUpdateResult {
     public bool Success { get; set; }
     public string? ErrorMessage { get; set; }
     public IEnumerable<string> ValidationErrors { get; set; } = [];
@@ -277,8 +271,7 @@ public class PackageUpdateResult
 /// <summary>
 /// Package version management information
 /// </summary>
-public class PackageVersionManagement
-{
+public class PackageVersionManagement {
     public Guid Id { get; set; }
     public string Version { get; set; } = string.Empty;
     public VersionStatus Status { get; set; }
@@ -299,8 +292,7 @@ public class PackageVersionManagement
 /// <summary>
 /// Version publish request
 /// </summary>
-public class VersionPublishRequest
-{
+public class VersionPublishRequest {
     public string Version { get; set; } = string.Empty;
     public string? ReleaseNotes { get; set; }
     public bool IsPrerelease { get; set; }
@@ -313,8 +305,7 @@ public class VersionPublishRequest
 /// <summary>
 /// Version publish result
 /// </summary>
-public class VersionPublishResult
-{
+public class VersionPublishResult {
     public bool Success { get; set; }
     public Guid? VersionId { get; set; }
     public string? ErrorMessage { get; set; }
@@ -327,8 +318,7 @@ public class VersionPublishResult
 /// <summary>
 /// Version status update result
 /// </summary>
-public class VersionStatusResult
-{
+public class VersionStatusResult {
     public bool Success { get; set; }
     public VersionStatus NewStatus { get; set; }
     public string? ErrorMessage { get; set; }
@@ -338,8 +328,7 @@ public class VersionStatusResult
 /// <summary>
 /// Package dependency information
 /// </summary>
-public class PackageDependencyInfo
-{
+public class PackageDependencyInfo {
     public Guid PackageId { get; set; }
     public Guid? VersionId { get; set; }
     public IEnumerable<PackageDependency> Dependencies { get; set; } = [];
@@ -353,8 +342,7 @@ public class PackageDependencyInfo
 /// <summary>
 /// Package dependency
 /// </summary>
-public class PackageDependency
-{
+public class PackageDependency {
     public string Name { get; set; } = string.Empty;
     public string Version { get; set; } = string.Empty;
     public string LatestVersion { get; set; } = string.Empty;
@@ -368,8 +356,7 @@ public class PackageDependency
 /// <summary>
 /// Dependency conflict
 /// </summary>
-public class DependencyConflict
-{
+public class DependencyConflict {
     public string PackageName { get; set; } = string.Empty;
     public string RequiredVersion { get; set; } = string.Empty;
     public string ConflictingVersion { get; set; } = string.Empty;
@@ -380,8 +367,7 @@ public class DependencyConflict
 /// <summary>
 /// Dependency vulnerability
 /// </summary>
-public class DependencyVulnerability
-{
+public class DependencyVulnerability {
     public string PackageName { get; set; } = string.Empty;
     public string Version { get; set; } = string.Empty;
     public string VulnerabilityId { get; set; } = string.Empty;
@@ -394,8 +380,7 @@ public class DependencyVulnerability
 /// <summary>
 /// Dependency update request
 /// </summary>
-public class DependencyUpdateRequest
-{
+public class DependencyUpdateRequest {
     public IEnumerable<DependencyUpdate> Updates { get; set; } = [];
     public bool UpdateAll { get; set; }
     public bool IncludeDevDependencies { get; set; }
@@ -405,8 +390,7 @@ public class DependencyUpdateRequest
 /// <summary>
 /// Dependency update
 /// </summary>
-public class DependencyUpdate
-{
+public class DependencyUpdate {
     public string Name { get; set; } = string.Empty;
     public string FromVersion { get; set; } = string.Empty;
     public string ToVersion { get; set; } = string.Empty;
@@ -416,8 +400,7 @@ public class DependencyUpdate
 /// <summary>
 /// Dependency update result
 /// </summary>
-public class DependencyUpdateResult
-{
+public class DependencyUpdateResult {
     public bool Success { get; set; }
     public string? ErrorMessage { get; set; }
     public IEnumerable<DependencyUpdate> AppliedUpdates { get; set; } = [];
@@ -428,8 +411,7 @@ public class DependencyUpdateResult
 /// <summary>
 /// Package usage statistics
 /// </summary>
-public class PackageUsageStatistics
-{
+public class PackageUsageStatistics {
     public Guid PackageId { get; set; }
     public long TotalDownloads { get; set; }
     public long WeeklyDownloads { get; set; }
@@ -447,8 +429,7 @@ public class PackageUsageStatistics
 /// <summary>
 /// Version usage statistics
 /// </summary>
-public class VersionUsage
-{
+public class VersionUsage {
     public string Version { get; set; } = string.Empty;
     public long Downloads { get; set; }
     public double Percentage { get; set; }
@@ -458,8 +439,7 @@ public class VersionUsage
 /// <summary>
 /// Package settings
 /// </summary>
-public class PackageSettings
-{
+public class PackageSettings {
     public bool IsPrivate { get; set; }
     public bool AllowCommunityContributions { get; set; }
     public bool EnableSecurityScanning { get; set; }
@@ -477,8 +457,7 @@ public class PackageSettings
 /// <summary>
 /// Package settings update request
 /// </summary>
-public class PackageSettingsRequest
-{
+public class PackageSettingsRequest {
     public bool? IsPrivate { get; set; }
     public bool? AllowCommunityContributions { get; set; }
     public bool? EnableSecurityScanning { get; set; }
@@ -496,8 +475,7 @@ public class PackageSettingsRequest
 /// <summary>
 /// Settings update result
 /// </summary>
-public class SettingsUpdateResult
-{
+public class SettingsUpdateResult {
     public bool Success { get; set; }
     public string? ErrorMessage { get; set; }
     public IEnumerable<string> ValidationErrors { get; set; } = [];
@@ -507,8 +485,7 @@ public class SettingsUpdateResult
 /// <summary>
 /// Package deletion result
 /// </summary>
-public class PackageDeletionResult
-{
+public class PackageDeletionResult {
     public bool Success { get; set; }
     public string? ErrorMessage { get; set; }
     public string? ConfirmationToken { get; set; }
@@ -521,8 +498,7 @@ public class PackageDeletionResult
 /// <summary>
 /// Package restoration result
 /// </summary>
-public class PackageRestorationResult
-{
+public class PackageRestorationResult {
     public bool Success { get; set; }
     public string? ErrorMessage { get; set; }
     public DateTime? RestoredAt { get; set; }
@@ -532,8 +508,7 @@ public class PackageRestorationResult
 /// <summary>
 /// Package collaborators information
 /// </summary>
-public class PackageCollaborators
-{
+public class PackageCollaborators {
     public Guid PackageId { get; set; }
     public Guid OwnerId { get; set; }
     public string OwnerName { get; set; } = string.Empty;
@@ -545,8 +520,7 @@ public class PackageCollaborators
 /// <summary>
 /// Package collaborator
 /// </summary>
-public class PackageCollaborator
-{
+public class PackageCollaborator {
     public Guid UserId { get; set; }
     public string Username { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
@@ -559,8 +533,7 @@ public class PackageCollaborator
 /// <summary>
 /// Pending collaborator invitation
 /// </summary>
-public class PendingInvitation
-{
+public class PendingInvitation {
     public Guid Id { get; set; }
     public string Email { get; set; } = string.Empty;
     public CollaboratorRole Role { get; set; }
@@ -572,8 +545,7 @@ public class PendingInvitation
 /// <summary>
 /// Collaborator management request
 /// </summary>
-public class CollaboratorRequest
-{
+public class CollaboratorRequest {
     public CollaboratorAction Action { get; set; }
     public Guid? UserId { get; set; }
     public string? Email { get; set; }
@@ -584,8 +556,7 @@ public class CollaboratorRequest
 /// <summary>
 /// Collaborator management result
 /// </summary>
-public class CollaboratorResult
-{
+public class CollaboratorResult {
     public bool Success { get; set; }
     public string? ErrorMessage { get; set; }
     public CollaboratorAction Action { get; set; }
@@ -595,8 +566,7 @@ public class CollaboratorResult
 /// <summary>
 /// Conflict severity levels
 /// </summary>
-public enum ConflictSeverity
-{
+public enum ConflictSeverity {
     Low,
     Medium,
     High,
@@ -606,8 +576,7 @@ public enum ConflictSeverity
 /// <summary>
 /// Dependency update types
 /// </summary>
-public enum DependencyUpdateType
-{
+public enum DependencyUpdateType {
     Patch,
     Minor,
     Major,
@@ -617,8 +586,7 @@ public enum DependencyUpdateType
 /// <summary>
 /// Collaborator roles
 /// </summary>
-public enum CollaboratorRole
-{
+public enum CollaboratorRole {
     Maintainer,
     Developer,
     Contributor,
@@ -628,8 +596,7 @@ public enum CollaboratorRole
 /// <summary>
 /// Collaborator actions
 /// </summary>
-public enum CollaboratorAction
-{
+public enum CollaboratorAction {
     Invite,
     UpdateRole,
     Remove,

@@ -46,8 +46,8 @@ public interface IThreatDetectionService {
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Active threat indicators</returns>
     Task<IReadOnlyList<ThreatIndicator>> GetActiveThreatIndicatorsAsync(
-        IEnumerable<ThreatType>? threatTypes = null, 
-        ThreatSeverity? severity = null, 
+        IEnumerable<ThreatType>? threatTypes = null,
+        ThreatSeverity? severity = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>

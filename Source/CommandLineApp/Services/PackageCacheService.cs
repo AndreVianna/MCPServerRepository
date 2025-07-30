@@ -8,25 +8,19 @@ namespace MCPHub.CommandLineApp.Services;
 /// <summary>
 /// Package-specific caching service implementation
 /// </summary>
-public class PackageCacheService : IPackageCacheService {
-    private readonly ILogger<PackageCacheService> _logger;
-    private readonly ICacheService _cacheService;
-    private readonly McpmConfiguration _configuration;
+public class PackageCacheService(
+    ILogger<PackageCacheService> logger,
+    ICacheService cacheService,
+    McpmConfiguration configuration) : IPackageCacheService {
+    private readonly ILogger<PackageCacheService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ICacheService _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
+    private readonly McpmConfiguration _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 
     private const string PACKAGE_INFO_PREFIX = "pkg:info:";
     private const string PACKAGE_VERSIONS_PREFIX = "pkg:versions:";
     private const string SECURITY_SUMMARY_PREFIX = "pkg:security:";
     private const string TRUST_TIER_PREFIX = "pkg:trust:";
     private const string DEPENDENCIES_PREFIX = "pkg:deps:";
-
-    public PackageCacheService(
-        ILogger<PackageCacheService> logger,
-        ICacheService cacheService,
-        McpmConfiguration configuration) {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
-        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-    }
 
     public async Task CachePackageInfoAsync(string packageName, PackageInfoResponse packageInfo, CancellationToken cancellationToken = default) {
         if (!_configuration.Cache.PackageInfo.Enabled) {
@@ -262,7 +256,7 @@ public class PackageCacheService : IPackageCacheService {
         // This would typically require integration with the API client to fetch popular packages
         // For now, we'll return 0 as this is a placeholder implementation
         _logger.LogInformation("Package preloading not yet implemented (pattern: {Pattern}, max: {Max})", pattern, maxPackages);
-        
+
         // TODO: Implement package preloading
         // 1. Get list of popular packages from API
         // 2. Filter by pattern if provided
@@ -273,26 +267,18 @@ public class PackageCacheService : IPackageCacheService {
         return 0;
     }
 
-    private static string GetPackageInfoKey(string packageName) {
-        return $"{PACKAGE_INFO_PREFIX}{packageName.ToLowerInvariant()}";
-    }
+    private static string GetPackageInfoKey(string packageName) => $"{PACKAGE_INFO_PREFIX}{packageName.ToLowerInvariant()}";
 
     private static string GetPackageVersionsKey(string packageName, bool includePrerelease) {
         var suffix = includePrerelease ? ":pre" : ":stable";
         return $"{PACKAGE_VERSIONS_PREFIX}{packageName.ToLowerInvariant()}{suffix}";
     }
 
-    private static string GetSecuritySummaryKey(string packageName) {
-        return $"{SECURITY_SUMMARY_PREFIX}{packageName.ToLowerInvariant()}";
-    }
+    private static string GetSecuritySummaryKey(string packageName) => $"{SECURITY_SUMMARY_PREFIX}{packageName.ToLowerInvariant()}";
 
-    private static string GetTrustTierKey(string packageName) {
-        return $"{TRUST_TIER_PREFIX}{packageName.ToLowerInvariant()}";
-    }
+    private static string GetTrustTierKey(string packageName) => $"{TRUST_TIER_PREFIX}{packageName.ToLowerInvariant()}";
 
-    private static string GetDependenciesKey(string packageName, string version) {
-        return $"{DEPENDENCIES_PREFIX}{packageName.ToLowerInvariant()}:{version.ToLowerInvariant()}";
-    }
+    private static string GetDependenciesKey(string packageName, string version) => $"{DEPENDENCIES_PREFIX}{packageName.ToLowerInvariant()}:{version.ToLowerInvariant()}";
 
     private static void ValidatePackageName(string packageName) {
         if (string.IsNullOrWhiteSpace(packageName)) {

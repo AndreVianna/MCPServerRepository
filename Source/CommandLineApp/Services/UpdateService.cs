@@ -25,14 +25,10 @@ public class UpdateService(
     private readonly ISecurityService _securityService = securityService ?? throw new ArgumentNullException(nameof(securityService));
 
     /// <inheritdoc />
-    public Task<List<PackageUpdateInfo>> CheckForUpdatesAsync(bool global = false, bool includePrerelease = false, CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Update checking logic will be implemented when first consumer requires it");
-    }
+    public Task<List<PackageUpdateInfo>> CheckForUpdatesAsync(bool global = false, bool includePrerelease = false, CancellationToken cancellationToken = default) => throw new NotImplementedException("Update checking logic will be implemented when first consumer requires it");
 
     /// <inheritdoc />
-    public Task<PackageUpdateInfo?> CheckPackageUpdatesAsync(string packageName, bool global = false, bool includePrerelease = false, CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Package update checking logic will be implemented when first consumer requires it");
-    }
+    public Task<PackageUpdateInfo?> CheckPackageUpdatesAsync(string packageName, bool global = false, bool includePrerelease = false, CancellationToken cancellationToken = default) => throw new NotImplementedException("Package update checking logic will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<PackageUpdateResult> UpdatePackageAsync(
@@ -42,9 +38,7 @@ public class UpdateService(
         bool force = false,
         bool skipDependencyCheck = false,
         bool createBackup = true,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Package update logic will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Package update logic will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<BatchUpdateResult> UpdateAllPackagesAsync(
@@ -52,34 +46,26 @@ public class UpdateService(
         bool includePrerelease = false,
         bool skipDependencyCheck = false,
         bool createBackup = true,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Batch update logic will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Batch update logic will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<PackageRollbackResult> RollbackPackageAsync(
         string packageName,
         bool global = false,
         bool restoreFromBackup = true,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Package rollback logic will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Package rollback logic will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<PackageChangelog?> GetChangelogAsync(
         string packageName,
         string fromVersion,
         string toVersion,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Changelog retrieval logic will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Changelog retrieval logic will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<DependencyValidationResult> ValidateUpdateDependenciesAsync(
         string packageName,
         string targetVersion,
         bool global = false,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Dependency validation logic will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Dependency validation logic will be implemented when first consumer requires it");
 }

@@ -13,7 +13,7 @@
 
 <PageTitle>Global Package Statistics - MCP Hub</PageTitle>
 
-<ResponsiveContainer MaxWidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
+<ResponsiveContainer maxwidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
     <HeaderContent>
         <div class="global-stats-header">
             <div class="header-title mb-4">
@@ -61,7 +61,7 @@
                 <div class="export-controls d-flex gap-2">
                     <MudButton Variant="Variant.Outlined"
                                Color="Color.Primary"
-                               StartIcon="Icons.Material.Filled.Download"
+                               starticon="Icons.Material.Filled.Download"
                                Size="Size.Medium"
                                @onclick="ExportData">
                         Export Report
@@ -69,7 +69,7 @@
                     
                     <MudButton Variant="Variant.Filled"
                                Color="Color.Primary"
-                               StartIcon="Icons.Material.Filled.Refresh"
+                               starticon="Icons.Material.Filled.Refresh"
                                Size="Size.Medium"
                                @onclick="RefreshData"
                                Disabled="_isLoading">
@@ -109,7 +109,7 @@
             <div class="overview-metrics mb-6">
                 <MudGrid Spacing="3">
                     <MudItem xs="12" sm="6" md="4" lg="2">
-                        <MetricsCard Title="Total Packages"
+                        <MetricsCard title="Total Packages"
                                      Value="@FormatNumber(_globalStats?.Overview.TotalPackages ?? 0)"
                                      Icon="Icons.Material.Filled.Inventory"
                                      Color="Color.Primary"
@@ -122,7 +122,7 @@
                     </MudItem>
 
                     <MudItem xs="12" sm="6" md="4" lg="2">
-                        <MetricsCard Title="Total Downloads"
+                        <MetricsCard title="Total Downloads"
                                      Value="@FormatNumber(_globalStats?.Overview.TotalDownloads ?? 0)"
                                      Icon="Icons.Material.Filled.Download"
                                      Color="Color.Success"
@@ -135,7 +135,7 @@
                     </MudItem>
 
                     <MudItem xs="12" sm="6" md="4" lg="2">
-                        <MetricsCard Title="Active Publishers"
+                        <MetricsCard title="Active Publishers"
                                      Value="@FormatNumber(_globalStats?.Overview.ActivePublishers ?? 0)"
                                      Icon="Icons.Material.Filled.Business"
                                      Color="Color.Info"
@@ -148,7 +148,7 @@
                     </MudItem>
 
                     <MudItem xs="12" sm="6" md="4" lg="2">
-                        <MetricsCard Title="Countries Reached"
+                        <MetricsCard title="Countries Reached"
                                      Value="@(_globalStats?.Overview.CountriesReached.ToString() ?? "N/A")"
                                      Icon="Icons.Material.Filled.Public"
                                      Color="Color.Warning"
@@ -161,7 +161,7 @@
                     </MudItem>
 
                     <MudItem xs="12" sm="6" md="4" lg="2">
-                        <MetricsCard Title="Avg Rating"
+                        <MetricsCard title="Avg Rating"
                                      Value="@(_globalStats?.Overview.AveragePackageRating.ToString("F1") ?? "N/A")"
                                      Icon="Icons.Material.Filled.Star"
                                      Color="Color.Tertiary"
@@ -173,7 +173,7 @@
                     </MudItem>
 
                     <MudItem xs="12" sm="6" md="4" lg="2">
-                        <MetricsCard Title="Security Score"
+                        <MetricsCard title="Security Score"
                                      Value="@(_globalStats?.Overview.AverageSecurityScore.ToString("F0") ?? "N/A")"
                                      Icon="Icons.Material.Filled.Security"
                                      Color="@GetSecurityScoreColor()"
@@ -191,7 +191,7 @@
                 <MudGrid Spacing="3">
                     <!-- Download Trends Chart -->
                     <MudItem xs="12" lg="8" id="download-trends">
-                        <AnalyticsChart Title="🚀 Global Download Trends"
+                        <AnalyticsChart title="🚀 Global Download Trends"
                                         Subtitle="Package downloads across the platform"
                                         ChartType="ChartTypeConverter.FromMudBlazor(MudBlazor.ChartType.Line)"
                                         ChartSeries="@GetDownloadTrendsChartSeries().ToMudBlazorChartSeries()"
@@ -208,7 +208,7 @@
 
                     <!-- Technology Stack Distribution -->
                     <MudItem xs="12" lg="4">
-                        <AnalyticsChart Title="⚡ Technology Stack"
+                        <AnalyticsChart title="⚡ Technology Stack"
                                         Subtitle="Popular technologies and frameworks"
                                         ChartType="ChartTypeConverter.FromMudBlazor(MudBlazor.ChartType.Donut)"
                                         ChartSeries="@GetTechnologyStackChartSeries().ToMudBlazorChartSeries()"
@@ -523,7 +523,7 @@
                                         @foreach (var alert in _ecosystemHealth.Alerts.Take(3))
                                         {
                                             <MudAlert Severity="@GetAlertSeverity(alert.Severity)" 
-                                                      Dense="true" 
+                                                      dense="true" 
                                                       Class="mb-2">
                                                 <strong>@alert.Title:</strong> @alert.Description
                                             </MudAlert>
@@ -558,7 +558,7 @@
     private IEnumerable<CategoryStatistics>? _categories;
     private TechnologyStackAnalysis? _technologyStack;
     private EcosystemHealthMetrics? _ecosystemHealth;
-    private List<PackageInfo>? _trendingPackages;
+    private List<PackageInfo>? _trendingPackages = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -790,7 +790,7 @@
             var dialog = await DialogService.ShowExportDialogAsync(exportData, "global_package_statistics");
             var result = await dialog.Result;
             
-            if (!result.Canceled)
+            if (!result!.Canceled)
             {
                 Logger.LogInformation("Global statistics exported successfully");
             }
@@ -826,10 +826,11 @@
         await LoadGlobalStatistics();
     }
 
-    private async Task HandleDownloadTrendsDrillDown(ChartDrillDownEventArgs args)
+    private Task HandleDownloadTrendsDrillDown(ChartDrillDownEventArgs args)
     {
         // TODO: Navigate to detailed download analytics
         Snackbar.Add($"Drilling down into data for {args.XAxisLabel}", Severity.Info);
+        return Task.CompletedTask;
     }
 
     private async Task ExportDownloadTrends()
@@ -849,7 +850,7 @@
             var dialog = await DialogService.ShowExportDialogAsync(chartData, "download_trends");
             var result = await dialog.Result;
             
-            if (!result.Canceled)
+            if (!result!.Canceled)
             {
                 Logger.LogInformation("Download trends exported successfully");
             }
@@ -861,10 +862,11 @@
         }
     }
 
-    private async Task HandleTechnologyDrillDown(ChartDrillDownEventArgs args)
+    private Task HandleTechnologyDrillDown(ChartDrillDownEventArgs args)
     {
         // TODO: Navigate to technology-specific analytics
         Snackbar.Add($"Viewing packages using technology: {args.XAxisLabel}", Severity.Info);
+        return Task.CompletedTask;
     }
 
     private async Task ExportTechnologyData()
@@ -884,7 +886,7 @@
             var dialog = await DialogService.ShowExportDialogAsync(chartData, "technology_distribution");
             var result = await dialog.Result;
             
-            if (!result.Canceled)
+            if (!result!.Canceled)
             {
                 Logger.LogInformation("Technology distribution exported successfully");
             }

@@ -220,7 +220,7 @@ public class CacheCommand(
             Logger.LogInformation("Retrieving cache statistics");
 
             using var spinner = ProgressReporter.CreateSpinner("Gathering cache statistics...");
-            
+
             var cacheStats = await _cacheService.GetStatisticsAsync().ConfigureAwait(false);
             var searchStats = await _searchCache.GetSearchCacheStatisticsAsync().ConfigureAwait(false);
             var offlineStatus = _offlineMode.GetOfflineModeStatus();
@@ -258,7 +258,7 @@ public class CacheCommand(
 
             // Get confirmation unless skipped
             if (!skipConfirmation) {
-                string prompt = all ? "Clear ALL cache entries?" :
+                var prompt = all ? "Clear ALL cache entries?" :
                                expiredOnly ? "Clear expired cache entries?" :
                                !string.IsNullOrEmpty(pattern) ? $"Clear entries matching pattern '{pattern}'?" :
                                $"Clear entries of type '{type}'?";
@@ -270,7 +270,7 @@ public class CacheCommand(
             }
 
             using var spinner = ProgressReporter.CreateSpinner("Clearing cache...");
-            int removedCount = 0;
+            var removedCount = 0;
 
             if (all) {
                 await _cacheService.ClearAsync().ConfigureAwait(false);
@@ -437,7 +437,7 @@ public class CacheCommand(
             else if (prepare) {
                 using var spinner = ProgressReporter.CreateSpinner("Preparing for offline use...");
                 var result = await _offlineMode.PrepareForOfflineAsync().ConfigureAwait(false);
-                
+
                 if (result.Success) {
                     spinner.Success($"Offline preparation completed: {result.PackagesCached} packages cached, {result.DataDownloadedFormatted} downloaded");
                 }
@@ -452,7 +452,7 @@ public class CacheCommand(
             else if (sync) {
                 using var spinner = ProgressReporter.CreateSpinner("Synchronizing with API...");
                 var result = await _offlineMode.SynchronizeAsync().ConfigureAwait(false);
-                
+
                 if (result.Success) {
                     spinner.Success($"Synchronization completed: {result.ItemsSynchronized} items synchronized");
                 }
@@ -478,14 +478,14 @@ public class CacheCommand(
 
     private void DisplayCacheStatsTable(CacheStatistics cacheStats, SearchCacheStatistics searchStats, OfflineModeStatus offlineStatus, bool detailed) {
         OutputFormatter.WriteHeader("Cache Statistics");
-        
+
         // General cache info
         OutputFormatter.WriteInfo($"Total Entries: {cacheStats.TotalEntries:N0}");
         OutputFormatter.WriteInfo($"Total Size: {cacheStats.TotalSizeFormatted}");
         OutputFormatter.WriteInfo($"Expired Entries: {cacheStats.ExpiredEntries:N0}");
         OutputFormatter.WriteInfo($"Hit Rate: {cacheStats.HitRate:F1}%");
         OutputFormatter.WriteInfo($"Statistics Reset: {cacheStats.StatisticsResetAt:yyyy-MM-dd HH:mm:ss}");
-        
+
         OutputFormatter.WriteLine();
 
         // Search cache info
@@ -527,10 +527,10 @@ public class CacheCommand(
 
     private void DisplayOfflineStatus() {
         var status = _offlineMode.GetOfflineModeStatus();
-        
+
         OutputFormatter.WriteHeader("Offline Mode Status");
         OutputFormatter.WriteInfo($"Status: {(status.IsOffline ? "Offline" : "Online")}");
-        
+
         if (status.IsOffline) {
             OutputFormatter.WriteInfo($"Mode: {(status.IsManuallyEnabled ? "Manual" : "Automatic")}");
             if (status.OfflineSince.HasValue) {

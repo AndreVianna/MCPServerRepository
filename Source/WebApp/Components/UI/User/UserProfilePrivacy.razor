@@ -95,7 +95,7 @@
                           Variant="Variant.Filled"
                           Color="Color.Primary"
                           Disabled="@_isLoading"
-                          StartIcon="@(_isLoading ? null : Icons.Material.Filled.Save)">
+                          starticon="@(_isLoading ? null : Icons.Material.Filled.Save)">
                     @if (_isLoading)
                     {
                         <MudProgressCircular Size="Size.Small" Indeterminate="true" />
@@ -118,9 +118,9 @@
                 <MudItem xs="12">
                     <MudButton Variant="Variant.Outlined"
                               Color="Color.Primary"
-                              StartIcon="@Icons.Material.Filled.Download"
+                              starticon="@Icons.Material.Filled.Download"
                               OnClick="@HandleExportData"
-                              FullWidth="true"
+                              fullwidth="true"
                               Disabled="@_isExporting">
                         @if (_isExporting)
                         {
@@ -144,9 +144,9 @@
                 <MudItem xs="12">
                     <MudButton Variant="Variant.Outlined"
                               Color="Color.Error"
-                              StartIcon="@Icons.Material.Filled.DeleteForever"
+                              starticon="@Icons.Material.Filled.DeleteForever"
                               OnClick="@(() => _showDeleteDialog = true)"
-                              FullWidth="true">
+                              fullwidth="true">
                         Delete Account
                     </MudButton>
                     <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-1">
@@ -164,7 +164,7 @@
 </MudGrid>
 
 <!-- Account Deletion Dialog -->
-<MudDialog @bind-IsVisible="_showDeleteDialog" Options="@_deleteDialogOptions">
+<MudDialog @bind-Visible="_showDeleteDialog" Options="@_deleteDialogOptions">
     <TitleContent>
         <div class="d-flex align-center">
             <MudIcon Icon="@Icons.Material.Filled.Warning" Color="Color.Error" Class="mr-3" />
@@ -179,20 +179,20 @@
         <MudTextField @bind-Value="_deleteConfirmation"
                       Label="Type 'DELETE' to confirm"
                       Variant="Variant.Outlined"
-                      FullWidth="true"
+                      fullwidth="true"
                       Class="mb-4" />
         
         <MudTextField @bind-Value="_deletePassword"
                       Label="Enter your password"
                       Variant="Variant.Outlined"
                       InputType="InputType.Password"
-                      FullWidth="true"
+                      fullwidth="true"
                       Class="mb-4" />
         
         <MudSelect @bind-Value="_deleteReason"
                    Label="Reason for deletion (optional)"
                    Variant="Variant.Outlined"
-                   FullWidth="true">
+                   fullwidth="true">
             <MudSelectItem Value="@string.Empty">-- Select reason --</MudSelectItem>
             <MudSelectItem Value="@("No longer needed")">No longer needed</MudSelectItem>
             <MudSelectItem Value="@("Privacy concerns")">Privacy concerns</MudSelectItem>

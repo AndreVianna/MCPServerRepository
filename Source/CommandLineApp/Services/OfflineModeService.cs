@@ -55,9 +55,9 @@ public class OfflineModeService : IOfflineModeService {
 
         try {
             _logger.LogDebug("Testing API connectivity");
-            
+
             var isConnected = await _apiClient.TestConnectivityAsync(cancellationToken).ConfigureAwait(false);
-            
+
             _lastConnectivityTest = DateTimeOffset.UtcNow;
             _lastConnectivityResult = isConnected;
 
@@ -80,7 +80,7 @@ public class OfflineModeService : IOfflineModeService {
         }
         catch (Exception ex) {
             _logger.LogError(ex, "Failed to test API connectivity");
-            
+
             _lastConnectivityTest = DateTimeOffset.UtcNow;
             _lastConnectivityResult = false;
 
@@ -140,7 +140,7 @@ public class OfflineModeService : IOfflineModeService {
         // If we're offline or caching is disabled, try fallback first
         if (_isOfflineMode || !_configuration.Cache.Enabled) {
             _logger.LogDebug("Executing fallback operation for cache key: {CacheKey}", cacheKey);
-            
+
             try {
                 var fallbackResult = await offlineOperation(cancellationToken).ConfigureAwait(false);
                 if (fallbackResult != null) {
@@ -161,7 +161,7 @@ public class OfflineModeService : IOfflineModeService {
         try {
             _logger.LogDebug("Executing online operation for cache key: {CacheKey}", cacheKey);
             var result = await onlineOperation(cancellationToken).ConfigureAwait(false);
-            
+
             // If we were offline but online operation succeeded, we might be back online
             if (_isOfflineMode && !_isManuallyEnabled) {
                 _logger.LogInformation("Online operation succeeded, connectivity may be restored");
@@ -219,7 +219,7 @@ public class OfflineModeService : IOfflineModeService {
 
             // For now, just perform cache maintenance
             var maintenanceResult = await _cacheService.PerformMaintenanceAsync(cancellationToken).ConfigureAwait(false);
-            
+
             result.ItemsRemoved = maintenanceResult.ExpiredEntriesRemoved;
             result.Success = maintenanceResult.Success;
             result.Errors.AddRange(maintenanceResult.Errors);
@@ -236,54 +236,52 @@ public class OfflineModeService : IOfflineModeService {
         return result;
     }
 
-    public Dictionary<string, OfflineCapability> GetOfflineCapabilities() {
-        return new Dictionary<string, OfflineCapability> {
-            ["search"] = new OfflineCapability {
-                OperationName = "Package Search",
-                IsAvailableOffline = true,
-                DataFreshnessConfidence = CalculateSearchDataFreshness(),
-                Limitations = [
+    public Dictionary<string, OfflineCapability> GetOfflineCapabilities() => new() {
+        ["search"] = new OfflineCapability {
+            OperationName = "Package Search",
+            IsAvailableOffline = true,
+            DataFreshnessConfidence = CalculateSearchDataFreshness(),
+            Limitations = [
                     "Results may be outdated",
                     "New packages not included",
                     "Limited to cached search queries"
                 ],
-                RequiredCachedData = ["Search results", "Package metadata"],
-                FallbackBehavior = "Return cached search results matching query"
-            },
-            ["package-info"] = new OfflineCapability {
-                OperationName = "Package Information",
-                IsAvailableOffline = true,
-                DataFreshnessConfidence = CalculatePackageDataFreshness(),
-                Limitations = [
+            RequiredCachedData = ["Search results", "Package metadata"],
+            FallbackBehavior = "Return cached search results matching query"
+        },
+        ["package-info"] = new OfflineCapability {
+            OperationName = "Package Information",
+            IsAvailableOffline = true,
+            DataFreshnessConfidence = CalculatePackageDataFreshness(),
+            Limitations = [
                     "Information may be outdated",
                     "Download counts not current",
                     "Recent versions may be missing"
                 ],
-                RequiredCachedData = ["Package metadata", "Version information"],
-                FallbackBehavior = "Return cached package information"
-            },
-            ["install"] = new OfflineCapability {
-                OperationName = "Package Installation",
-                IsAvailableOffline = false,
-                DataFreshnessConfidence = 0,
-                Limitations = [
+            RequiredCachedData = ["Package metadata", "Version information"],
+            FallbackBehavior = "Return cached package information"
+        },
+        ["install"] = new OfflineCapability {
+            OperationName = "Package Installation",
+            IsAvailableOffline = false,
+            DataFreshnessConfidence = 0,
+            Limitations = [
                     "Requires package download",
                     "Cannot verify latest version",
                     "Dependency resolution limited"
                 ],
-                RequiredCachedData = ["Package manifest", "Dependency information"],
-                FallbackBehavior = "Installation not possible offline"
-            },
-            ["publish"] = new OfflineCapability {
-                OperationName = "Package Publishing",
-                IsAvailableOffline = false,
-                DataFreshnessConfidence = 0,
-                Limitations = ["Requires API connectivity"],
-                RequiredCachedData = [],
-                FallbackBehavior = "Publishing not possible offline"
-            }
-        };
-    }
+            RequiredCachedData = ["Package manifest", "Dependency information"],
+            FallbackBehavior = "Installation not possible offline"
+        },
+        ["publish"] = new OfflineCapability {
+            OperationName = "Package Publishing",
+            IsAvailableOffline = false,
+            DataFreshnessConfidence = 0,
+            Limitations = ["Requires API connectivity"],
+            RequiredCachedData = [],
+            FallbackBehavior = "Publishing not possible offline"
+        }
+    };
 
     public OfflineOperationValidation ValidateOfflineOperation(string operationType) {
         var capabilities = GetOfflineCapabilities();
@@ -351,7 +349,7 @@ public class OfflineModeService : IOfflineModeService {
                     maxPackages: _configuration.Cache.PopularPackagesPreloadCount,
                     cancellationToken: cancellationToken
                 ).ConfigureAwait(false);
-                
+
                 result.PackagesCached = preloadCount;
             }
 
@@ -398,7 +396,7 @@ public class OfflineModeService : IOfflineModeService {
     private async Task<CachedDataSummary> GetCachedDataSummaryAsync() {
         try {
             var cacheStats = await _cacheService.GetStatisticsAsync().ConfigureAwait(false);
-            
+
             return new CachedDataSummary {
                 CachedPackages = cacheStats.EntriesByType.GetValueOrDefault("PackageInfoResponse", 0),
                 CachedSearchResults = cacheStats.EntriesByType.GetValueOrDefault("SearchResultResponse", 0),
@@ -412,17 +410,15 @@ public class OfflineModeService : IOfflineModeService {
         }
     }
 
-    private int CalculateSearchDataFreshness() {
+    private int CalculateSearchDataFreshness()
         // TODO: Implement actual freshness calculation based on cache ages
         // For now, return a placeholder value
-        return _isOfflineMode ? 70 : 90;
-    }
+        => _isOfflineMode ? 70 : 90;
 
-    private int CalculatePackageDataFreshness() {
+    private int CalculatePackageDataFreshness()
         // TODO: Implement actual freshness calculation based on cache ages
         // For now, return a placeholder value
-        return _isOfflineMode ? 75 : 95;
-    }
+        => _isOfflineMode ? 75 : 95;
 
     public void Dispose() {
         _connectivityTimer?.Dispose();

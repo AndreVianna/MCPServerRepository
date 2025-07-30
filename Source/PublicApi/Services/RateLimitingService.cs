@@ -173,7 +173,7 @@ public class RateLimitingService : IRateLimitingService, IDisposable {
         return Task.FromResult(statistics);
     }
 
-    private async Task<RateLimitResult> CheckRateLimitInMemoryAsync(string key, RateLimitPolicy policy, DateTimeOffset now) {
+    private Task<RateLimitResult> CheckRateLimitInMemoryAsync(string key, RateLimitPolicy policy, DateTimeOffset now) {
         var entry = _inMemoryStore.GetOrAdd(key, _ => new RateLimitEntry {
             WindowStart = now,
             RequestCount = 0,
@@ -195,7 +195,7 @@ public class RateLimitingService : IRateLimitingService, IDisposable {
             entry.BlockedCount++;
         }
 
-        return new RateLimitResult(isAllowed, remaining, resetTime, policy);
+        return Task.FromResult(new RateLimitResult(isAllowed, remaining, resetTime, policy));
     }
 
     private async Task<RateLimitResult> CheckRateLimitDistributedAsync(string key, RateLimitPolicy policy, DateTimeOffset now, CancellationToken cancellationToken) {
@@ -208,16 +208,16 @@ public class RateLimitingService : IRateLimitingService, IDisposable {
             : new RateLimitEntry { WindowStart = now, RequestCount = 0, BlockedCount = 0 };
 
         // Check if window has expired
-        if (now - entry.WindowStart > policy.WindowDuration) {
+        if (entry != null && now - entry.WindowStart > policy.WindowDuration) {
             entry.WindowStart = now;
             entry.RequestCount = 0;
         }
 
-        var isAllowed = entry.RequestCount < policy.RequestLimit;
-        var remaining = Math.Max(0, policy.RequestLimit - entry.RequestCount);
-        var resetTime = entry.WindowStart.Add(policy.WindowDuration) - now;
+        var isAllowed = entry?.RequestCount < policy.RequestLimit;
+        var remaining = Math.Max(0, policy.RequestLimit - (entry?.RequestCount ?? 0));
+        var resetTime = (entry?.WindowStart.Add(policy.WindowDuration) ?? now) - now;
 
-        if (!isAllowed) {
+        if (!isAllowed && entry != null) {
             entry.BlockedCount++;
             // Update cache with blocked count
             var options = new DistributedCacheEntryOptions {
@@ -229,7 +229,8 @@ public class RateLimitingService : IRateLimitingService, IDisposable {
         return new RateLimitResult(isAllowed, remaining, resetTime, policy);
     }
 
-    private async Task RecordRequestInMemoryAsync(string key, RateLimitPolicy policy, DateTimeOffset now) => _inMemoryStore.AddOrUpdate(key,
+    private Task RecordRequestInMemoryAsync(string key, RateLimitPolicy policy, DateTimeOffset now) {
+        _inMemoryStore.AddOrUpdate(key,
             new RateLimitEntry { WindowStart = now, RequestCount = 1, BlockedCount = 0 },
             (_, existing) => {
                 if (now - existing.WindowStart > policy.WindowDuration) {
@@ -241,6 +242,8 @@ public class RateLimitingService : IRateLimitingService, IDisposable {
                 }
                 return existing;
             });
+        return Task.CompletedTask;
+    }
 
     private async Task RecordRequestDistributedAsync(string key, RateLimitPolicy policy, DateTimeOffset now, CancellationToken cancellationToken) {
         if (_distributedCache == null)
@@ -251,11 +254,11 @@ public class RateLimitingService : IRateLimitingService, IDisposable {
             ? JsonSerializer.Deserialize<RateLimitEntry>(entryJson)
             : new RateLimitEntry { WindowStart = now, RequestCount = 0, BlockedCount = 0 };
 
-        if (now - entry.WindowStart > policy.WindowDuration) {
+        if (entry != null && now - entry.WindowStart > policy.WindowDuration) {
             entry.WindowStart = now;
             entry.RequestCount = 1;
         }
-        else {
+        else if (entry != null) {
             entry.RequestCount++;
         }
 
@@ -263,7 +266,8 @@ public class RateLimitingService : IRateLimitingService, IDisposable {
             AbsoluteExpirationRelativeToNow = policy.WindowDuration
         };
 
-        await _distributedCache.SetStringAsync(key, JsonSerializer.Serialize(entry), options, cancellationToken);
+        if (entry != null)
+            await _distributedCache.SetStringAsync(key, JsonSerializer.Serialize(entry), options, cancellationToken);
     }
 
     private RateLimitUsage GetUsageInMemory(string key, RateLimitPolicy policy) {

@@ -6,8 +6,7 @@ namespace MCPHub.Common.Services;
 /// MCP health check service skeleton implementation
 /// Following contracts-first approach - implementation when needed
 /// </summary>
-public class MCPHealthCheckService : IHealthCheckService
-{
+public class MCPHealthCheckService : IHealthCheckService {
     public Task<OverallHealthResult> CheckHealthAsync(CancellationToken cancellationToken = default)
         => throw new NotImplementedException("Comprehensive health checks will be implemented when system health monitoring is needed");
 

@@ -192,7 +192,7 @@ public class InfoCommand(
         string? version,
         SecurityScanSummary securitySummary,
         string outputFormat) {
-        
+
         OutputFormatter.WriteInfo("=== Security Information ===");
         OutputFormatter.WriteLine();
 
@@ -222,7 +222,7 @@ public class InfoCommand(
             if (advisories.Any()) {
                 OutputFormatter.WriteLine();
                 OutputFormatter.WriteWarning($"Found {advisories.Count()} security advisories:");
-                
+
                 foreach (var advisory in advisories.Take(5)) {
                     var severityColor = advisory.Severity switch {
                         SecurityScanSeverity.Critical => "red",
@@ -230,7 +230,7 @@ public class InfoCommand(
                         SecurityScanSeverity.Medium => "yellow",
                         _ => "green"
                     };
-                    
+
                     OutputFormatter.WriteWarning($"  [{severityColor}]{advisory.Severity}[/] {advisory.Title}");
                 }
 
@@ -251,7 +251,7 @@ public class InfoCommand(
         string packageName,
         TrustTierAssessment assessment,
         string outputFormat) {
-        
+
         OutputFormatter.WriteInfo("=== Trust Tier Assessment ===");
         OutputFormatter.WriteLine();
 
@@ -269,12 +269,12 @@ public class InfoCommand(
             if (history.Any()) {
                 OutputFormatter.WriteLine();
                 OutputFormatter.WriteInfo("Recent Trust Tier History:");
-                
+
                 foreach (var entry in history) {
                     var changeDate = entry.ChangedAt.ToString("yyyy-MM-dd");
                     var changeType = entry.ToTier > entry.FromTier ? "↗️ Promoted" : "↘️ Demoted";
                     OutputFormatter.WriteInfo($"  {changeDate}: {changeType} to {entry.ToTier}");
-                    
+
                     if (!string.IsNullOrEmpty(entry.Reason)) {
                         OutputFormatter.WriteInfo($"    Reason: {entry.Reason}");
                     }
@@ -291,7 +291,7 @@ public class InfoCommand(
             OutputFormatter.WriteLine();
             OutputFormatter.WriteInfo("Trust Score Breakdown:");
             OutputFormatter.WriteInfo($"  Overall Score: {scoreBreakdown.TotalScore}/{scoreBreakdown.MaxScore} ({scoreBreakdown.ScorePercentage:F1}%)");
-            
+
             if (scoreBreakdown.Factors.Any()) {
                 OutputFormatter.WriteInfo("  Key Factors:");
                 foreach (var factor in scoreBreakdown.Factors.Take(3)) {
@@ -313,10 +313,9 @@ public class InfoCommand(
         }
     }
 
-    private void DisplaySecuritySummaryTable(SecurityScanSummary summary) {
+    private void DisplaySecuritySummaryTable(SecurityScanSummary summary)
         // Implementation would display actual security summary
-        OutputFormatter.WriteInfo("Security summary display not implemented in skeleton");
-    }
+        => OutputFormatter.WriteInfo("Security summary display not implemented in skeleton");
 
     private void DisplayTrustTierAssessmentTable(TrustTierAssessment assessment) {
         var table = new Table();
@@ -326,7 +325,7 @@ public class InfoCommand(
 
         var currentTierColor = assessment.CurrentTier switch {
             TrustTier.Enterprise => "green",
-            TrustTier.Professional => "blue", 
+            TrustTier.Professional => "blue",
             TrustTier.Community => "yellow",
             _ => "red"
         };
@@ -334,20 +333,20 @@ public class InfoCommand(
         var recommendedTierColor = assessment.RecommendedTier switch {
             TrustTier.Enterprise => "green",
             TrustTier.Professional => "blue",
-            TrustTier.Community => "yellow", 
+            TrustTier.Community => "yellow",
             _ => "red"
         };
 
-        table.AddRow("Current Tier", $"[{currentTierColor}]{assessment.CurrentTier}[/]", 
+        table.AddRow("Current Tier", $"[{currentTierColor}]{assessment.CurrentTier}[/]",
             assessment.CurrentTier == assessment.RecommendedTier ? "[green]✓[/]" : "[yellow]⚠[/]");
-        
+
         table.AddRow("Recommended Tier", $"[{recommendedTierColor}]{assessment.RecommendedTier}[/]",
             assessment.EligibleForPromotion ? "[green]Eligible[/]" : "[grey]Not Eligible[/]");
-        
-        table.AddRow("Trust Score", $"{assessment.TotalScore}/{assessment.MaxScore}", 
+
+        table.AddRow("Trust Score", $"{assessment.TotalScore}/{assessment.MaxScore}",
             $"{assessment.ScorePercentage:F1}%");
-        
-        table.AddRow("Last Assessment", assessment.LastAssessment.ToString("yyyy-MM-dd"), 
+
+        table.AddRow("Last Assessment", assessment.LastAssessment.ToString("yyyy-MM-dd"),
             assessment.AtRiskForDemotion ? "[red]At Risk[/]" : "[green]Stable[/]");
 
         AnsiConsole.Write(table);
@@ -369,13 +368,11 @@ public class InfoCommand(
         }
     }
 
-    private string GetSecurityGradeDisplay(string grade) {
-        return grade switch {
-            "A+" or "A" => $"[green]{grade}[/] (Excellent)",
-            "B" => $"[yellow]{grade}[/] (Good)",
-            "C" => $"[orange3]{grade}[/] (Acceptable)",
-            "D" or "F" => $"[red]{grade}[/] (Poor)",
-            _ => $"{grade} (Unknown)"
-        };
-    }
+    private string GetSecurityGradeDisplay(string grade) => grade switch {
+        "A+" or "A" => $"[green]{grade}[/] (Excellent)",
+        "B" => $"[yellow]{grade}[/] (Good)",
+        "C" => $"[orange3]{grade}[/] (Acceptable)",
+        "D" or "F" => $"[red]{grade}[/] (Poor)",
+        _ => $"{grade} (Unknown)"
+    };
 }

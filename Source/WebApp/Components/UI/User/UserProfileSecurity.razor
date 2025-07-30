@@ -24,7 +24,7 @@
                                       OnAdornmentClick="@(() => _showCurrentPassword = !_showCurrentPassword)"
                                       Required="true"
                                       For="@(() => _passwordModel.CurrentPassword)"
-                                      FullWidth="true" />
+                                      fullwidth="true" />
                     </MudItem>
                     <MudItem xs="12">
                         <MudTextField @bind-Value="_passwordModel.NewPassword"
@@ -36,7 +36,7 @@
                                       OnAdornmentClick="@(() => _showNewPassword = !_showNewPassword)"
                                       Required="true"
                                       For="@(() => _passwordModel.NewPassword)"
-                                      FullWidth="true" />
+                                      fullwidth="true" />
                         <PasswordStrengthIndicator Password="@_passwordModel.NewPassword" />
                     </MudItem>
                     <MudItem xs="12">
@@ -49,15 +49,15 @@
                                       OnAdornmentClick="@(() => _showConfirmPassword = !_showConfirmPassword)"
                                       Required="true"
                                       For="@(() => _passwordModel.ConfirmPassword)"
-                                      FullWidth="true" />
+                                      fullwidth="true" />
                     </MudItem>
                     <MudItem xs="12">
                         <MudButton ButtonType="ButtonType.Submit"
                                   Variant="Variant.Filled"
                                   Color="Color.Primary"
                                   Disabled="@_isChangingPassword"
-                                  StartIcon="@(_isChangingPassword ? null : Icons.Material.Filled.Lock)"
-                                  FullWidth="true">
+                                  starticon="@(_isChangingPassword ? null : Icons.Material.Filled.Lock)"
+                                  fullwidth="true">
                             @if (_isChangingPassword)
                             {
                                 <MudProgressCircular Size="Size.Small" Indeterminate="true" />
@@ -104,9 +104,9 @@
 
                 <MudButton Variant="Variant.Outlined"
                           Color="Color.Primary"
-                          StartIcon="@Icons.Material.Filled.Shield"
+                          starticon="@Icons.Material.Filled.Shield"
                           OnClick="@(() => _showTwoFactorSetup = true)"
-                          FullWidth="true">
+                          fullwidth="true">
                     Setup Two-Factor Authentication
                 </MudButton>
             }
@@ -120,20 +120,20 @@
                     <MudItem xs="12" sm="6">
                         <MudButton Variant="Variant.Outlined"
                                   Color="Color.Secondary"
-                                  StartIcon="@Icons.Material.Filled.Refresh"
+                                  starticon="@Icons.Material.Filled.Refresh"
                                   OnClick="@HandleRegenerateRecoveryCodes"
                                   Disabled="@_isLoadingTwoFactor"
-                                  FullWidth="true">
+                                  fullwidth="true">
                             Regenerate Recovery Codes
                         </MudButton>
                     </MudItem>
                     <MudItem xs="12" sm="6">
                         <MudButton Variant="Variant.Outlined"
                                   Color="Color.Error"
-                                  StartIcon="@Icons.Material.Filled.SecurityUpdateWarning"
+                                  starticon="@Icons.Material.Filled.SecurityUpdateWarning"
                                   OnClick="@HandleDisableTwoFactor"
                                   Disabled="@_isLoadingTwoFactor"
-                                  FullWidth="true">
+                                  fullwidth="true">
                             Disable 2FA
                         </MudButton>
                     </MudItem>
@@ -152,7 +152,7 @@
                 </MudText>
                 <MudButton Variant="Variant.Text"
                           Size="Size.Small"
-                          StartIcon="@Icons.Material.Filled.Refresh"
+                          starticon="@Icons.Material.Filled.Refresh"
                           OnClick="@LoadActiveSessions">
                     Refresh
                 </MudButton>
@@ -191,7 +191,7 @@
                                         <MudButton Variant="Variant.Text"
                                                   Color="Color.Error"
                                                   Size="Size.Small"
-                                                  StartIcon="@Icons.Material.Filled.Logout"
+                                                  starticon="@Icons.Material.Filled.Logout"
                                                   OnClick="@(() => HandleTerminateSession(session.Id))">
                                             Terminate
                                         </MudButton>
@@ -206,7 +206,7 @@
                 <div class="text-center">
                     <MudButton Variant="Variant.Outlined"
                               Color="Color.Error"
-                              StartIcon="@Icons.Material.Filled.Logout"
+                              starticon="@Icons.Material.Filled.Logout"
                               OnClick="@HandleTerminateAllOtherSessions"
                               Disabled="@_isLoadingSessions">
                         Terminate All Other Sessions
@@ -231,7 +231,7 @@
 </MudGrid>
 
 <!-- Two-Factor Setup Dialog -->
-<MudDialog @bind-IsVisible="_showTwoFactorSetup" Options="@_dialogOptions">
+<MudDialog @bind-Visible="_showTwoFactorSetup" Options="@_dialogOptions">
     <TitleContent>
         <div class="d-flex align-center">
             <MudIcon Icon="@Icons.Material.Filled.Security" Class="mr-3" />
@@ -304,7 +304,7 @@
         }
     }
 
-    private async Task HandleRegenerateRecoveryCodes()
+    private Task HandleRegenerateRecoveryCodes()
     {
         _isLoadingTwoFactor = true;
         try
@@ -320,9 +320,10 @@
         {
             _isLoadingTwoFactor = false;
         }
+        return Task.CompletedTask;
     }
 
-    private async Task HandleDisableTwoFactor()
+    private Task HandleDisableTwoFactor()
     {
         _isLoadingTwoFactor = true;
         try
@@ -339,6 +340,7 @@
         {
             _isLoadingTwoFactor = false;
         }
+        return Task.CompletedTask;
     }
 
     private async Task LoadActiveSessions()
@@ -408,7 +410,7 @@
         }
     }
 
-    private async Task HandleTwoFactorSetupCompleted(bool success)
+    private Task HandleTwoFactorSetupCompleted(bool success)
     {
         _showTwoFactorSetup = false;
         if (success)
@@ -416,6 +418,7 @@
             _isTwoFactorEnabled = true;
             Snackbar.Add("Two-factor authentication enabled successfully!", Severity.Success);
         }
+        return Task.CompletedTask;
     }
 
     private string GetDeviceIcon(string deviceInfo) => deviceInfo.ToLower() switch

@@ -13,7 +13,7 @@
 
 <PageTitle>@(_packageDetails?.Name ?? "Package") Analytics - MCP Hub</PageTitle>
 
-<ResponsiveContainer MaxWidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
+<ResponsiveContainer maxwidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
     <HeaderContent>
         @if (_packageDetails != null)
         {
@@ -71,7 +71,7 @@
                     <div class="action-controls d-flex gap-2">
                         <MudButton Variant="Variant.Outlined"
                                    Color="Color.Info"
-                                   StartIcon="Icons.Material.Filled.Compare"
+                                   starticon="Icons.Material.Filled.Compare"
                                    Size="Size.Medium"
                                    @onclick="ComparePackage">
                             Compare
@@ -79,7 +79,7 @@
                         
                         <MudButton Variant="Variant.Outlined"
                                    Color="Color.Primary"
-                                   StartIcon="Icons.Material.Filled.Download"
+                                   starticon="Icons.Material.Filled.Download"
                                    Size="Size.Medium"
                                    @onclick="ExportData">
                             Export
@@ -87,7 +87,7 @@
                         
                         <MudButton Variant="Variant.Filled"
                                    Color="Color.Primary"
-                                   StartIcon="Icons.Material.Filled.Refresh"
+                                   starticon="Icons.Material.Filled.Refresh"
                                    Size="Size.Medium"
                                    @onclick="RefreshData"
                                    Disabled="_isLoading">
@@ -127,7 +127,7 @@
             <div class="package-overview-metrics mb-6">
                 <MudGrid Spacing="3">
                     <MudItem xs="12" sm="6" md="3">
-                        <MetricsCard Title="Total Downloads"
+                        <MetricsCard title="Total Downloads"
                                      Value="@FormatNumber(_packageAnalytics.Overview.TotalDownloads)"
                                      Icon="Icons.Material.Filled.Download"
                                      Color="Color.Primary"
@@ -141,7 +141,7 @@
                     </MudItem>
 
                     <MudItem xs="12" sm="6" md="3">
-                        <MetricsCard Title="Active Users"
+                        <MetricsCard title="Active Users"
                                      Value="@FormatNumber(_packageAnalytics.UserEngagement.ActiveUsers)"
                                      Icon="Icons.Material.Filled.People"
                                      Color="Color.Success"
@@ -156,7 +156,7 @@
                     </MudItem>
 
                     <MudItem xs="12" sm="6" md="3">
-                        <MetricsCard Title="Rating"
+                        <MetricsCard title="Rating"
                                      Value="@_packageAnalytics.Overview.AverageRating.ToString("F1")"
                                      Icon="Icons.Material.Filled.Star"
                                      Color="Color.Warning"
@@ -170,7 +170,7 @@
                     </MudItem>
 
                     <MudItem xs="12" sm="6" md="3">
-                        <MetricsCard Title="Security Score"
+                        <MetricsCard title="Security Score"
                                      Value="@_packageAnalytics.Security.SecurityScore.ToString("F0")"
                                      Icon="Icons.Material.Filled.Security"
                                      Color="@GetSecurityColor()"
@@ -190,7 +190,7 @@
                 <MudGrid Spacing="3">
                     <!-- Download Analytics Chart -->
                     <MudItem xs="12" lg="8" id="download-analytics">
-                        <AnalyticsChart Title="📈 Download Analytics"
+                        <AnalyticsChart title="📈 Download Analytics"
                                         Subtitle="Download trends and patterns over time"
                                         ChartType="@GetChartTypeForMetric()"
                                         ChartSeries="@ChartSeriesConverter.ToMudBlazor(GetDownloadChartSeries())"
@@ -225,7 +225,7 @@
 
                     <!-- Version Adoption -->
                     <MudItem xs="12" lg="4">
-                        <AnalyticsChart Title="🔄 Version Adoption"
+                        <AnalyticsChart title="🔄 Version Adoption"
                                         Subtitle="Version distribution and upgrade patterns"
                                         ChartType="Components.UI.Models.ChartType.Donut"
                                         ChartSeries="@ChartSeriesConverter.ToMudBlazor(GetVersionChartSeries())"
@@ -392,7 +392,7 @@
                                     <MudText Typo="Typo.subtitle2" Class="mb-2">Dependency Alerts</MudText>
                                     @foreach (var alert in _packageAnalytics.Dependencies.Alerts.Take(3))
                                     {
-                                        <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-2">
+                                        <MudAlert Severity="Severity.Warning" dense="true" Class="mb-2">
                                             @alert.ToString()
                                         </MudAlert>
                                     }
@@ -614,11 +614,11 @@
         }
     }
 
-    private async Task<PackageInfo> GetPackageDetails(Guid packageId)
+    private Task<PackageInfo> GetPackageDetails(Guid packageId)
     {
         // This would normally be fetched from PackageService
         // For now, return mock data
-        return new PackageInfo
+        var packageInfo = new PackageInfo
         {
             Name = "@ai/claude-tools",
             LatestVersion = "2.1.4",
@@ -628,6 +628,7 @@
             TrustTier = TrustTier.Verified,
             LastUpdated = DateTime.UtcNow.AddDays(-7)
         };
+        return Task.FromResult(packageInfo);
     }
 
     private void GenerateMockPackageAnalytics()
@@ -730,10 +731,11 @@
         await LoadPackageAnalytics();
     }
 
-    private async Task OnMetricChanged()
+    private Task OnMetricChanged()
     {
         // Update the main chart to focus on selected metric
         StateHasChanged();
+        return Task.CompletedTask;
     }
 
     private async Task RefreshData()
@@ -742,15 +744,17 @@
         Snackbar.Add("Package analytics refreshed", Severity.Success);
     }
 
-    private async Task ExportData()
+    private Task ExportData()
     {
         // TODO: Implement comprehensive data export
         Snackbar.Add("Export functionality coming soon", Severity.Info);
+        return Task.CompletedTask;
     }
 
-    private async Task ComparePackage()
+    private Task ComparePackage()
     {
         Navigation.NavigateTo($"/analytics/compare?packages={PackageId}");
+        return Task.CompletedTask;
     }
 
     private void ScrollToSection(string sectionId)
@@ -771,24 +775,28 @@
         await LoadPackageAnalytics();
     }
 
-    private async Task HandleDownloadDrillDown(ChartDrillDownEventArgs args)
+    private Task HandleDownloadDrillDown(ChartDrillDownEventArgs args)
     {
         Snackbar.Add($"Drilling down into download data for {args.XAxisLabel}", Severity.Info);
+        return Task.CompletedTask;
     }
 
-    private async Task ExportDownloadData()
+    private Task ExportDownloadData()
     {
         Snackbar.Add("Exporting download data", Severity.Info);
+        return Task.CompletedTask;
     }
 
-    private async Task HandleVersionDrillDown(ChartDrillDownEventArgs args)
+    private Task HandleVersionDrillDown(ChartDrillDownEventArgs args)
     {
         Snackbar.Add($"Viewing details for version: {args.XAxisLabel}", Severity.Info);
+        return Task.CompletedTask;
     }
 
-    private async Task ExportVersionData()
+    private Task ExportVersionData()
     {
         Snackbar.Add("Exporting version data", Severity.Info);
+        return Task.CompletedTask;
     }
 
     // Helper methods for data formatting and display

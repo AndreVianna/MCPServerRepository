@@ -215,15 +215,16 @@ public class PackageManager(ILogger<PackageManager> logger, McpmConfiguration co
             // Remove all versions
             registry.InstalledPackages.Remove(localPackage);
             _logger.LogInformation("Package {PackageName} (all versions) unregistered from local registry", packageName);
-        } else {
+        }
+        else {
             // Remove specific version
             localPackage.Versions.RemoveAll(v => v.Version == version);
-            
+
             // If no versions left, remove the package entirely
             if (!localPackage.Versions.Any()) {
                 registry.InstalledPackages.Remove(localPackage);
             }
-            
+
             _logger.LogInformation("Package {PackageName}@{Version} unregistered from local registry", packageName, version);
         }
 
@@ -236,14 +237,14 @@ public class PackageManager(ILogger<PackageManager> logger, McpmConfiguration co
     public async Task<string> CreatePackageBackupAsync(string packageName, string version, bool global = false) {
         var packagePath = GetPackageInstallPath(packageName, global);
         var versionPath = Path.Combine(packagePath, version);
-        
+
         if (!Directory.Exists(versionPath)) {
             throw new DirectoryNotFoundException($"Package {packageName}@{version} not found at {versionPath}");
         }
 
         var backupDir = Path.Combine(_configuration.Paths.Temp, "backups");
         Directory.CreateDirectory(backupDir);
-        
+
         var timestamp = DateTimeOffset.UtcNow.ToString("yyyyMMdd-HHmmss");
         var backupFileName = $"{packageName}-{version}-{timestamp}.zip";
         var backupPath = Path.Combine(backupDir, backupFileName);
@@ -258,7 +259,7 @@ public class PackageManager(ILogger<PackageManager> logger, McpmConfiguration co
     /// <summary>
     /// Removes a package directory and files
     /// </summary>
-    public async Task<long> RemovePackageFilesAsync(string packageName, string? version = null, bool global = false) {
+    public Task<long> RemovePackageFilesAsync(string packageName, string? version = null, bool global = false) {
         var packagePath = GetPackageInstallPath(packageName, global);
         long removedBytes = 0;
 
@@ -269,14 +270,15 @@ public class PackageManager(ILogger<PackageManager> logger, McpmConfiguration co
                 Directory.Delete(packagePath, recursive: true);
                 _logger.LogInformation("Removed all files for package {PackageName}", packageName);
             }
-        } else {
+        }
+        else {
             // Remove specific version
             var versionPath = Path.Combine(packagePath, version);
             if (Directory.Exists(versionPath)) {
                 removedBytes = GetDirectorySize(versionPath);
                 Directory.Delete(versionPath, recursive: true);
                 _logger.LogInformation("Removed files for package {PackageName}@{Version}", packageName, version);
-                
+
                 // If no versions left, remove package directory
                 if (Directory.Exists(packagePath) && !Directory.EnumerateDirectories(packagePath).Any()) {
                     Directory.Delete(packagePath);
@@ -284,7 +286,7 @@ public class PackageManager(ILogger<PackageManager> logger, McpmConfiguration co
             }
         }
 
-        return removedBytes;
+        return Task.FromResult(removedBytes);
     }
 
     /// <summary>
@@ -293,7 +295,7 @@ public class PackageManager(ILogger<PackageManager> logger, McpmConfiguration co
     public async Task<bool> VerifyPackageIntegrityAsync(string packageName, string version, bool global = false) {
         var packagePath = GetPackageInstallPath(packageName, global);
         var versionPath = Path.Combine(packagePath, version);
-        
+
         if (!Directory.Exists(versionPath)) {
             return false;
         }
@@ -309,7 +311,7 @@ public class PackageManager(ILogger<PackageManager> logger, McpmConfiguration co
             // Validate manifest JSON
             var manifestContent = await File.ReadAllTextAsync(manifestPath);
             using var manifestDoc = JsonDocument.Parse(manifestContent);
-            
+
             // Basic validation - ensure required properties exist
             if (!manifestDoc.RootElement.TryGetProperty("name", out _) ||
                 !manifestDoc.RootElement.TryGetProperty("version", out _)) {
@@ -342,16 +344,16 @@ public class PackageManager(ILogger<PackageManager> logger, McpmConfiguration co
     /// </summary>
     private async Task AddDirectoryToArchiveAsync(ZipArchive archive, string directoryPath, string entryPrefix) {
         var directoryInfo = new DirectoryInfo(directoryPath);
-        
+
         foreach (var file in directoryInfo.EnumerateFiles("*", SearchOption.AllDirectories)) {
             var relativePath = Path.GetRelativePath(directoryPath, file.FullName);
             var entryName = Path.Combine(entryPrefix, relativePath).Replace('\\', '/');
-            
+
             var entry = archive.CreateEntry(entryName);
-            
+
             using var entryStream = entry.Open();
             using var fileStream = file.OpenRead();
-            
+
             await fileStream.CopyToAsync(entryStream);
         }
     }
@@ -403,11 +405,11 @@ public class PackageManager(ILogger<PackageManager> logger, McpmConfiguration co
     public async Task RecordTransactionAsync(PackageTransaction transaction, bool global = false) {
         var logPath = GetTransactionLogPath(global);
         var json = JsonSerializer.Serialize(transaction, new JsonSerializerOptions { WriteIndented = false });
-        
+
         // Append to log file
         await File.AppendAllTextAsync(logPath, json + Environment.NewLine);
-        
-        _logger.LogInformation("Recorded transaction: {Type} {Package}@{Version}", 
+
+        _logger.LogInformation("Recorded transaction: {Type} {Package}@{Version}",
             transaction.Type, transaction.PackageName, transaction.Version);
     }
 

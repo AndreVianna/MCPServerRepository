@@ -80,7 +80,7 @@ public class ValidationSummaryTests {
         // Assert
         Assert.False(summary.IsValid);
         Assert.Equal(3, summary.Errors.Count);
-        Assert.Equal(0, summary.Warnings.Count);
+        Assert.Empty(summary.Warnings);
         Assert.Equal(context, summary.Context);
         Assert.Equal(validationTime, summary.ValidationTimeMs);
         Assert.Equal(errors.ToList(), summary.Errors.ToList());
@@ -99,7 +99,7 @@ public class ValidationSummaryTests {
 
         // Assert
         Assert.False(summary.IsValid);
-        Assert.Equal(1, summary.Errors.Count);
+        Assert.Single(summary.Errors);
         Assert.Equal(error, summary.Errors.First());
         Assert.Equal(context, summary.Context);
     }
@@ -118,7 +118,7 @@ public class ValidationSummaryTests {
 
         // Assert
         Assert.False(summary.IsValid);
-        Assert.Equal(1, summary.Errors.Count);
+        Assert.Single(summary.Errors);
         Assert.Equal(2, summary.Warnings.Count);
         Assert.Equal(context, summary.Context);
     }
@@ -132,8 +132,8 @@ public class ValidationSummaryTests {
 
         // Assert
         Assert.True(combined.IsValid);
-        Assert.Equal(0, combined.Errors.Count);
-        Assert.Equal(0, combined.Warnings.Count);
+        Assert.Empty(combined.Errors);
+        Assert.Empty(combined.Warnings);
     }
 
     [Fact]
@@ -150,7 +150,7 @@ public class ValidationSummaryTests {
 
         // Assert
         Assert.True(combined.IsValid);
-        Assert.Equal(0, combined.Errors.Count);
+        Assert.Empty(combined.Errors);
         Assert.Equal(2, combined.Warnings.Count);
         Assert.Equal(60L, combined.ValidationTimeMs);
         Assert.Equal("manifest, security, dependencies", combined.Context);
@@ -174,11 +174,11 @@ public class ValidationSummaryTests {
         Assert.Equal(2, combined.Warnings.Count);
         Assert.Equal(60L, combined.ValidationTimeMs);
         Assert.Equal("manifest, security, dependencies", combined.Context);
-        Assert.True(combined.Errors.Contains("Error 1"));
-        Assert.True(combined.Errors.Contains("Error 2"));
-        Assert.True(combined.Errors.Contains("Error 3"));
-        Assert.True(combined.Warnings.Contains("Warning 1"));
-        Assert.True(combined.Warnings.Contains("Warning 2"));
+        Assert.Contains("Error 1", combined.Errors);
+        Assert.Contains("Error 2", combined.Errors);
+        Assert.Contains("Error 3", combined.Errors);
+        Assert.Contains("Warning 1", combined.Warnings);
+        Assert.Contains("Warning 2", combined.Warnings);
     }
 
     [Fact]
@@ -208,8 +208,8 @@ public class ValidationSummaryTests {
 
         // Assert
         Assert.True(summary.IsValid);
-        Assert.Equal(0, summary.Errors.Count);
-        Assert.Equal(0, summary.Warnings.Count);
+        Assert.Empty(summary.Errors);
+        Assert.Empty(summary.Warnings);
         Assert.Equal("test", summary.Context);
     }
 }

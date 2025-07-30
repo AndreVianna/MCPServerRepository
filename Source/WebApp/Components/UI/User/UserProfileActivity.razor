@@ -9,7 +9,7 @@
             <MudText Typo="Typo.h6">Recent Activity</MudText>
             <MudButton Variant="Variant.Text" 
                       Size="Size.Small"
-                      StartIcon="@Icons.Material.Filled.Refresh"
+                      starticon="@Icons.Material.Filled.Refresh"
                       OnClick="@LoadActivityLog">
                 Refresh
             </MudButton>
@@ -175,7 +175,7 @@
                        Label="Filter by Activity"
                        Variant="Variant.Outlined"
                        AnchorOrigin="Origin.BottomCenter"
-                       FullWidth="true"
+                       fullwidth="true"
                        Class="mb-3">
                 <MudSelectItem Value="@string.Empty">All Activities</MudSelectItem>
                 <MudSelectItem Value="@("Login")">Login Events</MudSelectItem>
@@ -187,14 +187,14 @@
             <MudDateRangePicker @bind-DateRange="_dateRange"
                                Label="Date Range"
                                Variant="Variant.Outlined"
-                               FullWidth="true"
+                               fullwidth="true"
                                Class="mb-3" />
             
             <MudButton Variant="Variant.Filled"
                       Color="Color.Primary"
-                      StartIcon="@Icons.Material.Filled.FilterList"
+                      starticon="@Icons.Material.Filled.FilterList"
                       OnClick="@ApplyFilters"
-                      FullWidth="true">
+                      fullwidth="true">
                 Apply Filters
             </MudButton>
         </MudPaper>
@@ -347,7 +347,7 @@
         var a when a.Contains("security") || a.Contains("2fa") => Icons.Material.Filled.Security,
         var a when a.Contains("favorite") || a.Contains("like") => Icons.Material.Filled.Favorite,
         var a when a.Contains("profile") => Icons.Material.Filled.Person,
-        _ => Icons.Material.Filled.Activity
+        _ => Icons.Material.Filled.Timeline
     };
 
     public class ActivityStats

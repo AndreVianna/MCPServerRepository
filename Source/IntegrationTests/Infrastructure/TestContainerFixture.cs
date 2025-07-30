@@ -1,17 +1,15 @@
-namespace MCPHub.BDD.IntegrationTests.Infrastructure;
+namespace MCPHub.IntegrationTests.Infrastructure;
 
 /// <summary>
 /// Test container fixture for managing database and cache containers across test runs
 /// </summary>
-public class TestContainerFixture : IAsyncLifetime
-{
+public class TestContainerFixture : IAsyncLifetime {
     public PostgreSqlContainer PostgreSqlContainer { get; private set; } = null!;
     public RedisContainer RedisContainer { get; private set; } = null!;
     public TestWebApplicationFactory<Program> WebApplicationFactory { get; private set; } = null!;
     public TestWebApplicationFactory<MCPHub.WebApp.Program> WebAppFactory { get; private set; } = null!;
 
-    public async Task InitializeAsync()
-    {
+    public async Task InitializeAsync() {
         // Start PostgreSQL container
         PostgreSqlContainer = new PostgreSqlBuilder()
             .WithDatabase("mcphub_test")
@@ -42,8 +40,7 @@ public class TestContainerFixture : IAsyncLifetime
         await WebAppFactory.InitializeDatabaseAsync();
     }
 
-    public async Task DisposeAsync()
-    {
+    public async Task DisposeAsync() {
         WebApplicationFactory?.Dispose();
         WebAppFactory?.Dispose();
 
@@ -59,8 +56,7 @@ public class TestContainerFixture : IAsyncLifetime
 /// Collection definition for sharing test containers across test classes
 /// </summary>
 [CollectionDefinition("TestContainer")]
-public class TestContainerCollection : ICollectionFixture<TestContainerFixture>
-{
+public class TestContainerCollection : ICollectionFixture<TestContainerFixture> {
     // This class has no code, and is never created. Its purpose is simply
     // to be the place to apply [CollectionDefinition] and all the
     // ICollectionFixture<> interfaces.

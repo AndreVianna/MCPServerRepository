@@ -133,7 +133,7 @@ public class InstallCommand(
         var yes = context.ParseResult.GetValueForOption(_yesOption!);
         var dryRun = context.ParseResult.GetValueForOption(_dryRunOption!);
         var nonInteractive = context.ParseResult.GetValueForOption(_nonInteractiveOption!);
-        
+
         try {
             Logger.LogInformation("Executing install command: Package={Package}, Dev={Dev}, Force={Force}, Global={Global}",
                 package, dev, force, global);
@@ -152,154 +152,153 @@ public class InstallCommand(
 
             // Stage 1: Fetch - Get package information with enhanced progress
             PackageInfoResponse packageInfo;
-            using (var fetchProgress = ProgressReporter.CreateStepProgress("Package Installation", new[] {
+            using var fetchProgress = ProgressReporter.CreateStepProgress("Package Installation", new[] {
                 "Fetching package information",
-                "Resolving dependencies", 
+                "Resolving dependencies",
                 "Verifying security",
                 "Installing packages"
-            })) {
-                fetchProgress.StartStep(0, $"Getting information for '{packageName}'...");
-                
-                try {
-                    packageInfo = await ApiClient.GetPackageInfoAsync(packageName);
-                    fetchProgress.CompleteStep(0, $"Retrieved {packageName} information");
-                }
-                catch (Exception ex) {
-                    fetchProgress.FailStep(0, $"Failed to get package information: {ex.Message}");
-                    throw;
-                }
+            });
+            fetchProgress.StartStep(0, $"Getting information for '{packageName}'...");
 
-                // Resolve version if not specified
-                if (string.IsNullOrEmpty(version)) {
-                    version = packageInfo.Version; // Latest version
-                    if (!nonInteractive) {
-                        OutputFormatter.WriteInfo($"No version specified, using latest: {version}");
-                    }
-                }
+            try {
+                packageInfo = await ApiClient.GetPackageInfoAsync(packageName);
+                fetchProgress.CompleteStep(0, $"Retrieved {packageName} information");
+            }
+            catch (Exception ex) {
+                fetchProgress.FailStep(0, $"Failed to get package information: {ex.Message}");
+                throw;
+            }
 
-                // Check if already installed (unless force)
-                if (!force) {
-                    var installedVersion = await _packageManager.GetInstalledPackageAsync(packageName, version, global);
-                    if (installedVersion != null) {
-                        if (!nonInteractive && !yes) {
-                            var reinstall = await InteractionService.ConfirmAsync(
-                                $"Package '{packageName}@{version}' is already installed. Reinstall?", false);
-                            if (!reinstall) {
-                                fetchProgress.CompleteAll("Installation cancelled by user");
-                                return 0;
-                            }
-                        }
-                        else if (!nonInteractive) {
-                            OutputFormatter.WriteInfo($"Package '{packageName}@{version}' is already installed");
-                            OutputFormatter.WriteInfo("Use --force to reinstall");
+            // Resolve version if not specified
+            if (string.IsNullOrEmpty(version)) {
+                version = packageInfo.Version; // Latest version
+                if (!nonInteractive) {
+                    OutputFormatter.WriteInfo($"No version specified, using latest: {version}");
+                }
+            }
+
+            // Check if already installed (unless force)
+            if (!force) {
+                var installedVersion = await _packageManager.GetInstalledPackageAsync(packageName, version, global);
+                if (installedVersion != null) {
+                    if (!nonInteractive && !yes) {
+                        var reinstall = await InteractionService.ConfirmAsync(
+                            $"Package '{packageName}@{version}' is already installed. Reinstall?", false);
+                        if (!reinstall) {
+                            fetchProgress.CompleteAll("Installation cancelled by user");
                             return 0;
                         }
                     }
-                }
-
-                // Stage 2: Resolve dependencies with interactive choices
-                fetchProgress.StartStep(1, "Analyzing dependencies...");
-                var dependencyResult = await _dependencyResolver.ResolveDependenciesAsync(packageName, version, dev, global);
-
-                if (!dependencyResult.Success) {
-                    fetchProgress.FailStep(1, "Dependency resolution failed");
-                    OutputFormatter.WriteError("Failed to resolve dependencies:");
-                    foreach (var error in dependencyResult.Errors) {
-                        OutputFormatter.WriteError($"  - {error}");
-                    }
-                    return 1;
-                }
-
-                fetchProgress.CompleteStep(1, $"Resolved {dependencyResult.PackagesToInstall.Count} packages");
-
-                // Interactive dependency resolution (mock implementation for conflicts)
-                var mockConflicts = new List<object>(); // In real implementation, get from dependencyResult
-                if (!nonInteractive && mockConflicts.Any()) {
-                    var resolveConflicts = await HandleDependencyConflictsAsync(mockConflicts);
-                    if (!resolveConflicts) {
-                        fetchProgress.CompleteAll("Installation cancelled due to dependency conflicts");
-                        return 130;
+                    else if (!nonInteractive) {
+                        OutputFormatter.WriteInfo($"Package '{packageName}@{version}' is already installed");
+                        OutputFormatter.WriteInfo("Use --force to reinstall");
+                        return 0;
                     }
                 }
-
-                // Show warnings
-                foreach (var warning in dependencyResult.Warnings) {
-                    OutputFormatter.WriteWarning(warning);
-                }
-
-                // Stage 3: Comprehensive security verification
-                fetchProgress.StartStep(2, "Performing comprehensive security verification...");
-                
-                // Parse security requirements
-                var minTrustTierEnum = ParseTrustTierEnum(minTrustTier);
-                var securityRequirements = new SecurityRequirements {
-                    MinimumTrustTier = minTrustTierEnum,
-                    MinimumSecurityGrade = minSecurityGrade,
-                    AllowVulnerabilities = allowVulnerabilities,
-                    PerformSecurityScan = securityScan && !skipVerify
-                };
-
-                // Perform comprehensive security assessment
-                var securityAssessment = await PerformSecurityAssessmentAsync(
-                    dependencyResult.PackagesToInstall, securityRequirements, nonInteractive);
-
-                if (!securityAssessment.IsApproved) {
-                    fetchProgress.FailStep(2, "Security verification failed");
-                    fetchProgress.SkipStep(3, "Security issues detected");
-                    
-                    DisplaySecurityIssues(securityAssessment);
-                    
-                    if (!nonInteractive && !yes) {
-                        var proceedAnyway = await InteractionService.ConfirmAsync(
-                            "Security issues detected. Do you want to proceed anyway? (NOT RECOMMENDED)", false);
-                        if (!proceedAnyway) {
-                            OutputFormatter.WriteInfo("Installation cancelled due to security concerns");
-                            return 130;
-                        }
-                    }
-                    else if (nonInteractive) {
-                        OutputFormatter.WriteError("Installation blocked due to security policy violations");
-                        return 130;
-                    }
-                }
-
-                // Display enhanced installation plan with security information
-                await DisplayEnhancedInstallationPlanWithSecurityAsync(
-                    dependencyResult.PackagesToInstall, securityAssessment, dev, global, nonInteractive);
-
-                if (dryRun) {
-                    fetchProgress.CompleteStep(2, "Security verification complete (dry run)");
-                    fetchProgress.SkipStep(3, "Dry run mode");
-                    OutputFormatter.WriteSuccess("Dry run completed. No packages were installed.");
-                    DisplaySecuritySummary(securityAssessment);
-                    return 0;
-                }
-
-                fetchProgress.CompleteStep(2, "Security verification completed");
-
-                // Final installation confirmation
-                if (!yes && !nonInteractive) {
-                    var confirmInstall = await ConfirmEnhancedInstallationAsync(dependencyResult.PackagesToInstall);
-                    if (!confirmInstall) {
-                        fetchProgress.SkipStep(3, "User cancelled installation");
-                        OutputFormatter.WriteInfo("Installation cancelled by user");
-                        return 130;
-                    }
-                }
-
-                // Stage 4: Install packages with detailed progress
-                fetchProgress.StartStep(3, "Installing packages...");
-                var installationResult = await InstallPackagesWithEnhancedProgressAsync(dependencyResult.PackagesToInstall, dev, global);
-                
-                if (installationResult.Success) {
-                    fetchProgress.CompleteStep(3, $"Successfully installed {installationResult.InstalledCount} packages");
-                }
-                else {
-                    fetchProgress.FailStep(3, "Installation failed");
-                }
-                
-                return await HandleInstallationResultAsync(installationResult);
             }
+
+            // Stage 2: Resolve dependencies with interactive choices
+            fetchProgress.StartStep(1, "Analyzing dependencies...");
+            var dependencyResult = await _dependencyResolver.ResolveDependenciesAsync(packageName, version, dev, global);
+
+            if (!dependencyResult.Success) {
+                fetchProgress.FailStep(1, "Dependency resolution failed");
+                OutputFormatter.WriteError("Failed to resolve dependencies:");
+                foreach (var error in dependencyResult.Errors) {
+                    OutputFormatter.WriteError($"  - {error}");
+                }
+                return 1;
+            }
+
+            fetchProgress.CompleteStep(1, $"Resolved {dependencyResult.PackagesToInstall.Count} packages");
+
+            // Interactive dependency resolution (mock implementation for conflicts)
+            var mockConflicts = new List<object>(); // In real implementation, get from dependencyResult
+            if (!nonInteractive && mockConflicts.Any()) {
+                var resolveConflicts = await HandleDependencyConflictsAsync(mockConflicts);
+                if (!resolveConflicts) {
+                    fetchProgress.CompleteAll("Installation cancelled due to dependency conflicts");
+                    return 130;
+                }
+            }
+
+            // Show warnings
+            foreach (var warning in dependencyResult.Warnings) {
+                OutputFormatter.WriteWarning(warning);
+            }
+
+            // Stage 3: Comprehensive security verification
+            fetchProgress.StartStep(2, "Performing comprehensive security verification...");
+
+            // Parse security requirements
+            var minTrustTierEnum = ParseTrustTierEnum(minTrustTier);
+            var securityRequirements = new SecurityRequirements {
+                MinimumTrustTier = minTrustTierEnum,
+                MinimumSecurityGrade = minSecurityGrade,
+                AllowVulnerabilities = allowVulnerabilities,
+                PerformSecurityScan = securityScan && !skipVerify
+            };
+
+            // Perform comprehensive security assessment
+            var securityAssessment = await PerformSecurityAssessmentAsync(
+                dependencyResult.PackagesToInstall, securityRequirements, nonInteractive);
+
+            if (!securityAssessment.IsApproved) {
+                fetchProgress.FailStep(2, "Security verification failed");
+                fetchProgress.SkipStep(3, "Security issues detected");
+
+                DisplaySecurityIssues(securityAssessment);
+
+                if (!nonInteractive && !yes) {
+                    var proceedAnyway = await InteractionService.ConfirmAsync(
+                        "Security issues detected. Do you want to proceed anyway? (NOT RECOMMENDED)", false);
+                    if (!proceedAnyway) {
+                        OutputFormatter.WriteInfo("Installation cancelled due to security concerns");
+                        return 130;
+                    }
+                }
+                else if (nonInteractive) {
+                    OutputFormatter.WriteError("Installation blocked due to security policy violations");
+                    return 130;
+                }
+            }
+
+            // Display enhanced installation plan with security information
+            await DisplayEnhancedInstallationPlanWithSecurityAsync(
+                dependencyResult.PackagesToInstall, securityAssessment, dev, global, nonInteractive);
+
+            if (dryRun) {
+                fetchProgress.CompleteStep(2, "Security verification complete (dry run)");
+                fetchProgress.SkipStep(3, "Dry run mode");
+                OutputFormatter.WriteSuccess("Dry run completed. No packages were installed.");
+                DisplaySecuritySummary(securityAssessment);
+                return 0;
+            }
+
+            fetchProgress.CompleteStep(2, "Security verification completed");
+
+            // Final installation confirmation
+            if (!yes && !nonInteractive) {
+                var confirmInstall = await ConfirmEnhancedInstallationAsync(dependencyResult.PackagesToInstall);
+                if (!confirmInstall) {
+                    fetchProgress.SkipStep(3, "User cancelled installation");
+                    OutputFormatter.WriteInfo("Installation cancelled by user");
+                    return 130;
+                }
+            }
+
+            // Stage 4: Install packages with detailed progress
+            fetchProgress.StartStep(3, "Installing packages...");
+            var installationResult = await InstallPackagesWithEnhancedProgressAsync(dependencyResult.PackagesToInstall, dev, global);
+
+            if (installationResult.Success) {
+                fetchProgress.CompleteStep(3, $"Successfully installed {installationResult.InstalledCount} packages");
+            }
+            else {
+                fetchProgress.FailStep(3, "Installation failed");
+            }
+
+            return await HandleInstallationResultAsync(installationResult);
         }
         catch (Exception ex) {
             return HandleError(ex, "install");
@@ -316,7 +315,7 @@ public class InstallCommand(
     /// </summary>
     private async Task<bool> HandleDependencyConflictsAsync(IEnumerable<object> conflicts) {
         OutputFormatter.WriteWarning("Dependency conflicts detected:");
-        
+
         foreach (var conflict in conflicts) {
             OutputFormatter.WriteWarning($"  - {conflict}");
         }
@@ -335,7 +334,7 @@ public class InstallCommand(
         if (!nonInteractive && packages.Count > 1) {
             var reviewPackages = await InteractionService.ConfirmAsync(
                 "Would you like to review individual packages before installation?", false);
-            
+
             if (reviewPackages) {
                 await ReviewPackagesInteractivelyAsync(packages);
             }
@@ -348,16 +347,16 @@ public class InstallCommand(
     private async Task ReviewPackagesInteractivelyAsync(List<ResolvedPackage> packages) {
         foreach (var package in packages) {
             using var spinner = ProgressReporter.CreateSpinner($"Getting details for {package.Name}...");
-            
+
             try {
                 // In a real implementation, this would get detailed package info
                 spinner.Success($"Loaded details for {package.Name}");
-                
+
                 OutputFormatter.WriteLine();
                 OutputFormatter.WriteInfo($"Package: {package.Name}@{package.Version}");
                 OutputFormatter.WriteInfo($"Trust Tier: {package.PackageInfo.TrustTier}");
                 OutputFormatter.WriteInfo($"Security Grade: {package.PackageInfo.SecurityGrade ?? "N/A"}");
-                
+
                 var continueReview = await InteractionService.ConfirmAsync("Continue with this package?", true);
                 if (!continueReview) {
                     throw new OperationCanceledException("Package review cancelled by user");
@@ -383,7 +382,7 @@ public class InstallCommand(
             "Modify local package configuration"
         };
 
-        var risks = untrustedPackages.Select(p => 
+        var risks = untrustedPackages.Select(p =>
             $"{p.Name}@{p.Version}: Trust tier '{p.TrustTier}', Security grade '{p.SecurityGrade ?? "Unknown"}'").ToList();
 
         return await InteractionService.ShowConsentFlowAsync(
@@ -399,7 +398,7 @@ public class InstallCommand(
     /// </summary>
     private async Task<bool> ConfirmEnhancedInstallationAsync(List<ResolvedPackage> packages) {
         var totalSize = packages.Sum(p => p.VersionInfo?.DownloadCount ?? 0);
-        
+
         OutputFormatter.WriteLine();
         OutputFormatter.WriteInfo($"Ready to install {packages.Count} package(s)");
         if (totalSize > 0) {
@@ -417,7 +416,7 @@ public class InstallCommand(
 
         foreach (var package in packages) {
             using var downloadProgress = ProgressReporter.CreateDownloadProgress(
-                $"{package.Name}@{package.Version}", 
+                $"{package.Name}@{package.Version}",
                 package.VersionInfo?.DownloadCount ?? 1000000);
 
             try {
@@ -430,10 +429,10 @@ public class InstallCommand(
                 };
 
                 var downloadResponse = await ApiClient.DownloadPackageAsync(package.Name, package.Version, downloadRequest);
-                
+
                 // Simulate download progress
                 downloadProgress.UpdateStatus("Downloading...");
-                for (int i = 0; i <= 100; i += 10) {
+                for (var i = 0; i <= 100; i += 10) {
                     var bytesDownloaded = (package.VersionInfo?.DownloadCount ?? 1000000) * i / 100;
                     downloadProgress.UpdateProgress(bytesDownloaded, 50000); // 50KB/s speed simulation
                     await Task.Delay(100); // Simulate download time
@@ -476,7 +475,7 @@ public class InstallCommand(
     /// <summary>
     /// Handles installation result with enhanced feedback
     /// </summary>
-    private async Task<int> HandleInstallationResultAsync(InstallationResult result) {
+    private Task<int> HandleInstallationResultAsync(InstallationResult result) {
         if (result.Success) {
             OutputFormatter.WriteSuccess($"Successfully installed {result.InstalledCount} package(s)");
 
@@ -495,14 +494,14 @@ public class InstallCommand(
                 OutputFormatter.WriteInfo($"  ⚠ {result.Errors.Count} packages had warnings");
             }
 
-            return 0;
+            return Task.FromResult(0);
         }
         else {
             OutputFormatter.WriteError("Installation failed:");
             foreach (var error in result.Errors) {
                 OutputFormatter.WriteError($"  - {error}");
             }
-            return 1;
+            return Task.FromResult(1);
         }
     }
 
@@ -597,7 +596,7 @@ public class InstallCommand(
 
         foreach (var package in packages) {
             using var packageSpinner = ProgressReporter.CreateSpinner($"Assessing {package.Name}...");
-            
+
             try {
                 var packageSecurity = new PackageSecurityInfo {
                     PackageName = package.Name,
@@ -608,7 +607,7 @@ public class InstallCommand(
                 if (requirements.MinimumTrustTier.HasValue) {
                     var trustTierAssessment = await _trustTierService.GetTrustTierAssessmentAsync(package.Name);
                     packageSecurity.TrustTierAssessment = trustTierAssessment;
-                    
+
                     if (trustTierAssessment.CurrentTier < requirements.MinimumTrustTier.Value) {
                         packageSecurity.Issues.Add($"Trust tier {trustTierAssessment.CurrentTier} is below required minimum {requirements.MinimumTrustTier.Value}");
                     }
@@ -671,7 +670,7 @@ public class InstallCommand(
         var gradeOrder = new[] { "F", "D", "C", "B", "A", "A+" };
         var actualIndex = Array.IndexOf(gradeOrder, actualGrade);
         var minimumIndex = Array.IndexOf(gradeOrder, minimumGrade);
-        
+
         return actualIndex >= minimumIndex;
     }
 
@@ -685,19 +684,19 @@ public class InstallCommand(
 
         foreach (var packageInfo in assessment.PackageSecurityInfo.Where(p => p.Issues.Any() || p.CriticalIssues.Any())) {
             OutputFormatter.WriteWarning($"Package: {packageInfo.PackageName}@{packageInfo.Version}");
-            
+
             foreach (var criticalIssue in packageInfo.CriticalIssues) {
                 OutputFormatter.WriteError($"  🔴 CRITICAL: {criticalIssue}");
             }
-            
+
             foreach (var highIssue in packageInfo.HighIssues) {
                 OutputFormatter.WriteError($"  🟠 HIGH: {highIssue}");
             }
-            
+
             foreach (var issue in packageInfo.Issues) {
                 OutputFormatter.WriteWarning($"  ⚠️  {issue}");
             }
-            
+
             OutputFormatter.WriteLine();
         }
 
@@ -715,13 +714,13 @@ public class InstallCommand(
         bool dev,
         bool global,
         bool nonInteractive) {
-        
+
         await DisplayEnhancedInstallationPlanAsync(packages, new List<UntrustedPackage>(), dev, global, nonInteractive);
-        
+
         if (securityAssessment.PackageSecurityInfo.Any()) {
             OutputFormatter.WriteLine();
             OutputFormatter.WriteInfo("Security Assessment Summary:");
-            
+
             var securityTable = new Table();
             securityTable.AddColumn("Package");
             securityTable.AddColumn("Trust Tier");
@@ -753,7 +752,7 @@ public class InstallCommand(
     private void DisplaySecuritySummary(SecurityAssessment assessment) {
         OutputFormatter.WriteLine();
         OutputFormatter.WriteInfo("=== Security Summary ===");
-        
+
         var totalPackages = assessment.PackageSecurityInfo.Count;
         var packagesWithIssues = assessment.PackageSecurityInfo.Count(p => p.Issues.Any() || p.CriticalIssues.Any());
         var criticalIssues = assessment.PackageSecurityInfo.Sum(p => p.CriticalIssues.Count);
@@ -761,11 +760,11 @@ public class InstallCommand(
 
         OutputFormatter.WriteInfo($"Total packages assessed: {totalPackages}");
         OutputFormatter.WriteInfo($"Packages with issues: {packagesWithIssues}");
-        
+
         if (criticalIssues > 0) {
             OutputFormatter.WriteError($"Critical security issues: {criticalIssues}");
         }
-        
+
         if (highIssues > 0) {
             OutputFormatter.WriteWarning($"High severity issues: {highIssues}");
         }
@@ -778,24 +777,20 @@ public class InstallCommand(
         }
     }
 
-    private string GetTrustTierMarkup(string trustTier) {
-        return trustTier switch {
-            "Enterprise" => $"[green]{trustTier}[/]",
-            "Professional" => $"[blue]{trustTier}[/]",
-            "Community" => $"[yellow]{trustTier}[/]",
-            "Unverified" => $"[red]{trustTier}[/]",
-            _ => trustTier
-        };
-    }
+    private string GetTrustTierMarkup(string trustTier) => trustTier switch {
+        "Enterprise" => $"[green]{trustTier}[/]",
+        "Professional" => $"[blue]{trustTier}[/]",
+        "Community" => $"[yellow]{trustTier}[/]",
+        "Unverified" => $"[red]{trustTier}[/]",
+        _ => trustTier
+    };
 
-    private string GetSecurityGradeMarkup(string grade) {
-        return grade switch {
-            "A+" or "A" => $"[green]{grade}[/]",
-            "B" => $"[yellow]{grade}[/]",
-            "C" or "D" or "F" => $"[red]{grade}[/]",
-            _ => grade
-        };
-    }
+    private string GetSecurityGradeMarkup(string grade) => grade switch {
+        "A+" or "A" => $"[green]{grade}[/]",
+        "B" => $"[yellow]{grade}[/]",
+        "C" or "D" or "F" => $"[red]{grade}[/]",
+        _ => grade
+    };
 
     private async Task<InstallationResult> InstallPackagesAsync(List<ResolvedPackage> packages, bool dev, bool global) {
         var result = new InstallationResult();

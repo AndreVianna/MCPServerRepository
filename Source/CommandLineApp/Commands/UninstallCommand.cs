@@ -40,7 +40,7 @@ public class UninstallCommand(
     /// <inheritdoc />
     public override Command CreateCommand() {
         var command = new Command("uninstall", "Uninstall MCP packages with dependency checking and cleanup");
-        
+
         // Add aliases
         command.AddAlias("remove");
         command.AddAlias("rm");
@@ -221,7 +221,7 @@ public class UninstallCommand(
         var yes = context.ParseResult.GetValueForOption(_yesOption!);
         var nonInteractive = context.ParseResult.GetValueForOption(_nonInteractiveOption!);
         var verbose = context.ParseResult.GetValueForOption(_verboseOption!);
-        
+
         try {
             Logger.LogInformation("Executing uninstall command: Package={Package}, Version={Version}, Global={Global}",
                 package, version, global);
@@ -240,22 +240,22 @@ public class UninstallCommand(
 
             // Stage 1: Validate uninstall
             progress.StartStep(0, $"Validating uninstall for '{package}'...");
-            
+
             try {
                 var validation = await _uninstallService.ValidateUninstallAsync(package, version, global);
-                
+
                 if (!validation.CanUninstall && !force) {
                     progress.FailStep(0, "Cannot uninstall package");
-                    
+
                     OutputFormatter.WriteError("Cannot uninstall package:");
                     foreach (var issue in validation.Issues) {
                         OutputFormatter.WriteError($"  - {issue}");
                     }
-                    
+
                     if (validation.RequiresForce) {
                         OutputFormatter.WriteInfo("Use --force to override these issues (not recommended)");
                     }
-                    
+
                     return 1;
                 }
 
@@ -272,15 +272,15 @@ public class UninstallCommand(
 
             // Stage 2: Analyze dependencies
             progress.StartStep(1, "Analyzing package dependencies...");
-            
+
             try {
                 var analysis = await _uninstallService.AnalyzeDependenciesAsync(package, version, global);
-                
+
                 if (!analysis.CanUninstallSafely && !force) {
                     progress.FailStep(1, "Dependency conflicts detected");
-                    
+
                     await DisplayDependencyAnalysisAsync(analysis, verbose);
-                    
+
                     if (!nonInteractive && !yes) {
                         var continueAnyway = await InteractionService.ConfirmAsync(
                             "This may break other packages. Continue anyway?", false);
@@ -289,17 +289,18 @@ public class UninstallCommand(
                             progress.SkipStep(3, "User cancelled");
                             return 130;
                         }
-                    } else if (!force) {
+                    }
+                    else if (!force) {
                         OutputFormatter.WriteError("Uninstall cancelled due to dependency conflicts");
                         return 1;
                     }
                 }
 
                 progress.CompleteStep(1, $"Analyzed {analysis.DependentPackages.Count} dependent packages");
-                
+
                 // Show what will be removed
                 await DisplayUninstallPlanAsync(package, version, analysis, removeDependencies, purge, verbose);
-                
+
                 if (dryRun) {
                     progress.SkipStep(2, "Dry run mode");
                     progress.SkipStep(3, "Dry run mode");
@@ -314,10 +315,10 @@ public class UninstallCommand(
 
             // Final confirmation
             if (!yes && !nonInteractive) {
-                var confirmMessage = purge ? 
-                    $"Completely remove '{package}' and all its data?" :
-                    $"Uninstall '{package}'?";
-                    
+                var confirmMessage = purge
+                    ? $"Completely remove '{package}' and all its data?"
+                    : $"Uninstall '{package}'?";
+
                 var confirmUninstall = await InteractionService.ConfirmAsync(confirmMessage, false);
                 if (!confirmUninstall) {
                     progress.SkipStep(2, "User cancelled");
@@ -330,14 +331,14 @@ public class UninstallCommand(
             // Stage 3: Create backup (if requested)
             if (!noBackup && !purge) {
                 progress.StartStep(2, "Creating backup...");
-                
+
                 try {
                     // For now, we'll assume the uninstall service handles backup creation
                     progress.CompleteStep(2, "Backup created");
                 }
                 catch (Exception ex) {
                     progress.FailStep(2, $"Backup failed: {ex.Message}");
-                    
+
                     if (!force && !nonInteractive && !yes) {
                         var continueWithoutBackup = await InteractionService.ConfirmAsync(
                             "Continue without backup?", false);
@@ -347,16 +348,17 @@ public class UninstallCommand(
                         }
                     }
                 }
-            } else {
+            }
+            else {
                 progress.SkipStep(2, noBackup ? "Backup skipped" : "Purge mode - no backup");
             }
 
             // Stage 4: Perform uninstall
             progress.StartStep(3, $"Uninstalling {package}...");
-            
+
             try {
                 PackageUninstallResult result;
-                
+
                 if (purge) {
                     var purgeResult = await _uninstallService.PurgePackageAsync(package, global);
                     result = new PackageUninstallResult {
@@ -367,15 +369,17 @@ public class UninstallCommand(
                         Duration = purgeResult.Duration,
                         FreedSpace = purgeResult.FreedSpace
                     };
-                } else {
+                }
+                else {
                     result = await _uninstallService.UninstallPackageAsync(
                         package, version, global, force, removeDependencies, !noBackup, false);
                 }
-                
+
                 if (result.Success) {
                     progress.CompleteStep(3, $"Successfully uninstalled {package}");
                     return await HandleUninstallResultAsync(result, verbose);
-                } else {
+                }
+                else {
                     progress.FailStep(3, "Uninstall failed");
                     return await HandleUninstallResultAsync(result, verbose);
                 }
@@ -395,24 +399,25 @@ public class UninstallCommand(
             Logger.LogInformation("Executing cleanup command: Global={Global}, DryRun={DryRun}", global, dryRun);
 
             using var spinner = ProgressReporter.CreateSpinner("Scanning for orphaned dependencies...");
-            
+
             var result = await _uninstallService.CleanupOrphanedDependenciesAsync(global, dryRun);
-            
+
             if (result.RemovedPackages.Any()) {
                 spinner.Success($"Found {result.RemovedPackages.Count} orphaned packages");
-                
+
                 OutputFormatter.WriteLine();
                 OutputFormatter.WriteInfo($"Orphaned packages {(dryRun ? "that would be removed" : "removed")}:");
-                
+
                 foreach (var package in result.RemovedPackages) {
                     OutputFormatter.WriteInfo($"  - {package}");
                 }
-                
+
                 if (result.FreedSpace > 0) {
                     var freedSpaceMB = result.FreedSpace / (1024 * 1024);
                     OutputFormatter.WriteInfo($"Space {(dryRun ? "that would be" : "")} freed: {freedSpaceMB:N1} MB");
                 }
-            } else {
+            }
+            else {
                 spinner.Success("No orphaned packages found");
                 OutputFormatter.WriteSuccess("No cleanup needed - all packages are being used!");
             }
@@ -451,15 +456,15 @@ public class UninstallCommand(
             }
 
             using var spinner = ProgressReporter.CreateSpinner("Restoring package from backup...");
-            
+
             var result = await _uninstallService.RestorePackageFromBackupAsync(backupPath, global);
-            
+
             if (result.Success) {
                 spinner.Success($"Successfully restored {result.PackageName}@{result.Version}");
-                
+
                 OutputFormatter.WriteSuccess($"Package restored: {result.PackageName}@{result.Version}");
                 OutputFormatter.WriteInfo($"Restored to: {result.RestorePath}");
-                
+
                 if (verbose) {
                     OutputFormatter.WriteInfo($"Restore duration: {result.Duration.TotalSeconds:F1}s");
                 }
@@ -467,9 +472,10 @@ public class UninstallCommand(
                 foreach (var message in result.Messages) {
                     OutputFormatter.WriteInfo($"  {message}");
                 }
-            } else {
+            }
+            else {
                 spinner.Fail("Restore failed");
-                
+
                 OutputFormatter.WriteError("Failed to restore package:");
                 foreach (var error in result.Errors) {
                     OutputFormatter.WriteError($"  - {error}");
@@ -488,12 +494,12 @@ public class UninstallCommand(
             Logger.LogInformation("Executing list-backups command: Package={Package}, Global={Global}", package, global);
 
             using var spinner = ProgressReporter.CreateSpinner("Loading backup information...");
-            
+
             var backups = await _uninstallService.ListBackupsAsync(package, global);
-            
+
             if (backups.Any()) {
                 spinner.Success($"Found {backups.Count} backup(s)");
-                
+
                 OutputFormatter.WriteLine();
                 OutputFormatter.WriteInfo($"Available backups {(global ? "(global)" : "(local)")}:");
                 OutputFormatter.WriteLine();
@@ -503,7 +509,7 @@ public class UninstallCommand(
                 table.AddColumn("Version");
                 table.AddColumn("Created");
                 table.AddColumn("Size");
-                
+
                 if (verbose) {
                     table.AddColumn("Path");
                     table.AddColumn("Description");
@@ -512,7 +518,7 @@ public class UninstallCommand(
                 foreach (var backup in backups.OrderByDescending(b => b.CreatedAt)) {
                     var sizeMB = backup.BackupSize / (1024.0 * 1024.0);
                     var created = backup.CreatedAt.ToString("yyyy-MM-dd HH:mm");
-                    
+
                     if (verbose) {
                         table.AddRow(
                             backup.PackageName,
@@ -521,7 +527,8 @@ public class UninstallCommand(
                             $"{sizeMB:F1} MB",
                             backup.BackupPath,
                             backup.Description ?? "");
-                    } else {
+                    }
+                    else {
                         table.AddRow(
                             backup.PackageName,
                             backup.Version,
@@ -531,13 +538,14 @@ public class UninstallCommand(
                 }
 
                 AnsiConsole.Write(table);
-                
+
                 var totalSizeMB = backups.Sum(b => b.BackupSize) / (1024.0 * 1024.0);
                 OutputFormatter.WriteLine();
                 OutputFormatter.WriteInfo($"Total backup size: {totalSizeMB:F1} MB");
-            } else {
+            }
+            else {
                 spinner.Success("No backups found");
-                
+
                 var filterText = string.IsNullOrEmpty(package) ? "" : $" for '{package}'";
                 OutputFormatter.WriteInfo($"No backups found{filterText}{(global ? " (global)" : " (local)")}");
             }
@@ -549,17 +557,17 @@ public class UninstallCommand(
         }
     }
 
-    private async Task DisplayDependencyAnalysisAsync(UninstallDependencyAnalysis analysis, bool verbose) {
+    private Task DisplayDependencyAnalysisAsync(UninstallDependencyAnalysis analysis, bool verbose) {
         OutputFormatter.WriteLine();
 
         if (analysis.DependentPackages.Any()) {
             OutputFormatter.WriteWarning($"The following packages depend on '{analysis.PackageName}':");
-            
+
             var table = new Table();
             table.AddColumn("Package");
             table.AddColumn("Version");
             table.AddColumn("Dependency Type");
-            
+
             if (verbose) {
                 table.AddColumn("Required Version");
                 table.AddColumn("Optional");
@@ -567,7 +575,7 @@ public class UninstallCommand(
 
             foreach (var dependent in analysis.DependentPackages.OrderBy(d => d.PackageName)) {
                 var depType = GetDependencyTypeMarkup(dependent.DependencyType);
-                
+
                 if (verbose) {
                     table.AddRow(
                         dependent.PackageName,
@@ -575,7 +583,8 @@ public class UninstallCommand(
                         depType,
                         dependent.RequiredVersion,
                         dependent.IsOptional ? "Yes" : "No");
-                } else {
+                }
+                else {
                     table.AddRow(
                         dependent.PackageName,
                         dependent.Version,
@@ -601,23 +610,25 @@ public class UninstallCommand(
         foreach (var issue in analysis.BlockingIssues) {
             OutputFormatter.WriteError(issue);
         }
+
+        return Task.CompletedTask;
     }
 
-    private async Task DisplayUninstallPlanAsync(
+    private Task DisplayUninstallPlanAsync(
         string packageName,
         string? version,
         UninstallDependencyAnalysis analysis,
         bool removeDependencies,
         bool purge,
         bool verbose) {
-        
+
         OutputFormatter.WriteLine();
         OutputFormatter.WriteInfo("Uninstall Plan:");
         OutputFormatter.WriteLine();
 
         var versionText = string.IsNullOrEmpty(version) ? "all versions" : $"version {version}";
         var actionText = purge ? "Purge" : "Uninstall";
-        
+
         OutputFormatter.WriteInfo($"  {actionText}: {packageName} ({versionText})");
 
         if (removeDependencies && analysis.OrphanedDependencies.Any()) {
@@ -632,16 +643,18 @@ public class UninstallCommand(
         }
 
         OutputFormatter.WriteLine();
+
+        return Task.CompletedTask;
     }
 
-    private async Task<int> HandleUninstallResultAsync(PackageUninstallResult result, bool verbose) {
+    private Task<int> HandleUninstallResultAsync(PackageUninstallResult result, bool verbose) {
         if (result.Success) {
             OutputFormatter.WriteSuccess($"Successfully uninstalled {result.PackageName}!");
-            
+
             if (!string.IsNullOrEmpty(result.UninstalledVersion)) {
                 OutputFormatter.WriteInfo($"  Removed version: {result.UninstalledVersion}");
             }
-            
+
             if (!string.IsNullOrEmpty(result.BackupPath)) {
                 OutputFormatter.WriteInfo($"  Backup created: {result.BackupPath}");
             }
@@ -657,7 +670,7 @@ public class UninstallCommand(
                 var freedSpaceMB = result.FreedSpace / (1024.0 * 1024.0);
                 OutputFormatter.WriteInfo($"  Freed space: {freedSpaceMB:F1} MB");
             }
-            
+
             if (verbose) {
                 OutputFormatter.WriteInfo($"  Uninstall duration: {result.Duration.TotalSeconds:F1}s");
             }
@@ -670,10 +683,11 @@ public class UninstallCommand(
                 OutputFormatter.WriteWarning($"  ⚠️  {warning}");
             }
 
-            return 0;
-        } else {
+            return Task.FromResult(0);
+        }
+        else {
             OutputFormatter.WriteError($"Failed to uninstall {result.PackageName}:");
-            
+
             foreach (var error in result.Errors) {
                 OutputFormatter.WriteError($"  - {error}");
             }
@@ -683,17 +697,15 @@ public class UninstallCommand(
                 OutputFormatter.WriteInfo("You can restore using: mcpm uninstall restore <backup-path>");
             }
 
-            return 1;
+            return Task.FromResult(1);
         }
     }
 
-    private string GetDependencyTypeMarkup(DependencyType type) {
-        return type switch {
-            DependencyType.Runtime => "[red]Runtime[/]",
-            DependencyType.Development => "[blue]Development[/]",
-            DependencyType.Optional => "[yellow]Optional[/]",
-            DependencyType.Peer => "[purple]Peer[/]",
-            _ => type.ToString()
-        };
-    }
+    private string GetDependencyTypeMarkup(DependencyType type) => type switch {
+        DependencyType.Runtime => "[red]Runtime[/]",
+        DependencyType.Development => "[blue]Development[/]",
+        DependencyType.Optional => "[yellow]Optional[/]",
+        DependencyType.Peer => "[purple]Peer[/]",
+        _ => type.ToString()
+    };
 }

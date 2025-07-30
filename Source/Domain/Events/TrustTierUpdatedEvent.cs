@@ -66,7 +66,7 @@ public record TrustTierUpdatedEvent : BaseMessage {
     /// <summary>
     /// Gets or sets additional metadata about the change
     /// </summary>
-    public new Dictionary<string, object> TrustTierMetadata { get; init; } = new();
+    public Dictionary<string, object> TrustTierMetadata { get; init; } = new();
 
     /// <summary>
     /// Gets whether this represents a promotion (tier increase)

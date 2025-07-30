@@ -139,14 +139,14 @@ public class CacheStatistics {
 
     private static string FormatBytes(long bytes) {
         string[] sizes = ["B", "KB", "MB", "GB", "TB"];
-        int order = 0;
+        var order = 0;
         double size = bytes;
-        
+
         while (size >= 1024 && order < sizes.Length - 1) {
             order++;
             size /= 1024;
         }
-        
+
         return $"{size:0.##} {sizes[order]}";
     }
 }
@@ -198,8 +198,8 @@ public class CacheEntryInfo {
     /// <summary>
     /// Time until expiration (if applicable)
     /// </summary>
-    public TimeSpan? TimeUntilExpiration => ExpiresAt.HasValue && !IsExpired 
-        ? ExpiresAt.Value - DateTimeOffset.UtcNow 
+    public TimeSpan? TimeUntilExpiration => ExpiresAt.HasValue && !IsExpired
+        ? ExpiresAt.Value - DateTimeOffset.UtcNow
         : null;
 
     /// <summary>
@@ -209,14 +209,14 @@ public class CacheEntryInfo {
 
     private static string FormatBytes(long bytes) {
         string[] sizes = ["B", "KB", "MB", "GB", "TB"];
-        int order = 0;
+        var order = 0;
         double size = bytes;
-        
+
         while (size >= 1024 && order < sizes.Length - 1) {
             order++;
             size /= 1024;
         }
-        
+
         return $"{size:0.##} {sizes[order]}";
     }
 }
@@ -257,14 +257,14 @@ public class CacheMaintenanceResult {
 
     private static string FormatBytes(long bytes) {
         string[] sizes = ["B", "KB", "MB", "GB", "TB"];
-        int order = 0;
+        var order = 0;
         double size = bytes;
-        
+
         while (size >= 1024 && order < sizes.Length - 1) {
             order++;
             size /= 1024;
         }
-        
+
         return $"{size:0.##} {sizes[order]}";
     }
 }

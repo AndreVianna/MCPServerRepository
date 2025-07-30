@@ -288,7 +288,7 @@ public class FileCacheService : ICacheService {
 
                     var key = GetKeyFromFilePath(file);
                     var entryInfo = await GetEntryInfoAsync(key, cancellationToken).ConfigureAwait(false);
-                    
+
                     if (entryInfo != null) {
                         if (entryInfo.IsExpired) {
                             expiredCount++;
@@ -331,7 +331,7 @@ public class FileCacheService : ICacheService {
             }
 
             var data = Encoding.UTF8.GetString(bytes);
-            
+
             // Parse just the metadata we need
             using var document = JsonDocument.Parse(data);
             var root = document.RootElement;
@@ -430,7 +430,7 @@ public class FileCacheService : ICacheService {
         try {
             var result = await PerformMaintenanceAsync().ConfigureAwait(false);
             if (!result.Success) {
-                _logger.LogWarning("Background maintenance completed with errors: {Errors}", 
+                _logger.LogWarning("Background maintenance completed with errors: {Errors}",
                     string.Join(", ", result.Errors));
             }
         }
@@ -457,13 +457,9 @@ public class FileCacheService : ICacheService {
         return Convert.ToHexString(hash).ToLowerInvariant();
     }
 
-    private static string GetKeyFromFilePath(string filePath) {
-        return Path.GetFileNameWithoutExtension(filePath);
-    }
+    private static string GetKeyFromFilePath(string filePath) => Path.GetFileNameWithoutExtension(filePath);
 
-    private SemaphoreSlim GetKeyLock(string key) {
-        return _keyLocks.GetOrAdd(key, _ => new SemaphoreSlim(1, 1));
-    }
+    private SemaphoreSlim GetKeyLock(string key) => _keyLocks.GetOrAdd(key, _ => new SemaphoreSlim(1, 1));
 
     private static void ValidateKey(string key) {
         if (string.IsNullOrWhiteSpace(key)) {
@@ -491,9 +487,7 @@ public class FileCacheService : ICacheService {
         return output.ToArray();
     }
 
-    private static string ConvertWildcardToRegex(string pattern) {
-        return "^" + Regex.Escape(pattern).Replace("\\*", ".*").Replace("\\?", ".") + "$";
-    }
+    private static string ConvertWildcardToRegex(string pattern) => "^" + Regex.Escape(pattern).Replace("\\*", ".*").Replace("\\?", ".") + "$";
 
     public void Dispose() {
         _maintenanceTimer?.Dispose();

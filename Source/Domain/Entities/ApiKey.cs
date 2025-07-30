@@ -254,7 +254,8 @@ public class ApiKey : BaseEntity {
 
         if (isSuccessful) {
             SuccessfulRequestCount++;
-        } else {
+        }
+        else {
             FailedRequestCount++;
         }
     }
@@ -352,9 +353,7 @@ public class ApiKey : BaseEntity {
     /// Removes a tag from the API key
     /// </summary>
     /// <param name="tag">Tag to remove</param>
-    public void RemoveTag(string tag) {
-        Tags.RemoveAll(t => string.Equals(t, tag, StringComparison.OrdinalIgnoreCase));
-    }
+    public void RemoveTag(string tag) => Tags.RemoveAll(t => string.Equals(t, tag, StringComparison.OrdinalIgnoreCase));
 
     /// <summary>
     /// Sets IP address restrictions for the API key
@@ -405,18 +404,14 @@ public class ApiKey : BaseEntity {
     /// </summary>
     /// <param name="scope">Scope to check</param>
     /// <returns>True if the key has the scope</returns>
-    public bool HasScope(string scope) {
-        return Scopes.Contains(scope, StringComparer.OrdinalIgnoreCase);
-    }
+    public bool HasScope(string scope) => Scopes.Contains(scope, StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Checks if the API key has the specified permission
     /// </summary>
     /// <param name="permission">Permission to check</param>
     /// <returns>True if the key has the permission</returns>
-    public bool HasPermission(string permission) {
-        return Permissions.Contains(permission, StringComparer.OrdinalIgnoreCase);
-    }
+    public bool HasPermission(string permission) => Permissions.Contains(permission, StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Checks if an IP address is allowed to use this API key

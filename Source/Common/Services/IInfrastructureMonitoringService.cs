@@ -3,53 +3,52 @@ namespace MCPHub.Common.Services;
 /// <summary>
 /// Kubernetes cluster monitoring service
 /// </summary>
-public interface IClusterMonitoringService
-{
+public interface IClusterMonitoringService {
     /// <summary>
     /// Gets cluster health status
     /// </summary>
     Task<ClusterHealth> GetClusterHealthAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets node resource utilization
     /// </summary>
     Task<IEnumerable<NodeMetrics>> GetNodeMetricsAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets pod status and resource usage
     /// </summary>
     Task<IEnumerable<PodMetrics>> GetPodMetricsAsync(string? namespaceFilter = null, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets service mesh metrics
     /// </summary>
     Task<ServiceMeshMetrics> GetServiceMeshMetricsAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets persistent volume usage
     /// </summary>
     Task<IEnumerable<VolumeMetrics>> GetVolumeMetricsAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets network policy effectiveness
     /// </summary>
     Task<NetworkPolicyMetrics> GetNetworkPolicyMetricsAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets horizontal pod autoscaler status
     /// </summary>
     Task<IEnumerable<HPAStatus>> GetHPAStatusAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets cluster events
     /// </summary>
     Task<IEnumerable<ClusterEvent>> GetClusterEventsAsync(TimeRange timeRange, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Triggers cluster health check
     /// </summary>
     Task<ClusterHealthCheckResult> PerformHealthCheckAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets resource quotas and limits
     /// </summary>
@@ -59,53 +58,52 @@ public interface IClusterMonitoringService
 /// <summary>
 /// Database performance monitoring service
 /// </summary>
-public interface IPerformanceInsightsService
-{
+public interface IPerformanceInsightsService {
     /// <summary>
     /// Gets database performance metrics
     /// </summary>
     Task<DatabasePerformanceMetrics> GetPerformanceMetricsAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets slow query analysis
     /// </summary>
     Task<IEnumerable<SlowQueryAnalysis>> GetSlowQueriesAsync(TimeRange timeRange, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets connection pool metrics
     /// </summary>
     Task<ConnectionPoolMetrics> GetConnectionPoolMetricsAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets database size and growth metrics
     /// </summary>
     Task<DatabaseSizeMetrics> GetDatabaseSizeMetricsAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets index usage statistics
     /// </summary>
     Task<IEnumerable<IndexUsageStats>> GetIndexUsageStatsAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets lock contention analysis
     /// </summary>
     Task<LockContentionAnalysis> GetLockContentionAnalysisAsync(TimeRange timeRange, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets replication lag metrics (if applicable)
     /// </summary>
     Task<ReplicationMetrics?> GetReplicationMetricsAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets vacuum/maintenance statistics
     /// </summary>
     Task<MaintenanceStats> GetMaintenanceStatsAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Analyzes query plan performance
     /// </summary>
     Task<QueryPlanAnalysis> AnalyzeQueryPlanAsync(string query, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets database health recommendations
     /// </summary>
@@ -115,53 +113,52 @@ public interface IPerformanceInsightsService
 /// <summary>
 /// Network monitoring and service mesh observability
 /// </summary>
-public interface INetworkMonitoringService
-{
+public interface INetworkMonitoringService {
     /// <summary>
     /// Gets service-to-service communication metrics
     /// </summary>
     Task<IEnumerable<ServiceCommunicationMetrics>> GetServiceCommunicationMetricsAsync(TimeRange timeRange, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets network latency metrics
     /// </summary>
     Task<NetworkLatencyMetrics> GetNetworkLatencyMetricsAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets bandwidth utilization
     /// </summary>
     Task<BandwidthUtilizationMetrics> GetBandwidthUtilizationAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets load balancer metrics
     /// </summary>
     Task<LoadBalancerMetrics> GetLoadBalancerMetricsAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets DNS resolution metrics
     /// </summary>
     Task<DNSMetrics> GetDNSMetricsAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets TLS/SSL certificate status
     /// </summary>
     Task<IEnumerable<CertificateStatus>> GetCertificateStatusAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets ingress controller metrics
     /// </summary>
     Task<IngressControllerMetrics> GetIngressControllerMetricsAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets CDN performance metrics
     /// </summary>
     Task<CDNMetrics?> GetCDNMetricsAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Traces network path performance
     /// </summary>
     Task<NetworkPathTrace> TraceNetworkPathAsync(string source, string destination, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets security group/firewall rule effectiveness
     /// </summary>
@@ -171,53 +168,52 @@ public interface INetworkMonitoringService
 /// <summary>
 /// Cost monitoring and resource optimization service
 /// </summary>
-public interface ICostMonitoringService
-{
+public interface ICostMonitoringService {
     /// <summary>
     /// Gets current cost breakdown
     /// </summary>
     Task<CostBreakdown> GetCurrentCostsAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets cost trends over time
     /// </summary>
     Task<CostTrends> GetCostTrendsAsync(TimeRange timeRange, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets resource utilization efficiency
     /// </summary>
     Task<ResourceEfficiencyMetrics> GetResourceEfficiencyAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets cost optimization recommendations
     /// </summary>
     Task<IEnumerable<CostOptimizationRecommendation>> GetOptimizationRecommendationsAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets budget alerts and forecasts
     /// </summary>
     Task<BudgetStatus> GetBudgetStatusAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets rightsizing recommendations
     /// </summary>
     Task<IEnumerable<RightsizingRecommendation>> GetRightsizingRecommendationsAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets reserved capacity recommendations
     /// </summary>
     Task<IEnumerable<ReservedCapacityRecommendation>> GetReservedCapacityRecommendationsAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets cost allocation by team/project
     /// </summary>
     Task<CostAllocation> GetCostAllocationAsync(string groupBy, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Forecasts future costs
     /// </summary>
     Task<CostForecast> ForecastCostsAsync(int daysAhead, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets cost anomaly detection
     /// </summary>

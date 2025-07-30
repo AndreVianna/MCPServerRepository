@@ -87,7 +87,7 @@ public record PackageDownloadedEvent : BaseMessage {
         DateTimeOffset downloadedAt,
         Guid? userId = null,
         string? clientVersion = null,
-        Dictionary<string, object>? metadata = null) => new PackageDownloadedEvent {
+        Dictionary<string, object>? metadata = null) => new() {
             DownloadId = downloadId,
             PackageId = packageId,
             PackageName = packageName,

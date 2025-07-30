@@ -29,7 +29,7 @@
                     </MudAvatar>
                     <MudButton Variant="Variant.Text" 
                               Color="Color.Secondary" 
-                              StartIcon="@Icons.Material.Filled.Delete"
+                              starticon="@Icons.Material.Filled.Delete"
                               OnClick="@ClearPreview">
                         Remove Preview
                     </MudButton>
@@ -48,7 +48,7 @@
                     </MudText>
                     <MudButton Variant="Variant.Outlined" 
                               Color="Color.Primary"
-                              StartIcon="@Icons.Material.Filled.PhotoLibrary"
+                              starticon="@Icons.Material.Filled.PhotoLibrary"
                               OnClick="@OpenFileDialog">
                         Choose File
                     </MudButton>
@@ -75,25 +75,25 @@
             <div class="d-flex justify-center gap-2 mb-4">
                 <MudButton Variant="Variant.Text" 
                           Size="Size.Small"
-                          StartIcon="@Icons.Material.Filled.ZoomIn"
+                          starticon="@Icons.Material.Filled.ZoomIn"
                           OnClick="@(() => ZoomCropper(0.1))">
                     Zoom In
                 </MudButton>
                 <MudButton Variant="Variant.Text" 
                           Size="Size.Small"
-                          StartIcon="@Icons.Material.Filled.ZoomOut"
+                          starticon="@Icons.Material.Filled.ZoomOut"
                           OnClick="@(() => ZoomCropper(-0.1))">
                     Zoom Out
                 </MudButton>
                 <MudButton Variant="Variant.Text" 
                           Size="Size.Small"
-                          StartIcon="@Icons.Material.Filled.RotateLeft"
+                          starticon="@Icons.Material.Filled.RotateLeft"
                           OnClick="@(() => RotateCropper(-90))">
                     Rotate Left
                 </MudButton>
                 <MudButton Variant="Variant.Text" 
                           Size="Size.Small"
-                          StartIcon="@Icons.Material.Filled.RotateRight"
+                          starticon="@Icons.Material.Filled.RotateRight"
                           OnClick="@(() => RotateCropper(90))">
                     Rotate Right
                 </MudButton>
@@ -113,7 +113,7 @@
             <MudButton Variant="Variant.Filled" 
                       Color="Color.Primary"
                       Disabled="@(_isUploading || string.IsNullOrEmpty(_previewImageUrl))"
-                      StartIcon="@(_isUploading ? null : Icons.Material.Filled.CloudUpload)"
+                      starticon="@(_isUploading ? null : Icons.Material.Filled.CloudUpload)"
                       OnClick="@HandleUpload">
                 @if (_isUploading)
                 {
@@ -318,13 +318,14 @@
         await Task.CompletedTask;
     }
 
-    private async Task HandleDrop(DragEventArgs e)
+    private Task HandleDrop(DragEventArgs e)
     {
         _isDragOver = false;
 
         // Note: File drop handling would require additional JavaScript integration
         // This is a placeholder for the UI behavior
         StateHasChanged();
+        return Task.CompletedTask;
     }
 
     private void ClearPreview()

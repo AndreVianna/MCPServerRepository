@@ -50,9 +50,9 @@ public interface IDataEncryptionService {
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Key generation result</returns>
     Task<KeyGenerationResult> GenerateKeyAsync(
-        EncryptionKeyType keyType, 
-        int keySize = 256, 
-        IDictionary<string, string>? metadata = null, 
+        EncryptionKeyType keyType,
+        int keySize = 256,
+        IDictionary<string, string>? metadata = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -80,8 +80,8 @@ public interface IDataEncryptionService {
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>List of encryption keys</returns>
     Task<IReadOnlyList<EncryptionKeyInfo>> ListKeysAsync(
-        EncryptionKeyType? keyType = null, 
-        bool includeDisabled = false, 
+        EncryptionKeyType? keyType = null,
+        bool includeDisabled = false,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -109,8 +109,8 @@ public interface IDataEncryptionService {
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Data encryption key result</returns>
     Task<DataEncryptionKeyResult> CreateDataEncryptionKeyAsync(
-        string kekId, 
-        DataEncryptionKeyOptions dekOptions, 
+        string kekId,
+        DataEncryptionKeyOptions dekOptions,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -121,8 +121,8 @@ public interface IDataEncryptionService {
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Decrypted data encryption key</returns>
     Task<DecryptedDataEncryptionKeyResult> DecryptDataEncryptionKeyAsync(
-        byte[] encryptedDek, 
-        string kekId, 
+        byte[] encryptedDek,
+        string kekId,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -135,10 +135,10 @@ public interface IDataEncryptionService {
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Field encryption result</returns>
     Task<FieldEncryptionResult> EncryptFieldAsync(
-        string fieldValue, 
-        string fieldName, 
-        string entityType, 
-        FieldEncryptionOptions options, 
+        string fieldValue,
+        string fieldName,
+        string entityType,
+        FieldEncryptionOptions options,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -151,10 +151,10 @@ public interface IDataEncryptionService {
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Field decryption result</returns>
     Task<FieldDecryptionResult> DecryptFieldAsync(
-        string encryptedValue, 
-        string fieldName, 
-        string entityType, 
-        FieldDecryptionOptions options, 
+        string encryptedValue,
+        string fieldName,
+        string entityType,
+        FieldDecryptionOptions options,
         CancellationToken cancellationToken = default);
 
     /// <summary>

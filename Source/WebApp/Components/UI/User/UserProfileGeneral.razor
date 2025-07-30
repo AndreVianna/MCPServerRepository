@@ -17,7 +17,7 @@
                                   Label="First Name"
                                   Variant="Variant.Outlined"
                                   For="@(() => _profileModel.FirstName)"
-                                  FullWidth="true"
+                                  fullwidth="true"
                                   Immediate="true" />
                 </MudItem>
                 <MudItem xs="12" md="6">
@@ -25,7 +25,7 @@
                                   Label="Last Name"
                                   Variant="Variant.Outlined"
                                   For="@(() => _profileModel.LastName)"
-                                  FullWidth="true"
+                                  fullwidth="true"
                                   Immediate="true" />
                 </MudItem>
                 <MudItem xs="12">
@@ -34,7 +34,7 @@
                                   Variant="Variant.Outlined"
                                   For="@(() => _profileModel.DisplayName)"
                                   HelperText="This is how your name will appear to other users"
-                                  FullWidth="true"
+                                  fullwidth="true"
                                   Immediate="true" />
                 </MudItem>
                 <MudItem xs="12">
@@ -44,7 +44,7 @@
                                   Lines="3"
                                   For="@(() => _profileModel.Bio)"
                                   HelperText="Tell others about yourself"
-                                  FullWidth="true"
+                                  fullwidth="true"
                                   Immediate="true" />
                 </MudItem>
                 <MudItem xs="12" md="6">
@@ -52,7 +52,7 @@
                                   Label="Job Title"
                                   Variant="Variant.Outlined"
                                   For="@(() => _profileModel.JobTitle)"
-                                  FullWidth="true"
+                                  fullwidth="true"
                                   Immediate="true" />
                 </MudItem>
                 <MudItem xs="12" md="6">
@@ -60,7 +60,7 @@
                                   Label="Company"
                                   Variant="Variant.Outlined"
                                   For="@(() => _profileModel.Company)"
-                                  FullWidth="true"
+                                  fullwidth="true"
                                   Immediate="true" />
                 </MudItem>
                 <MudItem xs="12" md="6">
@@ -68,7 +68,7 @@
                                   Label="Location"
                                   Variant="Variant.Outlined"
                                   For="@(() => _profileModel.Location)"
-                                  FullWidth="true"
+                                  fullwidth="true"
                                   Immediate="true" />
                 </MudItem>
                 <MudItem xs="12" md="6">
@@ -77,7 +77,7 @@
                                   Variant="Variant.Outlined"
                                   InputType="InputType.Telephone"
                                   For="@(() => _profileModel.PhoneNumber)"
-                                  FullWidth="true"
+                                  fullwidth="true"
                                   Immediate="true" />
                 </MudItem>
                 <MudItem xs="12">
@@ -86,7 +86,7 @@
                                   Variant="Variant.Outlined"
                                   InputType="InputType.Url"
                                   For="@(() => _profileModel.Website)"
-                                  FullWidth="true"
+                                  fullwidth="true"
                                   Immediate="true" />
                 </MudItem>
             </MudGrid>
@@ -100,9 +100,9 @@
                                   Label="GitHub URL"
                                   Variant="Variant.Outlined"
                                   InputType="InputType.Url"
-                                  StartIcon="@Icons.Custom.Brands.GitHub"
+                                  starticon="@Icons.Custom.Brands.GitHub"
                                   For="@(() => _profileModel.GitHubUrl)"
-                                  FullWidth="true"
+                                  fullwidth="true"
                                   Immediate="true" />
                 </MudItem>
                 <MudItem xs="12" md="4">
@@ -110,9 +110,9 @@
                                   Label="Twitter/X URL"
                                   Variant="Variant.Outlined"
                                   InputType="InputType.Url"
-                                  StartIcon="@Icons.Custom.Brands.Twitter"
+                                  starticon="@Icons.Custom.Brands.Twitter"
                                   For="@(() => _profileModel.TwitterUrl)"
-                                  FullWidth="true"
+                                  fullwidth="true"
                                   Immediate="true" />
                 </MudItem>
                 <MudItem xs="12" md="4">
@@ -120,9 +120,9 @@
                                   Label="LinkedIn URL"
                                   Variant="Variant.Outlined"
                                   InputType="InputType.Url"
-                                  StartIcon="@Icons.Custom.Brands.LinkedIn"
+                                  starticon="@Icons.Custom.Brands.LinkedIn"
                                   For="@(() => _profileModel.LinkedInUrl)"
-                                  FullWidth="true"
+                                  fullwidth="true"
                                   Immediate="true" />
                 </MudItem>
             </MudGrid>
@@ -132,7 +132,7 @@
                           Variant="Variant.Filled"
                           Color="Color.Primary"
                           Disabled="@_isLoading"
-                          StartIcon="@(_isLoading ? null : Icons.Material.Filled.Save)">
+                          starticon="@(_isLoading ? null : Icons.Material.Filled.Save)">
                     @if (_isLoading)
                     {
                         <MudProgressCircular Size="Size.Small" Indeterminate="true" />
@@ -161,7 +161,7 @@
                                 Color="Color.Success" 
                                 Size="Size.Small" 
                                 Class="ml-2" 
-                                Title="Email Verified" />
+                                title="Email Verified" />
                     }
                     else
                     {
@@ -169,7 +169,7 @@
                                 Color="Color.Warning" 
                                 Size="Size.Small" 
                                 Class="ml-2" 
-                                Title="Email Not Verified" />
+                                title="Email Not Verified" />
                     }
                 </div>
             </div>

@@ -11,10 +11,19 @@
 
 <PageTitle>My Profile - MCP Hub</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="mt-8">
+<MudContainer maxwidth="MaxWidth.Large" Class="mt-8">
+    @if (_isLoading)
+    {
+        <MudPaper Elevation="2" Class="pa-6 mb-6 text-center">
+            <MudProgressCircular Color="Color.Primary" />
+            <MudText Typo="Typo.body1" Class="mt-3">Loading profile...</MudText>
+        </MudPaper>
+    }
+    else
+    {
     <!-- Profile Header -->
     <MudPaper Elevation="2" Class="pa-6 mb-6">
-        <MudGrid Spacing="4" AlignItems="Center">
+        <MudGrid Spacing="4" alignitems="Center">
             <MudItem xs="12" sm="3" Class="text-center">
                 <div class="profile-avatar-section">
                     <MudAvatar Size="Size.Large" 
@@ -32,7 +41,7 @@
                     
                     <MudButton Variant="Variant.Outlined" 
                               Size="Size.Small" 
-                              StartIcon="@Icons.Material.Filled.PhotoCamera"
+                              starticon="@Icons.Material.Filled.PhotoCamera"
                               OnClick="@(() => _avatarUploadDialog = true)">
                         Change Avatar
                     </MudButton>
@@ -121,10 +130,11 @@
             <UserProfileApiKeys />
         </MudTabPanel>
     </MudTabs>
+    }
 </MudContainer>
 
 <!-- Avatar Upload Dialog -->
-<MudDialog @bind-IsVisible="_avatarUploadDialog" Options="@_dialogOptions">
+<MudDialog @bind-Visible="_avatarUploadDialog" Options="@_dialogOptions">
     <TitleContent>
         <div class="d-flex align-center">
             <MudIcon Icon="@Icons.Material.Filled.PhotoCamera" Class="mr-3" />
@@ -223,13 +233,14 @@
         }
     }
 
-    private async Task HandleProfileUpdated(UserProfileDomain updatedProfile)
+    private Task HandleProfileUpdated(UserProfileDomain updatedProfile)
     {
         _userProfile = updatedProfile;
         StateHasChanged();
+        return Task.CompletedTask;
     }
 
-    private async Task HandleAvatarUploaded(string avatarUrl)
+    private Task HandleAvatarUploaded(string avatarUrl)
     {
         if (_userProfile != null)
         {
@@ -240,6 +251,7 @@
         
         _avatarUploadDialog = false;
         Snackbar.Add("Avatar updated successfully!", Severity.Success);
+        return Task.CompletedTask;
     }
 
     private string GetInitials()

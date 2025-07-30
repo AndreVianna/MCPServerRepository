@@ -48,7 +48,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PublicApi.UnitTests", "Publ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.PublicApi.UnitTests", "PublicApi.UnitTests\MCPHub.PublicApi.UnitTests.csproj", "{9840A08B-5A4B-4DA1-BDEF-FD5D07446775}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.BDD.IntegrationTests", "BDD.IntegrationTests\MCPHub.BDD.IntegrationTests.csproj", "{A7D2F8E3-8F4B-4C9E-9A1B-5E6D7C8F9A0B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCPHub.IntegrationTests", "IntegrationTests\MCPHub.IntegrationTests.csproj", "{A7D2F8E3-8F4B-4C9E-9A1B-5E6D7C8F9A0B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

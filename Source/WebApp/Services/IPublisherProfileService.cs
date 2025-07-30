@@ -1,14 +1,13 @@
+using MCPHub.Domain.Contracts.Responses;
 using MCPHub.Domain.Entities;
 using MCPHub.Domain.ValueObjects;
-using MCPHub.Domain.Contracts.Responses;
 
 namespace MCPHub.WebApp.Services;
 
 /// <summary>
 /// Service interface for publisher profile management and verification
 /// </summary>
-public interface IPublisherProfileService
-{
+public interface IPublisherProfileService {
     /// <summary>
     /// Gets comprehensive publisher profile information
     /// </summary>
@@ -236,8 +235,7 @@ public interface IPublisherProfileService
 /// <summary>
 /// Complete publisher profile information
 /// </summary>
-public class PublisherProfile
-{
+public class PublisherProfile {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string DisplayName { get; set; } = string.Empty;
@@ -263,8 +261,7 @@ public class PublisherProfile
 /// <summary>
 /// Profile update request
 /// </summary>
-public class ProfileUpdateRequest
-{
+public class ProfileUpdateRequest {
     public string? DisplayName { get; set; }
     public string? Bio { get; set; }
     public string? Website { get; set; }
@@ -276,12 +273,10 @@ public class ProfileUpdateRequest
     public string? Avatar { get; set; }
 }
 
-
 /// <summary>
 /// Publisher verification status
 /// </summary>
-public class VerificationStatus
-{
+public class VerificationStatus {
     public bool IsVerified { get; set; }
     public VerificationLevel Level { get; set; }
     public DateTime? VerifiedAt { get; set; }
@@ -296,8 +291,7 @@ public class VerificationStatus
 /// <summary>
 /// Verification request
 /// </summary>
-public class VerificationRequest
-{
+public class VerificationRequest {
     public VerificationLevel RequestedLevel { get; set; }
     public string BusinessName { get; set; } = string.Empty;
     public string BusinessType { get; set; } = string.Empty;
@@ -315,8 +309,7 @@ public class VerificationRequest
 /// <summary>
 /// Verification result
 /// </summary>
-public class VerificationResult
-{
+public class VerificationResult {
     public bool Success { get; set; }
     public string? ErrorMessage { get; set; }
     public Guid? VerificationId { get; set; }
@@ -328,8 +321,7 @@ public class VerificationResult
 /// <summary>
 /// Verification document
 /// </summary>
-public class VerificationDocument
-{
+public class VerificationDocument {
     public Guid Id { get; set; }
     public DocumentType Type { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -344,8 +336,7 @@ public class VerificationDocument
 /// <summary>
 /// Document submission result
 /// </summary>
-public class DocumentSubmissionResult
-{
+public class DocumentSubmissionResult {
     public bool Success { get; set; }
     public string? ErrorMessage { get; set; }
     public IEnumerable<Guid> UploadedDocumentIds { get; set; } = [];
@@ -356,8 +347,7 @@ public class DocumentSubmissionResult
 /// <summary>
 /// Trust tier information
 /// </summary>
-public class TrustTierInfo
-{
+public class TrustTierInfo {
     public TrustTier CurrentTier { get; set; }
     public TrustTier? NextTier { get; set; }
     public double CompletionPercentage { get; set; }
@@ -373,8 +363,7 @@ public class TrustTierInfo
 /// <summary>
 /// Trust tier guidance
 /// </summary>
-public class TrustTierGuidance
-{
+public class TrustTierGuidance {
     public TrustTier TargetTier { get; set; }
     public IEnumerable<TrustTierRequirement> Requirements { get; set; } = [];
     public IEnumerable<TierImprovementAction> RecommendedActions { get; set; } = [];
@@ -386,8 +375,7 @@ public class TrustTierGuidance
 /// <summary>
 /// Publisher security settings
 /// </summary>
-public class PublisherSecuritySettings
-{
+public class PublisherSecuritySettings {
     public bool TwoFactorEnabled { get; set; }
     public bool EmailVerificationRequired { get; set; }
     public bool ApiKeyRotationEnabled { get; set; }
@@ -405,8 +393,7 @@ public class PublisherSecuritySettings
 /// <summary>
 /// Security settings request
 /// </summary>
-public class SecuritySettingsRequest
-{
+public class SecuritySettingsRequest {
     public bool? EmailVerificationRequired { get; set; }
     public bool? ApiKeyRotationEnabled { get; set; }
     public int? ApiKeyRotationDays { get; set; }
@@ -423,8 +410,7 @@ public class SecuritySettingsRequest
 /// <summary>
 /// Security settings result
 /// </summary>
-public class SecuritySettingsResult
-{
+public class SecuritySettingsResult {
     public bool Success { get; set; }
     public string? ErrorMessage { get; set; }
     public IEnumerable<string> ValidationErrors { get; set; } = [];
@@ -435,8 +421,7 @@ public class SecuritySettingsResult
 /// <summary>
 /// Two-factor authentication information
 /// </summary>
-public class TwoFactorAuthInfo
-{
+public class TwoFactorAuthInfo {
     public bool IsEnabled { get; set; }
     public IEnumerable<TwoFactorMethod> EnabledMethods { get; set; } = [];
     public IEnumerable<TwoFactorMethod> AvailableMethods { get; set; } = [];
@@ -449,9 +434,8 @@ public class TwoFactorAuthInfo
 /// <summary>
 /// Two-factor setup request
 /// </summary>
-public class TwoFactorSetupRequest
-{
-    public TwoFactorMethod Method { get; set; }
+public class TwoFactorSetupRequest {
+    public required TwoFactorMethod Method { get; set; }
     public string? PhoneNumber { get; set; }
     public string? Email { get; set; }
     public string? AuthenticatorSecret { get; set; }
@@ -463,8 +447,7 @@ public class TwoFactorSetupRequest
 /// <summary>
 /// Two-factor setup result
 /// </summary>
-public class TwoFactorSetupResult
-{
+public class TwoFactorSetupResult {
     public bool Success { get; set; }
     public string? ErrorMessage { get; set; }
     public string? QrCodeUrl { get; set; }
@@ -476,8 +459,7 @@ public class TwoFactorSetupResult
 /// <summary>
 /// Two-factor result
 /// </summary>
-public class TwoFactorResult
-{
+public class TwoFactorResult {
     public bool Success { get; set; }
     public string? ErrorMessage { get; set; }
     public DateTime ActionDate { get; set; }
@@ -486,8 +468,7 @@ public class TwoFactorResult
 /// <summary>
 /// Backup codes result
 /// </summary>
-public class BackupCodesResult
-{
+public class BackupCodesResult {
     public bool Success { get; set; }
     public string? ErrorMessage { get; set; }
     public IEnumerable<string> BackupCodes { get; set; } = [];
@@ -498,8 +479,7 @@ public class BackupCodesResult
 /// <summary>
 /// API key information
 /// </summary>
-public class ApiKeyInfo
-{
+public class ApiKeyInfo {
     public IEnumerable<ApiKey> ApiKeys { get; set; } = [];
     public int MaxAllowedKeys { get; set; }
     public bool CanCreateMore { get; set; }
@@ -510,8 +490,7 @@ public class ApiKeyInfo
 /// <summary>
 /// API key
 /// </summary>
-public class ApiKey
-{
+public class ApiKey {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string KeyPrefix { get; set; } = string.Empty;
@@ -527,8 +506,7 @@ public class ApiKey
 /// <summary>
 /// API key request
 /// </summary>
-public class ApiKeyRequest
-{
+public class ApiKeyRequest {
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     public IEnumerable<string> Scopes { get; set; } = [];
@@ -539,8 +517,7 @@ public class ApiKeyRequest
 /// <summary>
 /// API key creation result
 /// </summary>
-public class ApiKeyCreationResult
-{
+public class ApiKeyCreationResult {
     public bool Success { get; set; }
     public string? ErrorMessage { get; set; }
     public Guid? KeyId { get; set; }
@@ -552,8 +529,7 @@ public class ApiKeyCreationResult
 /// <summary>
 /// API key result
 /// </summary>
-public class ApiKeyResult
-{
+public class ApiKeyResult {
     public bool Success { get; set; }
     public string? ErrorMessage { get; set; }
     public DateTime ActionDate { get; set; }
@@ -562,8 +538,7 @@ public class ApiKeyResult
 /// <summary>
 /// Notification preferences
 /// </summary>
-public class NotificationPreferences
-{
+public class NotificationPreferences {
     public EmailNotificationSettings Email { get; set; } = new();
     public WebNotificationSettings Web { get; set; } = new();
     public MobileNotificationSettings Mobile { get; set; } = new();
@@ -577,8 +552,7 @@ public class NotificationPreferences
 /// <summary>
 /// Email notification settings
 /// </summary>
-public class EmailNotificationSettings
-{
+public class EmailNotificationSettings {
     public bool SecurityAlerts { get; set; } = true;
     public bool PackageUpdates { get; set; } = true;
     public bool DownloadMilestones { get; set; } = true;
@@ -592,8 +566,7 @@ public class EmailNotificationSettings
 /// <summary>
 /// Web notification settings
 /// </summary>
-public class WebNotificationSettings
-{
+public class WebNotificationSettings {
     public bool Enabled { get; set; } = true;
     public bool SecurityAlerts { get; set; } = true;
     public bool RealTimeUpdates { get; set; } = true;
@@ -604,8 +577,7 @@ public class WebNotificationSettings
 /// <summary>
 /// Mobile notification settings
 /// </summary>
-public class MobileNotificationSettings
-{
+public class MobileNotificationSettings {
     public bool Enabled { get; set; } = false;
     public bool PushNotifications { get; set; } = false;
     public bool SecurityAlerts { get; set; } = true;
@@ -615,8 +587,7 @@ public class MobileNotificationSettings
 /// <summary>
 /// Notification preferences request
 /// </summary>
-public class NotificationPreferencesRequest
-{
+public class NotificationPreferencesRequest {
     public EmailNotificationSettings? Email { get; set; }
     public WebNotificationSettings? Web { get; set; }
     public MobileNotificationSettings? Mobile { get; set; }
@@ -630,8 +601,7 @@ public class NotificationPreferencesRequest
 /// <summary>
 /// Preferences update result
 /// </summary>
-public class PreferencesUpdateResult
-{
+public class PreferencesUpdateResult {
     public bool Success { get; set; }
     public string? ErrorMessage { get; set; }
     public IEnumerable<string> ValidationErrors { get; set; } = [];
@@ -641,8 +611,7 @@ public class PreferencesUpdateResult
 /// <summary>
 /// Profile statistics
 /// </summary>
-public class ProfileStatistics
-{
+public class ProfileStatistics {
     public int TotalPackages { get; set; }
     public long TotalDownloads { get; set; }
     public double AverageRating { get; set; }
@@ -657,8 +626,7 @@ public class ProfileStatistics
 /// <summary>
 /// Social link
 /// </summary>
-public class SocialLink
-{
+public class SocialLink {
     public SocialPlatform Platform { get; set; }
     public string Url { get; set; } = string.Empty;
     public bool IsVerified { get; set; }
@@ -667,8 +635,7 @@ public class SocialLink
 /// <summary>
 /// Achievement
 /// </summary>
-public class Achievement
-{
+public class Achievement {
     public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -681,8 +648,7 @@ public class Achievement
 /// <summary>
 /// Verification requirement
 /// </summary>
-public class VerificationRequirement
-{
+public class VerificationRequirement {
     public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -695,8 +661,7 @@ public class VerificationRequirement
 /// <summary>
 /// Verification progress
 /// </summary>
-public class VerificationProgress
-{
+public class VerificationProgress {
     public int CompletedRequirements { get; set; }
     public int TotalRequirements { get; set; }
     public double CompletionPercentage { get; set; }
@@ -709,8 +674,7 @@ public class VerificationProgress
 /// <summary>
 /// Address information
 /// </summary>
-public class AddressInfo
-{
+public class AddressInfo {
     public string Street { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
     public string State { get; set; } = string.Empty;
@@ -721,8 +685,7 @@ public class AddressInfo
 /// <summary>
 /// Trust tier benefit
 /// </summary>
-public class TrustTierBenefit
-{
+public class TrustTierBenefit {
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public BenefitType Type { get; set; }
@@ -732,8 +695,7 @@ public class TrustTierBenefit
 /// <summary>
 /// Tier improvement action
 /// </summary>
-public class TierImprovementAction
-{
+public class TierImprovementAction {
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public int Points { get; set; }
@@ -746,8 +708,7 @@ public class TierImprovementAction
 /// <summary>
 /// Two-factor method
 /// </summary>
-public class TwoFactorMethod
-{
+public class TwoFactorMethod {
     public TwoFactorType Type { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -762,8 +723,7 @@ public class TwoFactorMethod
 /// <summary>
 /// Billing information (placeholder)
 /// </summary>
-public class BillingInfo
-{
+public class BillingInfo {
     public string PlanName { get; set; } = string.Empty;
     public decimal MonthlyCharge { get; set; }
     public DateTime NextBillingDate { get; set; }
@@ -823,8 +783,7 @@ public class DataExportResult { }
 /// <summary>
 /// Verification levels
 /// </summary>
-public enum VerificationLevel
-{
+public enum VerificationLevel {
     None,
     Basic,
     Enhanced,
@@ -834,8 +793,7 @@ public enum VerificationLevel
 /// <summary>
 /// Document types
 /// </summary>
-public enum DocumentType
-{
+public enum DocumentType {
     GovernmentId,
     BusinessLicense,
     TaxDocument,
@@ -848,8 +806,7 @@ public enum DocumentType
 /// <summary>
 /// Document status
 /// </summary>
-public enum DocumentStatus
-{
+public enum DocumentStatus {
     Pending,
     UnderReview,
     Approved,
@@ -860,8 +817,7 @@ public enum DocumentStatus
 /// <summary>
 /// Verification stages
 /// </summary>
-public enum VerificationStage
-{
+public enum VerificationStage {
     NotStarted,
     DocumentSubmission,
     DocumentReview,
@@ -874,8 +830,7 @@ public enum VerificationStage
 /// <summary>
 /// Social platforms
 /// </summary>
-public enum SocialPlatform
-{
+public enum SocialPlatform {
     GitHub,
     Twitter,
     LinkedIn,
@@ -889,8 +844,7 @@ public enum SocialPlatform
 /// <summary>
 /// Security levels
 /// </summary>
-public enum SecurityLevel
-{
+public enum SecurityLevel {
     Basic,
     Standard,
     High,
@@ -900,8 +854,7 @@ public enum SecurityLevel
 /// <summary>
 /// Two-factor types
 /// </summary>
-public enum TwoFactorType
-{
+public enum TwoFactorType {
     App,
     SMS,
     Email,
@@ -911,8 +864,7 @@ public enum TwoFactorType
 /// <summary>
 /// Benefit types
 /// </summary>
-public enum BenefitType
-{
+public enum BenefitType {
     Feature,
     Limit,
     Support,
@@ -923,8 +875,7 @@ public enum BenefitType
 /// <summary>
 /// Action difficulty
 /// </summary>
-public enum ActionDifficulty
-{
+public enum ActionDifficulty {
     Easy,
     Medium,
     Hard,
@@ -934,8 +885,7 @@ public enum ActionDifficulty
 /// <summary>
 /// Notification frequency
 /// </summary>
-public enum NotificationFrequency
-{
+public enum NotificationFrequency {
     Never,
     Daily,
     Weekly,

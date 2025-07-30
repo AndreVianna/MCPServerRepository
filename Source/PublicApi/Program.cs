@@ -123,7 +123,7 @@ builder.Services.AddSingleton<IRateLimitingService, RateLimitingService>();
 
 // Note: Messaging implementations removed - only interfaces available
 // Add minimal stub implementations for messaging
-builder.Services.AddScoped<IMessagePublisher>(provider => 
+builder.Services.AddScoped<IMessagePublisher>(provider =>
     new StubMessagePublisher(provider.GetRequiredService<ILogger<StubMessagePublisher>>()));
 
 // Register consumer services
@@ -154,12 +154,8 @@ app.MapControllers();
 app.Run();
 
 // Temporary stub implementation for messaging
-public class StubMessagePublisher : IMessagePublisher {
-    private readonly ILogger<StubMessagePublisher> _logger;
-
-    public StubMessagePublisher(ILogger<StubMessagePublisher> logger) {
-        _logger = logger;
-    }
+public class StubMessagePublisher(ILogger<StubMessagePublisher> logger) : IMessagePublisher {
+    private readonly ILogger<StubMessagePublisher> _logger = logger;
 
     public Task PublishAsync<T>(T message, CancellationToken cancellationToken = default) where T : BaseMessage {
         _logger.LogInformation("Stub: Publishing message of type {MessageType}", typeof(T).Name);
@@ -171,3 +167,6 @@ public class StubMessagePublisher : IMessagePublisher {
         return Task.CompletedTask;
     }
 }
+
+// Make Program class accessible for integration testing
+public partial class Program { }

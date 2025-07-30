@@ -6,7 +6,7 @@
 
 <PageTitle>Email Verification - MCP Hub</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Small" Class="mt-12">
+<MudContainer maxwidth="MaxWidth.Small" Class="mt-12">
     <MudPaper Elevation="2" Class="pa-8">
         <div class="text-center mb-6">
             <MudIcon Icon="@GetStatusIcon()" 
@@ -37,7 +37,7 @@
                                       InputType="InputType.Email"
                                       Required="true"
                                       For="@(() => _resendModel.Email)"
-                                      FullWidth="true"
+                                      fullwidth="true"
                                       HelperText="Enter your email to resend verification"
                                       Immediate="true" />
                     </MudItem>
@@ -45,9 +45,9 @@
                         <MudButton ButtonType="ButtonType.Submit"
                                   Variant="Variant.Outlined"
                                   Color="Color.Primary"
-                                  FullWidth="true"
+                                  fullwidth="true"
                                   Disabled="@_isLoading"
-                                  StartIcon="@Icons.Material.Filled.Email">
+                                  starticon="@Icons.Material.Filled.Email">
                             @if (_isLoading)
                             {
                                 <MudProgressCircular Size="Size.Small" Indeterminate="true" />
@@ -77,7 +77,7 @@
                 <MudButton Variant="Variant.Filled"
                           Color="Color.Primary"
                           Size="Size.Large"
-                          StartIcon="@Icons.Material.Filled.Login"
+                          starticon="@Icons.Material.Filled.Login"
                           Href="/login">
                     Continue to Sign In
                 </MudButton>
@@ -92,14 +92,14 @@
             <div class="text-center">
                 <MudButton Variant="Variant.Outlined"
                           Color="Color.Primary"
-                          StartIcon="@Icons.Material.Filled.Refresh"
+                          starticon="@Icons.Material.Filled.Refresh"
                           OnClick="@(() => Navigation.NavigateTo("/email-verification"))"
                           Class="mr-2">
                     Try Again
                 </MudButton>
                 <MudButton Variant="Variant.Text"
                           Color="Color.Secondary"
-                          StartIcon="@Icons.Material.Filled.Home"
+                          starticon="@Icons.Material.Filled.Home"
                           Href="/">
                     Back to Home
                 </MudButton>

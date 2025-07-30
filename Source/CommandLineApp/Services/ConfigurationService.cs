@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json;
 
@@ -251,12 +252,16 @@ public class ConfigurationService : IConfigurationService {
     }
 
     private object? GetPropertyValue(object obj, string propertyName) {
+#pragma warning disable IL2075 // Using reflection for configuration - not critical for AOT
         var property = obj.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+#pragma warning restore IL2075
         return property?.GetValue(obj);
     }
 
     private void SetPropertyValue(object obj, string propertyName, object? value) {
+#pragma warning disable IL2075 // Using reflection for configuration - not critical for AOT
         var property = obj.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+#pragma warning restore IL2075
         if (property != null && property.CanWrite) {
             property.SetValue(obj, value);
         }

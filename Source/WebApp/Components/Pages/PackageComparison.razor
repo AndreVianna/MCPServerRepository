@@ -15,7 +15,7 @@
 
 <PageTitle>Package Comparison - MCP Hub</PageTitle>
 
-<ResponsiveContainer MaxWidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
+<ResponsiveContainer maxwidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
     <HeaderContent>
         <div class="package-comparison-header">
             <div class="header-title mb-4">
@@ -26,7 +26,7 @@
             </div>
 
             <div class="header-controls mb-4">
-                <MudGrid Spacing="3" AlignItems="Center">
+                <MudGrid Spacing="3" alignitems="Center">
                     <MudItem xs="12" md="6">
                         <div class="package-selector">
                             <MudText Typo="Typo.subtitle2" Class="mb-2">Select Packages to Compare</MudText>
@@ -61,8 +61,8 @@
                                         {
                                             <MudButton Variant="Variant.Outlined"
                                                        Color="Color.Primary"
-                                                       StartIcon="Icons.Material.Filled.Add"
-                                                       FullWidth="true"
+                                                       starticon="Icons.Material.Filled.Add"
+                                                       fullwidth="true"
                                                        Class="add-package-button"
                                                        Style="height: 80px; border-style: dashed;"
                                                        @onclick="@(() => OpenPackageSelector(index))">
@@ -93,7 +93,7 @@
 
                                 <MudButton Variant="Variant.Filled"
                                            Color="Color.Primary"
-                                           StartIcon="Icons.Material.Filled.Compare"
+                                           starticon="Icons.Material.Filled.Compare"
                                            @onclick="ComparePackages"
                                            Disabled="@(_selectedPackages.Count < 2 || _isLoading)">
                                     Compare
@@ -103,7 +103,7 @@
                             <div class="d-flex gap-2">
                                 <MudButton Variant="Variant.Outlined"
                                            Color="Color.Secondary"
-                                           StartIcon="Icons.Material.Filled.Download"
+                                           starticon="Icons.Material.Filled.Download"
                                            @onclick="ExportComparison"
                                            Size="Size.Medium"
                                            Disabled="@(_comparisonResult == null)">
@@ -112,7 +112,7 @@
 
                                 <MudButton Variant="Variant.Outlined"
                                            Color="Color.Secondary"
-                                           StartIcon="Icons.Material.Filled.Share"
+                                           starticon="Icons.Material.Filled.Share"
                                            @onclick="ShareComparison"
                                            Size="Size.Medium"
                                            Disabled="@(_comparisonResult == null)">
@@ -121,7 +121,7 @@
 
                                 <MudButton Variant="Variant.Text"
                                            Color="Color.Error"
-                                           StartIcon="Icons.Material.Filled.Clear"
+                                           starticon="Icons.Material.Filled.Clear"
                                            @onclick="ClearComparison"
                                            Size="Size.Medium">
                                     Clear All
@@ -213,7 +213,7 @@
                     <MudCardContent Class="pa-0">
                         <div class="comparison-table-container">
                             <MudTable Items="@GetComparisonRows()" 
-                                      Dense="true" 
+                                      dense="true" 
                                       Striped="true" 
                                       Class="comparison-table"
                                       FixedHeader="true"
@@ -273,7 +273,7 @@
                 <MudGrid Spacing="3">
                     <!-- Downloads Comparison -->
                     <MudItem xs="12" lg="6">
-                        <AnalyticsChart Title="📈 Downloads Comparison"
+                        <AnalyticsChart title="📈 Downloads Comparison"
                                         Subtitle="Download trends over time"
                                         ChartType="Components.UI.Models.ChartType.Line"
                                         ChartSeries="@ChartSeriesConverter.ToMudBlazor(GetDownloadsComparisonSeries())"
@@ -404,14 +404,14 @@
                                         <MudButton Variant="Variant.Outlined"
                                                    Color="Color.Primary"
                                                    Size="Size.Small"
-                                                   StartIcon="Icons.Material.Filled.Visibility"
+                                                   starticon="Icons.Material.Filled.Visibility"
                                                    @onclick="@(() => Navigation.NavigateTo($"/package/{package.PackageId}"))">
                                             View Package
                                         </MudButton>
                                         <MudButton Variant="Variant.Text"
                                                    Color="Color.Secondary"
                                                    Size="Size.Small"
-                                                   StartIcon="Icons.Material.Filled.Analytics"
+                                                   starticon="Icons.Material.Filled.Analytics"
                                                    @onclick="@(() => Navigation.NavigateTo($"/package/{package.PackageId}/analytics"))">
                                             Analytics
                                         </MudButton>
@@ -437,7 +437,7 @@
                 </MudText>
                 <MudButton Variant="Variant.Filled"
                            Color="Color.Primary"
-                           StartIcon="Icons.Material.Filled.Search"
+                           starticon="Icons.Material.Filled.Search"
                            @onclick="@(() => OpenPackageSelector(0))">
                     Search Packages
                 </MudButton>
@@ -447,7 +447,7 @@
 </ResponsiveContainer>
 
 <!-- Package Selection Dialog -->
-<MudDialog @bind-IsVisible="_showPackageSelector" Options="_dialogOptions">
+<MudDialog @bind-Visible="_showPackageSelector" Options="_dialogOptions">
     <TitleContent>
         <MudText Typo="Typo.h6">
             <MudIcon Icon="Icons.Material.Filled.Search" Class="mr-3" />
@@ -466,7 +466,7 @@
 
             @if (_searchResults?.Any() == true)
             {
-                <MudList T="string" Clickable="true" Class="package-search-results">
+                <MudList T="string" ReadOnly="false" Class="package-search-results">
                     @foreach (var package in _searchResults.Take(10))
                     {
                         <MudListItem T="string" @onclick="@(() => SelectPackageForComparison(package))">
@@ -550,19 +550,20 @@
         }
     }
 
-    private async Task<PackageInfo?> GetPackageInfo(Guid packageId)
+    private Task<PackageInfo?> GetPackageInfo(Guid packageId)
     {
         try
         {
             // This would normally fetch from PackageService
             // For now, return mock data
             var mockPackages = GetMockPackages();
-            return mockPackages.FirstOrDefault(p => p.Name.GetHashCode() == packageId.GetHashCode() % mockPackages.Count);
+            var result = mockPackages.FirstOrDefault(p => p.Name.GetHashCode() == packageId.GetHashCode() % mockPackages.Count);
+            return Task.FromResult(result);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error loading package info for {PackageId}", packageId);
-            return null;
+            return Task.FromResult<PackageInfo?>(null);
         }
     }
 
@@ -581,12 +582,12 @@
         _searchResults = null;
     }
 
-    private async Task SearchPackages()
+    private Task SearchPackages()
     {
         if (string.IsNullOrWhiteSpace(_packageSearchQuery) || _packageSearchQuery.Length < 2)
         {
             _searchResults = null;
-            return;
+            return Task.CompletedTask;
         }
 
         try
@@ -606,6 +607,7 @@
             Logger.LogError(ex, "Error searching packages");
             Snackbar.Add("Error searching packages", Severity.Error);
         }
+        return Task.CompletedTask;
     }
 
     private void SelectPackageForComparison(PackageInfo package)
@@ -760,9 +762,10 @@
         }
     }
 
-    private async Task ExportComparison()
+    private Task ExportComparison()
     {
         Snackbar.Add("Export functionality coming soon", Severity.Info);
+        return Task.CompletedTask;
     }
 
     private async Task ShareComparison()
@@ -779,9 +782,10 @@
         StateHasChanged();
     }
 
-    private async Task ExportDownloadsChart()
+    private Task ExportDownloadsChart()
     {
         Snackbar.Add("Exporting downloads chart", Severity.Info);
+        return Task.CompletedTask;
     }
 
     // Helper methods and data transformation

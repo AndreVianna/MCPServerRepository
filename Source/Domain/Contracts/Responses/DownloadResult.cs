@@ -42,7 +42,7 @@ public record DownloadResult {
     /// <param name="downloadId">Download tracking ID</param>
     /// <param name="metadata">Additional metadata</param>
     /// <returns>Successful download result</returns>
-    public static DownloadResult CreateSuccess(string downloadUrl, DateTimeOffset expiresAt, Guid downloadId, Dictionary<string, object>? metadata = null) => new DownloadResult {
+    public static DownloadResult CreateSuccess(string downloadUrl, DateTimeOffset expiresAt, Guid downloadId, Dictionary<string, object>? metadata = null) => new() {
         Success = true,
         DownloadUrl = downloadUrl,
         ExpiresAt = expiresAt,
@@ -55,7 +55,7 @@ public record DownloadResult {
     /// </summary>
     /// <param name="errorMessage">Error description</param>
     /// <returns>Failed download result</returns>
-    public static DownloadResult CreateFailure(string errorMessage) => new DownloadResult {
+    public static DownloadResult CreateFailure(string errorMessage) => new() {
         Success = false,
         ErrorMessage = errorMessage
     };

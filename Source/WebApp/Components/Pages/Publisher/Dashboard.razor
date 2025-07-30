@@ -12,7 +12,7 @@
 
 <PageTitle>Publisher Dashboard - MCP Hub</PageTitle>
 
-<ResponsiveContainer MaxWidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
+<ResponsiveContainer maxwidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
     <HeaderContent>
         <div class="dashboard-header">
             <div class="welcome-section mb-4">
@@ -28,7 +28,7 @@
                 <MudGrid Spacing="3">
                     <MudItem xs="12" sm="6" md="3">
                         <MetricsCard 
-                            Title="Packages"
+                            title="Packages"
                             Value="@(_metrics?.TotalPackages.ToString() ?? "0")"
                             Icon="Icons.Material.Filled.Inventory"
                             Color="Color.Primary"
@@ -39,7 +39,7 @@
                     
                     <MudItem xs="12" sm="6" md="3">
                         <MetricsCard 
-                            Title="Total Downloads"
+                            title="Total Downloads"
                             Value="@($"{FormatNumber(_metrics?.WeeklyDownloads ?? 0)}/week")"
                             Icon="Icons.Material.Filled.Download"
                             Color="Color.Success"
@@ -50,7 +50,7 @@
                     
                     <MudItem xs="12" sm="6" md="3">
                         <MetricsCard 
-                            Title="Active Alerts"
+                            title="Active Alerts"
                             Value="@(_metrics?.ActiveAlerts.ToString() ?? "0")"
                             Icon="Icons.Material.Filled.Warning"
                             Color="@(_metrics?.ActiveAlerts > 0 ? Color.Warning : Color.Success)"
@@ -60,7 +60,7 @@
                     
                     <MudItem xs="12" sm="6" md="3">
                         <MetricsCard 
-                            Title="Avg Rating"
+                            title="Avg Rating"
                             Value="@(_metrics?.AverageRating.ToString("F1") ?? "0.0")"
                             Icon="Icons.Material.Filled.Star"
                             Color="Color.Warning"
@@ -75,7 +75,7 @@
                 <MudButton 
                     Variant="Variant.Filled"
                     Color="Color.Primary"
-                    StartIcon="Icons.Material.Filled.Add"
+                    starticon="Icons.Material.Filled.Add"
                     Size="Size.Large"
                     Href="/publisher/packages/publish"
                     Class="publish-button">
@@ -161,7 +161,7 @@
                 <!-- Download Trends Chart -->
                 <MudPaper Class="trends-section pa-4 mt-4" Elevation="2">
                     <AnalyticsChart 
-                        Title="Download Trends"
+                        title="Download Trends"
                         Subtitle="Package downloads over the last 30 days"
                         ChartType="ChartTypeConverter.FromMudBlazor(MudBlazor.ChartType.Line)"
                         ChartSeries="@_downloadChartSeries"
@@ -200,7 +200,7 @@
                                 <SecurityAlertCard 
                                     Alert="alert"
                                     ShowActions="true"
-                                    OnActionClick="@((string action) => HandleAlertAction(action))"
+                                    OnActionClick="@(((SecurityAlert Alert, string Action) args) => HandleAlertAction(args.Alert, args.Action))"
                                     Class="mb-3" />
                             }
                             
@@ -210,7 +210,7 @@
                                     Variant="Variant.Text"
                                     Color="Color.Primary"
                                     Size="Size.Small"
-                                    FullWidth="true"
+                                    fullwidth="true"
                                     Href="/publisher/security">
                                     View All @_securityAlerts.Count() Alerts
                                 </MudButton>
@@ -304,8 +304,8 @@
                         <MudButton 
                             Variant="Variant.Outlined"
                             Color="Color.Primary"
-                            StartIcon="Icons.Material.Filled.Add"
-                            FullWidth="true"
+                            starticon="Icons.Material.Filled.Add"
+                            fullwidth="true"
                             Href="/publisher/packages/publish"
                             Class="mb-2">
                             Publish Package
@@ -314,8 +314,8 @@
                         <MudButton 
                             Variant="Variant.Outlined"
                             Color="Color.Secondary"
-                            StartIcon="Icons.Material.Filled.Settings"
-                            FullWidth="true"
+                            starticon="Icons.Material.Filled.Settings"
+                            fullwidth="true"
                             Href="/publisher/profile"
                             Class="mb-2">
                             Profile Settings
@@ -324,8 +324,8 @@
                         <MudButton 
                             Variant="Variant.Outlined"
                             Color="Color.Info"
-                            StartIcon="Icons.Material.Filled.Analytics"
-                            FullWidth="true"
+                            starticon="Icons.Material.Filled.Analytics"
+                            fullwidth="true"
                             Href="/publisher/analytics"
                             Class="mb-2">
                             View Analytics
@@ -334,8 +334,8 @@
                         <MudButton 
                             Variant="Variant.Outlined"
                             Color="Color.Warning"
-                            StartIcon="Icons.Material.Filled.Security"
-                            FullWidth="true"
+                            starticon="Icons.Material.Filled.Security"
+                            fullwidth="true"
                             Href="/publisher/security">
                             Security Center
                         </MudButton>
@@ -577,7 +577,7 @@
         };
     }
 
-    private async Task HandleAlertAction(SecurityAlert alert, string action)
+    private Task HandleAlertAction(SecurityAlert alert, string action)
     {
         try
         {
@@ -602,6 +602,7 @@
             Logger.LogError(ex, "Error handling alert action");
             Snackbar.Add("Failed to process alert action", Severity.Error);
         }
+        return Task.CompletedTask;
     }
 
     private async Task RefreshDownloadData()

@@ -2,18 +2,18 @@
 @inject ISnackbar Snackbar
 
 <div class="social-login-section">
-    <MudDivider Class="mb-4">
+    <div class="divider-with-text mb-4">
         <MudText Typo="Typo.body2" Color="Color.Secondary">or continue with</MudText>
-    </MudDivider>
+    </div>
 
     <MudGrid Spacing="2">
         <MudItem xs="12" sm="4">
             <MudButton Variant="Variant.Outlined"
                       Color="Color.Default"
-                      FullWidth="true"
+                      fullwidth="true"
                       Size="Size.Large"
-                      StartIcon="@Icons.Custom.Brands.GitHub"
-                      OnClick="@(() => HandleSocialLogin("GitHub"))"
+                      starticon="@Icons.Custom.Brands.GitHub"
+                      onclick="@(() => HandleSocialLogin("GitHub"))"
                       Disabled="@IsLoading"
                       Class="social-login-button github-button">
                 GitHub
@@ -22,10 +22,10 @@
         <MudItem xs="12" sm="4">
             <MudButton Variant="Variant.Outlined"
                       Color="Color.Default"
-                      FullWidth="true"
+                      fullwidth="true"
                       Size="Size.Large"
-                      StartIcon="@Icons.Custom.Brands.Google"
-                      OnClick="@(() => HandleSocialLogin("Google"))"
+                      starticon="@Icons.Custom.Brands.Google"
+                      onclick="@(() => HandleSocialLogin("Google"))"
                       Disabled="@IsLoading"
                       Class="social-login-button google-button">
                 Google
@@ -34,10 +34,10 @@
         <MudItem xs="12" sm="4">
             <MudButton Variant="Variant.Outlined"
                       Color="Color.Default"
-                      FullWidth="true"
+                      fullwidth="true"
                       Size="Size.Large"
-                      StartIcon="@Icons.Custom.Brands.Microsoft"
-                      OnClick="@(() => HandleSocialLogin("Microsoft"))"
+                      starticon="@Icons.Custom.Brands.Microsoft"
+                      onclick="@(() => HandleSocialLogin("Microsoft"))"
                       Disabled="@IsLoading"
                       Class="social-login-button microsoft-button">
                 Microsoft
@@ -78,6 +78,28 @@
     .microsoft-button:hover {
         border-color: #0078d4;
         background-color: rgba(0, 120, 212, 0.05);
+    }
+
+    .divider-with-text {
+        display: flex;
+        align-items: center;
+        text-align: center;
+    }
+
+    .divider-with-text::before,
+    .divider-with-text::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--mud-palette-divider);
+    }
+
+    .divider-with-text::before {
+        margin-right: 15px;
+    }
+
+    .divider-with-text::after {
+        margin-left: 15px;
     }
 </style>
 

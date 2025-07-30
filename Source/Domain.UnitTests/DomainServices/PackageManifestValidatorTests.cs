@@ -9,7 +9,9 @@ namespace MCPHub.Domain.UnitTests.DomainServices;
 public class PackageManifestValidatorTests {
     private PackageManifestValidator _validator;
 
-        public PackageManifestValidatorTests() => _validator = new PackageManifestValidator();
+    public PackageManifestValidatorTests() {
+        _validator = new PackageManifestValidator();
+    }
 
     [Fact]
     [Trait("Category", "Unit")]

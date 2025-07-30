@@ -6,10 +6,9 @@ namespace MCPHub.Common.Services;
 /// Enhanced observability service implementation
 /// Skeleton implementation following contracts-first approach
 /// </summary>
-public class EnhancedObservabilityService : IDistributedTracingService, IMCPTracingService, IMCPMetricsService
-{
+public class EnhancedObservabilityService : IDistributedTracingService, IMCPTracingService, IMCPMetricsService {
     // IDistributedTracingService implementation
-    
+
     public Activity? StartActivity(string operationName, ActivityKind kind = ActivityKind.Internal)
         => throw new NotImplementedException("Distributed tracing will be implemented when OpenTelemetry integration is needed");
 

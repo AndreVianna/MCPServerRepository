@@ -80,7 +80,7 @@ public record PackageUninstalledEvent : BaseMessage {
         DateTimeOffset originalInstalledAt,
         DateTimeOffset uninstalledAt,
         string? uninstallReason = null,
-        string? clientVersion = null) => new PackageUninstalledEvent {
+        string? clientVersion = null) => new() {
             InstallationId = installationId,
             PackageId = packageId,
             PackageName = packageName,

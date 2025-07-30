@@ -82,7 +82,7 @@ public class PublishResult {
         ValidationSummary? validationSummary = null,
         long publishTimeMs = 0,
         string? storageUrl = null,
-        IEnumerable<string>? warnings = null) => new PublishResult(
+        IEnumerable<string>? warnings = null) => new(
             true,
             null,
             warnings,
@@ -99,7 +99,7 @@ public class PublishResult {
         IEnumerable<string> errors,
         ValidationSummary? validationSummary = null,
         long publishTimeMs = 0,
-        IEnumerable<string>? warnings = null) => new PublishResult(
+        IEnumerable<string>? warnings = null) => new(
             false,
             errors,
             warnings,
@@ -116,7 +116,7 @@ public class PublishResult {
         string error,
         ValidationSummary? validationSummary = null,
         long publishTimeMs = 0,
-        IEnumerable<string>? warnings = null) => new PublishResult(
+        IEnumerable<string>? warnings = null) => new(
             false,
             [error],
             warnings,

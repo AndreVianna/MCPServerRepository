@@ -18,7 +18,7 @@
                         <MudSelect T="string" 
                                    @bind-Value="@SelectedTimeRange"
                                    Variant="Variant.Outlined"
-                                   Dense="true"
+                                   dense="true"
                                    Class="mr-2"
                                    Style="min-width: 120px;"
                                    aria-label="Select time range">
@@ -33,14 +33,14 @@
                                    Color="Color.Default"
                                    Size="Size.Small"
                                    @onclick="RefreshData"
-                                   Title="Refresh data"
+                                   title="Refresh data"
                                    aria-label="Refresh chart data" />
                     
                     <MudIconButton Icon="Icons.Material.Filled.Download"
                                    Color="Color.Default"
                                    Size="Size.Small"
                                    @onclick="ExportData"
-                                   Title="Export data"
+                                   title="Export data"
                                    aria-label="Export chart data" />
                     
                     @if (EnableRealTime)
@@ -49,7 +49,7 @@
                                        Color="@(_isRealTimeActive ? Color.Error : Color.Success)"
                                        Size="Size.Small"
                                        @onclick="ToggleRealTime"
-                                       Title="@(_isRealTimeActive ? "Pause real-time updates" : "Start real-time updates")"
+                                       title="@(_isRealTimeActive ? "Pause real-time updates" : "Start real-time updates")"
                                        aria-label="Toggle real-time updates" />
                     }
                     
@@ -82,7 +82,7 @@
                 <MudText Typo="Typo.body2" Class="mt-2">Failed to load chart data</MudText>
                 <MudButton Color="Color.Primary" 
                            Variant="Variant.Text" 
-                           StartIcon="Icons.Material.Filled.Refresh"
+                           starticon="Icons.Material.Filled.Refresh"
                            Class="mt-2"
                            @onclick="RefreshData">
                     Retry
@@ -125,7 +125,7 @@
                               Width="100%"
                               Height="@($"{Height}px")"
                               ChartOptions="@GetChartOptions()"
-                              @onclick="@(EnableDrillDown ? HandleChartClick : null)" />
+                              @onclick="@(EnableDrillDown ? EventCallback.Factory.Create(this, HandleChartClick) : EventCallback.Empty)" />
                 }
                 else if (ChartType == Models.ChartType.Bar)
                 {
@@ -136,7 +136,7 @@
                               Width="100%"
                               Height="@($"{Height}px")"
                               ChartOptions="@GetChartOptions()"
-                              @onclick="@(EnableDrillDown ? HandleChartClick : null)" />
+                              @onclick="@(EnableDrillDown ? EventCallback.Factory.Create(this, HandleChartClick) : EventCallback.Empty)" />
                 }
                 else if (ChartType == Models.ChartType.Donut)
                 {
@@ -146,7 +146,7 @@
                               Width="100%"
                               Height="@($"{Height}px")"
                               ChartOptions="@GetChartOptions()"
-                              @onclick="@(EnableDrillDown ? HandleChartClick : null)" />
+                              @onclick="@(EnableDrillDown ? EventCallback.Factory.Create(this, HandleChartClick) : EventCallback.Empty)" />
                 }
                 else if (ChartType == Models.ChartType.Pie)
                 {
@@ -156,7 +156,7 @@
                               Width="100%"
                               Height="@($"{Height}px")"
                               ChartOptions="@GetChartOptions()"
-                              @onclick="@(EnableDrillDown ? HandleChartClick : null)" />
+                              @onclick="@(EnableDrillDown ? EventCallback.Factory.Create(this, HandleChartClick) : EventCallback.Empty)" />
                 }
                 
                 @if (EnableDrillDown && SelectedIndex >= 0)
@@ -173,7 +173,7 @@
             {
                 <div class="chart-data-table mt-4">
                     <MudTable Items="@GetTableData()" 
-                              Dense="true" 
+                              dense="true" 
                               Striped="true"
                               Class="chart-table"
                               aria-label="Chart data in table format">
@@ -386,7 +386,7 @@
         _realTimeTimer?.Dispose();
     }
 
-    private async Task ToggleRealTime()
+    private Task ToggleRealTime()
     {
         _isRealTimeActive = !_isRealTimeActive;
         
@@ -400,6 +400,7 @@
         }
         
         StateHasChanged();
+        return Task.CompletedTask;
     }
 
     private void StartRealTimeUpdates()

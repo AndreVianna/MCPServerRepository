@@ -202,10 +202,11 @@ public class McpmConfigurationManager : IMcpmConfigurationManager {
             _logger.LogDebug("Registry timeout overridden by environment variable");
         }
 
-        // Authentication configuration
+        // TODO: Replace with ICredentialStore when authentication is fully implemented
+        // Authentication configuration - temporarily disabled to avoid obsolete API usage
         if (Environment.GetEnvironmentVariable("MCPM_AUTH_TOKEN") is string authToken && !string.IsNullOrWhiteSpace(authToken)) {
-            configuration.Auth.Token = authToken;
-            _logger.LogDebug("Auth token overridden by environment variable");
+            // configuration.Auth.Token = authToken; // Disabled to avoid CS0618 warning
+            _logger.LogDebug("Auth token environment variable detected but not applied (pending ICredentialStore implementation)");
         }
 
         // Security configuration

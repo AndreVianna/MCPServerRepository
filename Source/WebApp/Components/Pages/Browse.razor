@@ -12,12 +12,16 @@
 
 <PageTitle>Browse Packages - MCP Hub</PageTitle>
 
-<ResponsiveContainer MaxWidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
+<ResponsiveContainer maxwidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
     <HeaderContent>
         <div class="browse-header">
             <MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-2">
                 Discover MCP Packages
             </MudText>
+            @if (_isLoading)
+            {
+                <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-2" />
+            }
             <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-4">
                 Explore curated collections of AI tools, data processors, and automation servers
             </MudText>
@@ -103,7 +107,7 @@
                                     <MudCardActions>
                                         <MudButton Color="Color.Primary" 
                                                  Variant="Variant.Filled"
-                                                 StartIcon="@Icons.Material.Filled.Explore"
+                                                 starticon="@Icons.Material.Filled.Explore"
                                                  @onclick="@(() => ExploreCollection(collection))">
                                             Explore
                                         </MudButton>
@@ -187,7 +191,7 @@
                     
                     <MudGrid Spacing="4">
                         <MudItem xs="12" md="8">
-                            <AnalyticsChart Title="Package Growth"
+                            <AnalyticsChart title="Package Growth"
                                            Subtitle="New packages published over time"
                                            ChartType="Components.UI.Models.ChartType.Line"
                                            ChartSeries="@GetPackageGrowthData()"
@@ -265,7 +269,7 @@
                             <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
                                          Color="Color.Default"
                                          @onclick="@(() => Navigation.NavigateTo("/browse"))"
-                                         Title="Back to browse"
+                                         title="Back to browse"
                                          Class="mr-2" />
                             <MudIcon Icon="@currentCategory.Icon" 
                                    Color="Color.Primary" 
@@ -300,14 +304,14 @@
                     <!-- Category Filters -->
                     <div class="category-filters mb-6">
                         <MudPaper Class="pa-4">
-                            <MudGrid AlignItems="Center">
+                            <MudGrid alignitems="Center">
                                 <MudItem xs="12" md="3">
                                     <MudSelect T="string" 
                                              @bind-Value="@_categorySortOption"
                                              Label="Sort by"
                                              Variant="Variant.Outlined"
-                                             Dense="true"
-                                             FullWidth="true">
+                                             dense="true"
+                                             fullwidth="true">
                                         <MudSelectItem Value="@("popular")">Most Popular</MudSelectItem>
                                         <MudSelectItem Value="@("recent")">Recently Added</MudSelectItem>
                                         <MudSelectItem Value="@("updated")">Recently Updated</MudSelectItem>
@@ -321,8 +325,8 @@
                                              @bind-Value="@_categoryTrustFilter"
                                              Label="Trust Tier"
                                              Variant="Variant.Outlined"
-                                             Dense="true"
-                                             FullWidth="true">
+                                             dense="true"
+                                             fullwidth="true">
                                         <MudSelectItem Value="@((TrustTier?)null)">All Trust Levels</MudSelectItem>
                                         <MudSelectItem Value="@("TrustTier.Enterprise")">Enterprise</MudSelectItem>
                                         <MudSelectItem Value="@("TrustTier.CommunityTrusted")">Community Trusted</MudSelectItem>
@@ -334,10 +338,10 @@
                                     <div class="filter-checkboxes d-flex gap-4">
                                         <MudCheckBox @bind-Value="@_showFeaturedOnly" 
                                                    Label="Featured only"
-                                                   Dense="true" />
+                                                   dense="true" />
                                         <MudCheckBox @bind-Value="@_showTrendingOnly" 
                                                    Label="Trending only"
-                                                   Dense="true" />
+                                                   dense="true" />
                                     </div>
                                 </MudItem>
                                 
@@ -346,8 +350,8 @@
                                                        Icon="@Icons.Material.Filled.ViewList"
                                                        ToggledIcon="@Icons.Material.Filled.GridView"
                                                        Color="Color.Primary"
-                                                       Title="@(_categoryGridView ? "Switch to list view" : "Switch to grid view")"
-                                                       FullWidth="true" />
+                                                       title="@(_categoryGridView ? "Switch to list view" : "Switch to grid view")"
+                                                       fullwidth="true" />
                                 </MudItem>
                             </MudGrid>
                         </MudPaper>
@@ -392,7 +396,7 @@
                             <MudButton Color="Color.Primary" 
                                      Variant="Variant.Outlined"
                                      Size="Size.Large"
-                                     StartIcon="@Icons.Material.Filled.ExpandMore"
+                                     starticon="@Icons.Material.Filled.ExpandMore"
                                      @onclick="LoadMorePackages">
                                 Load More Packages
                             </MudButton>
@@ -416,7 +420,7 @@
                         </MudText>
                         <MudButton Color="Color.Primary" 
                                  Variant="Variant.Filled"
-                                 StartIcon="@Icons.Material.Filled.ArrowBack"
+                                 starticon="@Icons.Material.Filled.ArrowBack"
                                  @onclick="@(() => Navigation.NavigateTo("/browse"))">
                             Back to Browse
                         </MudButton>
@@ -470,8 +474,8 @@
                     
                     <MudButton Color="Color.Primary" 
                              Variant="Variant.Outlined"
-                             FullWidth="true"
-                             StartIcon="@Icons.Material.Filled.Publish"
+                             fullwidth="true"
+                             starticon="@Icons.Material.Filled.Publish"
                              @onclick="@(() => Navigation.NavigateTo("/publisher/dashboard"))"
                              Class="mb-2">
                         Publish Package
@@ -479,8 +483,8 @@
                     
                     <MudButton Color="Color.Secondary" 
                              Variant="Variant.Outlined"
-                             FullWidth="true"
-                             StartIcon="@Icons.Material.Filled.Collections"
+                             fullwidth="true"
+                             starticon="@Icons.Material.Filled.Collections"
                              @onclick="@(() => Navigation.NavigateTo("/collections"))"
                              Class="mb-2">
                         View Collections
@@ -488,8 +492,8 @@
                     
                     <MudButton Color="Color.Info" 
                              Variant="Variant.Outlined"
-                             FullWidth="true"
-                             StartIcon="@Icons.Material.Filled.GetApp"
+                             fullwidth="true"
+                             starticon="@Icons.Material.Filled.GetApp"
                              @onclick="@(() => Navigation.NavigateTo("/cli"))">
                         Download CLI
                     </MudButton>
@@ -538,8 +542,8 @@
                         {
                             <MudButton Color="Color.Default" 
                                      Variant="Variant.Text"
-                                     FullWidth="true"
-                                     StartIcon="@related.Icon"
+                                     fullwidth="true"
+                                     starticon="@related.Icon"
                                      @onclick="@(() => BrowseCategory(related.Slug))"
                                      Class="mb-1 justify-start">
                                 @related.Name (@related.PackageCount)

@@ -229,9 +229,9 @@ public class TrustTierCalculationServiceTests {
     }
 
     [Fact]
-    public async Task GetTrustTierStatisticsAsync_ShouldThrowNotImplementedException() =>
+    public async Task GetTrustTierStatisticsAsync_ShouldThrowNotImplementedException()
         // Act & Assert
-        await _service.Invoking(s => s.GetTrustTierStatisticsAsync())
+        => await _service.Invoking(s => s.GetTrustTierStatisticsAsync())
             .Should().ThrowAsync<NotImplementedException>()
             .WithMessage("Trust tier statistics calculation logic will be implemented when first consumer requires it");
 
@@ -247,9 +247,9 @@ public class TrustTierCalculationServiceTests {
     }
 
     [Fact]
-    public async Task RecalculateAllTrustTiersAsync_ShouldThrowNotImplementedException() =>
+    public async Task RecalculateAllTrustTiersAsync_ShouldThrowNotImplementedException()
         // Act & Assert
-        await _service.Invoking(s => s.RecalculateAllTrustTiersAsync())
+        => await _service.Invoking(s => s.RecalculateAllTrustTiersAsync())
             .Should().ThrowAsync<NotImplementedException>()
             .WithMessage("Full trust tier recalculation logic will be implemented when first consumer requires it");
 
@@ -266,16 +266,16 @@ public class TrustTierCalculationServiceTests {
     }
 
     [Fact]
-    public async Task GetEligibleForPromotionAsync_ShouldThrowNotImplementedException() =>
+    public async Task GetEligibleForPromotionAsync_ShouldThrowNotImplementedException()
         // Act & Assert
-        await _service.Invoking(s => s.GetEligibleForPromotionAsync())
+        => await _service.Invoking(s => s.GetEligibleForPromotionAsync())
             .Should().ThrowAsync<NotImplementedException>()
             .WithMessage("Promotion eligibility logic will be implemented when first consumer requires it");
 
     [Fact]
-    public async Task GetAtRiskForDemotionAsync_ShouldThrowNotImplementedException() =>
+    public async Task GetAtRiskForDemotionAsync_ShouldThrowNotImplementedException()
         // Act & Assert
-        await _service.Invoking(s => s.GetAtRiskForDemotionAsync())
+        => await _service.Invoking(s => s.GetAtRiskForDemotionAsync())
             .Should().ThrowAsync<NotImplementedException>()
             .WithMessage("Demotion risk assessment logic will be implemented when first consumer requires it");
 

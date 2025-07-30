@@ -29,63 +29,63 @@ public class TrustTierCalculationService(
     private readonly ILogger<TrustTierCalculationService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     /// <inheritdoc />
-    public async Task<TrustTier> CalculatePackageTrustTierAsync(Guid packageId, CancellationToken cancellationToken = default) => throw new NotImplementedException("Trust tier calculation logic will be implemented when first consumer requires it");
+    public Task<TrustTier> CalculatePackageTrustTierAsync(Guid packageId, CancellationToken cancellationToken = default) => Task.FromException<TrustTier>(new NotImplementedException("Trust tier calculation logic will be implemented when first consumer requires it"));
 
     /// <inheritdoc />
-    public async Task<TrustTierAssessment> GetTrustTierAssessmentAsync(Guid packageId, CancellationToken cancellationToken = default) => throw new NotImplementedException("Trust tier assessment logic will be implemented when first consumer requires it");
+    public Task<TrustTierAssessment> GetTrustTierAssessmentAsync(Guid packageId, CancellationToken cancellationToken = default) => Task.FromException<TrustTierAssessment>(new NotImplementedException("Trust tier assessment logic will be implemented when first consumer requires it"));
 
     /// <inheritdoc />
-    public async Task UpdatePackageTrustTierAsync(
+    public Task UpdatePackageTrustTierAsync(
         Guid packageId,
         TrustTier newTier,
         string reason,
         Guid? changedByUserId = null,
         bool isManual = false,
-        CancellationToken cancellationToken = default) => throw new NotImplementedException("Trust tier update logic will be implemented when first consumer requires it");
+        CancellationToken cancellationToken = default) => Task.FromException(new NotImplementedException("Trust tier update logic will be implemented when first consumer requires it"));
 
     /// <inheritdoc />
-    public async Task<IEnumerable<TrustTierHistory>> GetTrustTierHistoryAsync(
+    public Task<IEnumerable<TrustTierHistory>> GetTrustTierHistoryAsync(
         Guid packageId,
         int limit = 50,
-        CancellationToken cancellationToken = default) => throw new NotImplementedException("Trust tier history retrieval logic will be implemented when first consumer requires it");
+        CancellationToken cancellationToken = default) => Task.FromException<IEnumerable<TrustTierHistory>>(new NotImplementedException("Trust tier history retrieval logic will be implemented when first consumer requires it"));
 
     /// <inheritdoc />
-    public async Task<TrustTierStatistics> GetTrustTierStatisticsAsync(
+    public Task<TrustTierStatistics> GetTrustTierStatisticsAsync(
         int periodDays = 30,
-        CancellationToken cancellationToken = default) => throw new NotImplementedException("Trust tier statistics calculation logic will be implemented when first consumer requires it");
+        CancellationToken cancellationToken = default) => Task.FromException<TrustTierStatistics>(new NotImplementedException("Trust tier statistics calculation logic will be implemented when first consumer requires it"));
 
     /// <inheritdoc />
-    public async Task<Dictionary<Guid, TrustTier>> BatchRecalculateTrustTiersAsync(
+    public Task<Dictionary<Guid, TrustTier>> BatchRecalculateTrustTiersAsync(
         IEnumerable<Guid> packageIds,
-        CancellationToken cancellationToken = default) => throw new NotImplementedException("Batch trust tier recalculation logic will be implemented when first consumer requires it");
+        CancellationToken cancellationToken = default) => Task.FromException<Dictionary<Guid, TrustTier>>(new NotImplementedException("Batch trust tier recalculation logic will be implemented when first consumer requires it"));
 
     /// <inheritdoc />
-    public async Task<TrustTierRecalculationSummary> RecalculateAllTrustTiersAsync(
+    public Task<TrustTierRecalculationSummary> RecalculateAllTrustTiersAsync(
         int maxConcurrency = 10,
-        CancellationToken cancellationToken = default) => throw new NotImplementedException("Full trust tier recalculation logic will be implemented when first consumer requires it");
+        CancellationToken cancellationToken = default) => Task.FromException<TrustTierRecalculationSummary>(new NotImplementedException("Full trust tier recalculation logic will be implemented when first consumer requires it"));
 
     /// <inheritdoc />
-    public async Task<TrustTierValidationResult> ValidateTrustTierEligibilityAsync(
+    public Task<TrustTierValidationResult> ValidateTrustTierEligibilityAsync(
         Guid packageId,
         TrustTier targetTier,
-        CancellationToken cancellationToken = default) => throw new NotImplementedException("Trust tier validation logic will be implemented when first consumer requires it");
+        CancellationToken cancellationToken = default) => Task.FromException<TrustTierValidationResult>(new NotImplementedException("Trust tier validation logic will be implemented when first consumer requires it"));
 
     /// <inheritdoc />
-    public async Task<IEnumerable<Guid>> GetEligibleForPromotionAsync(
+    public Task<IEnumerable<Guid>> GetEligibleForPromotionAsync(
         TrustTier? fromTier = null,
         int limit = 100,
-        CancellationToken cancellationToken = default) => throw new NotImplementedException("Promotion eligibility logic will be implemented when first consumer requires it");
+        CancellationToken cancellationToken = default) => Task.FromException<IEnumerable<Guid>>(new NotImplementedException("Promotion eligibility logic will be implemented when first consumer requires it"));
 
     /// <inheritdoc />
-    public async Task<IEnumerable<Guid>> GetAtRiskForDemotionAsync(
+    public Task<IEnumerable<Guid>> GetAtRiskForDemotionAsync(
         TrustTier? fromTier = null,
         int limit = 100,
-        CancellationToken cancellationToken = default) => throw new NotImplementedException("Demotion risk assessment logic will be implemented when first consumer requires it");
+        CancellationToken cancellationToken = default) => Task.FromException<IEnumerable<Guid>>(new NotImplementedException("Demotion risk assessment logic will be implemented when first consumer requires it"));
 
     /// <inheritdoc />
-    public async Task<Dictionary<Guid, bool>> EmergencyDemotePackagesAsync(
+    public Task<Dictionary<Guid, bool>> EmergencyDemotePackagesAsync(
         IEnumerable<Guid> packageIds,
         string reason,
         TrustTier demoteToTier = TrustTier.Unverified,
-        CancellationToken cancellationToken = default) => throw new NotImplementedException("Emergency demotion logic will be implemented when first consumer requires it");
+        CancellationToken cancellationToken = default) => Task.FromException<Dictionary<Guid, bool>>(new NotImplementedException("Emergency demotion logic will be implemented when first consumer requires it"));
 }

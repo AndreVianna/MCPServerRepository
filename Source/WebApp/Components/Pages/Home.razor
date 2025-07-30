@@ -5,8 +5,8 @@
 <PageTitle>MCP Hub - Secure AI Tool Registry</PageTitle>
 
 <!-- Hero Section -->
-<MudContainer MaxWidth="MaxWidth.Large" Class="mt-8 mb-12">
-    <MudGrid Justify="Justify.Center" AlignItems="Center" Class="min-vh-50">
+<MudContainer maxwidth="MaxWidth.Large" Class="mt-8 mb-12">
+    <MudGrid Justify="Justify.Center" alignitems="Center" Class="min-vh-50">
         <MudItem xs="12" md="8" Class="text-center">
             <MudIcon Icon="@Icons.Material.Filled.Security" 
                      Color="Color.Primary" 
@@ -30,7 +30,7 @@
                 <MudButton Variant="Variant.Filled" 
                           Color="Color.Primary" 
                           Size="Size.Large"
-                          StartIcon="@Icons.Material.Filled.Search"
+                          starticon="@Icons.Material.Filled.Search"
                           OnClick="@(() => Navigation.NavigateTo("/search"))"
                           Class="mr-4">
                     Search Packages
@@ -39,7 +39,7 @@
                 <MudButton Variant="Variant.Outlined" 
                           Color="Color.Primary" 
                           Size="Size.Large"
-                          StartIcon="@Icons.Material.Filled.Publish"
+                          starticon="@Icons.Material.Filled.Publish"
                           OnClick="@(() => Navigation.NavigateTo("/publisher/dashboard"))">
                     Publish Server
                 </MudButton>
@@ -49,7 +49,7 @@
 </MudContainer>
 
 <!-- Security Features Section -->
-<MudContainer MaxWidth="MaxWidth.Large" Class="mb-12">
+<MudContainer maxwidth="MaxWidth.Large" Class="mb-12">
     <MudText Typo="Typo.h4" Color="Color.Primary" Class="text-center mb-8 font-weight-bold">
         Enterprise-Grade Security
     </MudText>
@@ -115,9 +115,9 @@
 </MudContainer>
 
 <!-- Quick Stats Section -->
-<MudContainer MaxWidth="MaxWidth.Large" Class="mb-12">
+<MudContainer maxwidth="MaxWidth.Large" Class="mb-12">
     <MudPaper Elevation="1" Class="pa-8" Style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);">
-        <MudGrid Justify="Justify.SpaceAround" AlignItems="Center">
+        <MudGrid Justify="Justify.SpaceAround" alignitems="Center">
             <MudItem xs="6" md="3" Class="text-center">
                 <MudText Typo="Typo.h3" Color="Color.Primary" Class="font-weight-bold">
                     @_packageCount
@@ -158,7 +158,7 @@
 </MudContainer>
 
 <!-- Enhanced Search Demo Section -->
-<MudContainer MaxWidth="MaxWidth.Large" Class="mb-12">
+<MudContainer maxwidth="MaxWidth.Large" Class="mb-12">
     <MudText Typo="Typo.h4" Color="Color.Primary" Class="text-center mb-8 font-weight-bold">
         🔍 Try Our Enhanced Search
     </MudText>
@@ -179,7 +179,7 @@
 </MudContainer>
 
 <!-- Featured Packages Section -->
-<MudContainer MaxWidth="MaxWidth.Large" Class="mb-12">
+<MudContainer maxwidth="MaxWidth.Large" Class="mb-12">
     <MudText Typo="Typo.h4" Color="Color.Primary" Class="text-center mb-8 font-weight-bold">
         🌟 Featured Packages
     </MudText>
@@ -204,7 +204,7 @@
     <div class="text-center mt-6">
         <MudButton Color="Color.Primary" 
                    Variant="Variant.Outlined"
-                   StartIcon="@Icons.Material.Filled.Explore"
+                   starticon="@Icons.Material.Filled.Explore"
                    @onclick="@(() => Navigation.NavigateTo("/components"))"
                    Size="Size.Large">
             View Component Showcase
@@ -213,7 +213,7 @@
 </MudContainer>
 
 <!-- Security Showcase Section -->
-<MudContainer MaxWidth="MaxWidth.Large" Class="mb-12">
+<MudContainer maxwidth="MaxWidth.Large" Class="mb-12">
     <MudText Typo="Typo.h4" Color="Color.Primary" Class="text-center mb-8 font-weight-bold">
         🔒 Security at a Glance
     </MudText>
@@ -248,7 +248,7 @@
 </MudContainer>
 
 <!-- Get Started Section -->
-<MudContainer MaxWidth="MaxWidth.Large" Class="mb-12">
+<MudContainer maxwidth="MaxWidth.Large" Class="mb-12">
     <MudText Typo="Typo.h4" Color="Color.Primary" Class="text-center mb-8 font-weight-bold">
         Get Started in Minutes
     </MudText>
@@ -261,7 +261,7 @@
                         For Developers
                     </MudText>
                     
-                    <MudList T="string" Dense="true">
+                    <MudList T="string" dense="true">
                         <MudListItem T="string" Icon="@Icons.Material.Filled.Search" Text="Browse our secure package registry" />
                         <MudListItem T="string" Icon="@Icons.Material.Filled.Download" Text="Install packages with mcpm CLI tool" />
                         <MudListItem T="string" Icon="@Icons.Material.Filled.Apps" Text="Integrate MCP servers into your applications" />
@@ -270,8 +270,8 @@
                     
                     <MudButton Variant="Variant.Filled" 
                               Color="Color.Primary" 
-                              FullWidth="true"
-                              StartIcon="@Icons.Material.Filled.GetApp"
+                              fullwidth="true"
+                              starticon="@Icons.Material.Filled.GetApp"
                               OnClick="@(() => Navigation.NavigateTo("/docs/cli"))"
                               Class="mt-4">
                         Install CLI Tool
@@ -287,7 +287,7 @@
                         For Publishers
                     </MudText>
                     
-                    <MudList T="string" Dense="true">
+                    <MudList T="string" dense="true">
                         <MudListItem T="string" Icon="@Icons.Material.Filled.AccountCircle" Text="Create your publisher account" />
                         <MudListItem T="string" Icon="@Icons.Material.Filled.Publish" Text="Register your MCP servers" />
                         <MudListItem T="string" Icon="@Icons.Material.Filled.Security" Text="Pass security verification" />
@@ -296,8 +296,8 @@
                     
                     <MudButton Variant="Variant.Outlined" 
                               Color="Color.Primary" 
-                              FullWidth="true"
-                              StartIcon="@Icons.Material.Filled.PersonAdd"
+                              fullwidth="true"
+                              starticon="@Icons.Material.Filled.PersonAdd"
                               OnClick="@(() => Navigation.NavigateTo("/register"))"
                               Class="mt-4">
                         Register as Publisher

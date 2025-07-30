@@ -1,37 +1,27 @@
-namespace MCPHub.BDD.IntegrationTests.StepDefinitions;
+namespace MCPHub.IntegrationTests.StepDefinitions;
 
 [Binding]
 [Collection("TestContainer")]
-public class WebApplicationStepDefinitions
-{
-    private readonly TestContainerFixture _fixture;
-    private readonly BddScenarioContext _scenarioContext;
-
-    public WebApplicationStepDefinitions(TestContainerFixture fixture, BddScenarioContext scenarioContext)
-    {
-        _fixture = fixture ?? throw new ArgumentNullException(nameof(fixture));
-        _scenarioContext = scenarioContext ?? throw new ArgumentNullException(nameof(scenarioContext));
-    }
+public class WebApplicationStepDefinitions(TestContainerFixture fixture, SolutionScenarioContext scenarioContext) {
+    private readonly TestContainerFixture _fixture = fixture ?? throw new ArgumentNullException(nameof(fixture));
+    private readonly SolutionScenarioContext _scenarioContext = scenarioContext ?? throw new ArgumentNullException(nameof(scenarioContext));
 
     [Given(@"the MCP Hub web application is running")]
-    public void GivenTheMCPHubWebApplicationIsRunning()
-    {
+    public void GivenTheMCPHubWebApplicationIsRunning() {
         // Initialize web driver if not already done
-        if (_scenarioContext.WebDriver == null)
-        {
+        if (_scenarioContext.WebDriver == null) {
             _scenarioContext.WebDriver = WebDriverFactory.CreateChromeDriver(headless: true);
         }
 
         // Get the base URL from the web application factory
         var client = _fixture.WebAppFactory.CreateClient();
         var baseUrl = client.BaseAddress?.ToString().TrimEnd('/') ?? "http://localhost";
-        
+
         _scenarioContext.Set("BaseUrl", baseUrl);
     }
 
     [When(@"I visit the homepage")]
-    public void WhenIVisitTheHomepage()
-    {
+    public void WhenIVisitTheHomepage() {
         var baseUrl = _scenarioContext.Get<string>("BaseUrl");
         _scenarioContext.WebDriver!.Navigate().GoToUrl($"{baseUrl}/");
         _scenarioContext.WebDriver.WaitForPageLoad();
@@ -39,24 +29,22 @@ public class WebApplicationStepDefinitions
     }
 
     [When(@"I navigate to the package detail page")]
-    public void WhenINavigateToThePackageDetailPage()
-    {
+    public void WhenINavigateToThePackageDetailPage() {
         var package = _scenarioContext.CurrentPackage;
         package.Should().NotBeNull("A package should be set in the scenario context");
 
         var baseUrl = _scenarioContext.Get<string>("BaseUrl");
         var packageUrl = $"{baseUrl}/package/{package!.Publisher.Name}/{package.Name}";
-        
+
         _scenarioContext.WebDriver!.Navigate().GoToUrl(packageUrl);
         _scenarioContext.WebDriver.WaitForPageLoad();
         _scenarioContext.CurrentPageUrl = _scenarioContext.WebDriver.Url;
     }
 
     [When(@"I click the ""(.*)"" button")]
-    public void WhenIClickTheButton(string buttonText)
-    {
+    public void WhenIClickTheButton(string buttonText) {
         var driver = _scenarioContext.WebDriver!;
-        
+
         // Try multiple selectors to find the button
         var buttonSelectors = new[]
         {
@@ -68,15 +56,12 @@ public class WebApplicationStepDefinitions
         };
 
         IWebElement? button = null;
-        foreach (var selector in buttonSelectors)
-        {
-            try
-            {
+        foreach (var selector in buttonSelectors) {
+            try {
                 button = driver.WaitForElementToBeClickable(selector, TimeSpan.FromSeconds(2));
                 break;
             }
-            catch (WebDriverTimeoutException)
-            {
+            catch (WebDriverTimeoutException) {
                 continue;
             }
         }
@@ -87,10 +72,9 @@ public class WebApplicationStepDefinitions
     }
 
     [When(@"I enter ""(.*)"" in the search bar")]
-    public void WhenIEnterInTheSearchBar(string searchTerm)
-    {
+    public void WhenIEnterInTheSearchBar(string searchTerm) {
         var driver = _scenarioContext.WebDriver!;
-        
+
         var searchSelectors = new[]
         {
             By.Name("search"),
@@ -101,15 +85,12 @@ public class WebApplicationStepDefinitions
         };
 
         IWebElement? searchBox = null;
-        foreach (var selector in searchSelectors)
-        {
-            try
-            {
+        foreach (var selector in searchSelectors) {
+            try {
                 searchBox = driver.WaitForElement(selector, TimeSpan.FromSeconds(2));
                 break;
             }
-            catch (WebDriverTimeoutException)
-            {
+            catch (WebDriverTimeoutException) {
                 continue;
             }
         }
@@ -122,10 +103,9 @@ public class WebApplicationStepDefinitions
     }
 
     [When(@"I click the search button")]
-    public void WhenIClickTheSearchButton()
-    {
+    public void WhenIClickTheSearchButton() {
         var driver = _scenarioContext.WebDriver!;
-        
+
         var searchButtonSelectors = new[]
         {
             By.XPath("//button[@type='submit']"),
@@ -136,15 +116,12 @@ public class WebApplicationStepDefinitions
         };
 
         IWebElement? searchButton = null;
-        foreach (var selector in searchButtonSelectors)
-        {
-            try
-            {
+        foreach (var selector in searchButtonSelectors) {
+            try {
                 searchButton = driver.WaitForElementToBeClickable(selector, TimeSpan.FromSeconds(2));
                 break;
             }
-            catch (WebDriverTimeoutException)
-            {
+            catch (WebDriverTimeoutException) {
                 continue;
             }
         }
@@ -155,43 +132,36 @@ public class WebApplicationStepDefinitions
     }
 
     [When(@"I fill in valid registration details")]
-    public void WhenIFillInValidRegistrationDetails()
-    {
+    public void WhenIFillInValidRegistrationDetails() {
         var driver = _scenarioContext.WebDriver!;
         var testUser = _scenarioContext.DataBuilder.CreateTestUser();
 
-        var formData = new Dictionary<string, string>
-        {
+        var formData = new Dictionary<string, string> {
             ["email"] = testUser.Email!,
             ["password"] = "SecurePassword123!",
             ["confirmPassword"] = "SecurePassword123!",
-            ["firstName"] = testUser.FirstName,
-            ["lastName"] = testUser.LastName
+            ["displayName"] = testUser.DisplayName ?? "Test User"
         };
 
         driver.FillForm(formData);
         _scenarioContext.FormData = formData;
 
         // Check terms agreement checkbox if present
-        try
-        {
+        try {
             var termsCheckbox = driver.FindElement(By.Name("termsAgreement"));
-            if (!termsCheckbox.Selected)
-            {
+            if (!termsCheckbox.Selected) {
                 termsCheckbox.Click();
             }
         }
-        catch (NoSuchElementException)
-        {
+        catch (NoSuchElementException) {
             // Terms checkbox not found, continue
         }
     }
 
     [When(@"I submit the form")]
-    public void WhenISubmitTheForm()
-    {
+    public void WhenISubmitTheForm() {
         var driver = _scenarioContext.WebDriver!;
-        
+
         var submitSelectors = new[]
         {
             By.XPath("//button[@type='submit']"),
@@ -200,15 +170,12 @@ public class WebApplicationStepDefinitions
         };
 
         IWebElement? submitButton = null;
-        foreach (var selector in submitSelectors)
-        {
-            try
-            {
+        foreach (var selector in submitSelectors) {
+            try {
                 submitButton = driver.WaitForElementToBeClickable(selector, TimeSpan.FromSeconds(2));
                 break;
             }
-            catch (WebDriverTimeoutException)
-            {
+            catch (WebDriverTimeoutException) {
                 continue;
             }
         }
@@ -219,17 +186,15 @@ public class WebApplicationStepDefinitions
     }
 
     [When(@"I perform a search for ""(.*)""")]
-    public void WhenIPerformASearchFor(string searchTerm)
-    {
+    public void WhenIPerformASearchFor(string searchTerm) {
         WhenIEnterInTheSearchBar(searchTerm);
         WhenIClickTheSearchButton();
     }
 
     [Then(@"I should see the MCP Hub branding")]
-    public void ThenIShouldSeeTheMCPHubBranding()
-    {
+    public void ThenIShouldSeeTheMCPHubBranding() {
         var driver = _scenarioContext.WebDriver!;
-        
+
         var brandingSelectors = new[]
         {
             By.XPath("//*[contains(text(), 'MCP Hub')]"),
@@ -238,15 +203,14 @@ public class WebApplicationStepDefinitions
             By.XPath("//title[contains(text(), 'MCP Hub')]")
         };
 
-        var brandingFound = brandingSelectors.Any(selector => driver.IsElementPresent(selector));
+        var brandingFound = brandingSelectors.Any(driver.IsElementPresent);
         brandingFound.Should().BeTrue("MCP Hub branding should be visible on the page");
     }
 
     [Then(@"I should see the main search bar")]
-    public void ThenIShouldSeeTheMainSearchBar()
-    {
+    public void ThenIShouldSeeTheMainSearchBar() {
         var driver = _scenarioContext.WebDriver!;
-        
+
         var searchBarSelectors = new[]
         {
             By.Name("search"),
@@ -256,15 +220,14 @@ public class WebApplicationStepDefinitions
             By.CssSelector("[data-testid='search-input']")
         };
 
-        var searchBarFound = searchBarSelectors.Any(selector => driver.IsElementVisible(selector));
+        var searchBarFound = searchBarSelectors.Any(driver.IsElementVisible);
         searchBarFound.Should().BeTrue("Main search bar should be visible on the homepage");
     }
 
     [Then(@"I should see featured packages section")]
-    public void ThenIShouldSeeFeaturedPackagesSection()
-    {
+    public void ThenIShouldSeeFeaturedPackagesSection() {
         var driver = _scenarioContext.WebDriver!;
-        
+
         var featuredSelectors = new[]
         {
             By.XPath("//*[contains(text(), 'Featured') or contains(text(), 'featured')]"),
@@ -273,15 +236,14 @@ public class WebApplicationStepDefinitions
             By.XPath("//h2[contains(text(), 'Featured')]")
         };
 
-        var featuredFound = featuredSelectors.Any(selector => driver.IsElementPresent(selector));
+        var featuredFound = featuredSelectors.Any(driver.IsElementPresent);
         featuredFound.Should().BeTrue("Featured packages section should be present on the homepage");
     }
 
     [Then(@"I should see trending packages")]
-    public void ThenIShouldSeeTrendingPackages()
-    {
+    public void ThenIShouldSeeTrendingPackages() {
         var driver = _scenarioContext.WebDriver!;
-        
+
         var trendingSelectors = new[]
         {
             By.XPath("//*[contains(text(), 'Trending') or contains(text(), 'trending')]"),
@@ -290,15 +252,14 @@ public class WebApplicationStepDefinitions
             By.XPath("//h2[contains(text(), 'Trending')]")
         };
 
-        var trendingFound = trendingSelectors.Any(selector => driver.IsElementPresent(selector));
+        var trendingFound = trendingSelectors.Any(driver.IsElementPresent);
         trendingFound.Should().BeTrue("Trending packages section should be present on the homepage");
     }
 
     [Then(@"I should see category navigation")]
-    public void ThenIShouldSeeCategoryNavigation()
-    {
+    public void ThenIShouldSeeCategoryNavigation() {
         var driver = _scenarioContext.WebDriver!;
-        
+
         var categorySelectors = new[]
         {
             By.XPath("//*[contains(text(), 'Categories') or contains(text(), 'categories')]"),
@@ -307,15 +268,14 @@ public class WebApplicationStepDefinitions
             By.XPath("//ul[contains(@class, 'category')]")
         };
 
-        var categoryFound = categorySelectors.Any(selector => driver.IsElementPresent(selector));
+        var categoryFound = categorySelectors.Any(driver.IsElementPresent);
         categoryFound.Should().BeTrue("Category navigation should be present on the homepage");
     }
 
     [Then(@"I should see platform statistics")]
-    public void ThenIShouldSeePlatformStatistics()
-    {
+    public void ThenIShouldSeePlatformStatistics() {
         var driver = _scenarioContext.WebDriver!;
-        
+
         var statsSelectors = new[]
         {
             By.XPath("//*[contains(text(), 'packages') or contains(text(), 'downloads')]"),
@@ -324,42 +284,39 @@ public class WebApplicationStepDefinitions
             By.XPath("//*[contains(text(), 'developers') or contains(text(), 'users')]")
         };
 
-        var statsFound = statsSelectors.Any(selector => driver.IsElementPresent(selector));
+        var statsFound = statsSelectors.Any(driver.IsElementPresent);
         statsFound.Should().BeTrue("Platform statistics should be present on the homepage");
     }
 
     [Then(@"I should be redirected to the search results page")]
-    public void ThenIShouldBeRedirectedToTheSearchResultsPage()
-    {
+    public void ThenIShouldBeRedirectedToTheSearchResultsPage() {
         var driver = _scenarioContext.WebDriver!;
         var currentUrl = driver.Url;
-        
+
         currentUrl.Should().Contain("search", "URL should contain 'search' indicating search results page");
         _scenarioContext.CurrentPageUrl = currentUrl;
     }
 
     [Then(@"I should see packages matching ""(.*)""")]
-    public void ThenIShouldSeePackagesMatching(string searchTerm)
-    {
+    public void ThenIShouldSeePackagesMatching(string searchTerm) {
         var driver = _scenarioContext.WebDriver!;
-        
+
         // Wait for search results to load
         driver.WaitForElement(By.XPath("//*[contains(@class, 'package') or contains(@class, 'result')]"), TimeSpan.FromSeconds(5));
-        
+
         var packageElements = driver.FindElements(By.XPath("//*[contains(@class, 'package') or contains(@class, 'result')]"));
         packageElements.Should().NotBeEmpty($"Should find packages matching '{searchTerm}'");
 
         // Verify that at least some results contain the search term
         var pageText = driver.FindElement(By.TagName("body")).Text;
-        pageText.Should().Contain(searchTerm, StringComparison.OrdinalIgnoreCase, 
+        pageText.Should().Contain(searchTerm,
             $"Search results should contain the search term '{searchTerm}'");
     }
 
     [Then(@"each package result should display name, description, and trust tier")]
-    public void ThenEachPackageResultShouldDisplayNameDescriptionAndTrustTier()
-    {
+    public void ThenEachPackageResultShouldDisplayNameDescriptionAndTrustTier() {
         var driver = _scenarioContext.WebDriver!;
-        
+
         var packageCards = driver.FindElements(By.XPath("//*[contains(@class, 'package') or contains(@class, 'result')]"));
         packageCards.Should().NotBeEmpty("Should have package result cards");
 
@@ -375,45 +332,42 @@ public class WebApplicationStepDefinitions
 
             // Check for trust tier indicators (badges, icons, or tier text)
             var hasTrustTier = card.FindElements(By.XPath(".//*[contains(@class, 'trust') or contains(@class, 'tier') or contains(@class, 'badge')]")).Any() ||
-                              card.Text.Contains("Trust") || card.Text.Contains("Tier") || 
+                              card.Text.Contains("Trust") || card.Text.Contains("Tier") ||
                               card.Text.Contains("Certified") || card.Text.Contains("Verified");
             hasTrustTier.Should().BeTrue("Each package card should display trust tier information");
         }
     }
 
     [Then(@"I should see download counts and ratings")]
-    public void ThenIShouldSeeDownloadCountsAndRatings()
-    {
+    public void ThenIShouldSeeDownloadCountsAndRatings() {
         var driver = _scenarioContext.WebDriver!;
         var pageText = driver.FindElement(By.TagName("body")).Text;
-        
+
         // Look for download indicators
         var hasDownloads = pageText.Contains("download", StringComparison.OrdinalIgnoreCase) ||
                           pageText.Contains("DL", StringComparison.OrdinalIgnoreCase) ||
                           Regex.IsMatch(pageText, @"\d+[KMk]?\s*(downloads?|DL)", RegexOptions.IgnoreCase);
-        
+
         hasDownloads.Should().BeTrue("Search results should display download counts");
 
-        // Look for rating indicators  
+        // Look for rating indicators
         var hasRatings = driver.FindElements(By.XPath("//*[contains(@class, 'star') or contains(@class, 'rating')]")).Any() ||
                         Regex.IsMatch(pageText, @"⭐|★|rating|\d+\.\d+/\d+|\d+/10", RegexOptions.IgnoreCase);
-        
+
         hasRatings.Should().BeTrue("Search results should display ratings or stars");
     }
 
     [Then(@"I should see comprehensive package information:")]
-    public void ThenIShouldSeeComprehensivePackageInformation(Table table)
-    {
+    public void ThenIShouldSeeComprehensivePackageInformation(Table table) {
         var driver = _scenarioContext.WebDriver!;
         var pageText = driver.FindElement(By.TagName("body")).Text.ToLowerInvariant();
 
-        foreach (var row in table.Rows)
-        {
+        foreach (var row in table.Rows) {
             var section = row["Section"].ToLowerInvariant();
             var content = row["Content"].ToLowerInvariant();
 
             // Check if the section content is present on the page
-            var sectionFound = pageText.Contains(section) || 
+            var sectionFound = pageText.Contains(section) ||
                               driver.FindElements(By.XPath($"//*[contains(@class, '{section}') or contains(@id, '{section}')]")).Any();
 
             sectionFound.Should().BeTrue($"Package detail page should contain {section} section with {content}");
@@ -421,8 +375,7 @@ public class WebApplicationStepDefinitions
     }
 
     [Then(@"I should see an installation command that I can copy")]
-    public void ThenIShouldSeeAnInstallationCommandThatICanCopy()
-    {
+    public void ThenIShouldSeeAnInstallationCommandThatICanCopy() {
         var driver = _scenarioContext.WebDriver!;
         var pageText = driver.FindElement(By.TagName("body")).Text;
 
@@ -441,12 +394,11 @@ public class WebApplicationStepDefinitions
     }
 
     [Then(@"I should see the login form")]
-    public void ThenIShouldSeeTheLoginForm()
-    {
+    public void ThenIShouldSeeTheLoginForm() {
         var driver = _scenarioContext.WebDriver!;
-        
+
         // Check for email/username field
-        var hasEmailField = driver.IsElementPresent(By.Name("email")) || 
+        var hasEmailField = driver.IsElementPresent(By.Name("email")) ||
                            driver.IsElementPresent(By.Name("username")) ||
                            driver.IsElementPresent(By.XPath("//input[@type='email']"));
 
@@ -467,8 +419,7 @@ public class WebApplicationStepDefinitions
     }
 
     [Then(@"I should see a confirmation message about email verification")]
-    public void ThenIShouldSeeAConfirmationMessageAboutEmailVerification()
-    {
+    public void ThenIShouldSeeAConfirmationMessageAboutEmailVerification() {
         var driver = _scenarioContext.WebDriver!;
         var pageText = driver.FindElement(By.TagName("body")).Text;
 
@@ -480,49 +431,44 @@ public class WebApplicationStepDefinitions
     }
 
     [Given(@"I am logged in as a user")]
-    public void GivenIAmLoggedInAsAUser()
-    {
+    public void GivenIAmLoggedInAsAUser() {
         // Simulate logged-in state by setting user context
         var testUser = _scenarioContext.GetOrCreateTestUser();
         _scenarioContext.SetCurrentUser(testUser.Id.ToString(), testUser.Email!, "User");
-        
+
         // In a real implementation, this would involve:
         // 1. Navigating to login page
         // 2. Filling in credentials
         // 3. Submitting form
         // 4. Verifying successful login
-        
+
         // For now, we'll simulate this by storing user state
         _scenarioContext.Set("LoggedInUser", testUser);
     }
 
     [Given(@"I am logged in as a publisher with packages")]
-    public void GivenIAmLoggedInAsAPublisherWithPackages()
-    {
+    public void GivenIAmLoggedInAsAPublisherWithPackages() {
         var testUser = _scenarioContext.GetOrCreateTestUser("publisher@example.com");
         _scenarioContext.SetCurrentUser(testUser.Id.ToString(), testUser.Email!, "Publisher");
-        
+
         // Create test packages for this publisher
         var packages = _scenarioContext.DataBuilder.CreateTestPackages(5);
-        foreach (var package in packages)
-        {
-            package.Publisher.Email = testUser.Email;
+        foreach (var package in packages) {
+            package.Publisher.Email = testUser.Email!;
             package.PublisherId = testUser.Id;
         }
-        
-        var scenario = new TestScenario 
-        { 
+
+        var scenario = new TestScenario {
             Packages = packages,
             Users = new[] { testUser }.ToList()
         };
-        
+
         _scenarioContext.SetTestScenario(scenario);
         _scenarioContext.Set("LoggedInUser", testUser);
     }
 
     [When(@"I navigate to my publisher dashboard")]
-    public void WhenINavigateToMyPublisherDashboard()
-    {
+    public void WhenINavigateToMyPublisherDashboard() {
         var baseUrl = _scenarioContext.Get<string>("BaseUrl");
         _scenarioContext.WebDriver!.Navigate().GoToUrl($"{baseUrl}/dashboard");
         _scenarioContext.WebDriver.WaitForPageLoad();
@@ -530,13 +476,11 @@ public class WebApplicationStepDefinitions
     }
 
     [Then(@"I should see dashboard sections:")]
-    public void ThenIShouldSeeDashboardSections(Table table)
-    {
+    public void ThenIShouldSeeDashboardSections(Table table) {
         var driver = _scenarioContext.WebDriver!;
         var pageText = driver.FindElement(By.TagName("body")).Text.ToLowerInvariant();
 
-        foreach (var row in table.Rows)
-        {
+        foreach (var row in table.Rows) {
             var section = row["Section"].ToLowerInvariant();
             var content = row["Content"].ToLowerInvariant();
 
@@ -548,36 +492,33 @@ public class WebApplicationStepDefinitions
     }
 
     [Given(@"I am using a mobile device")]
-    public void GivenIAmUsingAMobileDevice()
-    {
+    public void GivenIAmUsingAMobileDevice() {
         // Resize browser to mobile viewport
         _scenarioContext.WebDriver!.Manage().Window.Size = new System.Drawing.Size(375, 667); // iPhone size
-        
+
         // Set mobile user agent if needed
         var options = new ChromeOptions();
         options.AddArgument("--user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15");
     }
 
     [Then(@"all pages should display correctly on mobile:")]
-    public void ThenAllPagesShouldDisplayCorrectlyOnMobile(Table table)
-    {
+    public void ThenAllPagesShouldDisplayCorrectlyOnMobile(Table table) {
         var driver = _scenarioContext.WebDriver!;
         var baseUrl = _scenarioContext.Get<string>("BaseUrl");
 
-        foreach (var row in table.Rows)
-        {
+        foreach (var row in table.Rows) {
             var pageType = row["Page Type"];
             var adaptations = row["Mobile Adaptations"];
 
             // Navigate to representative page for each type
-            var testUrl = GetTestUrlForPageType(baseUrl, pageType);
+            var testUrl = GetTestUrlForPageType(baseUrl ?? string.Empty, pageType);
             driver.Navigate().GoToUrl(testUrl);
             driver.WaitForPageLoad();
 
             // Verify page loads without horizontal scrolling
             var bodyWidth = ((IJavaScriptExecutor)driver).ExecuteScript("return document.body.scrollWidth;");
             var windowWidth = ((IJavaScriptExecutor)driver).ExecuteScript("return window.innerWidth;");
-            
+
             ((long)bodyWidth).Should().BeLessOrEqualTo((long)windowWidth + 20, // Allow small margin
                 $"{pageType} should not have horizontal scroll on mobile");
 
@@ -587,16 +528,12 @@ public class WebApplicationStepDefinitions
         }
     }
 
-    private static string GetTestUrlForPageType(string baseUrl, string pageType)
-    {
-        return pageType.ToLowerInvariant() switch
-        {
-            "homepage" => $"{baseUrl}/",
-            "search results" => $"{baseUrl}/search?q=test",
-            "package detail" => $"{baseUrl}/package/test/package",
-            "dashboard" => $"{baseUrl}/dashboard",
-            "forms" => $"{baseUrl}/auth/login",
-            _ => $"{baseUrl}/"
-        };
-    }
+    private static string GetTestUrlForPageType(string baseUrl, string pageType) => pageType.ToLowerInvariant() switch {
+        "homepage" => $"{baseUrl}/",
+        "search results" => $"{baseUrl}/search?q=test",
+        "package detail" => $"{baseUrl}/package/test/package",
+        "dashboard" => $"{baseUrl}/dashboard",
+        "forms" => $"{baseUrl}/auth/login",
+        _ => $"{baseUrl}/"
+    };
 }

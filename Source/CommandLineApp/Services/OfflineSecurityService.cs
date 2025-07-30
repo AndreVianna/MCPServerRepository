@@ -1,9 +1,9 @@
+using System.Security.Cryptography;
+using System.Text;
+
 using MCPHub.Domain.ValueObjects;
 
 using Microsoft.Extensions.Logging;
-
-using System.Security.Cryptography;
-using System.Text;
 
 namespace MCPHub.CommandLineApp.Services;
 
@@ -19,7 +19,7 @@ public class OfflineSecurityService(
         string packagePath,
         CancellationToken cancellationToken = default) {
         _logger.LogInformation("Verifying package signature for {PackagePath}", packagePath);
-        
+
         // Implementation would verify digital signatures using X.509 certificates
         throw new NotImplementedException("Package signature verification will be implemented when first consumer requires it");
     }
@@ -31,10 +31,10 @@ public class OfflineSecurityService(
         string hashAlgorithm = "SHA256",
         CancellationToken cancellationToken = default) {
         _logger.LogInformation("Verifying package checksum for {PackagePath} using {Algorithm}", packagePath, hashAlgorithm);
-        
+
         try {
             var startTime = DateTimeOffset.UtcNow;
-            
+
             if (!File.Exists(packagePath)) {
                 return new PackageChecksumVerificationResult {
                     IsValid = false,
@@ -53,7 +53,7 @@ public class OfflineSecurityService(
             }
 
             var calculationTime = DateTimeOffset.UtcNow - startTime;
-            var isValid = expectedChecksum == null || 
+            var isValid = expectedChecksum == null ||
                          string.Equals(calculatedChecksum, expectedChecksum, StringComparison.OrdinalIgnoreCase);
 
             return new PackageChecksumVerificationResult {
@@ -82,7 +82,7 @@ public class OfflineSecurityService(
         string version,
         CancellationToken cancellationToken = default) {
         _logger.LogInformation("Performing offline vulnerability scan for {PackageName}@{Version}", packageName, version);
-        
+
         // Implementation would query local vulnerability database
         throw new NotImplementedException("Offline vulnerability scanning will be implemented when first consumer requires it");
     }
@@ -92,7 +92,7 @@ public class OfflineSecurityService(
         IEnumerable<VulnerabilityDataSource>? sources = null,
         CancellationToken cancellationToken = default) {
         _logger.LogInformation("Updating vulnerability database from {SourceCount} sources", sources?.Count() ?? 0);
-        
+
         // Implementation would update local SQLite database from various vulnerability feeds
         throw new NotImplementedException("Vulnerability database updates will be implemented when first consumer requires it");
     }
@@ -100,7 +100,7 @@ public class OfflineSecurityService(
     /// <inheritdoc />
     public Task<LocalVulnerabilityDatabaseStatus> GetVulnerabilityDatabaseStatusAsync() {
         _logger.LogDebug("Getting vulnerability database status");
-        
+
         // Implementation would check local database file and metadata
         throw new NotImplementedException("Vulnerability database status will be implemented when first consumer requires it");
     }
@@ -110,7 +110,7 @@ public class OfflineSecurityService(
         string manifestPath,
         CancellationToken cancellationToken = default) {
         _logger.LogInformation("Validating manifest security for {ManifestPath}", manifestPath);
-        
+
         // Implementation would parse and validate package.json or mcp.json files
         throw new NotImplementedException("Manifest security validation will be implemented when first consumer requires it");
     }
@@ -121,7 +121,7 @@ public class OfflineSecurityService(
         StaticAnalysisOptions? analysisOptions = null,
         CancellationToken cancellationToken = default) {
         _logger.LogInformation("Performing static analysis on {PackagePath}", packagePath);
-        
+
         // Implementation would scan source code for security issues using rules engine
         throw new NotImplementedException("Static analysis will be implemented when first consumer requires it");
     }
@@ -132,15 +132,15 @@ public class OfflineSecurityService(
         OfflineReportOptions? reportOptions = null,
         CancellationToken cancellationToken = default) {
         _logger.LogInformation("Generating offline security report for {PackagePath}", packagePath);
-        
+
         // Implementation would combine all offline security checks into comprehensive report
         throw new NotImplementedException("Offline security report generation will be implemented when first consumer requires it");
     }
 
     /// <inheritdoc />
-    public async Task<OfflineSecurityCapabilities> GetOfflineCapabilitiesAsync() {
+    public Task<OfflineSecurityCapabilities> GetOfflineCapabilitiesAsync() {
         // Return current capabilities (basic implementation)
-        return new OfflineSecurityCapabilities {
+        var capabilities = new OfflineSecurityCapabilities {
             SignatureVerificationAvailable = false, // Not implemented yet
             ChecksumVerificationAvailable = true,    // Basic implementation available
             VulnerabilityDatabaseAvailable = false, // Not implemented yet
@@ -150,18 +150,17 @@ public class OfflineSecurityService(
             SupportedFileTypes = new[] { ".zip", ".tar.gz", ".tgz", ".tar" },
             Version = "1.0.0-skeleton"
         };
+        return Task.FromResult(capabilities);
     }
 
     /// <summary>
     /// Creates appropriate hash algorithm instance
     /// </summary>
-    private static HashAlgorithm CreateHashAlgorithm(string algorithmName) {
-        return algorithmName.ToUpperInvariant() switch {
-            "SHA256" => SHA256.Create(),
-            "SHA512" => SHA512.Create(),
-            "SHA1" => SHA1.Create(),
-            "MD5" => MD5.Create(),
-            _ => throw new ArgumentException($"Unsupported hash algorithm: {algorithmName}", nameof(algorithmName))
-        };
-    }
+    private static HashAlgorithm CreateHashAlgorithm(string algorithmName) => algorithmName.ToUpperInvariant() switch {
+        "SHA256" => SHA256.Create(),
+        "SHA512" => SHA512.Create(),
+        "SHA1" => SHA1.Create(),
+        "MD5" => MD5.Create(),
+        _ => throw new ArgumentException($"Unsupported hash algorithm: {algorithmName}", nameof(algorithmName))
+    };
 }

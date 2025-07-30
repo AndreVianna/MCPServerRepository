@@ -15,7 +15,6 @@ namespace MCPHub.PublicApi.Controllers.V1;
 /// <param name="logger">Logger instance</param>
 [ApiController]
 [ApiVersion("1.0")]
-[Route("api/v{version:apiVersion}/[controller]")]
 [Produces("application/json")]
 public abstract class BaseApiV1Controller(ILogger logger) : ControllerBase {
     /// <summary>

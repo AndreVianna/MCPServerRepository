@@ -171,7 +171,8 @@ public class SecurityScanTests {
         securityScan.VersionId.Should().Be(serverVersionId);
         securityScan.ServerVersionId.Should().Be(serverVersionId);
         securityScan.ServerVersionId.Should().NotBeNull();
-        securityScan.VersionId.Should().Be(securityScan.ServerVersionId.Value);
+        securityScan.ServerVersionId.Should().HaveValue();
+        securityScan.VersionId.Should().Be(securityScan.ServerVersionId!.Value);
     }
 
     [Fact]

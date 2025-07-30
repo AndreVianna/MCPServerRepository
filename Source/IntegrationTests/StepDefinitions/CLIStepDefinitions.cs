@@ -1,32 +1,28 @@
 using System.Diagnostics;
 using System.Text.Json;
 
-namespace MCPHub.BDD.IntegrationTests.StepDefinitions;
+namespace MCPHub.IntegrationTests.StepDefinitions;
 
 [Binding]
-public class CLIStepDefinitions
-{
-    private readonly BddScenarioContext _scenarioContext;
+public class CLIStepDefinitions {
+    private readonly SolutionScenarioContext _scenarioContext;
     private readonly string _cliExecutablePath;
 
-    public CLIStepDefinitions(BddScenarioContext scenarioContext)
-    {
+    public CLIStepDefinitions(SolutionScenarioContext scenarioContext) {
         _scenarioContext = scenarioContext ?? throw new ArgumentNullException(nameof(scenarioContext));
-        
+
         // In a real implementation, this would point to the actual CLI executable
         // For testing purposes, we'll simulate CLI behavior
         _cliExecutablePath = GetCliExecutablePath();
     }
 
     [Given(@"the CLI tool is installed and configured")]
-    public void GivenTheCLIToolIsInstalledAndConfigured()
-    {
+    public void GivenTheCLIToolIsInstalledAndConfigured() {
         // Verify CLI tool is available
         File.Exists(_cliExecutablePath).Should().BeTrue($"CLI executable should exist at {_cliExecutablePath}");
-        
+
         // Set up default configuration for testing
-        _scenarioContext.CliConfiguration = new Dictionary<string, string>
-        {
+        _scenarioContext.CliConfiguration = new Dictionary<string, string> {
             ["registry.url"] = "https://registry.mcphub.dev",
             ["cache.directory"] = Path.Combine(Path.GetTempPath(), "mcpm-test-cache"),
             ["packages.directory"] = Path.Combine(Path.GetTempPath(), "mcpm-test-packages"),
@@ -37,8 +33,7 @@ public class CLIStepDefinitions
     }
 
     [Given(@"the database contains test packages")]
-    public async Task GivenTheDatabaseContainsTestPackages()
-    {
+    public async Task GivenTheDatabaseContainsTestPackages() {
         // This would typically seed the database through the API
         // For now, we'll create a test scenario with packages
         var scenario = new TestScenarioBuilder()
@@ -47,79 +42,71 @@ public class CLIStepDefinitions
             .Build();
 
         _scenarioContext.SetTestScenario(scenario);
-        
+
         // In a real implementation, this would make API calls to seed data
         await Task.Delay(100); // Simulate async operation
     }
 
     [When(@"I run ""(.*)""")]
-    public async Task WhenIRun(string command)
-    {
-        var result = await ExecuteCliCommand(command);
-        
+    public async Task WhenIRun(string command) {
+        var (exitCode, output) = await ExecuteCliCommand(command);
+
         _scenarioContext.LastCliCommand = command;
-        _scenarioContext.LastCliOutput = result.output;
-        _scenarioContext.LastCliExitCode = result.exitCode;
+        _scenarioContext.LastCliOutput = output;
+        _scenarioContext.LastCliExitCode = exitCode;
     }
 
     [When(@"I run ""(.*)"" in an empty directory")]
-    public async Task WhenIRunInAnEmptyDirectory(string command)
-    {
+    public async Task WhenIRunInAnEmptyDirectory(string command) {
         // Create temporary empty directory
         var tempDir = Path.Combine(Path.GetTempPath(), $"mcpm-test-{Guid.NewGuid():N}");
         Directory.CreateDirectory(tempDir);
         _scenarioContext.Set("WorkingDirectory", tempDir);
 
-        try
-        {
-            var result = await ExecuteCliCommand(command, tempDir);
-            
+        try {
+            var (exitCode, output) = await ExecuteCliCommand(command, tempDir);
+
             _scenarioContext.LastCliCommand = command;
-            _scenarioContext.LastCliOutput = result.output;
-            _scenarioContext.LastCliExitCode = result.exitCode;
+            _scenarioContext.LastCliOutput = output;
+            _scenarioContext.LastCliExitCode = exitCode;
         }
-        finally
-        {
+        finally {
             // Cleanup will happen in scenario cleanup
         }
     }
 
     [Given(@"I have fetched a package ""(.*)""")]
-    public async Task GivenIHaveFetchedAPackage(string packageName)
-    {
+    public async Task GivenIHaveFetchedAPackage(string packageName) {
         // Simulate having fetched a package by running the fetch command
         await WhenIRun($"mcpm fetch {packageName}");
-        
+
         // Verify the fetch was successful
         _scenarioContext.LastCliExitCode.Should().Be(0, "Package fetch should have succeeded");
-        
+
         // Store the package state
         _scenarioContext.Set($"FetchedPackage:{packageName}", true);
     }
 
     [Given(@"I have verified a package ""(.*)""")]
-    public async Task GivenIHaveVerifiedAPackage(string packageName)
-    {
+    public async Task GivenIHaveVerifiedAPackage(string packageName) {
         // Ensure package is fetched first
         await GivenIHaveFetchedAPackage(packageName);
-        
+
         // Run verify command
         await WhenIRun($"mcpm verify {packageName}");
-        
+
         // Verify the verification was successful
         _scenarioContext.LastCliExitCode.Should().Be(0, "Package verification should have succeeded");
-        
+
         // Store the verification state
         _scenarioContext.Set($"VerifiedPackage:{packageName}", true);
     }
 
     [Given(@"I have installed several packages")]
-    public async Task GivenIHaveInstalledSeveralPackages()
-    {
+    public async Task GivenIHaveInstalledSeveralPackages() {
         var packages = new[] { "@test/package1", "@test/package2", "@test/package3" };
-        
-        foreach (var package in packages)
-        {
+
+        foreach (var package in packages) {
             await GivenIHaveVerifiedAPackage(package);
             await WhenIRun($"mcpm install {package}");
             _scenarioContext.LastCliExitCode.Should().Be(0, $"Installation of {package} should have succeeded");
@@ -127,64 +114,57 @@ public class CLIStepDefinitions
     }
 
     [Given(@"I have an outdated package ""(.*)""")]
-    public async Task GivenIHaveAnOutdatedPackage(string packageName)
-    {
+    public async Task GivenIHaveAnOutdatedPackage(string packageName) {
         // Simulate having an outdated package installed
         await GivenIHaveVerifiedAPackage(packageName);
         await WhenIRun($"mcpm install {packageName}");
-        
+
         // Mark package as outdated in our simulation
         _scenarioContext.Set($"OutdatedPackage:{packageName}", "1.0.0|1.1.0"); // current|latest
     }
 
     [Given(@"I have multiple outdated packages")]
-    public async Task GivenIHaveMultipleOutdatedPackages()
-    {
+    public async Task GivenIHaveMultipleOutdatedPackages() {
         var packages = new[] { "@test/old1", "@test/old2", "@test/old3" };
-        
-        foreach (var package in packages)
-        {
+
+        foreach (var package in packages) {
             await GivenIHaveAnOutdatedPackage(package);
         }
     }
 
     [Given(@"I am in a package project directory")]
-    public void GivenIAmInAPackageProjectDirectory()
-    {
+    public void GivenIAmInAPackageProjectDirectory() {
         var projectDir = Path.Combine(Path.GetTempPath(), $"mcpm-project-{Guid.NewGuid():N}");
         Directory.CreateDirectory(projectDir);
-        
+
         // Create a basic package project structure
         var manifestPath = Path.Combine(projectDir, "mcp-manifest.json");
-        var manifest = new
-        {
+        var manifest = new {
             name = "test-package",
             version = "1.0.0",
             description = "Test package for CLI testing",
             author = "Test Author",
             license = "MIT"
         };
-        
+
         File.WriteAllText(manifestPath, JsonSerializer.Serialize(manifest, new JsonSerializerOptions { WriteIndented = true }));
-        
+
         _scenarioContext.Set("WorkingDirectory", projectDir);
     }
 
     [Given(@"I have a validated package project")]
-    public async Task GivenIHaveAValidatedPackageProject()
-    {
+    public async Task GivenIHaveAValidatedPackageProject() {
         GivenIAmInAPackageProjectDirectory();
-        
+
         var workingDir = _scenarioContext.Get<string>("WorkingDirectory");
-        var result = await ExecuteCliCommand("mcpm validate", workingDir);
-        
-        result.exitCode.Should().Be(0, "Package validation should succeed");
-        result.output.Should().Contain("Ready for publishing", "Package should be ready for publishing");
+        var (exitCode, output) = await ExecuteCliCommand("mcpm validate", workingDir);
+
+        exitCode.Should().Be(0, "Package validation should succeed");
+        output.Should().Contain("Ready for publishing", "Package should be ready for publishing");
     }
 
     [Given(@"I am not authenticated")]
-    public void GivenIAmNotAuthenticated()
-    {
+    public void GivenIAmNotAuthenticated() {
         // Clear any authentication state
         _scenarioContext.CliConfiguration.Remove("auth.token");
         _scenarioContext.CliConfiguration.Remove("auth.username");
@@ -193,23 +173,21 @@ public class CLIStepDefinitions
     }
 
     [Given(@"I am authenticated as a publisher")]
-    public void GivenIAmAuthenticatedAsAPublisher()
-    {
+    public void GivenIAmAuthenticatedAsAPublisher() {
         var userId = Guid.CreateVersion7().ToString();
         var userEmail = "publisher@example.com";
         var authToken = "test-auth-token-" + Guid.NewGuid().ToString("N")[..16];
-        
+
         _scenarioContext.CliConfiguration["auth.token"] = authToken;
         _scenarioContext.CliConfiguration["auth.username"] = userEmail;
         _scenarioContext.SetCurrentUser(userId, userEmail, "Publisher");
     }
 
     [Given(@"I have cached packages and metadata")]
-    public void GivenIHaveCachedPackagesAndMetadata()
-    {
+    public void GivenIHaveCachedPackagesAndMetadata() {
         var cacheDir = _scenarioContext.CliConfiguration["cache.directory"];
         Directory.CreateDirectory(cacheDir);
-        
+
         // Create mock cached package metadata
         var metadataFile = Path.Combine(cacheDir, "package-metadata.json");
         var mockMetadata = new[]
@@ -218,80 +196,68 @@ public class CLIStepDefinitions
             new { name = "data-processor", description = "Process data files", category = "data" },
             new { name = "ai-assistant", description = "AI-powered file assistant", category = "ai" }
         };
-        
+
         File.WriteAllText(metadataFile, JsonSerializer.Serialize(mockMetadata));
-        _scenarioContext.Set("CachedMetadata", true);
+        _scenarioContext.Set("CachedMetadata", (object)true);
     }
 
     [Given(@"I have cached and verified a package ""(.*)""")]
-    public async Task GivenIHaveCachedAndVerifiedAPackage(string packageName)
-    {
+    public async Task GivenIHaveCachedAndVerifiedAPackage(string packageName) {
         await GivenIHaveVerifiedAPackage(packageName);
-        
+
         // Mark package as cached
         var cacheDir = _scenarioContext.CliConfiguration["cache.directory"];
         var packageCacheDir = Path.Combine(cacheDir, packageName.Replace("/", "_"));
         Directory.CreateDirectory(packageCacheDir);
-        
-        _scenarioContext.Set($"CachedPackage:{packageName}", true);
+
+        _scenarioContext.Set($"CachedPackage:{packageName}", (object)true);
     }
 
     [Given(@"I am offline")]
-    public void GivenIAmOffline()
-    {
+    public void GivenIAmOffline() {
         // Simulate offline mode by setting a flag
         _scenarioContext.CliConfiguration["offline.mode"] = "true";
-        _scenarioContext.Set("OfflineMode", true);
+        _scenarioContext.Set("OfflineMode", (object)true);
     }
 
     [Given(@"I lose internet connectivity")]
-    public void GivenILoseInternetConnectivity()
-    {
-        GivenIAmOffline();
-    }
+    public void GivenILoseInternetConnectivity() => GivenIAmOffline();
 
     [Then(@"the command should succeed")]
-    public void ThenTheCommandShouldSucceed()
-    {
-        _scenarioContext.LastCliExitCode.Should().Be(0, 
+    public void ThenTheCommandShouldSucceed() => _scenarioContext.LastCliExitCode.Should().Be(0,
             $"Command should succeed. Output: {_scenarioContext.LastCliOutput}");
-    }
 
     [Then(@"I should see packages matching ""(.*)"" in the output")]
-    public void ThenIShouldSeePackagesMatchingInTheOutput(string searchTerm)
-    {
+    public void ThenIShouldSeePackagesMatchingInTheOutput(string searchTerm) {
         _scenarioContext.LastCliOutput.Should().NotBeNullOrEmpty("CLI output should not be empty");
-        _scenarioContext.LastCliOutput!.Should().Contain(searchTerm, 
+        _scenarioContext.LastCliOutput!.Should().Contain(searchTerm,
             $"Output should contain packages matching '{searchTerm}'");
     }
 
     [Then(@"each package should display:")]
-    public void ThenEachPackageShouldDisplay(Table table)
-    {
+    public void ThenEachPackageShouldDisplay(Table table) {
         _scenarioContext.LastCliOutput.Should().NotBeNullOrEmpty();
-        
-        foreach (var row in table.Rows)
-        {
+
+        foreach (var row in table.Rows) {
             var information = row["Information"];
             var format = row["Format"];
-            
+
             // Verify the expected format appears in the output
-            switch (information.ToLowerInvariant())
-            {
+            switch (information.ToLowerInvariant()) {
                 case "name":
-                    _scenarioContext.LastCliOutput!.Should().MatchRegex(@"@\w+/[\w-]+", 
+                    _scenarioContext.LastCliOutput!.Should().MatchRegex(@"@\w+/[\w-]+",
                         "Should contain package names in @publisher/package format");
                     break;
                 case "trust tier":
-                    _scenarioContext.LastCliOutput!.Should().MatchRegex(@"[🔒🔓]\s*[A-F][+-]?", 
+                    _scenarioContext.LastCliOutput!.Should().MatchRegex(@"[🔒🔓]\s*[A-F][+-]?",
                         "Should contain trust tier badges");
                     break;
                 case "rating":
-                    _scenarioContext.LastCliOutput!.Should().MatchRegex(@"[⭐★]\s*\d\.\d", 
+                    _scenarioContext.LastCliOutput!.Should().MatchRegex(@"[⭐★]\s*\d\.\d",
                         "Should contain star ratings");
                     break;
                 case "downloads":
-                    _scenarioContext.LastCliOutput!.Should().MatchRegex(@"[📥]\s*\d+[KMk]?", 
+                    _scenarioContext.LastCliOutput!.Should().MatchRegex(@"[📥]\s*\d+[KMk]?",
                         "Should contain download counts");
                     break;
             }
@@ -299,194 +265,161 @@ public class CLIStepDefinitions
     }
 
     [Then(@"I should see usage hint about ""(.*)"" for details")]
-    public void ThenIShouldSeeUsageHintAboutForDetails(string command)
-    {
-        _scenarioContext.LastCliOutput.Should().Contain(command, 
+    public void ThenIShouldSeeUsageHintAboutForDetails(string command) => _scenarioContext.LastCliOutput.Should().Contain(command,
             $"Output should contain usage hint about '{command}'");
-    }
 
     [Then(@"I should see only packages that match all criteria:")]
-    public void ThenIShouldSeeOnlyPackagesThatMatchAllCriteria(Table table)
-    {
+    public void ThenIShouldSeeOnlyPackagesThatMatchAllCriteria(Table table) {
         _scenarioContext.LastCliOutput.Should().NotBeNullOrEmpty();
-        
-        foreach (var row in table.Rows)
-        {
+
+        foreach (var row in table.Rows) {
             var criteria = row["Criteria"];
             var expected = row["Expected"];
-            
+
             // In a real implementation, this would parse the actual CLI output
             // and verify that all packages meet the specified criteria
-            _scenarioContext.LastCliOutput!.Should().Contain("matching criteria", 
+            _scenarioContext.LastCliOutput!.Should().Contain("matching criteria",
                 $"Output should indicate packages match {criteria}: {expected}");
         }
     }
 
     [Then(@"I should see comprehensive package information:")]
-    public void ThenIShouldSeeComprehensivePackageInformation(Table table)
-    {
+    public void ThenIShouldSeeComprehensivePackageInformation(Table table) {
         _scenarioContext.LastCliOutput.Should().NotBeNullOrEmpty();
-        
-        foreach (var row in table.Rows)
-        {
+
+        foreach (var row in table.Rows) {
             var section = row["Section"];
             var content = row["Content"];
-            
+
             // Verify each section appears in the output
-            _scenarioContext.LastCliOutput!.Should().Contain(section, 
+            _scenarioContext.LastCliOutput!.Should().Contain(section,
                 $"Output should contain {section} section with {content}");
         }
     }
 
     [Then(@"I should see progress indicators during download")]
-    public void ThenIShouldSeeProgressIndicatorsDuringDownload()
-    {
+    public void ThenIShouldSeeProgressIndicatorsDuringDownload() {
         _scenarioContext.LastCliOutput.Should().NotBeNullOrEmpty();
-        
+
         // Look for progress indicators
         var hasProgressIndicators = _scenarioContext.LastCliOutput!.Contains("▓") || // Progress bar
                                    _scenarioContext.LastCliOutput.Contains("%") || // Percentage
                                    _scenarioContext.LastCliOutput.Contains("...") || // Loading dots
                                    _scenarioContext.LastCliOutput.Contains("MB/s"); // Speed indicator
-                                   
+
         hasProgressIndicators.Should().BeTrue("Output should contain progress indicators");
     }
 
     [Then(@"the output should show:")]
-    public void ThenTheOutputShouldShow(Table table)
-    {
+    public void ThenTheOutputShouldShow(Table table) {
         _scenarioContext.LastCliOutput.Should().NotBeNullOrEmpty();
-        
-        foreach (var row in table.Rows)
-        {
+
+        foreach (var row in table.Rows) {
             var information = row["Information"];
             var details = row["Details"];
-            
+
             // Verify the information appears in output
-            _scenarioContext.LastCliOutput!.Should().Contain(information, 
+            _scenarioContext.LastCliOutput!.Should().Contain(information,
                 $"Output should show {information}: {details}");
         }
     }
 
     [Then(@"the package should be cached locally")]
-    public void ThenThePackageShouldBeCachedLocally()
-    {
+    public void ThenThePackageShouldBeCachedLocally() {
         var cacheDir = _scenarioContext.CliConfiguration["cache.directory"];
         Directory.Exists(cacheDir).Should().BeTrue("Cache directory should exist");
-        
+
         var cacheFiles = Directory.GetFiles(cacheDir, "*", SearchOption.AllDirectories);
         cacheFiles.Should().NotBeEmpty("Cache should contain package files");
     }
 
     [Then(@"the package should NOT be installed yet")]
-    public void ThenThePackageShouldNOTBeInstalledYet()
-    {
+    public void ThenThePackageShouldNOTBeInstalledYet() {
         var packagesDir = _scenarioContext.CliConfiguration["packages.directory"];
-        
-        if (Directory.Exists(packagesDir))
-        {
+
+        if (Directory.Exists(packagesDir)) {
             var installedFiles = Directory.GetFiles(packagesDir, "*", SearchOption.AllDirectories);
             // In a real implementation, this would check if the specific package is installed
             // For now, we'll assume the test setup doesn't have the package installed
         }
-        
+
         // The main verification is that the CLI output indicated fetch-only operation
-        _scenarioContext.LastCliOutput.Should().Contain("NOT installed", 
+        _scenarioContext.LastCliOutput.Should().Contain("NOT installed",
             "Output should indicate package is not installed");
     }
 
     [Then(@"I should see detailed verification progress:")]
-    public void ThenIShouldSeeDetailedVerificationProgress(Table table)
-    {
+    public void ThenIShouldSeeDetailedVerificationProgress(Table table) {
         _scenarioContext.LastCliOutput.Should().NotBeNullOrEmpty();
-        
-        foreach (var row in table.Rows)
-        {
+
+        foreach (var row in table.Rows) {
             var stage = row["Verification Stage"];
             var progressIndicator = row["Progress Indicator"];
-            
+
             // Verify each verification stage appears in output
-            _scenarioContext.LastCliOutput!.Should().Contain(stage, 
+            _scenarioContext.LastCliOutput!.Should().Contain(stage,
                 $"Output should show {stage} verification stage");
         }
     }
 
     [Then(@"I should see permission requests clearly:")]
-    public void ThenIShouldSeePermissionRequestsClearly(Table table)
-    {
+    public void ThenIShouldSeePermissionRequestsClearly(Table table) {
         _scenarioContext.LastCliOutput.Should().NotBeNullOrEmpty();
-        
-        foreach (var row in table.Rows)
-        {
+
+        foreach (var row in table.Rows) {
             var permissionType = row["Permission Type"];
             var description = row["Description"];
-            
-            _scenarioContext.LastCliOutput!.Should().Contain(permissionType, 
+
+            _scenarioContext.LastCliOutput!.Should().Contain(permissionType,
                 $"Output should show {permissionType} permission request");
         }
     }
 
     [Then(@"I should be prompted ""(.*)""")]
-    public void ThenIShouldBePrompted(string expectedPrompt)
-    {
-        _scenarioContext.LastCliOutput.Should().Contain(expectedPrompt, 
+    public void ThenIShouldBePrompted(string expectedPrompt) => _scenarioContext.LastCliOutput.Should().Contain(expectedPrompt,
             $"Output should contain the prompt: {expectedPrompt}");
-    }
 
     [Then(@"the overall security score should be displayed")]
-    public void ThenTheOverallSecurityScoreShouldBeDisplayed()
-    {
-        _scenarioContext.LastCliOutput.Should().MatchRegex(@"[A-F][+-]?\s*\(\d+\.\d+/10\)", 
+    public void ThenTheOverallSecurityScoreShouldBeDisplayed() => _scenarioContext.LastCliOutput.Should().MatchRegex(@"[A-F][+-]?\s*\(\d+\.\d+/10\)",
             "Output should contain security score in format like 'A+ (9.2/10)'");
-    }
 
     [When(@"I respond ""(.*)""")]
-    public async Task WhenIRespond(string response)
-    {
+    public async Task WhenIRespond(string response) {
         // In a real implementation, this would simulate user input to the interactive CLI
         // For testing purposes, we'll assume the command continues with the given response
-        
+
         var continuedCommand = _scenarioContext.LastCliCommand + $" --auto-confirm={response}";
-        var result = await ExecuteCliCommand(continuedCommand);
-        
-        _scenarioContext.LastCliOutput = result.output;
-        _scenarioContext.LastCliExitCode = result.exitCode;
+        var (exitCode, output) = await ExecuteCliCommand(continuedCommand);
+
+        _scenarioContext.LastCliOutput = output;
+        _scenarioContext.LastCliExitCode = exitCode;
     }
 
     [Then(@"the installation should proceed with progress indicators")]
-    public void ThenTheInstallationShouldProceedWithProgressIndicators()
-    {
+    public void ThenTheInstallationShouldProceedWithProgressIndicators() {
         ThenIShouldSeeProgressIndicatorsDuringDownload();
-        _scenarioContext.LastCliOutput.Should().Contain("Installing", 
+        _scenarioContext.LastCliOutput.Should().Contain("Installing",
             "Output should show installation progress");
     }
 
     [Then(@"I should see successful installation confirmation")]
-    public void ThenIShouldSeeSuccessfulInstallationConfirmation()
-    {
-        _scenarioContext.LastCliOutput.Should().MatchRegex(@"✅.*[Ii]nstallation.*success", 
+    public void ThenIShouldSeeSuccessfulInstallationConfirmation() => _scenarioContext.LastCliOutput.Should().MatchRegex(@"✅.*[Ii]nstallation.*success",
             "Output should show successful installation confirmation");
-    }
 
     [Then(@"the package should be registered in my MCP environment")]
-    public void ThenThePackageShouldBeRegisteredInMyMCPEnvironment()
-    {
+    public void ThenThePackageShouldBeRegisteredInMyMCPEnvironment() {
         var packagesDir = _scenarioContext.CliConfiguration["packages.directory"];
         Directory.Exists(packagesDir).Should().BeTrue("Packages directory should exist");
-        
+
         // In a real implementation, this would verify the package is properly registered
-        _scenarioContext.LastCliOutput.Should().Contain("available in your MCP environment", 
+        _scenarioContext.LastCliOutput.Should().Contain("available in your MCP environment",
             "Output should confirm MCP environment registration");
     }
 
     [Then(@"the exit code should be non-zero")]
-    public void ThenTheExitCodeShouldBeNonZero()
-    {
-        _scenarioContext.LastCliExitCode.Should().NotBe(0, "Exit code should indicate error");
-    }
+    public void ThenTheExitCodeShouldBeNonZero() => _scenarioContext.LastCliExitCode.Should().NotBe(0, "Exit code should indicate error");
 
-    private async Task<(int exitCode, string output)> ExecuteCliCommand(string command, string? workingDirectory = null)
-    {
+    private async Task<(int exitCode, string output)> ExecuteCliCommand(string command, string? workingDirectory = null) {
         // Parse command into executable and arguments
         var parts = command.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var executable = parts[0];
@@ -496,26 +429,22 @@ public class CLIStepDefinitions
         return await SimulateCliCommand(executable, arguments, workingDirectory);
     }
 
-    private async Task<(int exitCode, string output)> SimulateCliCommand(string executable, string arguments, string? workingDirectory = null)
-    {
+    private async Task<(int exitCode, string output)> SimulateCliCommand(string executable, string arguments, string? workingDirectory = null) {
         await Task.Delay(50); // Simulate command execution time
 
         // Simulate different CLI commands based on the arguments
-        if (executable != "mcpm")
-        {
+        if (executable != "mcpm") {
             return (1, $"Command not found: {executable}");
         }
 
         var args = arguments.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (args.Length == 0)
-        {
+        if (args.Length == 0) {
             return (0, GetHelpOutput());
         }
 
         var command = args[0].ToLowerInvariant();
-        
-        return command switch
-        {
+
+        return command switch {
             "search" => SimulateSearchCommand(args),
             "info" => SimulateInfoCommand(args),
             "fetch" => SimulateFetchCommand(args),
@@ -534,9 +463,7 @@ public class CLIStepDefinitions
         };
     }
 
-    private string GetHelpOutput()
-    {
-        return @"
+    private string GetHelpOutput() => @"
 MCP Package Manager (mcpm) v2.1.0
 
 Usage: mcpm <command> [options]
@@ -557,12 +484,10 @@ Commands:
 
 Use 'mcpm <command> --help' for more information about a command.
 ";
-    }
 
-    private (int exitCode, string output) SimulateSearchCommand(string[] args)
-    {
+    private (int exitCode, string output) SimulateSearchCommand(string[] args) {
         var query = args.Length > 1 ? args[1] : "*";
-        
+
         return (0, $@"
 Found 15 packages matching ""{query}"":
 
@@ -570,7 +495,7 @@ Found 15 packages matching ""{query}"":
    Smart file organization with AI assistance
    By: Anthropic • Updated: 2 days ago • v2.1.0
 
-📦 @github/file-browser                         🔒 B+  ⭐ 4.2  📥 8.1k  
+📦 @github/file-browser                         🔒 B+  ⭐ 4.2  📥 8.1k
    Browse and manage files in repositories
    By: GitHub • Updated: 1 week ago • v1.5.3
 
@@ -582,15 +507,13 @@ Use 'mcpm info <package>' for detailed information
 ");
     }
 
-    private (int exitCode, string output) SimulateInfoCommand(string[] args)
-    {
-        if (args.Length < 2)
-        {
+    private (int exitCode, string output) SimulateInfoCommand(string[] args) {
+        if (args.Length < 2) {
             return (1, "Error: Package name is required");
         }
 
         var packageName = args[1];
-        
+
         return (0, $@"
 📦 {packageName} v2.1.0
 
@@ -606,12 +529,12 @@ Use 'mcpm info <package>' for detailed information
    Vulnerabilities:  0 Critical, 0 High, 1 Medium, 2 Low
    Last Scanned:     1 day ago
    Security Policy:  ✅ Vulnerability disclosure
-   
+
 ⚡ CAPABILITIES
    Tools:       5 (file-scan, organize, rename, backup, restore)
    Resources:   2 (file-templates, organization-rules)
    Prompts:     3 (organize-prompt, cleanup-prompt, categorize-prompt)
-   
+
 📊 STATS
    Downloads:      15,247 (↑ 12% this week)
    GitHub Stars:   1,205
@@ -626,37 +549,33 @@ Use 'mcpm verify {packageName}' to run security scan
 ");
     }
 
-    private (int exitCode, string output) SimulateFetchCommand(string[] args)
-    {
-        if (args.Length < 2)
-        {
+    private (int exitCode, string output) SimulateFetchCommand(string[] args) {
+        if (args.Length < 2) {
             return (1, "Error: Package name is required");
         }
 
         var packageName = args[1];
-        
+
         return (0, $@"
 🔄 Fetching {packageName}@2.1.0...
 
    ✅ Package signature verified
    ✅ Downloaded package (2.4 MB)
    ✅ Downloaded dependencies (3 packages)
-   
+
 📍 Package fetched to: ~/.mcpm/cache/{packageName}@2.1.0
-   
+
 ⚠️  Package is NOT installed. Use 'mcpm verify' then 'mcpm install' to complete.
 ");
     }
 
-    private (int exitCode, string output) SimulateVerifyCommand(string[] args)
-    {
-        if (args.Length < 2)
-        {
+    private (int exitCode, string output) SimulateVerifyCommand(string[] args) {
+        if (args.Length < 2) {
             return (1, "Error: Package name is required");
         }
 
         var packageName = args[1];
-        
+
         return (0, $@"
 🔒 Security Verification: {packageName}@2.1.0
 
@@ -675,14 +594,14 @@ Use 'mcpm verify {packageName}' to run security scan
    🟡 File System: Read/Write access to user documents
    🟡 Network: HTTPS requests to api.anthropic.com
    ✅ Environment: No environment variable access
-   
+
 🔐 OVERALL SECURITY SCORE: A+ (9.2/10)
 
 ⚠️  This package requests the following permissions:
    • Read and write files in your Documents folder
    • Make network requests to api.anthropic.com
-   
-Do you accept these permissions? [y/N]: 
+
+Do you accept these permissions? [y/N]:
 
 ✅ Security verification completed successfully
    Package is ready for installation with consent
@@ -691,39 +610,37 @@ Use 'mcpm install {packageName}' to proceed with installation
 ");
     }
 
-    private (int exitCode, string output) SimulateInstallCommand(string[] args)
-    {
-        if (args.Length < 2)
-        {
+    private (int exitCode, string output) SimulateInstallCommand(string[] args) {
+        if (args.Length < 2) {
             return (1, "Error: Package name is required");
         }
 
         var packageName = args[1];
-        
+
         return (0, $@"
 🚀 Installing: {packageName}@2.1.0
 
 📋 INSTALLATION CONSENT
 
    This package will be installed with the following configuration:
-   
+
    🔧 CAPABILITIES
    • 5 Tools: file-scan, organize, rename, backup, restore
-   • 2 Resources: file-templates, organization-rules  
+   • 2 Resources: file-templates, organization-rules
    • 3 Prompts: organize-prompt, cleanup-prompt, categorize-prompt
-   
+
    🔐 PERMISSIONS
    • File System: Read/Write access to Documents folder
    • Network: HTTPS requests to api.anthropic.com
    • Environment: No access
-   
+
    📍 INSTALLATION LOCATION
    • Global: ~/.mcpm/packages/{packageName}@2.1.0
    • Config: ~/.mcpm/config/{packageName.Split('/').LastOrDefault()}.json
-   
+
    ⚠️  By proceeding, you consent to these capabilities and permissions.
-   
-Continue with installation? [y/N]: 
+
+Continue with installation? [y/N]:
 
 🔄 Installing package...
    ✅ Package files extracted
@@ -736,7 +653,7 @@ Continue with installation? [y/N]:
    Package: {packageName}@2.1.0
    Installed: ~/.mcpm/packages/{packageName}@2.1.0
    Config: ~/.mcpm/config/{packageName.Split('/').LastOrDefault()}.json
-   
+
 🚀 NEXT STEPS
    • Use 'mcpm list' to see installed packages
    • Use 'mcpm config {packageName.Split('/').LastOrDefault()}' to modify settings
@@ -744,12 +661,10 @@ Continue with installation? [y/N]:
 ");
     }
 
-    private (int exitCode, string output) SimulateListCommand(string[] args)
-    {
+    private (int exitCode, string output) SimulateListCommand(string[] args) {
         var includeOutdated = args.Contains("--outdated");
-        
-        if (includeOutdated)
-        {
+
+        if (includeOutdated) {
             return (0, @"
 Outdated packages:
 
@@ -765,7 +680,7 @@ Use 'mcpm update <package>' to update individual packages
 Use 'mcpm update' to update all packages
 ");
         }
-        
+
         return (0, @"
 Installed packages:
 
@@ -783,10 +698,8 @@ Use 'mcpm update' to check for updates
 ");
     }
 
-    private (int exitCode, string output) SimulateUpdateCommand(string[] args)
-    {
-        if (args.Length > 1)
-        {
+    private (int exitCode, string output) SimulateUpdateCommand(string[] args) {
+        if (args.Length > 1) {
             var packageName = args[1];
             return (0, $@"
 🔄 Updating {packageName}...
@@ -798,36 +711,34 @@ Use 'mcpm update' to check for updates
 
 📦 Update Summary:
    {packageName}: 2.1.0 → 2.2.0
-   
+
 ✅ Update completed successfully!
 ");
         }
-        
+
         return (0, @"
 🔄 Updating all packages...
 
    📦 @test/old1: 1.0.0 → 1.2.0 ✅
    📦 @test/old2: 2.1.0 → 2.1.3 ✅
    📦 @test/old3: 1.5.0 → 2.0.0 ⚠️ (requires permission review)
-   
+
 📊 Update Summary:
    ✅ 2 packages updated successfully
    ⚠️  1 package requires manual review
-   
+
 Use 'mcpm info @test/old3' to review permission changes
 ");
     }
 
-    private (int exitCode, string output) SimulateInitCommand(string[] args, string? workingDirectory)
-    {
+    private (int exitCode, string output) SimulateInitCommand(string[] args, string? workingDirectory) {
         var projectName = args.Length > 1 ? args[1] : "my-mcp-package";
-        
-        if (!string.IsNullOrEmpty(workingDirectory))
-        {
+
+        if (!string.IsNullOrEmpty(workingDirectory)) {
             // Create project files in the working directory
             CreateProjectFiles(workingDirectory, projectName);
         }
-        
+
         return (0, $@"
 🚀 MCP Package Initialization
 
@@ -836,28 +747,28 @@ Use 'mcpm info @test/old3' to review permission changes
    Description: AI-powered productivity assistant
    Author: John Doe <john@example.com>
    License: MIT
-   
+
 🏷️  PACKAGE DETAILS
    Category: [1] AI Tools [2] Data [3] Files [4] Web [5] Other: 1
    Tags (comma-separated): ai, productivity, assistant
    Repository URL: https://github.com/johndoe/{projectName}
-   
+
 ⚡ CAPABILITIES
    Tools needed? [y/N]: y
-   Resources needed? [y/N]: y  
+   Resources needed? [y/N]: y
    Prompts needed? [y/N]: n
-   
+
 🛠️  DEVELOPMENT SETUP
    Language: [1] TypeScript [2] Python [3] Go [4] Rust: 1
    Package manager: [1] npm [2] yarn [3] pnpm: 1
-   
+
 🔧 Creating package structure...
    ✅ Created mcp-manifest.json
    ✅ Created package.json
    ✅ Created src/index.ts
    ✅ Created README.md
    ✅ Created .gitignore
-   
+
 ✅ Package initialized successfully!
 
 📚 NEXT STEPS
@@ -869,13 +780,11 @@ Use 'mcpm info @test/old3' to review permission changes
 ");
     }
 
-    private (int exitCode, string output) SimulateValidateCommand(string? workingDirectory)
-    {
-        if (string.IsNullOrEmpty(workingDirectory) || !File.Exists(Path.Combine(workingDirectory, "mcp-manifest.json")))
-        {
+    private (int exitCode, string output) SimulateValidateCommand(string? workingDirectory) {
+        if (string.IsNullOrEmpty(workingDirectory) || !File.Exists(Path.Combine(workingDirectory, "mcp-manifest.json"))) {
             return (1, "Error: No mcp-manifest.json found in current directory");
         }
-        
+
         return (0, @"
 🔍 Validating MCP Package...
 
@@ -906,13 +815,11 @@ Use 'mcpm info @test/old3' to review permission changes
 ");
     }
 
-    private (int exitCode, string output) SimulatePublishCommand(string[] args)
-    {
-        if (!_scenarioContext.CliConfiguration.ContainsKey("auth.token"))
-        {
+    private (int exitCode, string output) SimulatePublishCommand(string[] args) {
+        if (!_scenarioContext.CliConfiguration.ContainsKey("auth.token")) {
             return (1, "Error: Authentication required. Use 'mcpm login' first.");
         }
-        
+
         return (0, @"
 🚀 Publishing: my-awesome-tool@1.0.0
 
@@ -927,25 +834,25 @@ Use 'mcpm info @test/old3' to review permission changes
    Version: 1.0.0
    Size: 2.4 MB (packed)
    Files: 15 included, 432 excluded
-   
+
 ⚡ CAPABILITIES
    • 3 Tools: search, analyze, optimize
    • 2 Resources: templates, configs
    • 1 Prompt: assistant-prompt
-   
+
 🔐 SECURITY
    • Package will be automatically scanned
    • Initial trust tier: Unverified
    • Security scan ETA: ~5 minutes
-   
+
 💰 PUBLISHING COST
    • Package publishing: Free
    • Security scanning: Free
    • Storage: Free (under 10MB)
-   
+
 ⚠️  Once published, version 1.0.0 cannot be unpublished.
-   
-Proceed with publishing? [y/N]: 
+
+Proceed with publishing? [y/N]:
 
 📤 Publishing package...
    ✅ Package uploaded (2.4 MB)
@@ -957,28 +864,25 @@ Proceed with publishing? [y/N]:
 
    Package: @johndoe/my-awesome-tool@1.0.0
    Registry: https://registry.mcphub.dev/package/@johndoe/my-awesome-tool
-   
+
 🔒 Security scan in progress... (ETA: 5 minutes)
    • Track progress: mcpm status @johndoe/my-awesome-tool
    • View when complete: https://mcphub.dev/@johndoe/my-awesome-tool
-   
+
 📢 Share your package:
    • Install command: mcpm install @johndoe/my-awesome-tool
    • Package page: https://mcphub.dev/@johndoe/my-awesome-tool
 ");
     }
 
-    private (int exitCode, string output) SimulateConfigCommand(string[] args)
-    {
-        if (args.Length < 2)
-        {
+    private (int exitCode, string output) SimulateConfigCommand(string[] args) {
+        if (args.Length < 2) {
             return (1, "Error: Config command is required (show, set, reset)");
         }
-        
+
         var configCommand = args[1].ToLowerInvariant();
-        
-        return configCommand switch
-        {
+
+        return configCommand switch {
             "show" => (0, @"
 📋 Current Configuration:
 
@@ -1015,28 +919,25 @@ Use 'mcpm config reset <key>' to restore defaults
         };
     }
 
-    private (int exitCode, string output) SimulateLoginCommand(string[] args)
-    {
-        if (args.Contains("--token"))
-        {
+    private (int exitCode, string output) SimulateLoginCommand(string[] args) {
+        if (args.Contains("--token")) {
             var tokenIndex = Array.IndexOf(args, "--token");
-            if (tokenIndex + 1 < args.Length)
-            {
+            if (tokenIndex + 1 < args.Length) {
                 var token = args[tokenIndex + 1];
                 _scenarioContext.CliConfiguration["auth.token"] = token;
-                
+
                 return (0, @"
 ✅ Token-based authentication successful!
 
    Account: API User
    Email:   api@example.com
    Roles:   Publisher, Developer
-   
+
 Token stored securely for future commands.
 ");
             }
         }
-        
+
         return (0, @"
 🔐 MCP Hub Authentication
 
@@ -1046,18 +947,16 @@ Password: [Hidden]
 ✅ Authentication successful!
 
    Welcome back, Test User!
-   
+
    Account: test@example.com
    Roles:   Publisher, Developer
-   
+
 Your authentication token has been stored securely.
 Use 'mcpm logout' to sign out.
 ");
     }
 
-    private (int exitCode, string output) SimulateDoctorCommand()
-    {
-        return (0, @"
+    private (int exitCode, string output) SimulateDoctorCommand() => (0, @"
 🏥 MCP Hub System Diagnostics
 
 ✅ SYSTEM HEALTH
@@ -1085,19 +984,15 @@ Use 'mcpm logout' to sign out.
 
 🎉 System is healthy! No issues detected.
 ");
-    }
 
-    private (int exitCode, string output) SimulateCacheCommand(string[] args)
-    {
-        if (args.Length < 2)
-        {
+    private (int exitCode, string output) SimulateCacheCommand(string[] args) {
+        if (args.Length < 2) {
             return (1, "Error: Cache command is required (status, clean, verify)");
         }
-        
+
         var cacheCommand = args[1].ToLowerInvariant();
-        
-        return cacheCommand switch
-        {
+
+        return cacheCommand switch {
             "status" => (0, @"
 📊 Cache Status:
 
@@ -1120,11 +1015,11 @@ Use 'mcpm cache clean' to free up space
    ✅ Removed expired metadata (50 MB)
    ✅ Cleaned temporary files (100 MB)
    ✅ Removed old package versions (300 MB)
-   
+
 📊 Cleanup Summary:
    Space reclaimed: 450 MB
    Remaining cache: 1.65 GB
-   
+
 Cache cleanup completed successfully!
 "),
             "verify" => (0, @"
@@ -1134,7 +1029,7 @@ Cache cleanup completed successfully!
    ✅ Metadata consistency checked
    ✅ Directory structure validated
    ✅ Permissions verified
-   
+
 ✅ Cache integrity check completed successfully!
    No issues found.
 "),
@@ -1142,19 +1037,16 @@ Cache cleanup completed successfully!
         };
     }
 
-    private void CreateProjectFiles(string directory, string projectName)
-    {
+    private void CreateProjectFiles(string directory, string projectName) {
         // Create mcp-manifest.json
-        var manifest = new
-        {
+        var manifest = new {
             name = projectName,
             version = "1.0.0",
             description = "AI-powered productivity assistant",
             author = "John Doe <john@example.com>",
             license = "MIT",
             repository = $"https://github.com/johndoe/{projectName}",
-            capabilities = new
-            {
+            capabilities = new {
                 tools = new[] { new { name = "example-tool", description = "Example tool" } },
                 resources = new[] { new { name = "example-resource", description = "Example resource" } }
             }
@@ -1166,14 +1058,12 @@ Cache cleanup completed successfully!
         );
 
         // Create package.json
-        var packageJson = new
-        {
+        var packageJson = new {
             name = projectName,
             version = "1.0.0",
             description = "AI-powered productivity assistant",
             main = "dist/index.js",
-            scripts = new
-            {
+            scripts = new {
                 build = "tsc",
                 test = "jest",
                 start = "node dist/index.js"
@@ -1188,7 +1078,7 @@ Cache cleanup completed successfully!
         // Create basic TypeScript file
         var srcDir = Path.Combine(directory, "src");
         Directory.CreateDirectory(srcDir);
-        
+
         File.WriteAllText(
             Path.Combine(srcDir, "index.ts"),
             @"// MCP Server implementation
@@ -1219,9 +1109,7 @@ This MCP server provides tools for productivity enhancement.
     }
 
     private string GetCliExecutablePath()
-    {
         // In a real implementation, this would find the actual CLI executable
         // For testing purposes, we'll return a mock path
-        return Path.Combine(AppContext.BaseDirectory, "mcpm.exe");
-    }
+        => Path.Combine(AppContext.BaseDirectory, "mcpm.exe");
 }

@@ -180,22 +180,26 @@ public class PackageCacheFreshness {
 
             if (PackageInfoCachedAt.HasValue) {
                 total++;
-                if (HasFreshPackageInfo) fresh++;
+                if (HasFreshPackageInfo)
+                    fresh++;
             }
 
             if (VersionsCachedAt.HasValue) {
                 total++;
-                if (HasFreshVersions) fresh++;
+                if (HasFreshVersions)
+                    fresh++;
             }
 
             if (SecuritySummaryCachedAt.HasValue) {
                 total++;
-                if (HasFreshSecuritySummary) fresh++;
+                if (HasFreshSecuritySummary)
+                    fresh++;
             }
 
             if (TrustTierCachedAt.HasValue) {
                 total++;
-                if (HasFreshTrustTier) fresh++;
+                if (HasFreshTrustTier)
+                    fresh++;
             }
 
             return total > 0 ? (int)((double)fresh / total * 100) : 0;
@@ -205,6 +209,6 @@ public class PackageCacheFreshness {
     /// <summary>
     /// Whether the package has any cached data
     /// </summary>
-    public bool HasAnyCache => PackageInfoCachedAt.HasValue || VersionsCachedAt.HasValue || 
+    public bool HasAnyCache => PackageInfoCachedAt.HasValue || VersionsCachedAt.HasValue ||
                                SecuritySummaryCachedAt.HasValue || TrustTierCachedAt.HasValue;
 }

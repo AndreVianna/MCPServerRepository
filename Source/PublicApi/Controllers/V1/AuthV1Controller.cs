@@ -147,12 +147,12 @@ public class AuthV1Controller(
     [ProducesResponseType(typeof(LogoutResult), 200)]
     [ProducesResponseType(typeof(object), 400)]
     [ProducesResponseType(typeof(object), 500)]
-    public async Task<IActionResult> Logout(CancellationToken cancellationToken) {
+    public Task<IActionResult> Logout(CancellationToken cancellationToken) {
         try {
             var userId = GetCurrentUserId();
             if (userId == null) {
                 Logger.LogWarning("Logout failed - invalid user ID in token");
-                return CreateErrorResponse("Invalid user context", 400);
+                return Task.FromResult(CreateErrorResponse("Invalid user context", 400));
             }
 
             Logger.LogInformation("Logout for user {UserId}", userId);
@@ -161,11 +161,11 @@ public class AuthV1Controller(
             // For now, we'll just return success as the access token will expire naturally
 
             var logoutResult = new LogoutResult { IsSuccess = true };
-            return CreateSuccessResponse(logoutResult, "Logout successful");
+            return Task.FromResult(CreateSuccessResponse(logoutResult, "Logout successful"));
         }
         catch (Exception ex) {
             Logger.LogError(ex, "Error occurred during logout");
-            return CreateErrorResponse("An error occurred while processing your request", 500);
+            return Task.FromResult(CreateErrorResponse("An error occurred while processing your request", 500));
         }
     }
 

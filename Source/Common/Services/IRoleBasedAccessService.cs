@@ -15,10 +15,10 @@ public interface IRoleBasedAccessService {
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Authorization result</returns>
     Task<AuthorizationResult> CheckPermissionAsync(
-        Guid userId, 
-        string resource, 
-        string action, 
-        PermissionContext? context = null, 
+        Guid userId,
+        string resource,
+        string action,
+        PermissionContext? context = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -29,8 +29,8 @@ public interface IRoleBasedAccessService {
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Bulk authorization result</returns>
     Task<BulkAuthorizationResult> CheckPermissionsAsync(
-        Guid userId, 
-        IEnumerable<PermissionCheck> permissionChecks, 
+        Guid userId,
+        IEnumerable<PermissionCheck> permissionChecks,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -43,10 +43,10 @@ public interface IRoleBasedAccessService {
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Role assignment result</returns>
     Task<RoleAssignmentResult> AssignRoleAsync(
-        Guid userId, 
-        Guid roleId, 
-        Guid? assignedBy = null, 
-        DateTimeOffset? expiresAt = null, 
+        Guid userId,
+        Guid roleId,
+        Guid? assignedBy = null,
+        DateTimeOffset? expiresAt = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -59,10 +59,10 @@ public interface IRoleBasedAccessService {
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Role removal result</returns>
     Task<RoleRemovalResult> RemoveRoleAsync(
-        Guid userId, 
-        Guid roleId, 
-        Guid? removedBy = null, 
-        string? reason = null, 
+        Guid userId,
+        Guid roleId,
+        Guid? removedBy = null,
+        string? reason = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -133,9 +133,9 @@ public interface IRoleBasedAccessService {
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Permission addition result</returns>
     Task<PermissionAdditionResult> AddPermissionToRoleAsync(
-        Guid roleId, 
-        RolePermission permission, 
-        Guid? addedBy = null, 
+        Guid roleId,
+        RolePermission permission,
+        Guid? addedBy = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -148,10 +148,10 @@ public interface IRoleBasedAccessService {
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Permission removal result</returns>
     Task<PermissionRemovalResult> RemovePermissionFromRoleAsync(
-        Guid roleId, 
-        string resource, 
-        string action, 
-        Guid? removedBy = null, 
+        Guid roleId,
+        string resource,
+        string action,
+        Guid? removedBy = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -181,10 +181,10 @@ public interface IRoleBasedAccessService {
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Policy evaluation result</returns>
     Task<PolicyEvaluationResult> EvaluatePermissionPoliciesAsync(
-        Guid userId, 
-        string resource, 
-        string action, 
-        PermissionContext context, 
+        Guid userId,
+        string resource,
+        string action,
+        PermissionContext context,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -505,33 +505,33 @@ public static class StandardPermissions {
     public const string PackageDelete = "package:delete";
     public const string PackagePublish = "package:publish";
     public const string PackageApprove = "package:approve";
-    
+
     // Server permissions
     public const string ServerRead = "server:read";
     public const string ServerWrite = "server:write";
     public const string ServerDelete = "server:delete";
     public const string ServerRegister = "server:register";
-    
+
     // User permissions
     public const string UserRead = "user:read";
     public const string UserWrite = "user:write";
     public const string UserDelete = "user:delete";
     public const string UserManage = "user:manage";
-    
+
     // Admin permissions
     public const string AdminFull = "admin:full";
     public const string AdminRead = "admin:read";
     public const string AdminWrite = "admin:write";
-    
+
     // Security permissions
     public const string SecurityRead = "security:read";
     public const string SecurityWrite = "security:write";
     public const string SecurityManage = "security:manage";
-    
+
     // Audit permissions
     public const string AuditRead = "audit:read";
     public const string AuditExport = "audit:export";
-    
+
     // System permissions
     public const string SystemConfig = "system:config";
     public const string SystemMaintenance = "system:maintenance";

@@ -115,9 +115,9 @@ public class PackageInstallationServiceTests {
     }
 
     [Fact]
-    public async Task GetInstallationStatsAsync_WhenCalled_ThrowsNotImplementedException() =>
+    public async Task GetInstallationStatsAsync_WhenCalled_ThrowsNotImplementedException()
         // Arrange & Act & Assert
-        await Assert.ThrowsAsync<NotImplementedException>(() =>
+        => await Assert.ThrowsAsync<NotImplementedException>(() =>
             _service.GetInstallationStatsAsync());
 
     // TODO: When implementation is added, replace these tests with actual behavior tests:

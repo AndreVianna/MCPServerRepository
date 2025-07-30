@@ -54,7 +54,7 @@ public record PackageDownloadStats {
     /// </summary>
     /// <param name="packageId">Package identifier</param>
     /// <returns>Empty download stats</returns>
-    public static PackageDownloadStats Empty(Guid packageId) => new PackageDownloadStats {
+    public static PackageDownloadStats Empty(Guid packageId) => new() {
         PackageId = packageId,
         TotalDownloads = 0,
         UniqueDownloads = 0,

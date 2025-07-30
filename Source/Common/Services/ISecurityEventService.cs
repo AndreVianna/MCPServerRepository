@@ -38,9 +38,9 @@ public interface ISecurityEventService {
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>User security events</returns>
     Task<IReadOnlyList<SecurityEventDetails>> GetUserEventsAsync(
-        Guid userId, 
-        IEnumerable<SecurityEventType>? eventTypes = null, 
-        DateTimeRange? timeRange = null, 
+        Guid userId,
+        IEnumerable<SecurityEventType>? eventTypes = null,
+        DateTimeRange? timeRange = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -53,10 +53,10 @@ public interface ISecurityEventService {
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Resource security events</returns>
     Task<IReadOnlyList<SecurityEventDetails>> GetResourceEventsAsync(
-        string resourceType, 
-        Guid resourceId, 
-        IEnumerable<SecurityEventType>? eventTypes = null, 
-        DateTimeRange? timeRange = null, 
+        string resourceType,
+        Guid resourceId,
+        IEnumerable<SecurityEventType>? eventTypes = null,
+        DateTimeRange? timeRange = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -67,8 +67,8 @@ public interface ISecurityEventService {
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Security event statistics</returns>
     Task<SecurityEventStatistics> GetStatisticsAsync(
-        DateTimeRange timeRange, 
-        SecurityEventGroupBy groupBy = SecurityEventGroupBy.EventType, 
+        DateTimeRange timeRange,
+        SecurityEventGroupBy groupBy = SecurityEventGroupBy.EventType,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -81,10 +81,10 @@ public interface ISecurityEventService {
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Search results</returns>
     Task<SecurityEventSearchResult> SearchEventsAsync(
-        string searchQuery, 
-        SecurityEventFilters? filters = null, 
-        int pageSize = 50, 
-        int pageNumber = 1, 
+        string searchQuery,
+        SecurityEventFilters? filters = null,
+        int pageSize = 50,
+        int pageNumber = 1,
         CancellationToken cancellationToken = default);
 
     /// <summary>

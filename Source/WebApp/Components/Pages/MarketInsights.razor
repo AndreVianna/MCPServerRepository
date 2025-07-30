@@ -13,7 +13,7 @@
 
 <PageTitle>Market Insights - MCP Hub</PageTitle>
 
-<ResponsiveContainer MaxWidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
+<ResponsiveContainer maxwidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
     <HeaderContent>
         <div class="market-insights-header">
             <div class="header-title mb-4">
@@ -44,7 +44,7 @@
                                Variant="Variant.Outlined"
                                Margin="Margin.Dense"
                                Style="min-width: 200px;"
-                               T="string"
+                               T="string[]"
                                MultiSelection="true"
                                ValueChanged="OnCategoriesChanged">
                         <MudSelectItem Value="@("AI_ML")">AI & ML</MudSelectItem>
@@ -74,7 +74,7 @@
                 <div class="header-actions d-flex gap-2">
                     <MudButton Variant="Variant.Outlined"
                                Color="Color.Primary"
-                               StartIcon="Icons.Material.Filled.Download"
+                               starticon="Icons.Material.Filled.Download"
                                Size="Size.Medium"
                                @onclick="ExportInsights">
                         Export Report
@@ -82,7 +82,7 @@
                     
                     <MudButton Variant="Variant.Filled"
                                Color="Color.Primary"
-                               StartIcon="Icons.Material.Filled.Refresh"
+                               starticon="Icons.Material.Filled.Refresh"
                                Size="Size.Medium"
                                @onclick="RefreshData"
                                Disabled="_isLoading">
@@ -120,7 +120,7 @@
             <div class="market-overview mb-6">
                 <MudGrid Spacing="3">
                     <MudItem xs="12" sm="6" md="3">
-                        <MetricsCard Title="Total Market Size"
+                        <MetricsCard title="Total Market Size"
                                      Value="@FormatNumber(_marketInsights.Overview.TotalMarketSize)"
                                      Icon="Icons.Material.Filled.TrendingUp"
                                      Color="Color.Primary"
@@ -131,7 +131,7 @@
                     </MudItem>
 
                     <MudItem xs="12" sm="6" md="3">
-                        <MetricsCard Title="Active Categories"
+                        <MetricsCard title="Active Categories"
                                      Value="@_marketInsights.Overview.ActiveCategories.ToString()"
                                      Icon="Icons.Material.Filled.Category"
                                      Color="Color.Success"
@@ -140,7 +140,7 @@
                     </MudItem>
 
                     <MudItem xs="12" sm="6" md="3">
-                        <MetricsCard Title="Market Concentration"
+                        <MetricsCard title="Market Concentration"
                                      Value="@($"{_marketInsights.Overview.MarketConcentration:F1}%")"
                                      Icon="Icons.Material.Filled.PieChart"
                                      Color="Color.Info"
@@ -151,7 +151,7 @@
                     </MudItem>
 
                     <MudItem xs="12" sm="6" md="3">
-                        <MetricsCard Title="Market Leaders"
+                        <MetricsCard title="Market Leaders"
                                      Value="@_marketInsights.Overview.MarketLeaders.Count().ToString()"
                                      Icon="Icons.Material.Filled.Business"
                                      Color="Color.Warning"
@@ -166,7 +166,7 @@
                 <MudGrid Spacing="3">
                     <!-- Market Trends Chart -->
                     <MudItem xs="12" lg="8">
-                        <AnalyticsChart Title="📈 Market Trends Analysis"
+                        <AnalyticsChart title="📈 Market Trends Analysis"
                                         Subtitle="@GetTrendsSubtitle()"
                                         ChartType="@GetTrendsChartType()"
                                         ChartSeries="@GetTrendsChartSeries()"
@@ -456,7 +456,7 @@
                                                             <MudIconButton Icon="Icons.Material.Filled.OpenInNew" 
                                                                            Size="Size.Small" 
                                                                            Color="Color.Primary"
-                                                                           @onclick="@(() => ViewCompetitor(competitor.ToString()))" />
+                                                                           @onclick="@(() => ViewCompetitor(competitor.ToString() ?? string.Empty))" />
                                                         </div>
                                                     </div>
                                                 }
@@ -688,14 +688,16 @@
         await LoadMarketInsights();
     }
 
-    private async Task OnAnalysisTypeChanged()
+    private Task OnAnalysisTypeChanged()
     {
         StateHasChanged();
+        return Task.CompletedTask;
     }
 
-    private async Task OnCompetitiveCategoryChanged()
+    private Task OnCompetitiveCategoryChanged()
     {
         StateHasChanged();
+        return Task.CompletedTask;
     }
 
     private async Task RefreshData()
@@ -704,9 +706,10 @@
         Snackbar.Add("Market insights refreshed", Severity.Success);
     }
 
-    private async Task ExportInsights()
+    private Task ExportInsights()
     {
         Snackbar.Add("Export functionality coming soon", Severity.Info);
+        return Task.CompletedTask;
     }
 
     private void SetTrendsView(string view)
@@ -715,14 +718,16 @@
         StateHasChanged();
     }
 
-    private async Task HandleTrendsDrillDown(ChartDrillDownEventArgs args)
+    private Task HandleTrendsDrillDown(ChartDrillDownEventArgs args)
     {
         Snackbar.Add($"Drilling down into trend data for {args.XAxisLabel}", Severity.Info);
+        return Task.CompletedTask;
     }
 
-    private async Task ExportTrendsData()
+    private Task ExportTrendsData()
     {
         Snackbar.Add("Exporting trends data", Severity.Info);
+        return Task.CompletedTask;
     }
 
     private void DrillDownCategory(string category)

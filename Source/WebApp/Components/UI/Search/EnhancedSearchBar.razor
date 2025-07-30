@@ -68,7 +68,7 @@
                        Size="MudBlazor.Size.Medium"
                        Class="voice-search-button"
                        @onclick="ToggleVoiceSearch"
-                       Title="@GetVoiceTooltip()"
+                       title="@GetVoiceTooltip()"
                        aria-label="@GetVoiceTooltip()" />
     }
 
@@ -80,7 +80,7 @@
                        Size="MudBlazor.Size.Medium"
                        Class="advanced-search-button"
                        @onclick="ToggleAdvancedSearch"
-                       Title="Advanced search options"
+                       title="Advanced search options"
                        aria-label="Advanced search options"
                        aria-expanded="@ShowAdvancedFilters.ToString().ToLower()" />
     }
@@ -98,7 +98,7 @@
                                    @bind-Value="@SelectedCategory"
                                    Label="Category"
                                    Variant="Variant.Outlined"
-                                   Dense="true"
+                                   dense="true"
                                    aria-label="Filter by category">
                             <MudSelectItem Value="@("all_categories")">All Categories</MudSelectItem>
                             @foreach (var category in Categories)
@@ -113,7 +113,7 @@
                                    @bind-Value="@SelectedTrustTier"
                                    Label="Trust Tier"
                                    Variant="Variant.Outlined"
-                                   Dense="true"
+                                   dense="true"
                                    aria-label="Filter by trust tier">
                             <MudSelectItem Value="@((TrustTier?)null)">Any Trust Level</MudSelectItem>
                             @foreach (TrustTier tier in Enum.GetValues<TrustTier>())
@@ -128,7 +128,7 @@
                                    @bind-Value="@SelectedSecurityGrade"
                                    Label="Min Security Grade"
                                    Variant="Variant.Outlined"
-                                   Dense="true"
+                                   dense="true"
                                    aria-label="Filter by minimum security grade">
                             <MudSelectItem Value="@("any_grade")">Any Grade</MudSelectItem>
                             <MudSelectItem Value="@("A_plus")">A+ and above</MudSelectItem>
@@ -143,7 +143,7 @@
                                    @bind-Value="@SelectedTimeframe"
                                    Label="Updated"
                                    Variant="Variant.Outlined"
-                                   Dense="true"
+                                   dense="true"
                                    aria-label="Filter by update timeframe">
                             <MudSelectItem Value="@("any_time")">Any time</MudSelectItem>
                             <MudSelectItem Value="@("week")">This week</MudSelectItem>
@@ -157,14 +157,14 @@
                     <MudButton Color="Color.Default" 
                                Variant="Variant.Text"
                                @onclick="ClearFilters"
-                               StartIcon="Icons.Material.Filled.Clear">
+                               starticon="Icons.Material.Filled.Clear">
                         Clear Filters
                     </MudButton>
                     <MudButton Color="Color.Primary" 
                                Variant="Variant.Filled"
                                Class="ml-2"
                                @onclick="ApplyFilters"
-                               StartIcon="Icons.Material.Filled.Search">
+                               starticon="Icons.Material.Filled.Search">
                         Apply Filters
                     </MudButton>
                 </div>
@@ -320,11 +320,11 @@
         StateHasChanged();
     }
 
-    private async Task<bool> CheckVoiceSupport()
+    private Task<bool> CheckVoiceSupport()
     {
         // Implementation would check browser capabilities
         // For now, assume voice is supported in modern browsers
-        return true;
+        return Task.FromResult(true);
     }
 
     private async Task StartVoiceRecognition()
@@ -339,10 +339,11 @@
         await StopVoiceRecognition();
     }
 
-    private async Task StopVoiceRecognition()
+    private Task StopVoiceRecognition()
     {
         IsVoiceListening = false;
         // Implementation would stop browser voice recognition
         StateHasChanged();
+        return Task.CompletedTask;
     }
 }

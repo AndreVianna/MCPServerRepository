@@ -26,7 +26,7 @@ public class DoctorCommand(
     /// <inheritdoc />
     public override Command CreateCommand() {
         var command = new Command("doctor", "Perform comprehensive system health checks and diagnostics");
-        
+
         // Add alias
         command.AddAlias("health");
 
@@ -108,8 +108,7 @@ public class DoctorCommand(
     private Command CreateIntegrityCommand() {
         var command = new Command("integrity", "Check package integrity and file consistency");
 
-        var packageArgument = new Argument<string?>("package", "Specific package to check (optional)")
-        {
+        var packageArgument = new Argument<string?>("package", "Specific package to check (optional)") {
             Arity = ArgumentArity.ZeroOrOne
         };
         command.AddArgument(packageArgument);
@@ -301,8 +300,7 @@ public class DoctorCommand(
 
         var issueIdsOption = new Option<string[]>(
             aliases: ["--issues"],
-            description: "Specific issue IDs to repair (comma-separated)")
-        {
+            description: "Specific issue IDs to repair (comma-separated)") {
             Arity = ArgumentArity.ZeroOrMore,
             AllowMultipleArgumentsPerToken = true
         };
@@ -396,7 +394,8 @@ public class DoctorCommand(
 
             if (jsonOutput) {
                 await OutputHealthCheckAsJsonAsync(healthCheck);
-            } else {
+            }
+            else {
                 await DisplayHealthCheckResultAsync(healthCheck, verbose, nonInteractive, autoFix);
             }
 
@@ -424,7 +423,8 @@ public class DoctorCommand(
 
             if (result.IsValid) {
                 spinner.Success($"Integrity check completed: {result.ValidPackages}/{result.TotalPackagesChecked} packages valid");
-            } else {
+            }
+            else {
                 spinner.Fail($"Integrity issues found: {result.CorruptedPackages} corrupted packages");
             }
 
@@ -448,7 +448,8 @@ public class DoctorCommand(
 
             if (result.IsConsistent) {
                 spinner.Success("Dependencies are consistent");
-            } else {
+            }
+            else {
                 spinner.Fail($"Dependency conflicts found: {result.Conflicts.Count} conflicts");
             }
 
@@ -472,7 +473,8 @@ public class DoctorCommand(
 
             if (result.IsHealthy) {
                 spinner.Success("Cache is healthy");
-            } else {
+            }
+            else {
                 spinner.Warning($"Cache issues found: {result.CorruptedEntries} corrupted entries");
             }
 
@@ -496,7 +498,8 @@ public class DoctorCommand(
 
             if (result.IsValid) {
                 spinner.Success("Configuration is valid");
-            } else {
+            }
+            else {
                 spinner.Fail($"Configuration issues found: {result.Issues.Count} issues");
             }
 
@@ -520,7 +523,8 @@ public class DoctorCommand(
 
             if (result.IsSecure) {
                 spinner.Success("Security audit passed");
-            } else {
+            }
+            else {
                 spinner.Fail($"Security issues found: {result.CriticalVulnerabilities} critical, {result.HighVulnerabilities} high severity");
             }
 
@@ -554,7 +558,7 @@ public class DoctorCommand(
         }
     }
 
-    private async Task<int> ExecuteRepairAsync(string[] issueIds, bool createBackup, bool yes, bool verbose) {
+    private Task<int> ExecuteRepairAsync(string[] issueIds, bool createBackup, bool yes, bool verbose) {
         try {
             Logger.LogInformation("Executing repair: IssueIds={IssueIds}, Backup={Backup}",
                 string.Join(",", issueIds), createBackup);
@@ -563,10 +567,10 @@ public class DoctorCommand(
             OutputFormatter.WriteInfo("Repair functionality requires identified issues from a health check.");
             OutputFormatter.WriteInfo("Run 'mcpm doctor' first to identify issues that can be repaired.");
 
-            return 0;
+            return Task.FromResult(0);
         }
         catch (Exception ex) {
-            return HandleError(ex, "repair");
+            return Task.FromResult(HandleError(ex, "repair"));
         }
     }
 
@@ -594,7 +598,7 @@ public class DoctorCommand(
         // Overall status
         var scoreText = GetHealthScoreText(result.OverallScore);
         var scoreColor = GetHealthScoreColor(result.OverallScore);
-        
+
         OutputFormatter.WriteInfo($"[{scoreColor}]Overall Health: {scoreText}[/]");
         OutputFormatter.WriteInfo($"Check completed in {result.CheckDuration.TotalSeconds:F1}s");
         OutputFormatter.WriteLine();
@@ -609,7 +613,7 @@ public class DoctorCommand(
             table.AddColumn("Status");
             table.AddColumn("Score");
             table.AddColumn("Issues");
-            
+
             if (verbose) {
                 table.AddColumn("Duration");
             }
@@ -618,7 +622,7 @@ public class DoctorCommand(
                 var categoryScoreText = GetHealthScoreText(category.Score);
                 var categoryScoreColor = GetHealthScoreColor(category.Score);
                 var issueCount = category.Issues.Count.ToString();
-                
+
                 if (verbose) {
                     table.AddRow(
                         category.Name,
@@ -626,7 +630,8 @@ public class DoctorCommand(
                         $"[{categoryScoreColor}]{categoryScoreText}[/]",
                         issueCount,
                         $"{category.CheckDuration.TotalSeconds:F1}s");
-                } else {
+                }
+                else {
                     table.AddRow(
                         category.Name,
                         category.Status,
@@ -659,14 +664,14 @@ public class DoctorCommand(
         }
     }
 
-    private async Task DisplayIssuesSummaryAsync(List<SystemIssue> issues, bool verbose) {
+    private Task DisplayIssuesSummaryAsync(List<SystemIssue> issues, bool verbose) {
         var criticalIssues = issues.Where(i => i.Severity == IssueSeverity.Critical).ToList();
         var errorIssues = issues.Where(i => i.Severity == IssueSeverity.Error).ToList();
         var warningIssues = issues.Where(i => i.Severity == IssueSeverity.Warning).ToList();
         var infoIssues = issues.Where(i => i.Severity == IssueSeverity.Info).ToList();
 
         OutputFormatter.WriteInfo($"Issues Found: {issues.Count} total");
-        
+
         if (criticalIssues.Any()) {
             OutputFormatter.WriteError($"  🔴 Critical: {criticalIssues.Count}");
         }
@@ -687,7 +692,7 @@ public class DoctorCommand(
             foreach (var severityGroup in issues.GroupBy(i => i.Severity).OrderBy(g => g.Key)) {
                 var severityText = GetSeverityText(severityGroup.Key);
                 OutputFormatter.WriteInfo($"{severityText} Issues:");
-                
+
                 foreach (var issue in severityGroup.OrderBy(i => i.Category).ThenBy(i => i.Title)) {
                     OutputFormatter.WriteInfo($"  [{issue.Category}] {issue.Title}");
                     if (!string.IsNullOrEmpty(issue.Description)) {
@@ -700,24 +705,25 @@ public class DoctorCommand(
                 OutputFormatter.WriteLine();
             }
         }
+        return Task.CompletedTask;
     }
 
-    private async Task DisplayIntegrityResultAsync(PackageIntegrityResult result, bool verbose) {
+    private Task DisplayIntegrityResultAsync(PackageIntegrityResult result, bool verbose) {
         OutputFormatter.WriteLine();
         OutputFormatter.WriteInfo("Package Integrity Check Results:");
         OutputFormatter.WriteInfo($"  Total packages checked: {result.TotalPackagesChecked}");
         OutputFormatter.WriteInfo($"  Valid packages: {result.ValidPackages}");
-        
+
         if (result.CorruptedPackages > 0) {
             OutputFormatter.WriteError($"  Corrupted packages: {result.CorruptedPackages}");
         }
-        
+
         OutputFormatter.WriteInfo($"  Check duration: {result.CheckDuration.TotalSeconds:F1}s");
 
         if (result.Issues.Any()) {
             OutputFormatter.WriteLine();
             OutputFormatter.WriteWarning("Integrity Issues:");
-            
+
             foreach (var issue in result.Issues) {
                 OutputFormatter.WriteWarning($"  {issue.PackageName}@{issue.Version}: {issue.Description}");
                 if (issue.CanRepair && !string.IsNullOrEmpty(issue.RepairAction)) {
@@ -725,15 +731,17 @@ public class DoctorCommand(
                 }
             }
         }
+        return Task.CompletedTask;
     }
 
-    private async Task DisplayDependencyResultAsync(DependencyConsistencyResult result, bool verbose) {
+    private Task DisplayDependencyResultAsync(DependencyConsistencyResult result, bool verbose) {
         OutputFormatter.WriteLine();
         OutputFormatter.WriteInfo("Dependency Consistency Results:");
 
         if (result.IsConsistent) {
             OutputFormatter.WriteSuccess("  All dependencies are consistent");
-        } else {
+        }
+        else {
             OutputFormatter.WriteError($"  Found {result.Conflicts.Count} dependency conflicts");
         }
 
@@ -747,7 +755,7 @@ public class DoctorCommand(
         if (result.Conflicts.Any()) {
             OutputFormatter.WriteLine();
             OutputFormatter.WriteWarning("Dependency Conflicts:");
-            
+
             foreach (var conflict in result.Conflicts) {
                 var severityColor = GetConflictSeverityColor(conflict.Severity);
                 OutputFormatter.WriteInfo($"  [{severityColor}]{conflict.Severity}[/] {conflict.DependencyName}:");
@@ -767,15 +775,18 @@ public class DoctorCommand(
         foreach (var suggestion in result.Suggestions) {
             OutputFormatter.WriteInfo($"  💡 {suggestion}");
         }
+
+        return Task.CompletedTask;
     }
 
-    private async Task DisplayCacheResultAsync(CacheHealthResult result, bool verbose) {
+    private Task DisplayCacheResultAsync(CacheHealthResult result, bool verbose) {
         OutputFormatter.WriteLine();
         OutputFormatter.WriteInfo("Cache Health Results:");
 
         if (result.IsHealthy) {
             OutputFormatter.WriteSuccess("  Cache is healthy");
-        } else {
+        }
+        else {
             OutputFormatter.WriteWarning("  Cache has issues");
         }
 
@@ -808,15 +819,18 @@ public class DoctorCommand(
         foreach (var optimization in result.Optimizations) {
             OutputFormatter.WriteInfo($"  ⚡ {optimization}");
         }
+
+        return Task.CompletedTask;
     }
 
-    private async Task DisplayConfigurationResultAsync(ConfigurationValidationResult result, bool verbose) {
+    private Task DisplayConfigurationResultAsync(ConfigurationValidationResult result, bool verbose) {
         OutputFormatter.WriteLine();
         OutputFormatter.WriteInfo("Configuration Validation Results:");
 
         if (result.IsValid) {
             OutputFormatter.WriteSuccess("  Configuration is valid");
-        } else {
+        }
+        else {
             OutputFormatter.WriteError($"  Configuration has {result.Issues.Count} issues");
         }
 
@@ -831,15 +845,15 @@ public class DoctorCommand(
         if (result.Issues.Any()) {
             OutputFormatter.WriteLine();
             OutputFormatter.WriteWarning("Configuration Issues:");
-            
+
             foreach (var issue in result.Issues.OrderBy(i => i.Severity)) {
                 var severityIcon = GetSeverityIcon(issue.Severity);
                 OutputFormatter.WriteInfo($"  {severityIcon} [{issue.ConfigKey}] {issue.Description}");
-                
+
                 if (!string.IsNullOrEmpty(issue.SuggestedValue)) {
                     OutputFormatter.WriteInfo($"    Suggested: {issue.SuggestedValue}");
                 }
-                
+
                 if (!string.IsNullOrEmpty(issue.FixCommand)) {
                     OutputFormatter.WriteInfo($"    Fix: {issue.FixCommand}");
                 }
@@ -853,18 +867,20 @@ public class DoctorCommand(
         foreach (var optimization in result.OptimizationSuggestions) {
             OutputFormatter.WriteInfo($"  ⚡ {optimization}");
         }
+
+        return Task.CompletedTask;
     }
 
-    private async Task DisplaySecurityResultAsync(SecurityAuditResult result, bool verbose) {
+    private Task DisplaySecurityResultAsync(SecurityAuditResult result, bool verbose) {
         OutputFormatter.WriteLine();
         OutputFormatter.WriteInfo("Security Audit Results:");
 
         var scoreText = GetHealthScoreText(result.SecurityScore);
         var scoreColor = GetHealthScoreColor(result.SecurityScore);
         OutputFormatter.WriteInfo($"  Security Score: [{scoreColor}]{scoreText}[/]");
-        
+
         OutputFormatter.WriteInfo($"  Packages scanned: {result.TotalPackagesScanned}");
-        
+
         if (result.VulnerablePackages > 0) {
             OutputFormatter.WriteWarning($"  Vulnerable packages: {result.VulnerablePackages}");
         }
@@ -885,19 +901,19 @@ public class DoctorCommand(
         if (result.Issues.Any() && verbose) {
             OutputFormatter.WriteLine();
             OutputFormatter.WriteWarning("Security Issues:");
-            
+
             foreach (var issue in result.Issues.OrderByDescending(i => i.Severity)) {
                 var severityIcon = GetSecuritySeverityIcon(issue.Severity);
                 OutputFormatter.WriteInfo($"  {severityIcon} {issue.PackageName}@{issue.Version}: {issue.Title}");
-                
+
                 if (!string.IsNullOrEmpty(issue.Description)) {
                     OutputFormatter.WriteInfo($"    {issue.Description}");
                 }
-                
+
                 if (!string.IsNullOrEmpty(issue.FixVersion)) {
                     OutputFormatter.WriteInfo($"    Fix available in: {issue.FixVersion}");
                 }
-                
+
                 if (!string.IsNullOrEmpty(issue.CvssScore)) {
                     OutputFormatter.WriteInfo($"    CVSS Score: {issue.CvssScore}");
                 }
@@ -907,9 +923,11 @@ public class DoctorCommand(
         foreach (var recommendation in result.Recommendations) {
             OutputFormatter.WriteInfo($"  🛡️  {recommendation}");
         }
+
+        return Task.CompletedTask;
     }
 
-    private async Task DisplayPerformanceResultAsync(PerformanceAnalysisResult result, bool verbose) {
+    private Task DisplayPerformanceResultAsync(PerformanceAnalysisResult result, bool verbose) {
         OutputFormatter.WriteLine();
         OutputFormatter.WriteInfo("Performance Analysis Results:");
 
@@ -923,7 +941,7 @@ public class DoctorCommand(
         var packageSizeMB = result.DiskUsage.TotalPackageSize / (1024.0 * 1024.0);
         var cacheSizeMB = result.DiskUsage.CacheSize / (1024.0 * 1024.0);
         var tempSizeMB = result.DiskUsage.TempSize / (1024.0 * 1024.0);
-        
+
         OutputFormatter.WriteInfo($"  Disk usage:");
         OutputFormatter.WriteInfo($"    Packages: {packageSizeMB:F1} MB ({result.DiskUsage.PackageCount} packages)");
         OutputFormatter.WriteInfo($"    Cache: {cacheSizeMB:F1} MB");
@@ -938,7 +956,8 @@ public class DoctorCommand(
         if (result.NetworkLatency.IsReachable) {
             OutputFormatter.WriteInfo($"  Network latency: {result.NetworkLatency.RegistryLatency.TotalMilliseconds:F0}ms");
             OutputFormatter.WriteInfo($"  Connection quality: {result.NetworkLatency.ConnectionQuality}");
-        } else {
+        }
+        else {
             OutputFormatter.WriteWarning("  Network: Not reachable");
         }
 
@@ -949,9 +968,11 @@ public class DoctorCommand(
         foreach (var warning in result.Warnings) {
             OutputFormatter.WriteWarning($"  ⚠️  {warning}");
         }
+
+        return Task.CompletedTask;
     }
 
-    private async Task DisplayEnvironmentInfoAsync(SystemEnvironmentInfo result, bool verbose) {
+    private Task DisplayEnvironmentInfoAsync(SystemEnvironmentInfo result, bool verbose) {
         OutputFormatter.WriteLine();
         OutputFormatter.WriteInfo("System Environment Information:");
         OutputFormatter.WriteLine();
@@ -974,7 +995,7 @@ public class DoctorCommand(
         if (verbose && result.EnvironmentVariables.Any()) {
             OutputFormatter.WriteLine();
             OutputFormatter.WriteInfo("Relevant Environment Variables:");
-            
+
             foreach (var envVar in result.EnvironmentVariables.OrderBy(kv => kv.Key)) {
                 OutputFormatter.WriteInfo($"  {envVar.Key}={envVar.Value}");
             }
@@ -983,86 +1004,80 @@ public class DoctorCommand(
         if (verbose && result.SystemInfo.Any()) {
             OutputFormatter.WriteLine();
             OutputFormatter.WriteInfo("System Information:");
-            
+
             foreach (var info in result.SystemInfo.OrderBy(kv => kv.Key)) {
                 OutputFormatter.WriteInfo($"  {info.Key}: {info.Value}");
             }
         }
+
+        return Task.CompletedTask;
     }
 
-    private async Task DisplayEnvironmentSummaryAsync(SystemEnvironmentInfo environment) {
+    private Task DisplayEnvironmentSummaryAsync(SystemEnvironmentInfo environment) {
         OutputFormatter.WriteInfo("Environment Summary:");
         OutputFormatter.WriteInfo($"  OS: {environment.OperatingSystem} ({environment.Architecture})");
         OutputFormatter.WriteInfo($"  .NET: {environment.DotNetVersion}");
         OutputFormatter.WriteInfo($"  CLI: {environment.CliVersion}");
         OutputFormatter.WriteLine();
+
+        return Task.CompletedTask;
     }
 
-    private async Task OutputHealthCheckAsJsonAsync(SystemHealthCheckResult result) {
+    private Task OutputHealthCheckAsJsonAsync(SystemHealthCheckResult result) {
         // This would serialize the result to JSON
         // For now, just output a placeholder
         OutputFormatter.WriteInfo("{ \"health_check\": \"json_output_placeholder\" }");
+
+        return Task.CompletedTask;
     }
 
-    private string GetHealthScoreText(HealthScore score) {
-        return score switch {
-            HealthScore.Excellent => "Excellent",
-            HealthScore.Good => "Good",
-            HealthScore.Fair => "Fair",
-            HealthScore.Poor => "Poor",
-            HealthScore.Critical => "Critical",
-            _ => score.ToString()
-        };
-    }
+    private string GetHealthScoreText(HealthScore score) => score switch {
+        HealthScore.Excellent => "Excellent",
+        HealthScore.Good => "Good",
+        HealthScore.Fair => "Fair",
+        HealthScore.Poor => "Poor",
+        HealthScore.Critical => "Critical",
+        _ => score.ToString()
+    };
 
-    private string GetHealthScoreColor(HealthScore score) {
-        return score switch {
-            HealthScore.Excellent => "green",
-            HealthScore.Good => "lime",
-            HealthScore.Fair => "yellow",
-            HealthScore.Poor => "orange",
-            HealthScore.Critical => "red",
-            _ => "white"
-        };
-    }
+    private string GetHealthScoreColor(HealthScore score) => score switch {
+        HealthScore.Excellent => "green",
+        HealthScore.Good => "lime",
+        HealthScore.Fair => "yellow",
+        HealthScore.Poor => "orange",
+        HealthScore.Critical => "red",
+        _ => "white"
+    };
 
-    private string GetSeverityText(IssueSeverity severity) {
-        return severity switch {
-            IssueSeverity.Critical => "🔴 Critical",
-            IssueSeverity.Error => "🟠 Error",
-            IssueSeverity.Warning => "🟡 Warning",
-            IssueSeverity.Info => "🔵 Info",
-            _ => severity.ToString()
-        };
-    }
+    private string GetSeverityText(IssueSeverity severity) => severity switch {
+        IssueSeverity.Critical => "🔴 Critical",
+        IssueSeverity.Error => "🟠 Error",
+        IssueSeverity.Warning => "🟡 Warning",
+        IssueSeverity.Info => "🔵 Info",
+        _ => severity.ToString()
+    };
 
-    private string GetSeverityIcon(IssueSeverity severity) {
-        return severity switch {
-            IssueSeverity.Critical => "🔴",
-            IssueSeverity.Error => "🟠",
-            IssueSeverity.Warning => "🟡",
-            IssueSeverity.Info => "🔵",
-            _ => "•"
-        };
-    }
+    private string GetSeverityIcon(IssueSeverity severity) => severity switch {
+        IssueSeverity.Critical => "🔴",
+        IssueSeverity.Error => "🟠",
+        IssueSeverity.Warning => "🟡",
+        IssueSeverity.Info => "🔵",
+        _ => "•"
+    };
 
-    private string GetSecuritySeverityIcon(SecuritySeverity severity) {
-        return severity switch {
-            SecuritySeverity.Critical => "🔴",
-            SecuritySeverity.High => "🟠",
-            SecuritySeverity.Medium => "🟡",
-            SecuritySeverity.Low => "🟢",
-            _ => "•"
-        };
-    }
+    private string GetSecuritySeverityIcon(SecuritySeverity severity) => severity switch {
+        SecuritySeverity.Critical => "🔴",
+        SecuritySeverity.High => "🟠",
+        SecuritySeverity.Medium => "🟡",
+        SecuritySeverity.Low => "🟢",
+        _ => "•"
+    };
 
-    private string GetConflictSeverityColor(ConflictSeverity severity) {
-        return severity switch {
-            ConflictSeverity.Critical => "red",
-            ConflictSeverity.High => "orange",
-            ConflictSeverity.Medium => "yellow",
-            ConflictSeverity.Low => "green",
-            _ => "white"
-        };
-    }
+    private string GetConflictSeverityColor(ConflictSeverity severity) => severity switch {
+        ConflictSeverity.Critical => "red",
+        ConflictSeverity.High => "orange",
+        ConflictSeverity.Medium => "yellow",
+        ConflictSeverity.Low => "green",
+        _ => "white"
+    };
 }

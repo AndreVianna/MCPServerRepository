@@ -88,9 +88,9 @@ public class JwtServiceTests {
     }
 
     [Fact]
-    public async Task GenerateAccessTokenAsync_WithNullUser_ShouldThrowArgumentNullException() =>
+    public async Task GenerateAccessTokenAsync_WithNullUser_ShouldThrowArgumentNullException()
         // Act & Assert
-        await FluentActions.Invoking(() => _jwtService.GenerateAccessTokenAsync(null!))
+        => await FluentActions.Invoking(() => _jwtService.GenerateAccessTokenAsync(null!))
             .Should().ThrowAsync<ArgumentNullException>();
 
     [Fact]
@@ -111,9 +111,9 @@ public class JwtServiceTests {
     }
 
     [Fact]
-    public async Task GenerateRefreshTokenAsync_WithNullUser_ShouldThrowArgumentNullException() =>
+    public async Task GenerateRefreshTokenAsync_WithNullUser_ShouldThrowArgumentNullException()
         // Act & Assert
-        await FluentActions.Invoking(() => _jwtService.GenerateRefreshTokenAsync(null!))
+        => await FluentActions.Invoking(() => _jwtService.GenerateRefreshTokenAsync(null!))
             .Should().ThrowAsync<ArgumentNullException>();
 
     [Fact]
@@ -295,7 +295,7 @@ public class JwtServiceTests {
         userId.Should().BeNull();
     }
 
-    private static ApplicationUser CreateTestUser() => new ApplicationUser("testuser", "test@example.com") {
+    private static ApplicationUser CreateTestUser() => new("testuser", "test@example.com") {
         Id = Guid.NewGuid(),
         UserName = "testuser",
         Email = "test@example.com",

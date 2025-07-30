@@ -4,8 +4,7 @@ namespace MCPHub.Common.Services;
 /// Dashboard service for Grafana dashboard management
 /// Skeleton implementation following contracts-first approach
 /// </summary>
-public class DashboardService : IDashboardService
-{
+public class DashboardService : IDashboardService {
     public Task<Dashboard> CreateDashboardAsync(DashboardDefinition definition, CancellationToken cancellationToken = default)
         => throw new NotImplementedException("Dashboard creation will be implemented when Grafana integration is needed");
 
@@ -41,8 +40,7 @@ public class DashboardService : IDashboardService
 /// Alerting service with PagerDuty/Slack integration
 /// Skeleton implementation following contracts-first approach
 /// </summary>
-public class AlertingService : IAlertingService
-{
+public class AlertingService : IAlertingService {
     public Task<AlertRule> CreateAlertRuleAsync(AlertRuleDefinition definition, CancellationToken cancellationToken = default)
         => throw new NotImplementedException("Alert rule creation will be implemented when alerting is needed");
 
@@ -84,8 +82,7 @@ public class AlertingService : IAlertingService
 /// SLA/SLI monitoring service for uptime tracking
 /// Skeleton implementation following contracts-first approach
 /// </summary>
-public class UptimeTrackingService : IUptimeTrackingService
-{
+public class UptimeTrackingService : IUptimeTrackingService {
     public Task<ServiceLevelIndicator> CreateSLIAsync(SLIDefinition definition, CancellationToken cancellationToken = default)
         => throw new NotImplementedException("SLI creation will be implemented when SLI monitoring is needed");
 

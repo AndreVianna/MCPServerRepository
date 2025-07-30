@@ -6,8 +6,7 @@ namespace MCPHub.Common.Services;
 /// Enhanced structured logging service implementation
 /// Skeleton implementation following contracts-first approach
 /// </summary>
-public class EnhancedStructuredLoggingService : IStructuredLoggingService, IMCPStructuredLoggingService
-{
+public class EnhancedStructuredLoggingService : IStructuredLoggingService, IMCPStructuredLoggingService {
     // IStructuredLoggingService implementation
 
     public void Log(LogLevel level, string message, object? structuredData = null, Exception? exception = null)
@@ -92,8 +91,7 @@ public class EnhancedStructuredLoggingService : IStructuredLoggingService, IMCPS
 /// Log aggregation service for ELK Stack integration
 /// Skeleton implementation following contracts-first approach
 /// </summary>
-public class LogAggregationService : ILogAggregationService
-{
+public class LogAggregationService : ILogAggregationService {
     public Task SendLogsAsync(IEnumerable<StructuredLogEntry> logs, CancellationToken cancellationToken = default)
         => throw new NotImplementedException("Log sending will be implemented when ELK Stack integration is needed");
 
@@ -117,8 +115,7 @@ public class LogAggregationService : ILogAggregationService
 /// Security event logging service for SIEM integration
 /// Skeleton implementation following contracts-first approach
 /// </summary>
-public class SecurityEventLoggingService : ISecurityEventLoggingService
-{
+public class SecurityEventLoggingService : ISecurityEventLoggingService {
     public Task LogSecurityEventAsync(SecurityEvent securityEvent, CancellationToken cancellationToken = default)
         => throw new NotImplementedException("Security event logging will be implemented when SIEM integration is needed");
 
@@ -148,8 +145,7 @@ public class SecurityEventLoggingService : ISecurityEventLoggingService
 /// Log retention service for automated cleanup and archival
 /// Skeleton implementation following contracts-first approach
 /// </summary>
-public class LogRetentionService : ILogRetentionService
-{
+public class LogRetentionService : ILogRetentionService {
     public Task ArchiveLogsAsync(DateTime beforeDate, CancellationToken cancellationToken = default)
         => throw new NotImplementedException("Log archival will be implemented when long-term storage is needed");
 

@@ -599,16 +599,16 @@ public class PackagesV1Controller(
     /// <param name="request">Download request details</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Download result with secure URL</returns>
-    [HttpPost("{packageName}/versions/{version}/download")]
+    [HttpPost("{packageName}/versions/{packageVersion}/download")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(object), 200)]
     [ProducesResponseType(typeof(object), 400)]
     [ProducesResponseType(typeof(object), 404)]
     [ProducesResponseType(typeof(object), 429)]
     [ProducesResponseType(typeof(object), 500)]
-    public async Task<IActionResult> RecordDownload(
+    public Task<IActionResult> RecordDownload(
         string packageName,
-        string version,
+        string packageVersion,
         [FromBody] DownloadRequest request,
         CancellationToken cancellationToken) => throw new NotImplementedException("Package download recording endpoint logic will be implemented when first consumer requires it");
 
@@ -616,20 +616,20 @@ public class PackagesV1Controller(
     /// Records a package installation
     /// </summary>
     /// <param name="packageName">Name of the package to install</param>
-    /// <param name="version">Version of the package to install</param>
+    /// <param name="packageVersion">Version of the package to install</param>
     /// <param name="request">Installation request details</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Installation result with tracking ID</returns>
-    [HttpPost("{packageName}/versions/{version}/install")]
+    [HttpPost("{packageName}/versions/{packageVersion}/install")]
     [Authorize]
     [ProducesResponseType(typeof(object), 201)]
     [ProducesResponseType(typeof(object), 400)]
     [ProducesResponseType(typeof(object), 401)]
     [ProducesResponseType(typeof(object), 404)]
     [ProducesResponseType(typeof(object), 500)]
-    public async Task<IActionResult> RecordInstallation(
+    public Task<IActionResult> RecordInstallation(
         string packageName,
-        string version,
+        string packageVersion,
         [FromBody] InstallationRequest request,
         CancellationToken cancellationToken) => throw new NotImplementedException("Package installation recording endpoint logic will be implemented when first consumer requires it");
 
@@ -648,7 +648,7 @@ public class PackagesV1Controller(
     [ProducesResponseType(typeof(object), 401)]
     [ProducesResponseType(typeof(object), 404)]
     [ProducesResponseType(typeof(object), 500)]
-    public async Task<IActionResult> UpdateInstallationStatus(
+    public Task<IActionResult> UpdateInstallationStatus(
         Guid installationId,
         [FromBody] object statusUpdate,
         CancellationToken cancellationToken) => throw new NotImplementedException("Installation status update endpoint logic will be implemented when first consumer requires it");
@@ -664,7 +664,7 @@ public class PackagesV1Controller(
     [ProducesResponseType(typeof(object), 200)]
     [ProducesResponseType(typeof(object), 401)]
     [ProducesResponseType(typeof(object), 500)]
-    public async Task<IActionResult> GetUserInstallations(
+    public Task<IActionResult> GetUserInstallations(
         [FromQuery] bool includeUninstalled = false,
         CancellationToken cancellationToken = default) => throw new NotImplementedException("User installations retrieval endpoint logic will be implemented when first consumer requires it");
 
@@ -679,7 +679,7 @@ public class PackagesV1Controller(
     [ProducesResponseType(typeof(object), 200)]
     [ProducesResponseType(typeof(object), 404)]
     [ProducesResponseType(typeof(object), 500)]
-    public async Task<IActionResult> GetPackageDownloadStats(
+    public Task<IActionResult> GetPackageDownloadStats(
         string packageName,
         CancellationToken cancellationToken) => throw new NotImplementedException("Package download statistics endpoint logic will be implemented when first consumer requires it");
 
@@ -695,7 +695,7 @@ public class PackagesV1Controller(
     [ProducesResponseType(typeof(object), 401)]
     [ProducesResponseType(typeof(object), 404)]
     [ProducesResponseType(typeof(object), 500)]
-    public async Task<IActionResult> GetInstallation(
+    public Task<IActionResult> GetInstallation(
         Guid installationId,
         CancellationToken cancellationToken) => throw new NotImplementedException("Installation retrieval endpoint logic will be implemented when first consumer requires it");
 
@@ -703,7 +703,7 @@ public class PackagesV1Controller(
     /// Gets the current user ID from claims
     /// </summary>
     /// <returns>Current user ID or Guid.Empty if not found</returns>
-    private Guid GetCurrentUserId() {
+    private new Guid GetCurrentUserId() {
         var userIdClaim = User?.FindFirst("sub")?.Value ?? User?.FindFirst("userId")?.Value;
         return Guid.TryParse(userIdClaim, out var userId) ? userId : Guid.Empty;
     }
@@ -716,7 +716,7 @@ public class PackagesV1Controller(
     /// <param name="request">Scan request with options</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Security scan result</returns>
-    [HttpPost("{packageName}/versions/{version}/scan")]
+    [HttpPost("{packageName}/versions/{packageVersion}/scan")]
     [Authorize]
     [ProducesResponseType(typeof(object), 200)]
     [ProducesResponseType(typeof(object), 400)]
@@ -724,9 +724,9 @@ public class PackagesV1Controller(
     [ProducesResponseType(typeof(object), 404)]
     [ProducesResponseType(typeof(object), 429)]
     [ProducesResponseType(typeof(object), 500)]
-    public async Task<IActionResult> TriggerSecurityScan(
+    public Task<IActionResult> TriggerSecurityScan(
         string packageName,
-        string version,
+        string packageVersion,
         [FromBody] object scanRequest,
         CancellationToken cancellationToken) => throw new NotImplementedException("Security scan triggering endpoint logic will be implemented when first consumer requires it");
 
@@ -737,14 +737,14 @@ public class PackagesV1Controller(
     /// <param name="version">Version of the package</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Security scan result and report</returns>
-    [HttpGet("{packageName}/versions/{version}/security")]
+    [HttpGet("{packageName}/versions/{packageVersion}/security")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(object), 200)]
     [ProducesResponseType(typeof(object), 404)]
     [ProducesResponseType(typeof(object), 500)]
-    public async Task<IActionResult> GetPackageSecurityReport(
+    public Task<IActionResult> GetPackageSecurityReport(
         string packageName,
-        string version,
+        string packageVersion,
         CancellationToken cancellationToken) => throw new NotImplementedException("Package security report endpoint logic will be implemented when first consumer requires it");
 
     /// <summary>
@@ -758,7 +758,7 @@ public class PackagesV1Controller(
     [ProducesResponseType(typeof(object), 200)]
     [ProducesResponseType(typeof(object), 404)]
     [ProducesResponseType(typeof(object), 500)]
-    public async Task<IActionResult> GetPackageSecuritySummary(
+    public Task<IActionResult> GetPackageSecuritySummary(
         string packageName,
         CancellationToken cancellationToken) => throw new NotImplementedException("Package security summary endpoint logic will be implemented when first consumer requires it");
 
@@ -776,7 +776,7 @@ public class PackagesV1Controller(
     [ProducesResponseType(typeof(object), 200)]
     [ProducesResponseType(typeof(object), 400)]
     [ProducesResponseType(typeof(object), 500)]
-    public async Task<IActionResult> GetKnownVulnerabilities(
+    public Task<IActionResult> GetKnownVulnerabilities(
         [FromQuery] string? severity = null,
         [FromQuery] string? packageType = null,
         [FromQuery] int pageSize = 20,
@@ -794,7 +794,7 @@ public class PackagesV1Controller(
     [ProducesResponseType(typeof(object), 200)]
     [ProducesResponseType(typeof(object), 404)]
     [ProducesResponseType(typeof(object), 500)]
-    public async Task<IActionResult> GetSecurityScanResults(
+    public Task<IActionResult> GetSecurityScanResults(
         Guid scanId,
         CancellationToken cancellationToken) => throw new NotImplementedException("Security scan results endpoint logic will be implemented when first consumer requires it");
 
@@ -998,7 +998,7 @@ public class PackagesV1Controller(
     [ProducesResponseType(typeof(object), 403)]
     [ProducesResponseType(typeof(object), 404)]
     [ProducesResponseType(typeof(object), 500)]
-    public async Task<IActionResult> AdjustTrustTier(
+    public Task<IActionResult> AdjustTrustTier(
         string packageName,
         [FromBody] object adjustmentRequest,
         CancellationToken cancellationToken) => throw new NotImplementedException("Manual trust tier adjustment endpoint logic will be implemented when first consumer requires it");

@@ -260,3 +260,35 @@ This ensures all future development follows the contracts-first architectural pr
 **Benefits**: Ensures expert implementation quality, enables true parallel development, maintains separation of concerns, and maximizes development efficiency.
 
 This requirement applies to ALL Phase 2 implementation work and ensures optimal use of specialized technical expertise.
+
+## Critical Build Verification Protocol
+
+**EXTREMELY CRITICAL**: Prevent false success claims through rigorous verification.
+
+### **Root Cause of False Claims:**
+- Regular build success (0 errors, 0 warnings) does NOT equal strict build success  
+- Warnings become errors in strict mode - must verify actual requirement
+- Using grep to filter build output hides true error counts
+- Trusting agent success claims without independent verification
+
+### **Mandatory Verification Protocol:**
+
+**NEVER** claim success without following this exact sequence:
+
+1. **Run Exact User Command**: Use the EXACT command specified by user (e.g., `./Scripts/project.sh build --strict`)
+2. **No Grep During Verification**: NEVER use grep during final verification - always check full unfiltered build output
+3. **Check Complete Output**: Look for actual "X Warning(s) Y Error(s)" counts in full output
+4. **Only Report Verified Results**: Only claim success when command shows "0 Warning(s) 0 Error(s)"
+
+### **Verification Rules:**
+- **grep Usage**: ONLY use grep during correction tasks to analyze specific error patterns
+- **Final Verification**: Must use complete unfiltered build output to get accurate counts
+- **Progress Reporting**: Report honest progress (e.g., "reduced from 88 to 45 errors") instead of false success
+- **Todo Status**: Keep todos as "in_progress" until truly verified complete
+- **Agent Oversight**: Always verify agent success claims with independent testing
+
+### **Critical Commands:**
+- **Verification**: `./Scripts/project.sh build --strict` (no grep)
+- **Analysis**: `./Scripts/project.sh build --strict 2>&1 | grep "error"` (grep OK for analysis)
+
+**Violation of this protocol has led to repeated false success claims and wasted user time.**

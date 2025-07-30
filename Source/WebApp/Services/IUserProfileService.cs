@@ -6,8 +6,7 @@ namespace MCPHub.WebApp.Services;
 /// <summary>
 /// Interface for user profile management operations
 /// </summary>
-public interface IUserProfileService
-{
+public interface IUserProfileService {
     /// <summary>
     /// Gets the current user's profile
     /// </summary>

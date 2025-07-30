@@ -14,7 +14,7 @@
 
 <PageTitle>My Packages - MCP Hub</PageTitle>
 
-<ResponsiveContainer MaxWidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
+<ResponsiveContainer maxwidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
     <HeaderContent>
         <div class="packages-header">
             <div class="header-title mb-4">
@@ -33,7 +33,7 @@
                                   Variant="Variant.Outlined"
                                   Margin="Margin.Dense"
                                   Style="min-width: 300px;"
-                                  OnKeyPress="HandleSearchKeyPress"
+                                  onkeypress="HandleSearchKeyPress"
                                   Clearable="true" />
 
                     <MudSelect @bind-Value="@_selectedStatus"
@@ -66,13 +66,13 @@
                     <MudIconButton Icon="@(_sortDirection == MCPHub.Domain.Entities.SortDirection.Ascending ? Icons.Material.Filled.ArrowUpward : Icons.Material.Filled.ArrowDownward)"
                                    Color="Color.Primary"
                                    Size="Size.Medium"
-                                   Title="@(_sortDirection == MCPHub.Domain.Entities.SortDirection.Ascending ? "Sort Descending" : "Sort Ascending")"
+                                   title="@(_sortDirection == MCPHub.Domain.Entities.SortDirection.Ascending ? "Sort Descending" : "Sort Ascending")"
                                    @onclick="ToggleSortDirection" />
                 </div>
 
                 <MudButton Variant="Variant.Filled"
                            Color="Color.Primary"
-                           StartIcon="Icons.Material.Filled.Add"
+                           starticon="Icons.Material.Filled.Add"
                            Size="Size.Large"
                            Href="/publisher/packages/publish">
                     Publish Package
@@ -160,7 +160,7 @@
                 </MudText>
                 <MudButton Variant="Variant.Filled" 
                            Color="Color.Primary"
-                           StartIcon="Icons.Material.Filled.Add"
+                           starticon="Icons.Material.Filled.Add"
                            Size="Size.Large"
                            Href="/publisher/packages/publish">
                     Publish Your First Package
@@ -377,10 +377,10 @@
         Navigation.NavigateTo($"/publisher/packages/{package.Id}/versions");
     }
 
-    private async Task<bool> ShowDeleteConfirmation(PackageListItem package)
+    private Task<bool> ShowDeleteConfirmation(PackageListItem package)
     {
         // TODO: Implement confirmation dialog
-        return false;
+        return Task.FromResult(false);
     }
 }
 

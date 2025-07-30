@@ -11,7 +11,9 @@ namespace MCPHub.Domain.UnitTests.Services;
 public class PackagePublishingServiceTests {
     private PackagePublishingService _service;
 
-        public PackagePublishingServiceTests() => _service = new PackagePublishingService();
+    public PackagePublishingServiceTests() {
+        _service = new PackagePublishingService();
+    }
 
     [Fact]
     [Trait("Category", "Unit")]

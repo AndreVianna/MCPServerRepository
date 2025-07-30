@@ -5,7 +5,7 @@
 
 <PageTitle>Component Showcase - MCP Hub</PageTitle>
 
-<ResponsiveContainer MaxWidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
+<ResponsiveContainer maxwidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
     <HeaderContent>
         <div class="d-flex justify-space-between align-center">
             <div>
@@ -16,7 +16,7 @@
             </div>
             <MudButton Color="Color.Primary" 
                        Variant="Variant.Outlined"
-                       StartIcon="Icons.Material.Filled.Code"
+                       starticon="Icons.Material.Filled.Code"
                        Href="https://github.com/your-repo"
                        Target="_blank">
                 View Source
@@ -115,7 +115,7 @@
                     <MudItem xs="12" lg="4">
                         <MudPaper Class="pa-4" Elevation="2">
                             <MudText Typo="Typo.h6" Class="mb-3">Package Features</MudText>
-                            <MudList T="string" Dense="true">
+                            <MudList T="string" dense="true">
                                 <MudListItem T="string" Icon="@Icons.Material.Filled.Security" Text="Security grade badges" />
                                 <MudListItem T="string" Icon="@Icons.Material.Filled.Shield" Text="Trust tier indicators" />
                                 <MudListItem T="string" Icon="@Icons.Material.Filled.TrendingUp" Text="Trending indicators" />
@@ -167,7 +167,7 @@
                 
                 <MudGrid>
                     <MudItem xs="12" md="8">
-                        <AnalyticsChart Title="Download Trends"
+                        <AnalyticsChart title="Download Trends"
                                        Subtitle="Package downloads over the last 30 days"
                                        ChartType="ChartTypeConverter.FromMudBlazor(MudBlazor.ChartType.Line)"
                                        ChartSeries="@GetSampleChartData()"
@@ -179,7 +179,7 @@
                     </MudItem>
                     
                     <MudItem xs="12" md="4">
-                        <AnalyticsChart Title="Security Distribution"
+                        <AnalyticsChart title="Security Distribution"
                                        ChartType="ChartTypeConverter.FromMudBlazor(MudBlazor.ChartType.Donut)"
                                        ChartSeries="@GetSecurityDistributionData()"
                                        ShowTimeRangeSelector="false"
@@ -198,7 +198,7 @@
                     
                     <MudGrid>
                         <MudItem xs="12" md="6">
-                            <MudList T="string" Dense="true">
+                            <MudList T="string" dense="true">
                                 <MudListItem T="string" Icon="@Icons.Material.Filled.Smartphone" Text="Mobile-first responsive design" />
                                 <MudListItem T="string" Icon="@Icons.Material.Filled.Tablet" Text="Tablet-optimized layouts" />
                                 <MudListItem T="string" Icon="@Icons.Material.Filled.Computer" Text="Desktop multi-column layouts" />
@@ -206,7 +206,7 @@
                             </MudList>
                         </MudItem>
                         <MudItem xs="12" md="6">
-                            <MudList T="string" Dense="true">
+                            <MudList T="string" dense="true">
                                 <MudListItem T="string" Icon="@Icons.Material.Filled.Fullscreen" Text="Full-height container support" />
                                 <MudListItem T="string" Icon="@Icons.Material.Filled.Tune" Text="Flexible max-width options" />
                                 <MudListItem T="string" Icon="@Icons.Material.Filled.AccessibilityNew" Text="Built-in accessibility features" />
@@ -229,7 +229,7 @@
     <SidebarContent>
         <MudPaper Class="pa-4 mb-4" Elevation="2">
             <MudText Typo="Typo.h6" Class="mb-2">💡 Component Tips</MudText>
-            <MudList T="string" Dense="true">
+            <MudList T="string" dense="true">
                 <MudListItem T="string" Icon="@Icons.Material.Filled.Keyboard" Text="All components support keyboard navigation" />
                 <MudListItem T="string" Icon="@Icons.Material.Filled.RecordVoiceOver" Text="Screen reader compatible" />
                 <MudListItem T="string" Icon="@Icons.Material.Filled.Palette" Text="Automatic dark mode support" />
@@ -242,23 +242,23 @@
             <div class="d-flex flex-column gap-2">
                 <MudButton Color="Color.Primary" 
                            Variant="Variant.Filled"
-                           StartIcon="@Icons.Material.Filled.Home"
+                           starticon="@Icons.Material.Filled.Home"
                            Href="/"
-                           FullWidth="true">
+                           fullwidth="true">
                     Back to Home
                 </MudButton>
                 <MudButton Color="Color.Secondary" 
                            Variant="Variant.Outlined"
-                           StartIcon="@Icons.Material.Filled.Search"
+                           starticon="@Icons.Material.Filled.Search"
                            Href="/search"
-                           FullWidth="true">
+                           fullwidth="true">
                     Try Search
                 </MudButton>
                 <MudButton Color="Color.Info" 
                            Variant="Variant.Text"
-                           StartIcon="@Icons.Material.Filled.Help"
+                           starticon="@Icons.Material.Filled.Help"
                            @onclick="ShowComponentHelp"
-                           FullWidth="true">
+                           fullwidth="true">
                     Component Help
                 </MudButton>
             </div>

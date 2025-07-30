@@ -43,8 +43,7 @@ public class UpdateCommand(
         var command = new Command("update", "Update MCP packages to their latest versions with dependency checking");
 
         // Arguments
-        _packageArgument = new Argument<string?>("package", "Package name to update (optional - if not specified, checks all packages)")
-        {
+        _packageArgument = new Argument<string?>("package", "Package name to update (optional - if not specified, checks all packages)") {
             Arity = ArgumentArity.ZeroOrOne
         };
         command.AddArgument(_packageArgument);
@@ -126,7 +125,7 @@ public class UpdateCommand(
         var yes = context.ParseResult.GetValueForOption(_yesOption!);
         var nonInteractive = context.ParseResult.GetValueForOption(_nonInteractiveOption!);
         var verbose = context.ParseResult.GetValueForOption(_verboseOption!);
-        
+
         try {
             Logger.LogInformation("Executing update command: Package={Package}, Version={Version}, Global={Global}",
                 package, version, global);
@@ -161,7 +160,7 @@ public class UpdateCommand(
         bool yes,
         bool nonInteractive,
         bool verbose) {
-        
+
         using var progress = ProgressReporter.CreateStepProgress("Package Updates", new[] {
             "Checking for updates",
             "Analyzing dependencies",
@@ -170,15 +169,15 @@ public class UpdateCommand(
 
         // Stage 1: Check for updates
         progress.StartStep(0, "Scanning installed packages for updates...");
-        
+
         try {
             var updateInfo = await _updateService.CheckForUpdatesAsync(global, prerelease);
-            
+
             if (!updateInfo.Any()) {
                 progress.CompleteStep(0, "All packages are up to date");
                 progress.SkipStep(1, "No updates available");
                 progress.SkipStep(2, "No updates available");
-                
+
                 OutputFormatter.WriteSuccess("All packages are already up to date!");
                 return 0;
             }
@@ -210,13 +209,13 @@ public class UpdateCommand(
             // Stage 2: Dependency analysis (if not skipped)
             if (!skipDependencyCheck) {
                 progress.StartStep(1, "Analyzing dependency impacts...");
-                
+
                 var dependencyIssues = new List<string>();
-                
+
                 foreach (var update in updateInfo) {
                     var validation = await _updateService.ValidateUpdateDependenciesAsync(
                         update.PackageName, update.LatestVersion, global);
-                    
+
                     if (!validation.IsValid) {
                         dependencyIssues.AddRange(validation.Conflicts);
                     }
@@ -224,7 +223,7 @@ public class UpdateCommand(
 
                 if (dependencyIssues.Any()) {
                     progress.FailStep(1, "Dependency conflicts detected");
-                    
+
                     OutputFormatter.WriteError("Dependency conflicts detected:");
                     foreach (var issue in dependencyIssues) {
                         OutputFormatter.WriteError($"  - {issue}");
@@ -237,26 +236,29 @@ public class UpdateCommand(
                             progress.SkipStep(2, "Cancelled due to conflicts");
                             return 130;
                         }
-                    } else {
+                    }
+                    else {
                         OutputFormatter.WriteError("Update cancelled due to dependency conflicts");
                         return 1;
                     }
                 }
-                
+
                 progress.CompleteStep(1, "Dependency analysis completed");
-            } else {
+            }
+            else {
                 progress.SkipStep(1, "Dependency check skipped");
             }
 
             // Stage 3: Perform updates
             progress.StartStep(2, "Updating packages...");
-            
+
             var result = await _updateService.UpdateAllPackagesAsync(global, prerelease, skipDependencyCheck, createBackup);
-            
+
             if (result.Success) {
                 progress.CompleteStep(2, $"Successfully updated {result.UpdatedPackages} packages");
                 return await HandleBatchUpdateResultAsync(result, verbose);
-            } else {
+            }
+            else {
                 progress.FailStep(2, "Some updates failed");
                 return await HandleBatchUpdateResultAsync(result, verbose);
             }
@@ -280,7 +282,7 @@ public class UpdateCommand(
         bool yes,
         bool nonInteractive,
         bool verbose) {
-        
+
         using var progress = ProgressReporter.CreateStepProgress("Package Update", new[] {
             "Checking package updates",
             "Analyzing dependencies",
@@ -290,16 +292,16 @@ public class UpdateCommand(
 
         // Stage 1: Check for updates
         progress.StartStep(0, $"Checking updates for '{packageName}'...");
-        
+
         try {
             var updateInfo = await _updateService.CheckPackageUpdatesAsync(packageName, global, prerelease);
-            
+
             if (updateInfo == null) {
                 progress.CompleteStep(0, "Package is up to date");
                 progress.SkipStep(1, "No updates available");
                 progress.SkipStep(2, "No updates available");
                 progress.SkipStep(3, "No updates available");
-                
+
                 OutputFormatter.WriteSuccess($"Package '{packageName}' is already up to date!");
                 return 0;
             }
@@ -312,13 +314,13 @@ public class UpdateCommand(
             // Stage 2: Dependency validation (if not skipped)
             if (!skipDependencyCheck) {
                 progress.StartStep(1, "Validating dependencies...");
-                
+
                 var validation = await _updateService.ValidateUpdateDependenciesAsync(
                     packageName, targetVersion ?? updateInfo.LatestVersion, global);
-                
+
                 if (!validation.IsValid) {
                     progress.FailStep(1, "Dependency conflicts detected");
-                    
+
                     OutputFormatter.WriteError("Dependency conflicts detected:");
                     foreach (var conflict in validation.Conflicts) {
                         OutputFormatter.WriteError($"  - {conflict}");
@@ -332,31 +334,35 @@ public class UpdateCommand(
                             progress.SkipStep(3, "Cancelled due to conflicts");
                             return 130;
                         }
-                    } else if (!force) {
+                    }
+                    else if (!force) {
                         OutputFormatter.WriteError("Update cancelled due to dependency conflicts");
                         return 1;
                     }
                 }
-                
+
                 progress.CompleteStep(1, "Dependencies validated");
-            } else {
+            }
+            else {
                 progress.SkipStep(1, "Dependency check skipped");
             }
 
             // Stage 3: Show changelog (if requested)
             if (showChangelog) {
                 progress.StartStep(2, "Retrieving changelog...");
-                
+
                 var changelog = await _updateService.GetChangelogAsync(
                     packageName, updateInfo.CurrentVersion, targetVersion ?? updateInfo.LatestVersion);
-                
+
                 if (changelog != null) {
                     await DisplayChangelogAsync(changelog, nonInteractive);
                     progress.CompleteStep(2, "Changelog displayed");
-                } else {
+                }
+                else {
                     progress.CompleteStep(2, "No changelog available");
                 }
-            } else {
+            }
+            else {
                 progress.SkipStep(2, "Changelog display disabled");
             }
 
@@ -379,14 +385,15 @@ public class UpdateCommand(
 
             // Stage 4: Perform update
             progress.StartStep(3, $"Updating {packageName}...");
-            
+
             var result = await _updateService.UpdatePackageAsync(
                 packageName, targetVersion, global, force, skipDependencyCheck, createBackup);
-            
+
             if (result.Success) {
                 progress.CompleteStep(3, $"Successfully updated to {result.NewVersion}");
                 return await HandleUpdateResultAsync(result, verbose);
-            } else {
+            }
+            else {
                 progress.FailStep(3, "Update failed");
                 return await HandleUpdateResultAsync(result, verbose);
             }
@@ -397,7 +404,7 @@ public class UpdateCommand(
         }
     }
 
-    private async Task DisplayAvailableUpdatesAsync(List<PackageUpdateInfo> updates, bool verbose) {
+    private Task DisplayAvailableUpdatesAsync(List<PackageUpdateInfo> updates, bool verbose) {
         OutputFormatter.WriteLine();
         OutputFormatter.WriteInfo($"Found {updates.Count} package(s) with updates available:");
         OutputFormatter.WriteLine();
@@ -407,7 +414,7 @@ public class UpdateCommand(
         table.AddColumn("Current");
         table.AddColumn("Latest");
         table.AddColumn("Type");
-        
+
         if (verbose) {
             table.AddColumn("Release Date");
             table.AddColumn("Changes");
@@ -416,11 +423,11 @@ public class UpdateCommand(
         foreach (var update in updates.OrderBy(u => u.PackageName)) {
             var changeType = GetUpdateChangeType(update);
             var changeMarkup = GetChangeTypeMarkup(changeType);
-            
+
             if (verbose) {
                 var releaseDate = update.ReleaseDate.ToString("yyyy-MM-dd");
                 var changes = GetUpdateSummary(update);
-                
+
                 table.AddRow(
                     update.PackageName,
                     update.CurrentVersion,
@@ -428,7 +435,8 @@ public class UpdateCommand(
                     changeMarkup,
                     releaseDate,
                     changes);
-            } else {
+            }
+            else {
                 table.AddRow(
                     update.PackageName,
                     update.CurrentVersion,
@@ -439,22 +447,23 @@ public class UpdateCommand(
 
         AnsiConsole.Write(table);
         OutputFormatter.WriteLine();
+        return Task.CompletedTask;
     }
 
-    private async Task DisplayPackageUpdateInfoAsync(PackageUpdateInfo updateInfo, bool verbose) {
+    private Task DisplayPackageUpdateInfoAsync(PackageUpdateInfo updateInfo, bool verbose) {
         OutputFormatter.WriteLine();
         OutputFormatter.WriteInfo($"Update available for '{updateInfo.PackageName}':");
         OutputFormatter.WriteInfo($"  Current version: {updateInfo.CurrentVersion}");
         OutputFormatter.WriteInfo($"  Latest version:  {updateInfo.LatestVersion}");
-        
+
         if (updateInfo.IsPrerelease) {
             OutputFormatter.WriteWarning("  Note: This is a prerelease version");
         }
-        
+
         if (updateInfo.HasBreakingChanges) {
             OutputFormatter.WriteWarning("  ⚠️  Contains breaking changes");
         }
-        
+
         if (updateInfo.HasSecurityFixes) {
             OutputFormatter.WriteSuccess("  🛡️  Contains security fixes");
         }
@@ -472,13 +481,15 @@ public class UpdateCommand(
                 OutputFormatter.WriteWarning($"  - {impact}");
             }
         }
-        
+
         OutputFormatter.WriteLine();
+        return Task.CompletedTask;
     }
 
-    private async Task DisplayChangelogAsync(PackageChangelog changelog, bool nonInteractive) {
-        if (nonInteractive) return;
-        
+    private Task DisplayChangelogAsync(PackageChangelog changelog, bool nonInteractive) {
+        if (nonInteractive)
+            return Task.CompletedTask;
+
         OutputFormatter.WriteLine();
         OutputFormatter.WriteInfo($"Changelog for {changelog.PackageName} ({changelog.FromVersion} → {changelog.ToVersion}):");
         OutputFormatter.WriteLine();
@@ -486,44 +497,47 @@ public class UpdateCommand(
         if (changelog.HasBreakingChanges) {
             OutputFormatter.WriteWarning("⚠️  This update contains BREAKING CHANGES");
         }
-        
+
         if (changelog.HasSecurityFixes) {
             OutputFormatter.WriteSuccess("🛡️  This update contains security fixes");
         }
 
         if (changelog.Entries.Any()) {
             var groupedEntries = changelog.Entries.GroupBy(e => e.Type);
-            
+
             foreach (var group in groupedEntries.OrderBy(g => g.Key)) {
                 var sectionTitle = GetChangelogSectionTitle(group.Key);
                 OutputFormatter.WriteInfo(sectionTitle);
-                
+
                 foreach (var entry in group.OrderByDescending(e => e.Date)) {
                     var prefix = GetChangelogEntryPrefix(entry.Type);
                     OutputFormatter.WriteInfo($"  {prefix} {entry.Description}");
-                    
+
                     if (!string.IsNullOrEmpty(entry.Author)) {
                         OutputFormatter.WriteInfo($"    by {entry.Author}");
                     }
                 }
-                
+
                 OutputFormatter.WriteLine();
             }
-        } else {
+        }
+        else {
             OutputFormatter.WriteInfo("No detailed changelog available");
         }
+
+        return Task.CompletedTask;
     }
 
-    private async Task<int> HandleUpdateResultAsync(PackageUpdateResult result, bool verbose) {
+    private Task<int> HandleUpdateResultAsync(PackageUpdateResult result, bool verbose) {
         if (result.Success) {
             OutputFormatter.WriteSuccess($"Successfully updated {result.PackageName}!");
             OutputFormatter.WriteInfo($"  Previous version: {result.PreviousVersion}");
             OutputFormatter.WriteInfo($"  New version: {result.NewVersion}");
-            
+
             if (!string.IsNullOrEmpty(result.BackupPath)) {
                 OutputFormatter.WriteInfo($"  Backup created: {result.BackupPath}");
             }
-            
+
             if (verbose) {
                 OutputFormatter.WriteInfo($"  Update duration: {result.Duration.TotalSeconds:F1}s");
             }
@@ -536,10 +550,11 @@ public class UpdateCommand(
                 OutputFormatter.WriteWarning($"  ⚠️  {warning}");
             }
 
-            return 0;
-        } else {
+            return Task.FromResult(0);
+        }
+        else {
             OutputFormatter.WriteError($"Failed to update {result.PackageName}:");
-            
+
             foreach (var error in result.Errors) {
                 OutputFormatter.WriteError($"  - {error}");
             }
@@ -549,27 +564,28 @@ public class UpdateCommand(
                 OutputFormatter.WriteInfo("You can restore using: mcpm update --rollback");
             }
 
-            return 1;
+            return Task.FromResult(1);
         }
     }
 
-    private async Task<int> HandleBatchUpdateResultAsync(BatchUpdateResult result, bool verbose) {
+    private Task<int> HandleBatchUpdateResultAsync(BatchUpdateResult result, bool verbose) {
         OutputFormatter.WriteLine();
-        
+
         if (result.Success) {
             OutputFormatter.WriteSuccess($"Batch update completed successfully!");
-        } else {
+        }
+        else {
             OutputFormatter.WriteWarning("Batch update completed with some failures");
         }
 
         OutputFormatter.WriteInfo($"Summary:");
         OutputFormatter.WriteInfo($"  Total packages: {result.TotalPackages}");
         OutputFormatter.WriteInfo($"  Updated: {result.UpdatedPackages}");
-        
+
         if (result.FailedPackages > 0) {
             OutputFormatter.WriteError($"  Failed: {result.FailedPackages}");
         }
-        
+
         if (result.SkippedPackages > 0) {
             OutputFormatter.WriteWarning($"  Skipped: {result.SkippedPackages}");
         }
@@ -586,11 +602,11 @@ public class UpdateCommand(
         if (verbose && result.Results.Any()) {
             OutputFormatter.WriteLine();
             OutputFormatter.WriteInfo("Detailed results:");
-            
+
             foreach (var packageResult in result.Results.OrderBy(r => r.PackageName)) {
                 var status = packageResult.Success ? "✅" : "❌";
                 OutputFormatter.WriteInfo($"  {status} {packageResult.PackageName}: {packageResult.PreviousVersion} → {packageResult.NewVersion}");
-                
+
                 if (!packageResult.Success) {
                     foreach (var error in packageResult.Errors) {
                         OutputFormatter.WriteError($"    - {error}");
@@ -599,59 +615,59 @@ public class UpdateCommand(
             }
         }
 
-        return result.Success ? 0 : 1;
+        return Task.FromResult(result.Success ? 0 : 1);
     }
 
     private string GetUpdateChangeType(PackageUpdateInfo update) {
-        if (update.HasBreakingChanges) return "Major";
-        if (update.HasSecurityFixes) return "Security";
-        if (update.IsPrerelease) return "Prerelease";
+        if (update.HasBreakingChanges)
+            return "Major";
+        if (update.HasSecurityFixes)
+            return "Security";
+        if (update.IsPrerelease)
+            return "Prerelease";
         return "Minor";
     }
 
-    private string GetChangeTypeMarkup(string changeType) {
-        return changeType switch {
-            "Major" => "[red]Major[/]",
-            "Security" => "[green]Security[/]",
-            "Prerelease" => "[yellow]Prerelease[/]",
-            "Minor" => "[blue]Minor[/]",
-            _ => changeType
-        };
-    }
+    private string GetChangeTypeMarkup(string changeType) => changeType switch {
+        "Major" => "[red]Major[/]",
+        "Security" => "[green]Security[/]",
+        "Prerelease" => "[yellow]Prerelease[/]",
+        "Minor" => "[blue]Minor[/]",
+        _ => changeType
+    };
 
     private string GetUpdateSummary(PackageUpdateInfo update) {
         var summaries = new List<string>();
-        
-        if (update.HasSecurityFixes) summaries.Add("Security fixes");
-        if (update.HasBreakingChanges) summaries.Add("Breaking changes");
-        if (update.DependencyImpacts.Any()) summaries.Add("Dependency changes");
-        
+
+        if (update.HasSecurityFixes)
+            summaries.Add("Security fixes");
+        if (update.HasBreakingChanges)
+            summaries.Add("Breaking changes");
+        if (update.DependencyImpacts.Any())
+            summaries.Add("Dependency changes");
+
         return summaries.Any() ? string.Join(", ", summaries) : "Updates";
     }
 
-    private string GetChangelogSectionTitle(ChangelogEntryType type) {
-        return type switch {
-            ChangelogEntryType.Feature => "🆕 New Features:",
-            ChangelogEntryType.BugFix => "🐛 Bug Fixes:",
-            ChangelogEntryType.SecurityFix => "🛡️ Security Fixes:",
-            ChangelogEntryType.BreakingChange => "💥 Breaking Changes:",
-            ChangelogEntryType.Performance => "⚡ Performance Improvements:",
-            ChangelogEntryType.Documentation => "📚 Documentation:",
-            ChangelogEntryType.Dependency => "📦 Dependencies:",
-            _ => "📝 Other Changes:"
-        };
-    }
+    private string GetChangelogSectionTitle(ChangelogEntryType type) => type switch {
+        ChangelogEntryType.Feature => "🆕 New Features:",
+        ChangelogEntryType.BugFix => "🐛 Bug Fixes:",
+        ChangelogEntryType.SecurityFix => "🛡️ Security Fixes:",
+        ChangelogEntryType.BreakingChange => "💥 Breaking Changes:",
+        ChangelogEntryType.Performance => "⚡ Performance Improvements:",
+        ChangelogEntryType.Documentation => "📚 Documentation:",
+        ChangelogEntryType.Dependency => "📦 Dependencies:",
+        _ => "📝 Other Changes:"
+    };
 
-    private string GetChangelogEntryPrefix(ChangelogEntryType type) {
-        return type switch {
-            ChangelogEntryType.Feature => "✨",
-            ChangelogEntryType.BugFix => "🔧",
-            ChangelogEntryType.SecurityFix => "🛡️",
-            ChangelogEntryType.BreakingChange => "💥",
-            ChangelogEntryType.Performance => "⚡",
-            ChangelogEntryType.Documentation => "📖",
-            ChangelogEntryType.Dependency => "📦",
-            _ => "•"
-        };
-    }
+    private string GetChangelogEntryPrefix(ChangelogEntryType type) => type switch {
+        ChangelogEntryType.Feature => "✨",
+        ChangelogEntryType.BugFix => "🔧",
+        ChangelogEntryType.SecurityFix => "🛡️",
+        ChangelogEntryType.BreakingChange => "💥",
+        ChangelogEntryType.Performance => "⚡",
+        ChangelogEntryType.Documentation => "📖",
+        ChangelogEntryType.Dependency => "📦",
+        _ => "•"
+    };
 }

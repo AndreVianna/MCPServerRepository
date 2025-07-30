@@ -408,8 +408,7 @@ public class MCPDockerConfig {
 /// <summary>
 /// Server information structure
 /// </summary>
-public class ServerInfo
-{
+public class ServerInfo {
     public string Name { get; set; } = string.Empty;
     public string Version { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -418,8 +417,7 @@ public class ServerInfo
 /// <summary>
 /// Server capabilities structure
 /// </summary>
-public class ServerCapabilities
-{
+public class ServerCapabilities {
     public bool Logging { get; set; } = false;
     public bool Tools { get; set; } = false;
     public bool Resources { get; set; } = false;

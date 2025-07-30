@@ -29,75 +29,57 @@ public class DoctorService(
         bool includeSecurityScan = true,
         bool includePerformanceAnalysis = false,
         bool autoFix = false,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("System health check logic will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("System health check logic will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<PackageIntegrityResult> VerifyPackageIntegrityAsync(
         string? packageName = null,
         bool global = false,
         bool deep = false,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Package integrity verification logic will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Package integrity verification logic will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<DependencyConsistencyResult> ValidateDependencyConsistencyAsync(
         bool global = false,
         bool autoResolve = false,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Dependency consistency validation logic will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Dependency consistency validation logic will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<CacheHealthResult> CheckCacheHealthAsync(
         bool clearCorrupted = true,
         bool compactCache = false,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Cache health check logic will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Cache health check logic will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<ConfigurationValidationResult> ValidateConfigurationAsync(
         bool checkPermissions = true,
         bool validatePaths = true,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Configuration validation logic will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Configuration validation logic will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<SecurityAuditResult> PerformSecurityAuditAsync(
         bool scanVulnerabilities = true,
         bool checkTrustTiers = true,
         bool analyzePermissions = false,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Security audit logic will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Security audit logic will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<PerformanceAnalysisResult> AnalyzePerformanceAsync(
         bool measureStartupTime = true,
         bool analyzeDiskUsage = true,
         bool checkNetworkLatency = true,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Performance analysis logic will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Performance analysis logic will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<RepairResult> RepairIssuesAsync(
         IEnumerable<SystemIssue> issues,
         bool createBackup = true,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Issue repair logic will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Issue repair logic will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<SystemEnvironmentInfo> GetSystemEnvironmentAsync(
         bool includeSystemInfo = true,
         bool includeEnvironmentVars = false,
         bool includePaths = true,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("System environment information logic will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("System environment information logic will be implemented when first consumer requires it");
 }

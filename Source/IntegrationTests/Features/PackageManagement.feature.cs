@@ -10,7 +10,7 @@
 // ------------------------------------------------------------------------------
 #region Designer generated code
 #pragma warning disable
-namespace MCPHub.BDD.IntegrationTests.Features
+namespace MCPHub.IntegrationTests.Features
 {
     using TechTalk.SpecFlow;
     using System;
@@ -31,7 +31,7 @@ namespace MCPHub.BDD.IntegrationTests.Features
 #line 1 "PackageManagement.feature"
 #line hidden
         
-        public PackageManagementAPIFeature(PackageManagementAPIFeature.FixtureData fixtureData, MCPHub_BDD_IntegrationTests_XUnitAssemblyFixture assemblyFixture, Xunit.Abstractions.ITestOutputHelper testOutputHelper)
+        public PackageManagementAPIFeature(PackageManagementAPIFeature.FixtureData fixtureData, MCPHub_IntegrationTests_XUnitAssemblyFixture assemblyFixture, Xunit.Abstractions.ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
             this.TestInitialize();

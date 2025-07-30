@@ -13,7 +13,7 @@
                           Required="true"
                           For="@(() => _keyModel.Name)"
                           HelperText="A descriptive name to identify this key"
-                          FullWidth="true"
+                          fullwidth="true"
                           Immediate="true" />
         </MudItem>
         
@@ -24,7 +24,7 @@
                           Lines="3"
                           For="@(() => _keyModel.Description)"
                           HelperText="What will this API key be used for?"
-                          FullWidth="true"
+                          fullwidth="true"
                           Immediate="true" />
         </MudItem>
         
@@ -78,7 +78,7 @@
                                Label="Expiration Date"
                                Variant="Variant.Outlined"
                                MinDate="DateTime.Today.AddDays(1)"
-                               FullWidth="true"
+                               fullwidth="true"
                                HelperText="The key will automatically expire on this date" />
             }
         </MudItem>
@@ -101,7 +101,7 @@
                           Variant="Variant.Filled"
                           Color="Color.Primary"
                           Disabled="@(_isCreating || !HasValidPermissions())"
-                          StartIcon="@(_isCreating ? null : Icons.Material.Filled.VpnKey)">
+                          starticon="@(_isCreating ? null : Icons.Material.Filled.VpnKey)">
                     @if (_isCreating)
                     {
                         <MudProgressCircular Size="Size.Small" Indeterminate="true" />
@@ -118,7 +118,7 @@
 </EditForm>
 
 <!-- Success Dialog -->
-<MudDialog @bind-IsVisible="_showSuccessDialog" Options="@_successDialogOptions">
+<MudDialog @bind-Visible="_showSuccessDialog" Options="@_successDialogOptions">
     <TitleContent>
         <div class="d-flex align-center">
             <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Class="mr-3" />
@@ -137,7 +137,7 @@
                       Adornment="Adornment.End"
                       AdornmentIcon="@Icons.Material.Filled.ContentCopy"
                       OnAdornmentClick="@(() => CopyToClipboard(_createdApiKey))"
-                      FullWidth="true"
+                      fullwidth="true"
                       Class="mb-4" />
         
         <MudText Typo="Typo.body2" Color="Color.Secondary">
@@ -250,10 +250,11 @@
         _keyModel.ManageProfile || 
         _keyModel.AccessStatistics;
 
-    private async Task CopyToClipboard(string text)
+    private Task CopyToClipboard(string text)
     {
         // TODO: Implement clipboard copy
         Snackbar.Add("API key copied to clipboard!", Severity.Success);
+        return Task.CompletedTask;
     }
 
     public class CreateApiKeyModel

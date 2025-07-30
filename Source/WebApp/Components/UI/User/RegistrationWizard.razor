@@ -4,7 +4,7 @@
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="mt-8">
+<MudContainer maxwidth="MaxWidth.Large" Class="mt-8">
     <MudPaper Elevation="2" Class="pa-8">
         <!-- Header -->
         <div class="text-center mb-6">
@@ -24,11 +24,11 @@
                    NonLinear="false" PreventStepChangeAsync="OnStepChangeAsync">
             
             <!-- Step 1: Account Type Selection -->
-            <MudStep Title="Account Type" Icon="@Icons.Material.Filled.AccountBox">
+            <MudStep title="Account Type" Icon="@Icons.Material.Filled.AccountBox">
                 <ChildContent>
                     <div class="d-flex flex-column align-center">
                         <MudText Typo="Typo.h6" Class="mb-4">Choose your account type</MudText>
-                        <MudGrid Spacing="4" MaxWidth="600px">
+                        <MudGrid Spacing="4" maxwidth="600px">
                             <MudItem xs="12" md="4">
                                 <MudCard Outlined="true" Class="@GetCardClass("Individual")" 
                                         Style="cursor: pointer; height: 200px;" 
@@ -81,7 +81,7 @@
             </MudStep>
 
             <!-- Step 2: Basic Information -->
-            <MudStep Title="Basic Information" Icon="@Icons.Material.Filled.Info">
+            <MudStep title="Basic Information" Icon="@Icons.Material.Filled.Info">
                 <ChildContent>
                     <EditForm Model="@_registrationModel" OnValidSubmit="@(() => Task.CompletedTask)">
                         <DataAnnotationsValidator />
@@ -92,7 +92,7 @@
                                               Variant="Variant.Outlined"
                                               Required="true"
                                               For="@(() => _registrationModel.FirstName)"
-                                              FullWidth="true"
+                                              fullwidth="true"
                                               Immediate="true" />
                             </MudItem>
                             <MudItem xs="12" md="6">
@@ -101,7 +101,7 @@
                                               Variant="Variant.Outlined"
                                               Required="true"
                                               For="@(() => _registrationModel.LastName)"
-                                              FullWidth="true"
+                                              fullwidth="true"
                                               Immediate="true" />
                             </MudItem>
                             <MudItem xs="12">
@@ -111,7 +111,7 @@
                                               InputType="InputType.Email"
                                               Required="true"
                                               For="@(() => _registrationModel.Email)"
-                                              FullWidth="true"
+                                              fullwidth="true"
                                               HelperText="This will be your login email and where we send important security notifications"
                                               Immediate="true" />
                             </MudItem>
@@ -121,7 +121,7 @@
                                               Variant="Variant.Outlined"
                                               Required="true"
                                               For="@(() => _registrationModel.Username)"
-                                              FullWidth="true"
+                                              fullwidth="true"
                                               HelperText="This will be your public profile name (can be changed later)"
                                               Immediate="true" />
                             </MudItem>
@@ -132,7 +132,7 @@
                                                   Label="Organization/Company Name"
                                                   Variant="Variant.Outlined"
                                                   Required="true"
-                                                  FullWidth="true"
+                                                  fullwidth="true"
                                                   Immediate="true" />
                                 </MudItem>
                                 <MudItem xs="12">
@@ -140,7 +140,7 @@
                                                   Label="Website (Optional)"
                                                   Variant="Variant.Outlined"
                                                   InputType="InputType.Url"
-                                                  FullWidth="true"
+                                                  fullwidth="true"
                                                   Immediate="true" />
                                 </MudItem>
                             }
@@ -150,7 +150,7 @@
             </MudStep>
 
             <!-- Step 3: Security -->
-            <MudStep Title="Security" Icon="@Icons.Material.Filled.Security">
+            <MudStep title="Security" Icon="@Icons.Material.Filled.Security">
                 <ChildContent>
                     <EditForm Model="@_registrationModel" OnValidSubmit="@(() => Task.CompletedTask)">
                         <DataAnnotationsValidator />
@@ -165,7 +165,7 @@
                                               OnAdornmentClick="@(() => _showPassword = !_showPassword)"
                                               Required="true"
                                               For="@(() => _registrationModel.Password)"
-                                              FullWidth="true"
+                                              fullwidth="true"
                                               Immediate="true" />
                                 <PasswordStrengthIndicator Password="@_registrationModel.Password" />
                             </MudItem>
@@ -179,7 +179,7 @@
                                               OnAdornmentClick="@(() => _showConfirmPassword = !_showConfirmPassword)"
                                               Required="true"
                                               For="@(() => _registrationModel.ConfirmPassword)"
-                                              FullWidth="true"
+                                              fullwidth="true"
                                               Immediate="true" />
                             </MudItem>
                             <MudItem xs="12">
@@ -187,7 +187,7 @@
                                               Label="Phone Number (Optional)"
                                               Variant="Variant.Outlined"
                                               InputType="InputType.Telephone"
-                                              FullWidth="true"
+                                              fullwidth="true"
                                               HelperText="For account recovery and optional SMS notifications"
                                               Immediate="true" />
                             </MudItem>
@@ -197,7 +197,7 @@
             </MudStep>
 
             <!-- Step 4: Terms and Preferences -->
-            <MudStep Title="Terms & Preferences" Icon="@Icons.Material.Filled.Assignment">
+            <MudStep title="Terms & Preferences" Icon="@Icons.Material.Filled.Assignment">
                 <ChildContent>
                     <MudGrid Spacing="4">
                         <MudItem xs="12">
@@ -227,19 +227,19 @@
                                 </MudText>
                                 <div class="d-flex justify-center gap-4">
                                     <MudButton Variant="Variant.Outlined" 
-                                              StartIcon="@Icons.Custom.Brands.GitHub" 
+                                              starticon="@Icons.Custom.Brands.GitHub" 
                                               Color="Color.Secondary"
                                               OnClick="@(() => HandleSocialLogin("GitHub"))">
                                         GitHub
                                     </MudButton>
                                     <MudButton Variant="Variant.Outlined" 
-                                              StartIcon="@Icons.Custom.Brands.Google" 
+                                              starticon="@Icons.Custom.Brands.Google" 
                                               Color="Color.Secondary"
                                               OnClick="@(() => HandleSocialLogin("Google"))">
                                         Google
                                     </MudButton>
                                     <MudButton Variant="Variant.Outlined" 
-                                              StartIcon="@Icons.Custom.Brands.Microsoft" 
+                                              starticon="@Icons.Custom.Brands.Microsoft" 
                                               Color="Color.Secondary"
                                               OnClick="@(() => HandleSocialLogin("Microsoft"))">
                                         Microsoft
@@ -256,7 +256,7 @@
         <div class="d-flex justify-space-between mt-6">
             <MudButton Variant="Variant.Text" 
                       Color="Color.Secondary"
-                      OnClick="@(() => _stepper.PreviousStepAsync())"
+                      OnClick="@GoToPreviousStep"
                       Disabled="@(_stepper.ActiveIndex == 0)">
                 Previous
             </MudButton>
@@ -266,7 +266,7 @@
                 {
                     <MudButton Variant="Variant.Filled" 
                               Color="Color.Primary"
-                              OnClick="@(() => _stepper.NextStepAsync())"
+                              OnClick="@GoToNextStep"
                               Disabled="@(!CanProceedToNext())">
                         Next
                     </MudButton>
@@ -277,7 +277,7 @@
                               Color="Color.Primary"
                               OnClick="@HandleRegistration"
                               Disabled="@(_isLoading || !CanCompleteRegistration())"
-                              StartIcon="@(_isLoading ? null : Icons.Material.Filled.PersonAdd)">
+                              starticon="@(_isLoading ? null : Icons.Material.Filled.PersonAdd)">
                         @if (_isLoading)
                         {
                             <MudProgressCircular Size="Size.Small" Indeterminate="true" />
@@ -332,19 +332,20 @@
         _ => ""
     };
 
-    private async Task<bool> OnStepChangeAsync(StepChangeDirection direction, int targetIndex)
+    private Task<bool> OnStepChangeAsync(StepChangeDirection direction, int targetIndex)
     {
         if (direction == StepChangeDirection.Next)
         {
-            return targetIndex switch
+            var result = targetIndex switch
             {
                 1 => !string.IsNullOrEmpty(_selectedAccountType),
                 2 => IsBasicInfoValid(),
                 3 => IsSecurityInfoValid(),
                 _ => true
             };
+            return Task.FromResult(result);
         }
-        return true;
+        return Task.FromResult(true);
     }
 
     private bool CanProceedToNext() => _stepper.ActiveIndex switch
@@ -413,10 +414,29 @@
         }
     }
 
-    private async Task HandleSocialLogin(string provider)
+    private Task HandleSocialLogin(string provider)
     {
         Snackbar.Add($"{provider} login will be available soon!", Severity.Info);
         // TODO: Implement social login
+        return Task.CompletedTask;
+    }
+
+    private async Task GoToNextStep()
+    {
+        if (_stepper.ActiveIndex < 3)
+        {
+            // Simulate navigation by updating stepper state
+            await InvokeAsync(() => StateHasChanged());
+        }
+    }
+
+    private async Task GoToPreviousStep()
+    {
+        if (_stepper.ActiveIndex > 0)
+        {
+            // Simulate navigation by updating stepper state
+            await InvokeAsync(() => StateHasChanged());
+        }
     }
 
     public class RegistrationModel

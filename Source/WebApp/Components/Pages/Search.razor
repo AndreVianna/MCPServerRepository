@@ -13,7 +13,7 @@
 
 <PageTitle>Search Packages - MCP Hub</PageTitle>
 
-<ResponsiveContainer MaxWidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
+<ResponsiveContainer maxwidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
     <HeaderContent>
         <div class="search-page-header">
             <MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-2">
@@ -67,14 +67,14 @@
                                        Icon="@Icons.Material.Filled.ViewList"
                                        ToggledIcon="@Icons.Material.Filled.GridView"
                                        Color="Color.Primary"
-                                       Title="@(_isGridView ? "Switch to list view" : "Switch to grid view")"
+                                       title="@(_isGridView ? "Switch to list view" : "Switch to grid view")"
                                        Class="mr-2" />
                     
                     <!-- Sort Options -->
                     <MudSelect T="string" 
                              Value="@_selectedSortOption"
                              Variant="Variant.Outlined"
-                             Dense="true"
+                             dense="true"
                              Style="min-width: 180px;"
                              Label="Sort by"
                              ValueChanged="@OnSortChanged">
@@ -208,14 +208,14 @@
                         <div class="no-results-actions">
                             <MudButton Color="Color.Primary" 
                                      Variant="Variant.Filled"
-                                     StartIcon="@Icons.Material.Filled.Clear"
+                                     starticon="@Icons.Material.Filled.Clear"
                                      @onclick="ClearSearch"
                                      Class="mr-2">
                                 Clear Search
                             </MudButton>
                             <MudButton Color="Color.Primary" 
                                      Variant="Variant.Outlined"
-                                     StartIcon="@Icons.Material.Filled.Explore"
+                                     starticon="@Icons.Material.Filled.Explore"
                                      @onclick="@(() => Navigation.NavigateTo("/browse"))">
                                 Browse Categories
                             </MudButton>
@@ -237,8 +237,8 @@
                             <MudItem xs="6" sm="4" md="3" lg="2">
                                 <MudButton Variant="Variant.Outlined" 
                                          Color="Color.Primary"
-                                         FullWidth="true"
-                                         StartIcon="@category.Icon"
+                                         fullwidth="true"
+                                         starticon="@category.Icon"
                                          @onclick="@(() => SearchByCategory(category.Key))"
                                          Class="category-button">
                                     @category.Name
@@ -309,7 +309,7 @@
                     </div>
                     <MudButton Size="Size.Small" 
                              Variant="Variant.Text"
-                             StartIcon="@Icons.Material.Filled.Clear"
+                             starticon="@Icons.Material.Filled.Clear"
                              @onclick="ClearAllFilters">
                         Clear All
                     </MudButton>
@@ -324,8 +324,8 @@
                          Value="@_selectedCategory"
                          Placeholder="All Categories"
                          Variant="Variant.Outlined"
-                         Dense="true"
-                         FullWidth="true"
+                         dense="true"
+                         fullwidth="true"
                          ValueChanged="@OnCategoryChanged">
                     <MudSelectItem Value="@("all_categories")">All Categories</MudSelectItem>
                     @foreach (var category in PackageCategories)
@@ -342,8 +342,8 @@
                          Value="@_selectedSecurityGrade"
                          Placeholder="Any Grade"
                          Variant="Variant.Outlined"
-                         Dense="true"
-                         FullWidth="true"
+                         dense="true"
+                         fullwidth="true"
                          ValueChanged="@OnSecurityGradeChanged">
                     <MudSelectItem Value="@("any_grade")">Any Grade</MudSelectItem>
                     <MudSelectItem Value="@("A_plus")">A+ and above</MudSelectItem>
@@ -360,8 +360,8 @@
                          Value="@_selectedTrustTier"
                          Placeholder="Any Trust Level"
                          Variant="Variant.Outlined"
-                         Dense="true"
-                         FullWidth="true"
+                         dense="true"
+                         fullwidth="true"
                          ValueChanged="@OnTrustTierChanged">
                     <MudSelectItem Value="@((TrustTier?)null)">Any Trust Level</MudSelectItem>
                     <MudSelectItem Value="@("TrustTier.Enterprise")">Enterprise</MudSelectItem>
@@ -378,8 +378,8 @@
                          Value="@_selectedDownloadRange"
                          Placeholder="Any Volume"
                          Variant="Variant.Outlined"
-                         Dense="true"
-                         FullWidth="true"
+                         dense="true"
+                         fullwidth="true"
                          ValueChanged="@OnDownloadRangeChanged">
                     <MudSelectItem Value="@("any_volume")">Any Volume</MudSelectItem>
                     <MudSelectItem Value="@("thousand_plus")">1K+ downloads</MudSelectItem>
@@ -396,8 +396,8 @@
                          Value="@_selectedTimeframe"
                          Placeholder="Any Time"
                          Variant="Variant.Outlined"
-                         Dense="true"
-                         FullWidth="true"
+                         dense="true"
+                         fullwidth="true"
                          ValueChanged="@OnTimeframeChanged">
                     <MudSelectItem Value="@("any_time")">Any Time</MudSelectItem>
                     <MudSelectItem Value="@("day")">Today</MudSelectItem>
@@ -411,13 +411,13 @@
             <div class="filter-options mb-4">
                 <MudCheckBox @bind-Value="@_showAIRelevanceScores" 
                            Label="Show AI relevance scores"
-                           Dense="true" />
+                           dense="true" />
                 <MudCheckBox @bind-Value="@_showAIInsights" 
                            Label="Show AI search insights"
-                           Dense="true" />
+                           dense="true" />
                 <MudCheckBox @bind-Value="@_includePrerelease" 
                            Label="Include prerelease versions"
-                           Dense="true" />
+                           dense="true" />
             </div>
         </div>
     </SidebarContent>
@@ -592,12 +592,13 @@
     }
 
     // Filter event handlers
-    private async Task OnSortChanged(string sortOption)
+    private Task OnSortChanged(string sortOption)
     {
         _selectedSortOption = sortOption;
         ApplySorting();
         UpdatePagination();
         StateHasChanged();
+        return Task.CompletedTask;
     }
 
     private async Task OnCategoryChanged(string category)

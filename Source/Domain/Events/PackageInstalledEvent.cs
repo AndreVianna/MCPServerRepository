@@ -74,7 +74,7 @@ public record PackageInstalledEvent : BaseMessage {
         string installationPath,
         DateTimeOffset installedAt,
         string clientVersion,
-        Dictionary<string, object>? installationOptions = null) => new PackageInstalledEvent {
+        Dictionary<string, object>? installationOptions = null) => new() {
             InstallationId = installationId,
             PackageId = packageId,
             PackageName = packageName,

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+
 using Microsoft.Extensions.Logging;
 
 namespace MCPHub.Common.Configuration;
@@ -12,25 +13,24 @@ public class ObservabilityOptions {
     public string ServiceVersion { get; set; } = "1.0.0";
     [Required(ErrorMessage = "Environment is required")]
     public string Environment { get; set; } = "Development";
-    
+
     // OpenTelemetry Configuration
     public OpenTelemetryOptions OpenTelemetry { get; set; } = new();
-    
+
     // Metrics Configuration
     public MetricsOptions Metrics { get; set; } = new();
-    
+
     // Tracing Configuration
     public TracingOptions Tracing { get; set; } = new();
-    
+
     // Logging Configuration
     public LoggingOptions Logging { get; set; } = new();
-    
+
     // Alerting Configuration
     public AlertingOptions Alerting { get; set; } = new();
 }
 
-public class OpenTelemetryOptions
-{
+public class OpenTelemetryOptions {
     public bool Enabled { get; set; } = true;
     public string? OtlpEndpoint { get; set; }
     public string? ApiKey { get; set; }
@@ -40,8 +40,7 @@ public class OpenTelemetryOptions
     public TimeSpan ExportInterval { get; set; } = TimeSpan.FromSeconds(5);
 }
 
-public class MetricsOptions
-{
+public class MetricsOptions {
     public bool Enabled { get; set; } = true;
     public string PrometheusEndpoint { get; set; } = "/metrics";
     public TimeSpan CollectionInterval { get; set; } = TimeSpan.FromSeconds(15);
@@ -50,8 +49,7 @@ public class MetricsOptions
     public bool EnableInfrastructureMetrics { get; set; } = true;
 }
 
-public class TracingOptions
-{
+public class TracingOptions {
     public bool Enabled { get; set; } = true;
     public double SamplingRatio { get; set; } = 1.0; // 100% sampling for development
     public bool EnableSqlInstrumentation { get; set; } = true;
@@ -61,8 +59,7 @@ public class TracingOptions
     public List<string> IgnoredPaths { get; set; } = new() { "/health", "/metrics" };
 }
 
-public class LoggingOptions
-{
+public class LoggingOptions {
     public bool EnableStructuredLogging { get; set; } = true;
     public bool EnableCorrelationIds { get; set; } = true;
     public bool EnableElasticSearch { get; set; } = false; // Disabled by default for development
@@ -72,8 +69,7 @@ public class LoggingOptions
     public LogLevel MinimumLogLevel { get; set; } = LogLevel.Information;
 }
 
-public class AlertingOptions
-{
+public class AlertingOptions {
     public bool Enabled { get; set; } = false; // Disabled by default for development
     public string? PagerDutyApiKey { get; set; }
     public string? SlackWebhookUrl { get; set; }

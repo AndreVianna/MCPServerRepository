@@ -4,8 +4,7 @@ namespace MCPHub.Common.Services;
 /// Monitoring service skeleton implementation
 /// Following contracts-first approach - implementation when needed
 /// </summary>
-public class MonitoringService : IMonitoringService
-{
+public class MonitoringService : IMonitoringService {
     public void RecordHttpRequest(string method, string path, int statusCode, TimeSpan duration)
         => throw new NotImplementedException("HTTP request monitoring will be implemented when web request tracking is needed");
 

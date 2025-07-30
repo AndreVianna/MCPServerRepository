@@ -6,7 +6,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace MCPHub.Data.Migrations; 
+namespace MCPHub.Data.Migrations;
 /// <inheritdoc />
 public partial class InitialCreateWithIdentity : Migration {
     /// <inheritdoc />

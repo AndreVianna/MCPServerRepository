@@ -10,7 +10,7 @@
             <MudText Typo="Typo.h6">API Keys</MudText>
             <MudButton Variant="Variant.Filled"
                       Color="Color.Primary"
-                      StartIcon="@Icons.Material.Filled.Add"
+                      starticon="@Icons.Material.Filled.Add"
                       OnClick="@(() => _showCreateDialog = true)">
                 Create New Key
             </MudButton>
@@ -66,16 +66,16 @@
                                                     <MudTextField Value="@GetMaskedKey(apiKey.Key)"
                                                                  Variant="Variant.Outlined"
                                                                  ReadOnly="true"
-                                                                 Dense="true"
+                                                                 dense="true"
                                                                  Class="flex-grow-1 mr-2" />
                                                     <MudIconButton Icon="@Icons.Material.Filled.ContentCopy"
                                                                   Size="Size.Small"
                                                                   OnClick="@(() => CopyToClipboard(apiKey.Key))"
-                                                                  Title="Copy to clipboard" />
+                                                                  title="Copy to clipboard" />
                                                     <MudIconButton Icon="@(_visibleKeys.Contains(apiKey.Id) ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
                                                                   Size="Size.Small"
                                                                   OnClick="@(() => ToggleKeyVisibility(apiKey.Id))"
-                                                                  Title="Toggle visibility" />
+                                                                  title="Toggle visibility" />
                                                 </div>
                                             </MudItem>
                                             <MudItem xs="12" md="6">
@@ -199,20 +199,20 @@
             
             <MudButton Variant="Variant.Outlined"
                       Color="Color.Primary"
-                      StartIcon="@Icons.Material.Filled.Description"
+                      starticon="@Icons.Material.Filled.Description"
                       Href="/docs/api"
                       Target="_blank"
-                      FullWidth="true"
+                      fullwidth="true"
                       Class="mb-2">
                 View Documentation
             </MudButton>
             
             <MudButton Variant="Variant.Text"
                       Color="Color.Secondary"
-                      StartIcon="@Icons.Material.Filled.Code"
+                      starticon="@Icons.Material.Filled.Code"
                       Href="/docs/examples"
                       Target="_blank"
-                      FullWidth="true">
+                      fullwidth="true">
                 Code Examples
             </MudButton>
         </MudPaper>
@@ -220,7 +220,7 @@
 </MudGrid>
 
 <!-- Create API Key Dialog -->
-<MudDialog @bind-IsVisible="_showCreateDialog" Options="@_dialogOptions">
+<MudDialog @bind-Visible="_showCreateDialog" Options="@_dialogOptions">
     <TitleContent>
         <div class="d-flex align-center">
             <MudIcon Icon="@Icons.Material.Filled.VpnKey" Class="mr-3" />
@@ -233,7 +233,7 @@
 </MudDialog>
 
 <!-- Delete Confirmation Dialog -->
-<MudDialog @bind-IsVisible="_showDeleteDialog" Options="@_deleteDialogOptions">
+<MudDialog @bind-Visible="_showDeleteDialog" Options="@_deleteDialogOptions">
     <TitleContent>
         <div class="d-flex align-center">
             <MudIcon Icon="@Icons.Material.Filled.Warning" Color="Color.Error" Class="mr-3" />
@@ -252,7 +252,7 @@
         <MudTextField @bind-Value="_deleteConfirmation"
                       Label="Type 'DELETE' to confirm"
                       Variant="Variant.Outlined"
-                      FullWidth="true" />
+                      fullwidth="true" />
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="@(() => _showDeleteDialog = false)">Cancel</MudButton>
@@ -374,10 +374,11 @@
         Snackbar.Add("API key editing will be available soon!", Severity.Info);
     }
 
-    private async Task RegenerateApiKey(MCPHub.Domain.Contracts.Responses.ApiKeyInfo apiKey)
+    private Task RegenerateApiKey(MCPHub.Domain.Contracts.Responses.ApiKeyInfo apiKey)
     {
         // TODO: Implement API key regeneration
         Snackbar.Add("API key regenerated successfully!", Severity.Success);
+        return Task.CompletedTask;
     }
 
     private void ConfirmDeleteApiKey(MCPHub.Domain.Contracts.Responses.ApiKeyInfo apiKey)
@@ -449,10 +450,11 @@
     private Guid GetKeyId(string key) => 
         _apiKeys?.FirstOrDefault(k => k.Key == key)?.Id ?? Guid.Empty;
 
-    private async Task CopyToClipboard(string text)
+    private Task CopyToClipboard(string text)
     {
         // TODO: Implement clipboard copy
         Snackbar.Add("API key copied to clipboard!", Severity.Success);
+        return Task.CompletedTask;
     }
 
     private Color GetUsageColor() => _apiUsage.UsagePercentage switch

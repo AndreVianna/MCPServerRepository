@@ -6,8 +6,7 @@ namespace MCPHub.WebApp.Services;
 /// <summary>
 /// Service interface for publisher dashboard operations and analytics
 /// </summary>
-public interface IPublisherDashboardService
-{
+public interface IPublisherDashboardService {
     /// <summary>
     /// Gets comprehensive dashboard overview data for a publisher
     /// </summary>
@@ -127,8 +126,7 @@ public interface IPublisherDashboardService
 /// <summary>
 /// Comprehensive dashboard overview data
 /// </summary>
-public class PublisherDashboardOverview
-{
+public class PublisherDashboardOverview {
     public Guid PublisherId { get; set; }
     public string PublisherName { get; set; } = string.Empty;
     public TrustTier TrustTier { get; set; }
@@ -142,8 +140,7 @@ public class PublisherDashboardOverview
 /// <summary>
 /// Publisher key performance metrics
 /// </summary>
-public class PublisherMetrics
-{
+public class PublisherMetrics {
     public int TotalPackages { get; set; }
     public long TotalDownloads { get; set; }
     public long WeeklyDownloads { get; set; }
@@ -159,8 +156,7 @@ public class PublisherMetrics
 /// <summary>
 /// Publisher activity entry
 /// </summary>
-public class PublisherActivity
-{
+public class PublisherActivity {
     public Guid Id { get; set; }
     public ActivityType Type { get; set; }
     public string Title { get; set; } = string.Empty;
@@ -175,8 +171,7 @@ public class PublisherActivity
 /// <summary>
 /// Security alert information
 /// </summary>
-public class SecurityAlert
-{
+public class SecurityAlert {
     public Guid Id { get; set; }
     public string PackageName { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
@@ -193,8 +188,7 @@ public class SecurityAlert
 /// <summary>
 /// Download analytics data
 /// </summary>
-public class DownloadAnalytics
-{
+public class DownloadAnalytics {
     public string TimeRange { get; set; } = string.Empty;
     public string Granularity { get; set; } = string.Empty;
     public IEnumerable<DataPoint> DownloadTrend { get; set; } = [];
@@ -208,8 +202,7 @@ public class DownloadAnalytics
 /// <summary>
 /// Geographic distribution data
 /// </summary>
-public class GeographicDistribution
-{
+public class GeographicDistribution {
     public IEnumerable<CountryDownloads> CountryData { get; set; } = [];
     public int TotalCountries { get; set; }
     public string TopCountry { get; set; } = string.Empty;
@@ -219,8 +212,7 @@ public class GeographicDistribution
 /// <summary>
 /// Package performance data
 /// </summary>
-public class PackagePerformance
-{
+public class PackagePerformance {
     public Guid PackageId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string LatestVersion { get; set; } = string.Empty;
@@ -238,8 +230,7 @@ public class PackagePerformance
 /// <summary>
 /// Security trends over time
 /// </summary>
-public class SecurityTrends
-{
+public class SecurityTrends {
     public IEnumerable<SecurityScorePoint> ScoreTrend { get; set; } = [];
     public double AverageScore { get; set; }
     public double ScoreImprovement { get; set; }
@@ -251,8 +242,7 @@ public class SecurityTrends
 /// <summary>
 /// Trust tier progression information
 /// </summary>
-public class TrustTierProgression
-{
+public class TrustTierProgression {
     public TrustTier CurrentTier { get; set; }
     public TrustTier? NextTier { get; set; }
     public double CompletionPercentage { get; set; }
@@ -265,8 +255,7 @@ public class TrustTierProgression
 /// <summary>
 /// Publisher notification
 /// </summary>
-public class PublisherNotification
-{
+public class PublisherNotification {
     public Guid Id { get; set; }
     public NotificationType Type { get; set; }
     public string Title { get; set; } = string.Empty;
@@ -281,8 +270,7 @@ public class PublisherNotification
 /// <summary>
 /// Revenue analytics data (for monetized packages)
 /// </summary>
-public class RevenueAnalytics
-{
+public class RevenueAnalytics {
     public decimal TotalRevenue { get; set; }
     public decimal MonthlyRevenue { get; set; }
     public decimal RevenueGrowth { get; set; }
@@ -294,8 +282,7 @@ public class RevenueAnalytics
 /// <summary>
 /// Data point for time series data
 /// </summary>
-public class DataPoint
-{
+public class DataPoint {
     public DateTime Date { get; set; }
     public double Value { get; set; }
     public string Label { get; set; } = string.Empty;
@@ -304,8 +291,7 @@ public class DataPoint
 /// <summary>
 /// Package download breakdown
 /// </summary>
-public class PackageDownloadBreakdown
-{
+public class PackageDownloadBreakdown {
     public string PackageName { get; set; } = string.Empty;
     public long Downloads { get; set; }
     public double Percentage { get; set; }
@@ -314,8 +300,7 @@ public class PackageDownloadBreakdown
 /// <summary>
 /// Country downloads data
 /// </summary>
-public class CountryDownloads
-{
+public class CountryDownloads {
     public string CountryCode { get; set; } = string.Empty;
     public string CountryName { get; set; } = string.Empty;
     public long Downloads { get; set; }
@@ -325,8 +310,7 @@ public class CountryDownloads
 /// <summary>
 /// Security score data point
 /// </summary>
-public class SecurityScorePoint
-{
+public class SecurityScorePoint {
     public DateTime Date { get; set; }
     public double Score { get; set; }
     public string Grade { get; set; } = string.Empty;
@@ -335,8 +319,7 @@ public class SecurityScorePoint
 /// <summary>
 /// Trust tier requirement
 /// </summary>
-public class TrustTierRequirement
-{
+public class TrustTierRequirement {
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public bool IsCompleted { get; set; }
@@ -347,8 +330,7 @@ public class TrustTierRequirement
 /// <summary>
 /// Revenue data point
 /// </summary>
-public class RevenueDataPoint
-{
+public class RevenueDataPoint {
     public DateTime Date { get; set; }
     public decimal Revenue { get; set; }
     public string Label { get; set; } = string.Empty;
@@ -357,8 +339,7 @@ public class RevenueDataPoint
 /// <summary>
 /// Package revenue breakdown
 /// </summary>
-public class PackageRevenue
-{
+public class PackageRevenue {
     public string PackageName { get; set; } = string.Empty;
     public decimal Revenue { get; set; }
     public double Percentage { get; set; }
@@ -367,8 +348,7 @@ public class PackageRevenue
 /// <summary>
 /// Publisher packages result containing list of packages
 /// </summary>
-public class PublisherPackagesResult
-{
+public class PublisherPackagesResult {
     public IEnumerable<PackageListItem>? Packages { get; set; }
     public int TotalCount { get; set; }
     public bool Success { get; set; } = true;
@@ -378,8 +358,7 @@ public class PublisherPackagesResult
 /// <summary>
 /// Activity types for publisher dashboard
 /// </summary>
-public enum ActivityType
-{
+public enum ActivityType {
     PackagePublished,
     PackageUpdated,
     SecurityScanCompleted,
@@ -396,8 +375,7 @@ public enum ActivityType
 /// <summary>
 /// Activity priority levels
 /// </summary>
-public enum ActivityPriority
-{
+public enum ActivityPriority {
     Low,
     Normal,
     High,
@@ -407,8 +385,7 @@ public enum ActivityPriority
 /// <summary>
 /// Security alert types
 /// </summary>
-public enum SecurityAlertType
-{
+public enum SecurityAlertType {
     Vulnerability,
     DependencyUpdate,
     LicenseIssue,
@@ -420,8 +397,7 @@ public enum SecurityAlertType
 /// <summary>
 /// Security alert status
 /// </summary>
-public enum SecurityAlertStatus
-{
+public enum SecurityAlertStatus {
     Active,
     Acknowledged,
     InProgress,
@@ -432,8 +408,7 @@ public enum SecurityAlertStatus
 /// <summary>
 /// Notification types
 /// </summary>
-public enum NotificationType
-{
+public enum NotificationType {
     SecurityAlert,
     PackageUpdate,
     SystemNotification,
@@ -447,8 +422,7 @@ public enum NotificationType
 /// <summary>
 /// Notification priority levels
 /// </summary>
-public enum NotificationPriority
-{
+public enum NotificationPriority {
     Low,
     Normal,
     High,

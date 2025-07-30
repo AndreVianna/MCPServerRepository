@@ -112,21 +112,21 @@ public class PackageInstallationRepositoryTests : IDisposable {
     }
 
     [Fact]
-    public async Task GetInstallationsByStatusAsync_WhenCalled_ThrowsNotImplementedException() =>
+    public async Task GetInstallationsByStatusAsync_WhenCalled_ThrowsNotImplementedException()
         // Arrange & Act & Assert
-        await Assert.ThrowsAsync<NotImplementedException>(() =>
+        => await Assert.ThrowsAsync<NotImplementedException>(() =>
             _repository.GetInstallationsByStatusAsync());
 
     [Fact]
-    public async Task GetFailedInstallationsAsync_WhenCalled_ThrowsNotImplementedException() =>
+    public async Task GetFailedInstallationsAsync_WhenCalled_ThrowsNotImplementedException()
         // Arrange & Act & Assert
-        await Assert.ThrowsAsync<NotImplementedException>(() =>
+        => await Assert.ThrowsAsync<NotImplementedException>(() =>
             _repository.GetFailedInstallationsAsync());
 
     [Fact]
-    public async Task GetStuckInstallationsAsync_WhenCalled_ThrowsNotImplementedException() =>
+    public async Task GetStuckInstallationsAsync_WhenCalled_ThrowsNotImplementedException()
         // Arrange & Act & Assert
-        await Assert.ThrowsAsync<NotImplementedException>(() =>
+        => await Assert.ThrowsAsync<NotImplementedException>(() =>
             _repository.GetStuckInstallationsAsync());
 
     public void Dispose() => _context?.Dispose();

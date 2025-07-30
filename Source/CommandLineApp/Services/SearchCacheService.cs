@@ -12,23 +12,17 @@ namespace MCPHub.CommandLineApp.Services;
 /// <summary>
 /// Search-specific caching service implementation with query normalization and similarity matching
 /// </summary>
-public class SearchCacheService : ISearchCacheService {
-    private readonly ILogger<SearchCacheService> _logger;
-    private readonly ICacheService _cacheService;
-    private readonly McpmConfiguration _configuration;
+public class SearchCacheService(
+    ILogger<SearchCacheService> logger,
+    ICacheService cacheService,
+    McpmConfiguration configuration) : ISearchCacheService {
+    private readonly ILogger<SearchCacheService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ICacheService _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
+    private readonly McpmConfiguration _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 
     private const string SEARCH_RESULTS_PREFIX = "search:results:";
     private const string SEARCH_QUERIES_PREFIX = "search:queries:";
     private const string POPULAR_QUERIES_KEY = "search:popular";
-
-    public SearchCacheService(
-        ILogger<SearchCacheService> logger,
-        ICacheService cacheService,
-        McpmConfiguration configuration) {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
-        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-    }
 
     public async Task CacheSearchResultsAsync(SearchRequest request, SearchResultResponse results, CancellationToken cancellationToken = default) {
         if (!_configuration.Cache.SearchResults.Enabled) {
@@ -65,7 +59,7 @@ public class SearchCacheService : ISearchCacheService {
 
         if (result != null) {
             _logger.LogDebug("Retrieved cached search results for query: {Query}", request.Query);
-            
+
             // Update query access information
             await UpdateQueryAccessAsync(normalizedRequest, cancellationToken).ConfigureAwait(false);
         }
@@ -86,7 +80,8 @@ public class SearchCacheService : ISearchCacheService {
         foreach (var queryKey in allQueryKeys) {
             try {
                 var cachedQuery = await _cacheService.GetAsync<CachedSearchQuery>(queryKey, cancellationToken).ConfigureAwait(false);
-                if (cachedQuery == null) continue;
+                if (cachedQuery == null)
+                    continue;
 
                 var similarity = CalculateQuerySimilarity(normalizedQuery, cachedQuery.Query);
                 if (similarity >= similarityThreshold) {
@@ -159,7 +154,7 @@ public class SearchCacheService : ISearchCacheService {
         return statistics;
     }
 
-    public async Task<int> WarmSearchCacheAsync(IEnumerable<string> popularQueries, CancellationToken cancellationToken = default) {
+    public Task<int> WarmSearchCacheAsync(IEnumerable<string> popularQueries, CancellationToken cancellationToken = default) {
         ArgumentNullException.ThrowIfNull(popularQueries);
 
         var warmedCount = 0;
@@ -168,14 +163,14 @@ public class SearchCacheService : ISearchCacheService {
                 // This would typically require integration with the API client to perform searches
                 // For now, we'll just log the intention
                 _logger.LogDebug("Would warm cache for query: {Query}", query);
-                
+
                 // TODO: Implement actual cache warming
                 // 1. Create SearchRequest from query
                 // 2. Execute search via API client
                 // 3. Cache the results
-                
+
                 warmedCount++;
-                
+
                 // Respect cancellation
                 cancellationToken.ThrowIfCancellationRequested();
             }
@@ -185,7 +180,7 @@ public class SearchCacheService : ISearchCacheService {
         }
 
         _logger.LogInformation("Warmed search cache for {Count} queries", warmedCount);
-        return warmedCount;
+        return Task.FromResult(warmedCount);
     }
 
     public async Task<int> ClearOldSearchCacheAsync(TimeSpan olderThan, CancellationToken cancellationToken = default) {
@@ -246,22 +241,22 @@ public class SearchCacheService : ISearchCacheService {
         ArgumentNullException.ThrowIfNull(request);
 
         var normalizedRequest = NormalizeSearchRequest(request);
-        
+
         // Create a consistent string representation of the search parameters
         var keyBuilder = new StringBuilder();
         keyBuilder.Append($"q:{normalizedRequest.Query}");
-        
+
         if (normalizedRequest.Categories?.Any() == true) {
             keyBuilder.Append($"|cat:{string.Join(",", normalizedRequest.Categories)}");
         }
-        
+
         if (!string.IsNullOrEmpty(normalizedRequest.TrustTier)) {
             keyBuilder.Append($"|trust:{normalizedRequest.TrustTier}");
         }
-        
+
         keyBuilder.Append($"|page:{normalizedRequest.Page}");
         keyBuilder.Append($"|size:{normalizedRequest.PageSize}");
-        
+
         if (!string.IsNullOrEmpty(normalizedRequest.SortBy)) {
             keyBuilder.Append($"|sort:{normalizedRequest.SortBy}:{normalizedRequest.SortDirection}");
         }

@@ -6,8 +6,7 @@ namespace MCPHub.WebApp.Services;
 /// <summary>
 /// Service interface for comprehensive analytics and reporting functionality
 /// </summary>
-public interface IAnalyticsService
-{
+public interface IAnalyticsService {
     /// <summary>
     /// Gets comprehensive analytics dashboard data for a publisher
     /// </summary>
@@ -258,8 +257,7 @@ public interface IAnalyticsService
 /// <summary>
 /// Comprehensive analytics dashboard data
 /// </summary>
-public class AnalyticsDashboard
-{
+public class AnalyticsDashboard {
     public Guid PublisherId { get; set; }
     public string TimeRange { get; set; } = string.Empty;
     public DateTime GeneratedAt { get; set; } = DateTime.UtcNow;
@@ -275,8 +273,7 @@ public class AnalyticsDashboard
 /// <summary>
 /// Overview metrics summary
 /// </summary>
-public class OverviewMetrics
-{
+public class OverviewMetrics {
     public long TotalDownloads { get; set; }
     public long DownloadsChange { get; set; }
     public double DownloadsChangePercentage { get; set; }
@@ -293,8 +290,7 @@ public class OverviewMetrics
 /// <summary>
 /// Download trends data
 /// </summary>
-public class DownloadTrends
-{
+public class DownloadTrends {
     public IEnumerable<DataPoint> TrendData { get; set; } = [];
     public long PeakDownloads { get; set; }
     public DateTime PeakDate { get; set; }
@@ -306,8 +302,7 @@ public class DownloadTrends
 /// <summary>
 /// User engagement summary
 /// </summary>
-public class UserEngagement
-{
+public class UserEngagement {
     public double AverageSessionDuration { get; set; }
     public double RetentionRate { get; set; }
     public int UniqueUsers { get; set; }
@@ -319,8 +314,7 @@ public class UserEngagement
 /// <summary>
 /// Geographic summary
 /// </summary>
-public class GeographicSummary
-{
+public class GeographicSummary {
     public int TotalCountries { get; set; }
     public IEnumerable<CountryMetric> TopCountries { get; set; } = [];
     public string GrowthRegion { get; set; } = string.Empty;
@@ -330,8 +324,7 @@ public class GeographicSummary
 /// <summary>
 /// Security summary
 /// </summary>
-public class SecuritySummary
-{
+public class SecuritySummary {
     public double AverageSecurityScore { get; set; }
     public int TotalVulnerabilities { get; set; }
     public int ResolvedVulnerabilities { get; set; }
@@ -342,8 +335,7 @@ public class SecuritySummary
 /// <summary>
 /// Top package information
 /// </summary>
-public class TopPackage
-{
+public class TopPackage {
     public Guid PackageId { get; set; }
     public string Name { get; set; } = string.Empty;
     public long Downloads { get; set; }
@@ -355,8 +347,7 @@ public class TopPackage
 /// <summary>
 /// Trending metric
 /// </summary>
-public class TrendingMetric
-{
+public class TrendingMetric {
     public string Name { get; set; } = string.Empty;
     public string Value { get; set; } = string.Empty;
     public double ChangePercentage { get; set; }
@@ -367,8 +358,7 @@ public class TrendingMetric
 /// <summary>
 /// Detailed download analytics
 /// </summary>
-public class DetailedDownloadAnalytics
-{
+public class DetailedDownloadAnalytics {
     public string TimeRange { get; set; } = string.Empty;
     public string Granularity { get; set; } = string.Empty;
     public IEnumerable<DownloadDataPoint> DownloadData { get; set; } = [];
@@ -382,8 +372,7 @@ public class DetailedDownloadAnalytics
 /// <summary>
 /// Download data point with additional context
 /// </summary>
-public class DownloadDataPoint : DataPoint
-{
+public class DownloadDataPoint : DataPoint {
     public long DownloadCount { get; set; }
     public int UniqueUsers { get; set; }
     public IEnumerable<string> TopPackages { get; set; } = [];
@@ -392,8 +381,7 @@ public class DownloadDataPoint : DataPoint
 /// <summary>
 /// Download statistics
 /// </summary>
-public class DownloadStatistics
-{
+public class DownloadStatistics {
     public long TotalDownloads { get; set; }
     public long AverageDaily { get; set; }
     public long MedianDaily { get; set; }
@@ -406,8 +394,7 @@ public class DownloadStatistics
 /// <summary>
 /// Version downloads
 /// </summary>
-public class VersionDownloads
-{
+public class VersionDownloads {
     public string Version { get; set; } = string.Empty;
     public long Downloads { get; set; }
     public double Percentage { get; set; }
@@ -418,8 +405,7 @@ public class VersionDownloads
 /// <summary>
 /// Platform downloads
 /// </summary>
-public class PlatformDownloads
-{
+public class PlatformDownloads {
     public string Platform { get; set; } = string.Empty;
     public long Downloads { get; set; }
     public double Percentage { get; set; }
@@ -429,8 +415,7 @@ public class PlatformDownloads
 /// <summary>
 /// Download source information
 /// </summary>
-public class DownloadSource
-{
+public class DownloadSource {
     public string Source { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
     public long Downloads { get; set; }
@@ -440,8 +425,7 @@ public class DownloadSource
 /// <summary>
 /// Download pattern analysis
 /// </summary>
-public class DownloadPattern
-{
+public class DownloadPattern {
     public string Pattern { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public double Confidence { get; set; }
@@ -451,8 +435,7 @@ public class DownloadPattern
 /// <summary>
 /// User engagement analytics
 /// </summary>
-public class UserEngagementAnalytics
-{
+public class UserEngagementAnalytics {
     public string TimeRange { get; set; } = string.Empty;
     public UserMetrics UserMetrics { get; set; } = new();
     public SessionMetrics SessionMetrics { get; set; } = new();
@@ -465,8 +448,7 @@ public class UserEngagementAnalytics
 /// <summary>
 /// User metrics
 /// </summary>
-public class UserMetrics
-{
+public class UserMetrics {
     public int TotalUsers { get; set; }
     public int ActiveUsers { get; set; }
     public int NewUsers { get; set; }
@@ -478,8 +460,7 @@ public class UserMetrics
 /// <summary>
 /// Session metrics
 /// </summary>
-public class SessionMetrics
-{
+public class SessionMetrics {
     public TimeSpan AverageSessionDuration { get; set; }
     public TimeSpan MedianSessionDuration { get; set; }
     public int AverageDownloadsPerSession { get; set; }
@@ -490,8 +471,7 @@ public class SessionMetrics
 /// <summary>
 /// Retention metrics
 /// </summary>
-public class RetentionMetrics
-{
+public class RetentionMetrics {
     public double Day1Retention { get; set; }
     public double Day7Retention { get; set; }
     public double Day30Retention { get; set; }
@@ -502,8 +482,7 @@ public class RetentionMetrics
 /// <summary>
 /// Engagement trend
 /// </summary>
-public class EngagementTrend
-{
+public class EngagementTrend {
     public DateTime Date { get; set; }
     public double EngagementScore { get; set; }
     public int ActiveUsers { get; set; }
@@ -513,8 +492,7 @@ public class EngagementTrend
 /// <summary>
 /// User segment
 /// </summary>
-public class UserSegment
-{
+public class UserSegment {
     public string SegmentName { get; set; } = string.Empty;
     public int UserCount { get; set; }
     public double Percentage { get; set; }
@@ -525,8 +503,7 @@ public class UserSegment
 /// <summary>
 /// Behavior pattern
 /// </summary>
-public class BehaviorPattern
-{
+public class BehaviorPattern {
     public string Pattern { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public int UserCount { get; set; }
@@ -536,8 +513,7 @@ public class BehaviorPattern
 /// <summary>
 /// Retention cohort
 /// </summary>
-public class RetentionCohort
-{
+public class RetentionCohort {
     public DateTime CohortDate { get; set; }
     public int InitialUsers { get; set; }
     public double Day1Retention { get; set; }
@@ -548,8 +524,7 @@ public class RetentionCohort
 /// <summary>
 /// Geographic analytics
 /// </summary>
-public class GeographicAnalytics
-{
+public class GeographicAnalytics {
     public string TimeRange { get; set; } = string.Empty;
     public int TotalCountries { get; set; }
     public IEnumerable<CountryAnalytics> CountryData { get; set; } = [];
@@ -561,8 +536,7 @@ public class GeographicAnalytics
 /// <summary>
 /// Country analytics
 /// </summary>
-public class CountryAnalytics
-{
+public class CountryAnalytics {
     public string CountryCode { get; set; } = string.Empty;
     public string CountryName { get; set; } = string.Empty;
     public long Downloads { get; set; }
@@ -576,8 +550,7 @@ public class CountryAnalytics
 /// <summary>
 /// Region analytics
 /// </summary>
-public class RegionAnalytics
-{
+public class RegionAnalytics {
     public string Region { get; set; } = string.Empty;
     public long Downloads { get; set; }
     public double Percentage { get; set; }
@@ -588,8 +561,7 @@ public class RegionAnalytics
 /// <summary>
 /// City analytics
 /// </summary>
-public class CityAnalytics
-{
+public class CityAnalytics {
     public string City { get; set; } = string.Empty;
     public string Country { get; set; } = string.Empty;
     public long Downloads { get; set; }
@@ -599,8 +571,7 @@ public class CityAnalytics
 /// <summary>
 /// Growth analysis
 /// </summary>
-public class GrowthAnalysis
-{
+public class GrowthAnalysis {
     public string FastestGrowingCountry { get; set; } = string.Empty;
     public double FastestGrowthRate { get; set; }
     public IEnumerable<string> EmergingMarkets { get; set; } = [];
@@ -610,8 +581,7 @@ public class GrowthAnalysis
 /// <summary>
 /// Performance comparison analytics
 /// </summary>
-public class PerformanceComparison
-{
+public class PerformanceComparison {
     public string TimeRange { get; set; } = string.Empty;
     public IEnumerable<string> ComparedMetrics { get; set; } = [];
     public IEnumerable<PackageComparison> PackageComparisons { get; set; } = [];
@@ -622,8 +592,7 @@ public class PerformanceComparison
 /// <summary>
 /// Package comparison data
 /// </summary>
-public class PackageComparison
-{
+public class PackageComparison {
     public Guid PackageId { get; set; }
     public string PackageName { get; set; } = string.Empty;
     public Dictionary<string, double> Metrics { get; set; } = new();
@@ -635,8 +604,7 @@ public class PackageComparison
 /// <summary>
 /// Comparison summary
 /// </summary>
-public class ComparisonSummary
-{
+public class ComparisonSummary {
     public string TopPerformer { get; set; } = string.Empty;
     public string FastestGrowing { get; set; } = string.Empty;
     public string MostConsistent { get; set; } = string.Empty;
@@ -647,8 +615,7 @@ public class ComparisonSummary
 /// <summary>
 /// Performance insight
 /// </summary>
-public class PerformanceInsight
-{
+public class PerformanceInsight {
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public InsightType Type { get; set; }
@@ -659,8 +626,7 @@ public class PerformanceInsight
 /// <summary>
 /// Security analytics
 /// </summary>
-public class SecurityAnalytics
-{
+public class SecurityAnalytics {
     public string TimeRange { get; set; } = string.Empty;
     public SecurityOverview Overview { get; set; } = new();
     public IEnumerable<SecurityTrendPoint> ScoreTrends { get; set; } = [];
@@ -673,8 +639,7 @@ public class SecurityAnalytics
 /// <summary>
 /// Security overview
 /// </summary>
-public class SecurityOverview
-{
+public class SecurityOverview {
     public double AverageSecurityScore { get; set; }
     public double SecurityScoreChange { get; set; }
     public int TotalScans { get; set; }
@@ -687,8 +652,7 @@ public class SecurityOverview
 /// <summary>
 /// Security trend point
 /// </summary>
-public class SecurityTrendPoint
-{
+public class SecurityTrendPoint {
     public DateTime Date { get; set; }
     public double Score { get; set; }
     public string Grade { get; set; } = string.Empty;
@@ -698,8 +662,7 @@ public class SecurityTrendPoint
 /// <summary>
 /// Vulnerability analysis
 /// </summary>
-public class VulnerabilityAnalysis
-{
+public class VulnerabilityAnalysis {
     public string VulnerabilityId { get; set; } = string.Empty;
     public SecurityScanSeverity Severity { get; set; }
     public string Description { get; set; } = string.Empty;
@@ -712,8 +675,7 @@ public class VulnerabilityAnalysis
 /// <summary>
 /// Security incident
 /// </summary>
-public class SecurityIncident
-{
+public class SecurityIncident {
     public Guid Id { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -727,8 +689,7 @@ public class SecurityIncident
 /// <summary>
 /// Security comparison
 /// </summary>
-public class SecurityComparison
-{
+public class SecurityComparison {
     public double IndustryAverageScore { get; set; }
     public double PublisherScore { get; set; }
     public int IndustryRanking { get; set; }
@@ -738,8 +699,7 @@ public class SecurityComparison
 /// <summary>
 /// Security recommendation
 /// </summary>
-public class SecurityRecommendation
-{
+public class SecurityRecommendation {
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public RecommendationPriority Priority { get; set; }
@@ -750,8 +710,7 @@ public class SecurityRecommendation
 /// <summary>
 /// Analytics export request
 /// </summary>
-public class AnalyticsExportRequest
-{
+public class AnalyticsExportRequest {
     public ExportFormat Format { get; set; } = ExportFormat.Csv;
     public string TimeRange { get; set; } = "30d";
     public IEnumerable<string> Metrics { get; set; } = [];
@@ -764,8 +723,7 @@ public class AnalyticsExportRequest
 /// <summary>
 /// Analytics export result
 /// </summary>
-public class AnalyticsExportResult
-{
+public class AnalyticsExportResult {
     public bool Success { get; set; }
     public string? FileUrl { get; set; }
     public string? FileName { get; set; }
@@ -778,8 +736,7 @@ public class AnalyticsExportResult
 /// <summary>
 /// Download milestone
 /// </summary>
-public class DownloadMilestone
-{
+public class DownloadMilestone {
     public long Threshold { get; set; }
     public DateTime AchievedAt { get; set; }
     public string PackageName { get; set; } = string.Empty;
@@ -788,8 +745,7 @@ public class DownloadMilestone
 /// <summary>
 /// Engagement metric
 /// </summary>
-public class EngagementMetric
-{
+public class EngagementMetric {
     public string Name { get; set; } = string.Empty;
     public double Value { get; set; }
     public string Unit { get; set; } = string.Empty;
@@ -799,8 +755,7 @@ public class EngagementMetric
 /// <summary>
 /// Country metric
 /// </summary>
-public class CountryMetric
-{
+public class CountryMetric {
     public string CountryCode { get; set; } = string.Empty;
     public string CountryName { get; set; } = string.Empty;
     public long Downloads { get; set; }
@@ -810,8 +765,7 @@ public class CountryMetric
 /// <summary>
 /// Trend direction
 /// </summary>
-public enum TrendDirection
-{
+public enum TrendDirection {
     Up,
     Down,
     Stable,
@@ -821,8 +775,7 @@ public enum TrendDirection
 /// <summary>
 /// Insight types
 /// </summary>
-public enum InsightType
-{
+public enum InsightType {
     Opportunity,
     Warning,
     Achievement,
@@ -833,14 +786,12 @@ public enum InsightType
 /// <summary>
 /// Recommendation priority
 /// </summary>
-public enum RecommendationPriority
-{
+public enum RecommendationPriority {
     Low,
     Medium,
     High,
     Critical
 }
-
 
 // Additional classes for trust tier, dependency, market insights, financial, predictive, and real-time analytics would be defined here
 // These follow similar patterns but are omitted for brevity
@@ -848,8 +799,7 @@ public enum RecommendationPriority
 /// <summary>
 /// Trust tier analytics (placeholder for additional implementation)
 /// </summary>
-public class TrustTierAnalytics
-{
+public class TrustTierAnalytics {
     public TrustTier CurrentTier { get; set; }
     public double ProgressToNext { get; set; }
     public IEnumerable<TrustTierRequirement> Requirements { get; set; } = [];
@@ -859,8 +809,7 @@ public class TrustTierAnalytics
 /// <summary>
 /// Dependency analytics (placeholder for additional implementation)
 /// </summary>
-public class DependencyAnalytics
-{
+public class DependencyAnalytics {
     public int TotalDependencies { get; set; }
     public int OutdatedDependencies { get; set; }
     public IEnumerable<DependencyInsight> Insights { get; set; } = [];
@@ -870,8 +819,7 @@ public class DependencyAnalytics
 /// <summary>
 /// Market insights (placeholder for additional implementation)
 /// </summary>
-public class MarketInsights
-{
+public class MarketInsights {
     public IEnumerable<MarketTrend> Trends { get; set; } = [];
     public IEnumerable<CompetitorAnalysis> Competitors { get; set; } = [];
     // Additional properties...
@@ -880,8 +828,7 @@ public class MarketInsights
 /// <summary>
 /// Financial analytics (placeholder for additional implementation)
 /// </summary>
-public class FinancialAnalytics
-{
+public class FinancialAnalytics {
     public decimal TotalRevenue { get; set; }
     public IEnumerable<RevenueDataPoint> RevenueTrend { get; set; } = [];
     // Additional properties...
@@ -890,8 +837,7 @@ public class FinancialAnalytics
 /// <summary>
 /// Predictive analytics (placeholder for additional implementation)
 /// </summary>
-public class PredictiveAnalytics
-{
+public class PredictiveAnalytics {
     public IEnumerable<PredictionModel> Predictions { get; set; } = [];
     public double ConfidenceLevel { get; set; }
     // Additional properties...
@@ -900,8 +846,7 @@ public class PredictiveAnalytics
 /// <summary>
 /// Real-time analytics (placeholder for additional implementation)
 /// </summary>
-public class RealTimeAnalytics
-{
+public class RealTimeAnalytics {
     public Dictionary<string, object> LiveMetrics { get; set; } = new();
     public DateTime LastUpdated { get; set; }
     // Additional properties...
@@ -923,8 +868,7 @@ public class PredictionModel { }
 /// <summary>
 /// Global platform statistics
 /// </summary>
-public class GlobalPlatformStatistics
-{
+public class GlobalPlatformStatistics {
     public string TimeRange { get; set; } = string.Empty;
     public DateTime GeneratedAt { get; set; } = DateTime.UtcNow;
     public GlobalOverviewMetrics Overview { get; set; } = new();
@@ -941,8 +885,7 @@ public class GlobalPlatformStatistics
 /// <summary>
 /// Global overview metrics
 /// </summary>
-public class GlobalOverviewMetrics
-{
+public class GlobalOverviewMetrics {
     public long TotalPackages { get; set; }
     public long TotalDownloads { get; set; }
     public int ActivePublishers { get; set; }
@@ -959,8 +902,7 @@ public class GlobalOverviewMetrics
 /// <summary>
 /// Global download trends
 /// </summary>
-public class GlobalDownloadTrends
-{
+public class GlobalDownloadTrends {
     public IEnumerable<DataPoint> TrendData { get; set; } = [];
     public long DailyAverageDownloads { get; set; }
     public long PeakDailyDownloads { get; set; }
@@ -972,8 +914,7 @@ public class GlobalDownloadTrends
 /// <summary>
 /// Global user engagement metrics
 /// </summary>
-public class GlobalUserEngagement
-{
+public class GlobalUserEngagement {
     public int TotalActiveUsers { get; set; }
     public int NewUsersThisPeriod { get; set; }
     public double UserRetentionRate { get; set; }
@@ -985,8 +926,7 @@ public class GlobalUserEngagement
 /// <summary>
 /// Global geographic distribution
 /// </summary>
-public class GlobalGeographicDistribution
-{
+public class GlobalGeographicDistribution {
     public int TotalCountries { get; set; }
     public IEnumerable<CountryAnalytics> TopCountries { get; set; } = [];
     public IEnumerable<RegionAnalytics> RegionData { get; set; } = [];
@@ -997,8 +937,7 @@ public class GlobalGeographicDistribution
 /// <summary>
 /// Global security metrics
 /// </summary>
-public class GlobalSecurityMetrics
-{
+public class GlobalSecurityMetrics {
     public double AverageSecurityScore { get; set; }
     public int TotalSecurityScans { get; set; }
     public int ActiveVulnerabilities { get; set; }
@@ -1010,8 +949,7 @@ public class GlobalSecurityMetrics
 /// <summary>
 /// Global trust tier distribution
 /// </summary>
-public class GlobalTrustTierDistribution
-{
+public class GlobalTrustTierDistribution {
     public Dictionary<TrustTier, int> TierDistribution { get; set; } = new();
     public Dictionary<TrustTier, double> TierPercentages { get; set; } = new();
     public TrustTier MostCommonTier { get; set; }
@@ -1022,8 +960,7 @@ public class GlobalTrustTierDistribution
 /// <summary>
 /// Category statistics
 /// </summary>
-public class CategoryStatistics
-{
+public class CategoryStatistics {
     public string Category { get; set; } = string.Empty;
     public int PackageCount { get; set; }
     public long TotalDownloads { get; set; }
@@ -1035,8 +972,7 @@ public class CategoryStatistics
 /// <summary>
 /// Trending package data
 /// </summary>
-public class TrendingPackageData
-{
+public class TrendingPackageData {
     public Guid PackageId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -1054,8 +990,7 @@ public class TrendingPackageData
 /// <summary>
 /// Ecosystem growth metrics
 /// </summary>
-public class EcosystemGrowthMetrics
-{
+public class EcosystemGrowthMetrics {
     public double PackageGrowthRate { get; set; }
     public double PublisherGrowthRate { get; set; }
     public double UserGrowthRate { get; set; }
@@ -1067,8 +1002,7 @@ public class EcosystemGrowthMetrics
 /// <summary>
 /// Technology stack analysis
 /// </summary>
-public class TechnologyStackAnalysis
-{
+public class TechnologyStackAnalysis {
     public Dictionary<string, TechnologyUsage> Technologies { get; set; } = new();
     public IEnumerable<TechnologyTrend> TrendingTechnologies { get; set; } = [];
     public IEnumerable<TechnologyCompatibility> CompatibilityMatrix { get; set; } = [];
@@ -1078,8 +1012,7 @@ public class TechnologyStackAnalysis
 /// <summary>
 /// Technology usage metrics
 /// </summary>
-public class TechnologyUsage
-{
+public class TechnologyUsage {
     public string Technology { get; set; } = string.Empty;
     public int PackageCount { get; set; }
     public double MarketShare { get; set; }
@@ -1090,8 +1023,7 @@ public class TechnologyUsage
 /// <summary>
 /// Technology trend data
 /// </summary>
-public class TechnologyTrend
-{
+public class TechnologyTrend {
     public string Technology { get; set; } = string.Empty;
     public double TrendScore { get; set; }
     public TrendDirection Direction { get; set; }
@@ -1101,8 +1033,7 @@ public class TechnologyTrend
 /// <summary>
 /// Technology compatibility information
 /// </summary>
-public class TechnologyCompatibility
-{
+public class TechnologyCompatibility {
     public string Technology1 { get; set; } = string.Empty;
     public string Technology2 { get; set; } = string.Empty;
     public double CompatibilityScore { get; set; }
@@ -1112,8 +1043,7 @@ public class TechnologyCompatibility
 /// <summary>
 /// Technology insight
 /// </summary>
-public class TechnologyInsight
-{
+public class TechnologyInsight {
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public InsightType Type { get; set; }
@@ -1123,8 +1053,7 @@ public class TechnologyInsight
 /// <summary>
 /// Ecosystem health metrics
 /// </summary>
-public class EcosystemHealthMetrics
-{
+public class EcosystemHealthMetrics {
     public double OverallHealthScore { get; set; }
     public EcosystemHealthIndicators Indicators { get; set; } = new();
     public IEnumerable<HealthTrend> HealthTrends { get; set; } = [];
@@ -1135,8 +1064,7 @@ public class EcosystemHealthMetrics
 /// <summary>
 /// Ecosystem health indicators
 /// </summary>
-public class EcosystemHealthIndicators
-{
+public class EcosystemHealthIndicators {
     public double SecurityHealth { get; set; }
     public double QualityHealth { get; set; }
     public double DiversityHealth { get; set; }
@@ -1148,8 +1076,7 @@ public class EcosystemHealthIndicators
 /// <summary>
 /// Health trend data
 /// </summary>
-public class HealthTrend
-{
+public class HealthTrend {
     public DateTime Date { get; set; }
     public double HealthScore { get; set; }
     public string Category { get; set; } = string.Empty;
@@ -1158,8 +1085,7 @@ public class HealthTrend
 /// <summary>
 /// Health alert
 /// </summary>
-public class HealthAlert
-{
+public class HealthAlert {
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public AlertSeverity Severity { get; set; }
@@ -1170,8 +1096,7 @@ public class HealthAlert
 /// <summary>
 /// Health recommendation
 /// </summary>
-public class HealthRecommendation
-{
+public class HealthRecommendation {
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Action { get; set; } = string.Empty;
@@ -1182,8 +1107,7 @@ public class HealthRecommendation
 /// <summary>
 /// Detailed package analytics for individual packages
 /// </summary>
-public class DetailedPackageAnalytics
-{
+public class DetailedPackageAnalytics {
     public Guid PackageId { get; set; }
     public string PackageName { get; set; } = string.Empty;
     public string TimeRange { get; set; } = string.Empty;
@@ -1201,8 +1125,7 @@ public class DetailedPackageAnalytics
 /// <summary>
 /// Package overview metrics
 /// </summary>
-public class PackageOverviewMetrics
-{
+public class PackageOverviewMetrics {
     public long TotalDownloads { get; set; }
     public long DownloadsThisPeriod { get; set; }
     public double GrowthRate { get; set; }
@@ -1218,8 +1141,7 @@ public class PackageOverviewMetrics
 /// <summary>
 /// Package user engagement metrics
 /// </summary>
-public class PackageUserEngagement
-{
+public class PackageUserEngagement {
     public int UniqueUsers { get; set; }
     public int ActiveUsers { get; set; }
     public double RetentionRate { get; set; }
@@ -1231,8 +1153,7 @@ public class PackageUserEngagement
 /// <summary>
 /// Package version analytics
 /// </summary>
-public class PackageVersionAnalytics
-{
+public class PackageVersionAnalytics {
     public IEnumerable<VersionDownloads> VersionBreakdown { get; set; } = [];
     public double AdoptionRate { get; set; }
     public TimeSpan AverageUpgradeTime { get; set; }
@@ -1243,8 +1164,7 @@ public class PackageVersionAnalytics
 /// <summary>
 /// Package dependency analysis
 /// </summary>
-public class PackageDependencyAnalysis
-{
+public class PackageDependencyAnalysis {
     public IEnumerable<DependencyUsage> Dependencies { get; set; } = [];
     public IEnumerable<DependentPackage> Dependents { get; set; } = [];
     public double DependencyHealth { get; set; }
@@ -1255,8 +1175,7 @@ public class PackageDependencyAnalysis
 /// <summary>
 /// Package security analysis
 /// </summary>
-public class PackageSecurityAnalysis
-{
+public class PackageSecurityAnalysis {
     public double SecurityScore { get; set; }
     public string SecurityGrade { get; set; } = string.Empty;
     public IEnumerable<SecurityScanResult> RecentScans { get; set; } = [];
@@ -1267,8 +1186,7 @@ public class PackageSecurityAnalysis
 /// <summary>
 /// Package performance metrics
 /// </summary>
-public class PackagePerformanceMetrics
-{
+public class PackagePerformanceMetrics {
     public TimeSpan AverageInstallTime { get; set; }
     public double SuccessRate { get; set; }
     public IEnumerable<PerformanceBenchmark> Benchmarks { get; set; } = [];
@@ -1278,8 +1196,7 @@ public class PackagePerformanceMetrics
 /// <summary>
 /// Package feedback
 /// </summary>
-public class PackageFeedback
-{
+public class PackageFeedback {
     public string Type { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
     public double? Rating { get; set; }
@@ -1290,8 +1207,7 @@ public class PackageFeedback
 /// <summary>
 /// Package comparison result
 /// </summary>
-public class PackageComparisonResult
-{
+public class PackageComparisonResult {
     public string TimeRange { get; set; } = string.Empty;
     public IEnumerable<Guid> ComparedPackages { get; set; } = [];
     public IEnumerable<PackageComparisonData> ComparisonData { get; set; } = [];
@@ -1303,8 +1219,7 @@ public class PackageComparisonResult
 /// <summary>
 /// Package comparison data
 /// </summary>
-public class PackageComparisonData
-{
+public class PackageComparisonData {
     public Guid PackageId { get; set; }
     public string PackageName { get; set; } = string.Empty;
     public Dictionary<string, object> Metrics { get; set; } = new();
@@ -1315,8 +1230,7 @@ public class PackageComparisonData
 /// <summary>
 /// Comparison matrix
 /// </summary>
-public class ComparisonMatrix
-{
+public class ComparisonMatrix {
     public IEnumerable<string> Metrics { get; set; } = [];
     public Dictionary<string, Dictionary<Guid, double>> Matrix { get; set; } = new();
     public Dictionary<string, Guid> Winners { get; set; } = new();
@@ -1325,8 +1239,7 @@ public class ComparisonMatrix
 /// <summary>
 /// Comparison insight
 /// </summary>
-public class ComparisonInsight
-{
+public class ComparisonInsight {
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public InsightType Type { get; set; }
@@ -1336,8 +1249,7 @@ public class ComparisonInsight
 /// <summary>
 /// Global market insights
 /// </summary>
-public class GlobalMarketInsights
-{
+public class GlobalMarketInsights {
     public string TimeRange { get; set; } = string.Empty;
     public MarketOverview Overview { get; set; } = new();
     public IEnumerable<MarketTrendData> Trends { get; set; } = [];
@@ -1350,8 +1262,7 @@ public class GlobalMarketInsights
 /// <summary>
 /// Market overview
 /// </summary>
-public class MarketOverview
-{
+public class MarketOverview {
     public long TotalMarketSize { get; set; }
     public double GrowthRate { get; set; }
     public int ActiveCategories { get; set; }
@@ -1363,8 +1274,7 @@ public class MarketOverview
 /// <summary>
 /// Market trend data
 /// </summary>
-public class MarketTrendData
-{
+public class MarketTrendData {
     public string Trend { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public double Impact { get; set; }
@@ -1375,8 +1285,7 @@ public class MarketTrendData
 /// <summary>
 /// Category insight
 /// </summary>
-public class CategoryInsight
-{
+public class CategoryInsight {
     public string Category { get; set; } = string.Empty;
     public long MarketSize { get; set; }
     public double GrowthRate { get; set; }
@@ -1389,8 +1298,7 @@ public class CategoryInsight
 /// <summary>
 /// Competitive analysis
 /// </summary>
-public class CompetitiveAnalysis
-{
+public class CompetitiveAnalysis {
     public string Category { get; set; } = string.Empty;
     public IEnumerable<CompetitorProfile> Competitors { get; set; } = [];
     public MarketPositioning Positioning { get; set; } = new();
@@ -1400,8 +1308,7 @@ public class CompetitiveAnalysis
 /// <summary>
 /// Market opportunity
 /// </summary>
-public class MarketOpportunity
-{
+public class MarketOpportunity {
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public double OpportunitySize { get; set; }
@@ -1413,8 +1320,7 @@ public class MarketOpportunity
 /// <summary>
 /// Market forecast
 /// </summary>
-public class MarketForecast
-{
+public class MarketForecast {
     public string ForecastPeriod { get; set; } = string.Empty;
     public IEnumerable<ForecastDataPoint> Projections { get; set; } = [];
     public double ConfidenceLevel { get; set; }
@@ -1445,8 +1351,7 @@ public class ForecastAssumption { }
 /// <summary>
 /// Alert severity levels
 /// </summary>
-public enum AlertSeverity
-{
+public enum AlertSeverity {
     Low,
     Medium,
     High,
@@ -1458,8 +1363,7 @@ public enum AlertSeverity
 /// <summary>
 /// Publisher analytics data for dashboard display
 /// </summary>
-public class PublisherAnalytics
-{
+public class PublisherAnalytics {
     public long TotalDownloads { get; set; }
     public double DownloadGrowth { get; set; }
     public int ActiveUsers { get; set; }
@@ -1477,8 +1381,7 @@ public class PublisherAnalytics
 /// <summary>
 /// Chart data point for time series visualization
 /// </summary>
-public class ChartDataPoint
-{
+public class ChartDataPoint {
     public DateTime Date { get; set; }
     public long Value { get; set; }
 }
@@ -1486,8 +1389,7 @@ public class ChartDataPoint
 /// <summary>
 /// Geographic data point for map visualization
 /// </summary>
-public class GeographicDataPoint
-{
+public class GeographicDataPoint {
     public string Region { get; set; } = string.Empty;
     public long Downloads { get; set; }
     public double Percentage { get; set; }

@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 
@@ -8,45 +9,33 @@ namespace MCPHub.WebApp.Services;
 /// <summary>
 /// Custom authentication state provider for Blazor Server with JWT tokens
 /// </summary>
-public class CustomAuthenticationStateProvider : AuthenticationStateProvider
-{
-    private readonly IJSRuntime _jsRuntime;
-    private readonly ILogger<CustomAuthenticationStateProvider> _logger;
+public class CustomAuthenticationStateProvider(IJSRuntime jsRuntime, ILogger<CustomAuthenticationStateProvider> logger) : AuthenticationStateProvider {
+    private readonly IJSRuntime _jsRuntime = jsRuntime;
+    private readonly ILogger<CustomAuthenticationStateProvider> _logger = logger;
     private ClaimsPrincipal _anonymous = new(new ClaimsIdentity());
-
-    public CustomAuthenticationStateProvider(IJSRuntime jsRuntime, ILogger<CustomAuthenticationStateProvider> logger)
-    {
-        _jsRuntime = jsRuntime;
-        _logger = logger;
-    }
 
     /// <summary>
     /// Gets the current authentication state
     /// </summary>
     /// <returns>Authentication state</returns>
-    public override async Task<AuthenticationState> GetAuthenticationStateAsync()
-    {
-        try
-        {
+    public override async Task<AuthenticationState> GetAuthenticationStateAsync() {
+        try {
             var token = await GetTokenFromStorageAsync();
-            
-            if (string.IsNullOrEmpty(token))
-            {
+
+            if (string.IsNullOrEmpty(token)) {
                 return new AuthenticationState(_anonymous);
             }
 
             var claimsPrincipal = CreateClaimsPrincipalFromToken(token);
-            
-            if (claimsPrincipal == null || IsTokenExpired(token))
-            {
+
+            if (claimsPrincipal == null || IsTokenExpired(token)) {
                 await ClearTokenAsync();
                 return new AuthenticationState(_anonymous);
             }
 
             return new AuthenticationState(claimsPrincipal);
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Error getting authentication state");
             return new AuthenticationState(_anonymous);
         }
@@ -57,20 +46,16 @@ public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     /// </summary>
     /// <param name="token">JWT access token</param>
     /// <param name="refreshToken">Refresh token</param>
-    public async Task MarkUserAsAuthenticatedAsync(string token, string refreshToken)
-    {
-        try
-        {
+    public async Task MarkUserAsAuthenticatedAsync(string token, string refreshToken) {
+        try {
             await SetTokenInStorageAsync(token, refreshToken);
-            
+
             var claimsPrincipal = CreateClaimsPrincipalFromToken(token);
-            if (claimsPrincipal != null)
-            {
+            if (claimsPrincipal != null) {
                 NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(claimsPrincipal)));
             }
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Error marking user as authenticated");
         }
     }
@@ -78,15 +63,12 @@ public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     /// <summary>
     /// Marks the user as logged out
     /// </summary>
-    public async Task MarkUserAsLoggedOutAsync()
-    {
-        try
-        {
+    public async Task MarkUserAsLoggedOutAsync() {
+        try {
             await ClearTokenAsync();
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_anonymous)));
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Error marking user as logged out");
         }
     }
@@ -95,96 +77,75 @@ public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     /// Gets the stored access token
     /// </summary>
     /// <returns>Access token</returns>
-    public async Task<string?> GetTokenAsync()
-    {
-        return await GetTokenFromStorageAsync();
-    }
+    public async Task<string?> GetTokenAsync() => await GetTokenFromStorageAsync();
 
     /// <summary>
     /// Gets the stored refresh token
     /// </summary>
     /// <returns>Refresh token</returns>
-    public async Task<string?> GetRefreshTokenAsync()
-    {
-        try
-        {
+    public async Task<string?> GetRefreshTokenAsync() {
+        try {
             return await _jsRuntime.InvokeAsync<string>("localStorage.getItem", "refreshToken");
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Error getting refresh token from storage");
             return null;
         }
     }
 
-    private async Task<string?> GetTokenFromStorageAsync()
-    {
-        try
-        {
+    private async Task<string?> GetTokenFromStorageAsync() {
+        try {
             return await _jsRuntime.InvokeAsync<string>("localStorage.getItem", "accessToken");
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Error getting token from storage");
             return null;
         }
     }
 
-    private async Task SetTokenInStorageAsync(string token, string refreshToken)
-    {
-        try
-        {
+    private async Task SetTokenInStorageAsync(string token, string refreshToken) {
+        try {
             await _jsRuntime.InvokeVoidAsync("localStorage.setItem", "accessToken", token);
             await _jsRuntime.InvokeVoidAsync("localStorage.setItem", "refreshToken", refreshToken);
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Error setting tokens in storage");
         }
     }
 
-    private async Task ClearTokenAsync()
-    {
-        try
-        {
+    private async Task ClearTokenAsync() {
+        try {
             await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", "accessToken");
             await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", "refreshToken");
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             _logger.LogError(ex, "Error clearing tokens from storage");
         }
     }
 
-    private static ClaimsPrincipal? CreateClaimsPrincipalFromToken(string token)
-    {
-        try
-        {
+    private static ClaimsPrincipal? CreateClaimsPrincipalFromToken(string token) {
+        try {
             var handler = new JwtSecurityTokenHandler();
             var jsonToken = handler.ReadJwtToken(token);
-            
+
             var claims = jsonToken.Claims.ToList();
             var identity = new ClaimsIdentity(claims, "jwt");
-            
+
             return new ClaimsPrincipal(identity);
         }
-        catch
-        {
+        catch {
             return null;
         }
     }
 
-    private static bool IsTokenExpired(string token)
-    {
-        try
-        {
+    private static bool IsTokenExpired(string token) {
+        try {
             var handler = new JwtSecurityTokenHandler();
             var jsonToken = handler.ReadJwtToken(token);
-            
+
             return jsonToken.ValidTo < DateTime.UtcNow;
         }
-        catch
-        {
+        catch {
             return true;
         }
     }

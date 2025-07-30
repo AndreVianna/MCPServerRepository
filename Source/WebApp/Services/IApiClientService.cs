@@ -7,8 +7,7 @@ namespace MCPHub.WebApp.Services;
 /// <summary>
 /// Interface for API client operations
 /// </summary>
-public interface IApiClientService
-{
+public interface IApiClientService {
     /// <summary>
     /// Searches for packages
     /// </summary>
@@ -113,8 +112,7 @@ public interface IApiClientService
 /// <summary>
 /// Package search result item
 /// </summary>
-public class PackageSearchResultItem
-{
+public class PackageSearchResultItem {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -137,8 +135,7 @@ public class PackageSearchResultItem
 /// <summary>
 /// Package details result
 /// </summary>
-public class PackageDetailsResult
-{
+public class PackageDetailsResult {
     public bool IsSuccess { get; set; }
     public string Message { get; set; } = string.Empty;
     public PackageDetails? Package { get; set; }
@@ -147,8 +144,7 @@ public class PackageDetailsResult
 /// <summary>
 /// Package details
 /// </summary>
-public class PackageDetails
-{
+public class PackageDetails {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -177,8 +173,7 @@ public class PackageDetails
 /// <summary>
 /// Server details result
 /// </summary>
-public class ServerDetailsResult
-{
+public class ServerDetailsResult {
     public bool IsSuccess { get; set; }
     public string Message { get; set; } = string.Empty;
     public ServerDetails? Server { get; set; }
@@ -187,8 +182,7 @@ public class ServerDetailsResult
 /// <summary>
 /// Server details
 /// </summary>
-public class ServerDetails
-{
+public class ServerDetails {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -205,8 +199,7 @@ public class ServerDetails
 /// <summary>
 /// Advanced search request
 /// </summary>
-public class AdvancedSearchRequest
-{
+public class AdvancedSearchRequest {
     public string Query { get; set; } = string.Empty;
     public List<string>? Categories { get; set; }
     public string? TrustTier { get; set; }
@@ -221,8 +214,7 @@ public class AdvancedSearchRequest
 /// <summary>
 /// Package version information
 /// </summary>
-public class PackageVersion
-{
+public class PackageVersion {
     public string Version { get; set; } = string.Empty;
     public DateTime ReleaseDate { get; set; }
     public List<string> Changes { get; set; } = new();
@@ -234,8 +226,7 @@ public class PackageVersion
 /// <summary>
 /// Security analysis details
 /// </summary>
-public class SecurityAnalysisDetails
-{
+public class SecurityAnalysisDetails {
     public string OverallGrade { get; set; } = string.Empty;
     public List<SecurityCategory> Categories { get; set; } = new();
     public List<Vulnerability> Vulnerabilities { get; set; } = new();
@@ -245,8 +236,7 @@ public class SecurityAnalysisDetails
 /// <summary>
 /// Security category assessment
 /// </summary>
-public class SecurityCategory
-{
+public class SecurityCategory {
     public string Name { get; set; } = string.Empty;
     public string Grade { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -256,8 +246,7 @@ public class SecurityCategory
 /// <summary>
 /// Security vulnerability
 /// </summary>
-public class Vulnerability
-{
+public class Vulnerability {
     public string Id { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -270,8 +259,7 @@ public class Vulnerability
 /// <summary>
 /// Package collection
 /// </summary>
-public class PackageCollection
-{
+public class PackageCollection {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -285,8 +273,7 @@ public class PackageCollection
 /// <summary>
 /// Platform statistics
 /// </summary>
-public class PlatformStatistics
-{
+public class PlatformStatistics {
     public int TotalPackages { get; set; }
     public int TotalDownloads { get; set; }
     public int TotalPublishers { get; set; }
@@ -298,8 +285,7 @@ public class PlatformStatistics
 /// <summary>
 /// Category statistics
 /// </summary>
-public class CategoryStats
-{
+public class CategoryStats {
     public string Name { get; set; } = string.Empty;
     public int PackageCount { get; set; }
     public int DownloadCount { get; set; }
@@ -308,8 +294,7 @@ public class CategoryStats
 /// <summary>
 /// Publisher statistics
 /// </summary>
-public class PublisherStats
-{
+public class PublisherStats {
     public string Name { get; set; } = string.Empty;
     public int PackageCount { get; set; }
     public int TotalDownloads { get; set; }

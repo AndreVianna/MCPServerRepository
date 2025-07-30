@@ -35,7 +35,7 @@ public class MCPManifestTests {
 
         // Assert
         Assert.True(result.IsValid);
-        Assert.Equal(0, result.Errors.Count);
+        Assert.Empty(result.Errors);
         Assert.Equal("manifest", result.Context);
     }
 
@@ -54,10 +54,10 @@ public class MCPManifestTests {
         // Assert
         Assert.False(result.IsValid);
         Assert.True(result.Errors.Count >= 4); // name, version, description, license, author
-        Assert.True(result.Errors.Any(e => e.Contains("name")));
-        Assert.True(result.Errors.Any(e => e.Contains("version")));
-        Assert.True(result.Errors.Any(e => e.Contains("description")));
-        Assert.True(result.Errors.Any(e => e.Contains("license")));
+        Assert.Contains(result.Errors, e => e.Contains("name"));
+        Assert.Contains(result.Errors, e => e.Contains("version"));
+        Assert.Contains(result.Errors, e => e.Contains("description"));
+        Assert.Contains(result.Errors, e => e.Contains("license"));
     }
 
     [Fact]
@@ -78,7 +78,7 @@ public class MCPManifestTests {
 
         // Assert
         Assert.False(result.IsValid);
-        Assert.True(result.Errors.Any(e => e.Contains("Package name")));
+        Assert.Contains(result.Errors, e => e.Contains("Package name"));
     }
 
     [Fact]
@@ -99,7 +99,7 @@ public class MCPManifestTests {
 
         // Assert
         Assert.True(result.IsValid);
-        Assert.Equal(0, result.Errors.Count);
+        Assert.Empty(result.Errors);
     }
 
     [Fact]
@@ -120,7 +120,7 @@ public class MCPManifestTests {
 
         // Assert
         Assert.False(result.IsValid);
-        Assert.True(result.Errors.Any(e => e.Contains("semantic versioning")));
+        Assert.Contains(result.Errors, e => e.Contains("semantic versioning"));
     }
 
     [Fact]
@@ -169,9 +169,9 @@ public class MCPManifestTests {
         // Assert
         Assert.False(result.IsValid);
         Assert.True(result.Errors.Count >= 3); // homepage, repository, bugs
-        Assert.True(result.Errors.Any(e => e.Contains("Homepage")));
-        Assert.True(result.Errors.Any(e => e.Contains("Repository")));
-        Assert.True(result.Errors.Any(e => e.Contains("Bugs")));
+        Assert.Contains(result.Errors, e => e.Contains("Homepage"));
+        Assert.Contains(result.Errors, e => e.Contains("Repository"));
+        Assert.Contains(result.Errors, e => e.Contains("Bugs"));
     }
 
     [Fact]
@@ -194,7 +194,7 @@ public class MCPManifestTests {
         // Assert
         Assert.True(result.IsValid); // Should still be valid
         Assert.True(result.Warnings.Count > 0);
-        Assert.True(result.Warnings.Any(w => w.Contains("capability")));
+        Assert.Contains(result.Warnings, w => w.Contains("capability"));
     }
 
     [Fact]
@@ -215,7 +215,7 @@ public class MCPManifestTests {
 
         // Assert
         Assert.False(result.IsValid);
-        Assert.True(result.Errors.Any(e => e.Contains("Author name")));
+        Assert.Contains(result.Errors, e => e.Contains("Author name"));
     }
 }
 

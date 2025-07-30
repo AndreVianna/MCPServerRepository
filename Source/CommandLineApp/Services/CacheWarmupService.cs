@@ -7,33 +7,24 @@ namespace MCPHub.CommandLineApp.Services;
 /// <summary>
 /// Service for cache warming and background maintenance operations
 /// </summary>
-public class CacheWarmupService : ICacheWarmupService {
-    private readonly ILogger<CacheWarmupService> _logger;
-    private readonly ICacheService _cacheService;
-    private readonly IPackageCacheService _packageCache;
-    private readonly ISearchCacheService _searchCache;
-    private readonly IOfflineModeService _offlineMode;
-    private readonly McpmConfiguration _configuration;
+public class CacheWarmupService(
+    ILogger<CacheWarmupService> logger,
+    ICacheService cacheService,
+    IPackageCacheService packageCache,
+    ISearchCacheService searchCache,
+    IOfflineModeService offlineMode,
+    McpmConfiguration configuration) : ICacheWarmupService {
+    private readonly ILogger<CacheWarmupService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ICacheService _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
+    private readonly IPackageCacheService _packageCache = packageCache ?? throw new ArgumentNullException(nameof(packageCache));
+    private readonly ISearchCacheService _searchCache = searchCache ?? throw new ArgumentNullException(nameof(searchCache));
+    private readonly IOfflineModeService _offlineMode = offlineMode ?? throw new ArgumentNullException(nameof(offlineMode));
+    private readonly McpmConfiguration _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 
     private Timer? _maintenanceTimer;
     private Timer? _warmupTimer;
     private readonly CacheWarmupStatus _status = new();
     private readonly SemaphoreSlim _operationLock = new(1, 1);
-
-    public CacheWarmupService(
-        ILogger<CacheWarmupService> logger,
-        ICacheService cacheService,
-        IPackageCacheService packageCache,
-        ISearchCacheService searchCache,
-        IOfflineModeService offlineMode,
-        McpmConfiguration configuration) {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
-        _packageCache = packageCache ?? throw new ArgumentNullException(nameof(packageCache));
-        _searchCache = searchCache ?? throw new ArgumentNullException(nameof(searchCache));
-        _offlineMode = offlineMode ?? throw new ArgumentNullException(nameof(offlineMode));
-        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-    }
 
     public async Task StartAsync(CancellationToken cancellationToken = default) {
         if (_status.IsRunning) {
@@ -185,7 +176,7 @@ public class CacheWarmupService : ICacheWarmupService {
             var result = await _cacheService.PerformMaintenanceAsync(cancellationToken).ConfigureAwait(false);
 
             _status.LastMaintenanceAt = DateTimeOffset.UtcNow;
-            
+
             if (_configuration.Cache.BackgroundMaintenance) {
                 _status.NextMaintenanceAt = DateTimeOffset.UtcNow.Add(_configuration.Cache.MaintenanceInterval);
             }
@@ -211,19 +202,17 @@ public class CacheWarmupService : ICacheWarmupService {
         }
     }
 
-    public CacheWarmupStatus GetStatus() {
-        return new CacheWarmupStatus {
-            IsRunning = _status.IsRunning,
-            StartedAt = _status.StartedAt,
-            LastMaintenanceAt = _status.LastMaintenanceAt,
-            LastPackageWarmupAt = _status.LastPackageWarmupAt,
-            LastSearchWarmupAt = _status.LastSearchWarmupAt,
-            LastPackagesWarmed = _status.LastPackagesWarmed,
-            LastSearchesWarmed = _status.LastSearchesWarmed,
-            LastErrors = new List<string>(_status.LastErrors),
-            NextMaintenanceAt = _status.NextMaintenanceAt
-        };
-    }
+    public CacheWarmupStatus GetStatus() => new() {
+        IsRunning = _status.IsRunning,
+        StartedAt = _status.StartedAt,
+        LastMaintenanceAt = _status.LastMaintenanceAt,
+        LastPackageWarmupAt = _status.LastPackageWarmupAt,
+        LastSearchWarmupAt = _status.LastSearchWarmupAt,
+        LastPackagesWarmed = _status.LastPackagesWarmed,
+        LastSearchesWarmed = _status.LastSearchesWarmed,
+        LastErrors = new List<string>(_status.LastErrors),
+        NextMaintenanceAt = _status.NextMaintenanceAt
+    };
 
     private async Task PerformBackgroundMaintenanceAsync() {
         try {
@@ -240,10 +229,10 @@ public class CacheWarmupService : ICacheWarmupService {
             if (!_offlineMode.IsOfflineMode) {
                 var packageCount = Math.Min(10, _configuration.Cache.PopularPackagesPreloadCount / 5); // Smaller batches for background
                 await WarmPopularPackagesAsync(packageCount).ConfigureAwait(false);
-                
+
                 // Small delay between operations
                 await Task.Delay(TimeSpan.FromSeconds(30)).ConfigureAwait(false);
-                
+
                 await WarmPopularSearchesAsync(5).ConfigureAwait(false); // Just a few searches
             }
         }

@@ -281,7 +281,7 @@ public class AuthControllerTests {
         logoutResult.IsSuccess.Should().BeTrue();
     }
 
-    private static ApplicationUser CreateTestUser() => new ApplicationUser("testuser", "test@example.com") {
+    private static ApplicationUser CreateTestUser() => new("testuser", "test@example.com") {
         Id = Guid.NewGuid(),
         UserName = "testuser",
         Email = "test@example.com",

@@ -4,8 +4,7 @@ namespace MCPHub.Common.Services;
 /// Kubernetes cluster monitoring service
 /// Skeleton implementation following contracts-first approach
 /// </summary>
-public class ClusterMonitoringService : IClusterMonitoringService
-{
+public class ClusterMonitoringService : IClusterMonitoringService {
     public Task<ClusterHealth> GetClusterHealthAsync(CancellationToken cancellationToken = default)
         => throw new NotImplementedException("Cluster health monitoring will be implemented when Kubernetes monitoring is needed");
 
@@ -41,8 +40,7 @@ public class ClusterMonitoringService : IClusterMonitoringService
 /// Database performance monitoring service
 /// Skeleton implementation following contracts-first approach
 /// </summary>
-public class PerformanceInsightsService : IPerformanceInsightsService
-{
+public class PerformanceInsightsService : IPerformanceInsightsService {
     public Task<DatabasePerformanceMetrics> GetPerformanceMetricsAsync(CancellationToken cancellationToken = default)
         => throw new NotImplementedException("Database performance monitoring will be implemented when database optimization is needed");
 
@@ -78,8 +76,7 @@ public class PerformanceInsightsService : IPerformanceInsightsService
 /// Network monitoring and service mesh observability
 /// Skeleton implementation following contracts-first approach
 /// </summary>
-public class NetworkMonitoringService : INetworkMonitoringService
-{
+public class NetworkMonitoringService : INetworkMonitoringService {
     public Task<IEnumerable<ServiceCommunicationMetrics>> GetServiceCommunicationMetricsAsync(TimeRange timeRange, CancellationToken cancellationToken = default)
         => throw new NotImplementedException("Service communication monitoring will be implemented when service mesh observability is needed");
 
@@ -115,8 +112,7 @@ public class NetworkMonitoringService : INetworkMonitoringService
 /// Cost monitoring and resource optimization service
 /// Skeleton implementation following contracts-first approach
 /// </summary>
-public class CostMonitoringService : ICostMonitoringService
-{
+public class CostMonitoringService : ICostMonitoringService {
     public Task<CostBreakdown> GetCurrentCostsAsync(CancellationToken cancellationToken = default)
         => throw new NotImplementedException("Cost monitoring will be implemented when cloud cost optimization is needed");
 

@@ -4,53 +4,52 @@ namespace MCPHub.Common.Services;
 /// Dashboard service for Grafana dashboard management
 /// Supports: Development (JSON files) → Production (Grafana API) → Enterprise (Multiple systems)
 /// </summary>
-public interface IDashboardService
-{
+public interface IDashboardService {
     /// <summary>
     /// Creates a new dashboard
     /// </summary>
     Task<Dashboard> CreateDashboardAsync(DashboardDefinition definition, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Updates an existing dashboard
     /// </summary>
     Task<Dashboard> UpdateDashboardAsync(string dashboardId, DashboardDefinition definition, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Deletes a dashboard
     /// </summary>
     Task DeleteDashboardAsync(string dashboardId, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets a dashboard by ID
     /// </summary>
     Task<Dashboard?> GetDashboardAsync(string dashboardId, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Lists all dashboards
     /// </summary>
     Task<IEnumerable<DashboardSummary>> ListDashboardsAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Creates dashboard from template
     /// </summary>
     Task<Dashboard> CreateFromTemplateAsync(string templateName, Dictionary<string, object> parameters, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Exports dashboard configuration
     /// </summary>
     Task<string> ExportDashboardAsync(string dashboardId, DashboardExportFormat format, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Imports dashboard configuration
     /// </summary>
     Task<Dashboard> ImportDashboardAsync(string dashboardConfig, DashboardExportFormat format, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Creates standard MCP Hub dashboards
     /// </summary>
     Task CreateStandardDashboardsAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets dashboard health status
     /// </summary>
@@ -60,63 +59,62 @@ public interface IDashboardService
 /// <summary>
 /// Alerting service with PagerDuty/Slack integration
 /// </summary>
-public interface IAlertingService
-{
+public interface IAlertingService {
     /// <summary>
     /// Creates a new alert rule
     /// </summary>
     Task<AlertRule> CreateAlertRuleAsync(AlertRuleDefinition definition, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Updates an existing alert rule
     /// </summary>
     Task<AlertRule> UpdateAlertRuleAsync(string ruleId, AlertRuleDefinition definition, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Deletes an alert rule
     /// </summary>
     Task DeleteAlertRuleAsync(string ruleId, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets alert rule by ID
     /// </summary>
     Task<AlertRule?> GetAlertRuleAsync(string ruleId, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Lists all alert rules
     /// </summary>
     Task<IEnumerable<AlertRuleSummary>> ListAlertRulesAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Triggers an alert manually
     /// </summary>
     Task TriggerAlertAsync(string ruleId, string message, AlertSeverity severity, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Resolves an active alert
     /// </summary>
     Task ResolveAlertAsync(string alertId, string resolution, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets active alerts
     /// </summary>
     Task<IEnumerable<ActiveAlert>> GetActiveAlertsAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets alert history
     /// </summary>
     Task<IEnumerable<AlertEvent>> GetAlertHistoryAsync(TimeRange timeRange, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Creates standard MCP Hub alert rules
     /// </summary>
     Task CreateStandardAlertRulesAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Tests alert notification channels
     /// </summary>
     Task<NotificationTestResult> TestNotificationChannelsAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets alerting system health
     /// </summary>
@@ -126,53 +124,52 @@ public interface IAlertingService
 /// <summary>
 /// SLA/SLI monitoring service for uptime tracking
 /// </summary>
-public interface IUptimeTrackingService
-{
+public interface IUptimeTrackingService {
     /// <summary>
     /// Defines a new SLI (Service Level Indicator)
     /// </summary>
     Task<ServiceLevelIndicator> CreateSLIAsync(SLIDefinition definition, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Defines a new SLO (Service Level Objective)
     /// </summary>
     Task<ServiceLevelObjective> CreateSLOAsync(SLODefinition definition, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Records uptime data point
     /// </summary>
     Task RecordUptimeAsync(string serviceId, bool isHealthy, TimeSpan responseTime, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets current uptime status
     /// </summary>
     Task<UptimeStatus> GetUptimeStatusAsync(string serviceId, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets uptime statistics for a time period
     /// </summary>
     Task<UptimeStatistics> GetUptimeStatisticsAsync(string serviceId, TimeRange timeRange, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets SLO compliance status
     /// </summary>
     Task<SLOComplianceStatus> GetSLOComplianceAsync(string sloId, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets all SLO compliance statuses
     /// </summary>
     Task<IEnumerable<SLOComplianceStatus>> GetAllSLOComplianceAsync(CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Creates incident report for downtime
     /// </summary>
     Task<IncidentReport> CreateIncidentReportAsync(IncidentReportDefinition definition, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets incident history
     /// </summary>
     Task<IEnumerable<IncidentReport>> GetIncidentHistoryAsync(TimeRange timeRange, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets availability report
     /// </summary>
@@ -242,8 +239,7 @@ public record Dashboard(
 /// <summary>
 /// Dashboard export formats
 /// </summary>
-public enum DashboardExportFormat
-{
+public enum DashboardExportFormat {
     Json,
     Yaml,
     Terraform
@@ -287,8 +283,7 @@ public record AlertCondition(
 /// <summary>
 /// Alert operators
 /// </summary>
-public enum AlertOperator
-{
+public enum AlertOperator {
     GreaterThan,
     LessThan,
     EqualTo,
@@ -300,8 +295,7 @@ public enum AlertOperator
 /// <summary>
 /// Alert severity levels
 /// </summary>
-public enum AlertSeverity
-{
+public enum AlertSeverity {
     Info,
     Warning,
     Critical,
@@ -350,8 +344,7 @@ public record AlertRule(
 /// <summary>
 /// Alert rule status
 /// </summary>
-public enum AlertRuleStatus
-{
+public enum AlertRuleStatus {
     OK,
     Pending,
     Alerting,
@@ -387,8 +380,7 @@ public record AlertEvent(
 /// <summary>
 /// Alert event types
 /// </summary>
-public enum AlertEventType
-{
+public enum AlertEventType {
     Triggered,
     Resolved,
     Acknowledged,
@@ -431,8 +423,7 @@ public record SLIDefinition(
 /// <summary>
 /// SLI types
 /// </summary>
-public enum SLIType
-{
+public enum SLIType {
     Availability,
     Latency,
     ErrorRate,
@@ -586,8 +577,7 @@ public record AvailabilityTrend(
 /// <summary>
 /// Trend direction
 /// </summary>
-public enum TrendDirection
-{
+public enum TrendDirection {
     Up,
     Down,
     Stable

@@ -3,8 +3,7 @@ namespace MCPHub.WebApp.Components.UI.Models;
 /// <summary>
 /// Types of search suggestions
 /// </summary>
-public enum SuggestionType
-{
+public enum SuggestionType {
     Query,
     Package,
     Category,
@@ -17,8 +16,7 @@ public enum SuggestionType
 /// <summary>
 /// Chart types for analytics components
 /// </summary>
-public enum ChartType
-{
+public enum ChartType {
     Line,
     Bar,
     Donut,
@@ -29,8 +27,7 @@ public enum ChartType
 /// <summary>
 /// Sidebar position for responsive layouts
 /// </summary>
-public enum SidebarPosition
-{
+public enum SidebarPosition {
     Left,
     Right
 }
@@ -38,8 +35,7 @@ public enum SidebarPosition
 /// <summary>
 /// Container maximum width options
 /// </summary>
-public enum ContainerMaxWidth
-{
+public enum ContainerMaxWidth {
     Small,      // 640px
     Medium,     // 768px
     Large,      // 1024px
@@ -50,8 +46,7 @@ public enum ContainerMaxWidth
 /// <summary>
 /// Security badge styles
 /// </summary>
-public enum SecurityBadgeStyle
-{
+public enum SecurityBadgeStyle {
     Compact,
     Standard,
     Detailed
@@ -60,8 +55,7 @@ public enum SecurityBadgeStyle
 /// <summary>
 /// Trust tier indicator styles
 /// </summary>
-public enum TrustTierStyle
-{
+public enum TrustTierStyle {
     Badge,
     Card,
     Inline
@@ -70,8 +64,7 @@ public enum TrustTierStyle
 /// <summary>
 /// Package card display modes
 /// </summary>
-public enum PackageCardMode
-{
+public enum PackageCardMode {
     Compact,
     Standard,
     Detailed,
@@ -82,8 +75,7 @@ public enum PackageCardMode
 /// <summary>
 /// Search bar sizes
 /// </summary>
-public enum SearchBarSize
-{
+public enum SearchBarSize {
     Small,
     Medium,
     Large
@@ -92,8 +84,7 @@ public enum SearchBarSize
 /// <summary>
 /// Analytics time ranges
 /// </summary>
-public enum AnalyticsTimeRange
-{
+public enum AnalyticsTimeRange {
     Last7Days,
     Last30Days,
     Last90Days,
@@ -104,8 +95,7 @@ public enum AnalyticsTimeRange
 /// <summary>
 /// Component theme variants
 /// </summary>
-public enum ComponentTheme
-{
+public enum ComponentTheme {
     Default,
     Primary,
     Secondary,
@@ -118,8 +108,7 @@ public enum ComponentTheme
 /// <summary>
 /// Loading states for components
 /// </summary>
-public enum LoadingState
-{
+public enum LoadingState {
     NotStarted,
     Loading,
     Loaded,
@@ -130,8 +119,7 @@ public enum LoadingState
 /// <summary>
 /// Accessibility priorities for screen readers
 /// </summary>
-public enum AccessibilityPriority
-{
+public enum AccessibilityPriority {
     Low,
     Medium,
     High,

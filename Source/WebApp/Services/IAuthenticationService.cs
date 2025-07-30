@@ -6,8 +6,7 @@ namespace MCPHub.WebApp.Services;
 /// <summary>
 /// Enhanced interface for authentication operations in the web application
 /// </summary>
-public interface IAuthenticationService
-{
+public interface IAuthenticationService {
     /// <summary>
     /// Authenticates a user with email and password
     /// </summary>

@@ -16,15 +16,16 @@ internal class SimpleStepProgress : IStepProgress {
     public SimpleStepProgress(string title, List<string> steps) {
         _title = title;
         _steps = steps;
-        
+
         AnsiConsole.MarkupLine($"[blue]📋 {title}[/]");
-        for (int i = 0; i < _steps.Count; i++) {
+        for (var i = 0; i < _steps.Count; i++) {
             AnsiConsole.MarkupLine($"  {i + 1}. [gray]⏳ {_steps[i]}[/]");
         }
     }
 
     public void StartStep(int stepIndex, string? message = null) {
-        if (_disposed || stepIndex < 0 || stepIndex >= _steps.Count) return;
+        if (_disposed || stepIndex < 0 || stepIndex >= _steps.Count)
+            return;
 
         _currentStep = stepIndex;
         var stepText = message ?? _steps[stepIndex];
@@ -32,39 +33,45 @@ internal class SimpleStepProgress : IStepProgress {
     }
 
     public void CompleteStep(int stepIndex, string? message = null) {
-        if (_disposed || stepIndex < 0 || stepIndex >= _steps.Count) return;
+        if (_disposed || stepIndex < 0 || stepIndex >= _steps.Count)
+            return;
 
         var stepText = message ?? _steps[stepIndex];
         AnsiConsole.MarkupLine($"[green]✅ Step {stepIndex + 1}: {stepText}[/]");
     }
 
     public void FailStep(int stepIndex, string message) {
-        if (_disposed || stepIndex < 0 || stepIndex >= _steps.Count) return;
+        if (_disposed || stepIndex < 0 || stepIndex >= _steps.Count)
+            return;
 
         AnsiConsole.MarkupLine($"[red]❌ Step {stepIndex + 1}: {message}[/]");
     }
 
     public void SkipStep(int stepIndex, string reason) {
-        if (_disposed || stepIndex < 0 || stepIndex >= _steps.Count) return;
+        if (_disposed || stepIndex < 0 || stepIndex >= _steps.Count)
+            return;
 
         AnsiConsole.MarkupLine($"[yellow]⏭️ Step {stepIndex + 1}: Skipped - {reason}[/]");
     }
 
     public void UpdateStatus(string message) {
-        if (_disposed || _currentStep < 0) return;
+        if (_disposed || _currentStep < 0)
+            return;
 
         AnsiConsole.MarkupLine($"[blue]  💬 {message}[/]");
     }
 
     public void CompleteAll(string? message = null) {
-        if (_disposed) return;
+        if (_disposed)
+            return;
 
         var statusText = message ?? $"{_title} - All steps completed";
         AnsiConsole.MarkupLine($"[green]🎉 {statusText}[/]");
     }
 
     public void Dispose() {
-        if (_disposed) return;
+        if (_disposed)
+            return;
         _disposed = true;
     }
 }
@@ -79,34 +86,39 @@ internal class SimpleSpinnerContext : ISpinnerContext {
     }
 
     public void UpdateMessage(string message) {
-        if (_disposed) return;
+        if (_disposed)
+            return;
         AnsiConsole.MarkupLine($"[blue]🔄 {message}[/]");
     }
 
     public void Success(string? message = null) {
-        if (_disposed) return;
-        
+        if (_disposed)
+            return;
+
         var statusText = message ?? "Operation completed successfully";
         AnsiConsole.MarkupLine($"[green]✅ {statusText}[/]");
         Dispose();
     }
 
     public void Fail(string message) {
-        if (_disposed) return;
-        
+        if (_disposed)
+            return;
+
         AnsiConsole.MarkupLine($"[red]❌ {message}[/]");
         Dispose();
     }
 
     public void Warning(string message) {
-        if (_disposed) return;
-        
+        if (_disposed)
+            return;
+
         AnsiConsole.MarkupLine($"[yellow]⚠️ {message}[/]");
         Dispose();
     }
 
     public void Dispose() {
-        if (_disposed) return;
+        if (_disposed)
+            return;
         _disposed = true;
     }
 }
@@ -122,30 +134,32 @@ internal class SimpleLiveDisplayContext : ILiveDisplayContext {
     }
 
     public void UpdateContent(string content) {
-        if (_disposed) return;
+        if (_disposed)
+            return;
         AnsiConsole.MarkupLine($"[gray]{content}[/]");
     }
 
     public void AddLine(string line) {
-        if (_disposed) return;
-        
+        if (_disposed)
+            return;
+
         _lines.Add(line);
         AnsiConsole.MarkupLine($"[gray]  {line}[/]");
     }
 
     public void Clear() {
-        if (_disposed) return;
-        
+        if (_disposed)
+            return;
+
         _lines.Clear();
         AnsiConsole.MarkupLine($"[blue]📺 {_title} - Cleared[/]");
     }
 
-    public void Stop() {
-        Dispose();
-    }
+    public void Stop() => Dispose();
 
     public void Dispose() {
-        if (_disposed) return;
+        if (_disposed)
+            return;
         _disposed = true;
     }
 }

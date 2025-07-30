@@ -9,12 +9,8 @@ namespace MCPHub.CommandLineApp.Services;
 /// <summary>
 /// Implementation of progress reporting using Spectre.Console
 /// </summary>
-public class ProgressReporter : IProgressReporter {
-    private readonly McpmConfiguration _configuration;
-
-    public ProgressReporter(McpmConfiguration configuration) {
-        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-    }
+public class ProgressReporter(McpmConfiguration configuration) : IProgressReporter {
+    private readonly McpmConfiguration _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 
     /// <inheritdoc />
     public IProgressContext CreateProgressBar(string description, double maxValue = 100) {
@@ -85,8 +81,9 @@ internal class SimpleProgressContext : IProgressContext {
     }
 
     public void UpdateProgress(double value, string? message = null) {
-        if (_disposed) return;
-        
+        if (_disposed)
+            return;
+
         _currentValue = value;
         var percentage = (int)((value / _maxValue) * 100);
         var statusText = message ?? _description;
@@ -94,32 +91,37 @@ internal class SimpleProgressContext : IProgressContext {
     }
 
     public void Complete(string? message = null) {
-        if (_disposed) return;
-        
+        if (_disposed)
+            return;
+
         var statusText = message ?? $"{_description} completed";
         AnsiConsole.MarkupLine($"[green]✅ {statusText}[/]");
     }
 
     public void Fail(string message) {
-        if (_disposed) return;
-        
+        if (_disposed)
+            return;
+
         AnsiConsole.MarkupLine($"[red]❌ {message}[/]");
     }
 
     public void UpdateStatus(string status) {
-        if (_disposed) return;
-        
+        if (_disposed)
+            return;
+
         AnsiConsole.MarkupLine($"[blue]Status:[/] {status}");
     }
 
     public void Increment(double amount = 1.0) {
-        if (_disposed) return;
-        
+        if (_disposed)
+            return;
+
         UpdateProgress(_currentValue + amount);
     }
 
     public void Dispose() {
-        if (_disposed) return;
+        if (_disposed)
+            return;
         _disposed = true;
     }
 }
@@ -144,13 +146,15 @@ internal class SimpleDownloadProgress : IDownloadProgress {
     public TimeSpan? EstimatedTimeRemaining { get; private set; }
 
     public void UpdateProgress(long bytesDownloaded, long? speed = null) {
-        if (_disposed) return;
+        if (_disposed)
+            return;
 
         // Calculate speed if not provided
         var now = DateTime.UtcNow;
         if (speed.HasValue) {
             CurrentSpeed = speed.Value;
-        } else if ((now - _lastUpdate).TotalSeconds >= 1) {
+        }
+        else if ((now - _lastUpdate).TotalSeconds >= 1) {
             var bytesThisSecond = bytesDownloaded - _lastBytes;
             var secondsElapsed = (now - _lastUpdate).TotalSeconds;
             CurrentSpeed = (long)(bytesThisSecond / secondsElapsed);
@@ -168,32 +172,36 @@ internal class SimpleDownloadProgress : IDownloadProgress {
         var percentage = (int)((bytesDownloaded * 100) / _totalBytes);
         var speedText = CurrentSpeed.HasValue ? $"{FormatBytes(CurrentSpeed.Value)}/s" : "";
         var etaText = EstimatedTimeRemaining.HasValue ? $"ETA: {EstimatedTimeRemaining.Value:mm\\:ss}" : "";
-        
+
         AnsiConsole.MarkupLine($"[blue]Downloading:[/] {_fileName} {percentage}% {speedText} {etaText}".Trim());
     }
 
     public void UpdateStatus(string status) {
-        if (_disposed) return;
-        
+        if (_disposed)
+            return;
+
         AnsiConsole.MarkupLine($"[yellow]{status}:[/] {_fileName}");
     }
 
     public void Complete(string? message = null) {
-        if (_disposed) return;
-        
+        if (_disposed)
+            return;
+
         var statusText = message ?? $"Downloaded {_fileName}";
         AnsiConsole.MarkupLine($"[green]✅ {statusText}[/]");
     }
 
     public void Fail(string message) {
-        if (_disposed) return;
-        
+        if (_disposed)
+            return;
+
         AnsiConsole.MarkupLine($"[red]❌ {message}[/]");
     }
 
     public void Dispose() {
-        if (_disposed) return;
-        
+        if (_disposed)
+            return;
+
         _disposed = true;
         _stopwatch?.Stop();
     }

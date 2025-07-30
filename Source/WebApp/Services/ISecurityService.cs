@@ -6,8 +6,7 @@ namespace MCPHub.WebApp.Services;
 /// <summary>
 /// Interface for security and authentication management operations
 /// </summary>
-public interface ISecurityService
-{
+public interface ISecurityService {
     /// <summary>
     /// Changes the user's password
     /// </summary>

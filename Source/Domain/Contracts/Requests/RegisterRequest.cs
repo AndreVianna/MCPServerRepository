@@ -71,7 +71,7 @@ public class SocialLoginRequest {
 public class VerifyEmailRequest {
     [Required]
     public required string Token { get; init; }
-    
+
     [Required]
     [EmailAddress]
     public required string Email { get; init; }

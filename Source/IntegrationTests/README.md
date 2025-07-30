@@ -26,7 +26,7 @@ The BDD tests provide comprehensive coverage of:
 
 ### Project Structure
 ```
-BDD.IntegrationTests/
+IntegrationTests/
 ├── Features/                     # Gherkin feature files
 │   ├── PackageManagement.feature # API package operations
 │   ├── Authentication.feature    # Auth and authorization
@@ -116,7 +116,7 @@ BDD.IntegrationTests/
 
 ```bash
 # Run all BDD tests
-dotnet test Source/BDD.IntegrationTests/
+dotnet test Source/IntegrationTests/
 
 # Run specific feature
 dotnet test --filter "Category=api"
@@ -129,7 +129,7 @@ dotnet test --filter "TestCategory=security"
 dotnet test --filter "TestCategory=performance"
 
 # Generate test report
-dotnet test --logger "trx;LogFileName=BddTestResults.trx"
+dotnet test --logger "trx;LogFileName=IntegrationTestResults.trx"
 ```
 
 ### Visual Studio
@@ -141,10 +141,10 @@ dotnet test --logger "trx;LogFileName=BddTestResults.trx"
 ### Integration with project.sh
 ```bash
 # Run BDD tests through project script
-./Scripts/project.sh test --project BDD.IntegrationTests
+./Scripts/project.sh test --project IntegrationTests
 
 # Run specific test categories
-./Scripts/project.sh test --project BDD.IntegrationTests --filter "api"
+./Scripts/project.sh test --project IntegrationTests --filter "api"
 ```
 
 ## Test Data Management

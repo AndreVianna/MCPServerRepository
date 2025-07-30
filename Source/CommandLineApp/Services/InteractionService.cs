@@ -7,12 +7,8 @@ namespace MCPHub.CommandLineApp.Services;
 /// <summary>
 /// Implementation of interactive user prompts using Spectre.Console
 /// </summary>
-public class InteractionService : IInteractionService {
-    private readonly McpmConfiguration _configuration;
-
-    public InteractionService(McpmConfiguration configuration) {
-        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-    }
+public class InteractionService(McpmConfiguration configuration) : IInteractionService {
+    private readonly McpmConfiguration _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 
     /// <inheritdoc />
     public Task<bool> ConfirmAsync(string message, bool defaultValue = false, CancellationToken cancellationToken = default) {
@@ -30,7 +26,7 @@ public class InteractionService : IInteractionService {
     }
 
     /// <inheritdoc />
-    public Task<T?> SelectFromListAsync<T>(string message, IEnumerable<T> options, Func<T, string> displaySelector, CancellationToken cancellationToken = default) {
+    public Task<T?> SelectFromListAsync<T>(string message, IEnumerable<T> options, Func<T, string> displaySelector, CancellationToken cancellationToken = default) where T : notnull {
         var optionsList = options.ToList();
         if (!optionsList.Any()) {
             return Task.FromResult<T?>(default);
@@ -55,7 +51,7 @@ public class InteractionService : IInteractionService {
     }
 
     /// <inheritdoc />
-    public Task<IEnumerable<T>> SelectMultipleAsync<T>(string message, IEnumerable<T> options, Func<T, string> displaySelector, CancellationToken cancellationToken = default) {
+    public Task<IEnumerable<T>> SelectMultipleAsync<T>(string message, IEnumerable<T> options, Func<T, string> displaySelector, CancellationToken cancellationToken = default) where T : notnull {
         var optionsList = options.ToList();
         if (!optionsList.Any()) {
             return Task.FromResult<IEnumerable<T>>([]);
@@ -87,7 +83,7 @@ public class InteractionService : IInteractionService {
         }
 
         var prompt = new TextPrompt<string>(message);
-        
+
         if (!string.IsNullOrEmpty(defaultValue)) {
             prompt.DefaultValue(defaultValue);
         }
@@ -146,7 +142,7 @@ public class InteractionService : IInteractionService {
     }
 
     /// <inheritdoc />
-    public Task<T?> SelectFromPagedListAsync<T>(string message, IEnumerable<T> items, Func<T, string> displaySelector, int pageSize = 10, CancellationToken cancellationToken = default) {
+    public Task<T?> SelectFromPagedListAsync<T>(string message, IEnumerable<T> items, Func<T, string> displaySelector, int pageSize = 10, CancellationToken cancellationToken = default) where T : notnull {
         var itemsList = items.ToList();
         if (!itemsList.Any()) {
             return Task.FromResult<T?>(default);
@@ -203,9 +199,7 @@ public class InteractionService : IInteractionService {
         return await AnsiConsole.Progress()
             .StartAsync(async ctx => {
                 var task = ctx.AddTask(message);
-                var progress = new Progress<string>(status => {
-                    task.Description = status;
-                });
+                var progress = new Progress<string>(status => task.Description = status);
 
                 var result = await operation(progress);
                 task.Value = 100;

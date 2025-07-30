@@ -1,10 +1,9 @@
-namespace MCPHub.BDD.IntegrationTests.Support;
+namespace MCPHub.IntegrationTests.Support;
 
 /// <summary>
 /// Extended scenario context for BDD tests with strongly-typed data storage
 /// </summary>
-public class BddScenarioContext
-{
+public class SolutionScenarioContext {
     private readonly Dictionary<string, object> _data = new();
     private readonly TestDataBuilder _dataBuilder = new();
 
@@ -43,30 +42,24 @@ public class BddScenarioContext
     public List<ApplicationUser> TestUsers { get; set; } = new();
 
     // Generic storage for custom data
-    public T? Get<T>(string key) where T : class
-    {
-        return _data.TryGetValue(key, out var value) ? value as T : null;
-    }
+    public T? Get<T>(string key) where T : class => _data.TryGetValue(key, out var value) ? value as T : null;
 
-    public void Set<T>(string key, T value) where T : class
-    {
-        _data[key] = value;
-    }
+    public void Set<T>(string key, T value) where T : class => _data[key] = value;
+
+    public void Set(string key, object value) => _data[key] = value;
 
     public bool ContainsKey(string key) => _data.ContainsKey(key);
 
     public void Clear() => _data.Clear();
 
     // Helper methods for common operations
-    public void SetCurrentUser(string userId, string email, params string[] roles)
-    {
+    public void SetCurrentUser(string userId, string email, params string[] roles) {
         CurrentUserId = userId;
         CurrentUserEmail = email;
         CurrentUserRoles = roles.ToList();
     }
 
-    public ApplicationUser GetOrCreateTestUser(string email = "test@example.com")
-    {
+    public ApplicationUser GetOrCreateTestUser(string email = "test@example.com") {
         var existingUser = TestUsers.FirstOrDefault(u => u.Email == email);
         if (existingUser != null)
             return existingUser;
@@ -76,15 +69,13 @@ public class BddScenarioContext
         return newUser;
     }
 
-    public void StoreApiResponse(HttpResponseMessage response, string content)
-    {
+    public void StoreApiResponse(HttpResponseMessage response, string content) {
         LastApiResponse = response;
         LastApiResponseContent = content;
         LastApiStatusCode = response.StatusCode;
     }
 
-    public void SetTestScenario(TestScenario scenario)
-    {
+    public void SetTestScenario(TestScenario scenario) {
         TestScenario = scenario;
         TestUsers.AddRange(scenario.Users);
     }
@@ -94,21 +85,14 @@ public class BddScenarioContext
 /// Context hooks for SpecFlow scenarios
 /// </summary>
 [Binding]
-public class ContextHooks
-{
-    private readonly BddScenarioContext _scenarioContext;
-
-    public ContextHooks(BddScenarioContext scenarioContext)
-    {
-        _scenarioContext = scenarioContext ?? throw new ArgumentNullException(nameof(scenarioContext));
-    }
+public class ContextHooks(SolutionScenarioContext scenarioContext) {
+    private readonly SolutionScenarioContext _scenarioContext = scenarioContext ?? throw new ArgumentNullException(nameof(scenarioContext));
 
     [BeforeScenario]
-    public void BeforeScenario()
-    {
+    public void BeforeScenario() {
         // Initialize scenario context
         _scenarioContext.Clear();
-        
+
         // Set up default test user
         _scenarioContext.SetCurrentUser(
             Guid.CreateVersion7().ToString(),
@@ -118,8 +102,7 @@ public class ContextHooks
     }
 
     [AfterScenario]
-    public void AfterScenario()
-    {
+    public void AfterScenario() {
         // Clean up web driver
         _scenarioContext.WebDriver?.Dispose();
         _scenarioContext.WebDriver = null;
@@ -133,69 +116,51 @@ public class ContextHooks
 /// Step argument transformations for common BDD patterns
 /// </summary>
 [Binding]
-public class StepArgumentTransformations
-{
+public class StepArgumentTransformations {
     [StepArgumentTransformation]
-    public TrustTier TransformTrustTier(string trustTier)
-    {
-        return trustTier.ToLowerInvariant() switch
-        {
-            "unverified" => TrustTier.Unverified,
-            "community" or "community trusted" => TrustTier.CommunityTrusted,
-            "security audited" or "audited" => TrustTier.SecurityAudited,
-            "certified" => TrustTier.Certified,
-            _ => throw new ArgumentException($"Unknown trust tier: {trustTier}")
-        };
-    }
+    public TrustTier TransformTrustTier(string trustTier) => trustTier.ToLowerInvariant() switch {
+        "unverified" => TrustTier.Unverified,
+        "community" or "community trusted" => TrustTier.CommunityTrusted,
+        "security audited" or "audited" => TrustTier.SecurityAudited,
+        "certified" => TrustTier.Certified,
+        _ => throw new ArgumentException($"Unknown trust tier: {trustTier}")
+    };
 
     [StepArgumentTransformation]
-    public PackageStatus TransformPackageStatus(string status)
-    {
-        return status.ToLowerInvariant() switch
-        {
-            "active" => PackageStatus.Active,
-            "deprecated" => PackageStatus.Deprecated,
-            "archived" => PackageStatus.Archived,
-            "suspended" => PackageStatus.Suspended,
-            _ => throw new ArgumentException($"Unknown package status: {status}")
-        };
-    }
+    public PackageStatus TransformPackageStatus(string status) => status.ToLowerInvariant() switch {
+        "active" => PackageStatus.Published,
+        "deprecated" => PackageStatus.Deprecated,
+        "archived" => PackageStatus.Deprecated,
+        "suspended" => PackageStatus.Suspended,
+        _ => throw new ArgumentException($"Unknown package status: {status}")
+    };
 
     [StepArgumentTransformation]
-    public HttpStatusCode TransformHttpStatusCode(string statusCode)
-    {
-        return statusCode.ToLowerInvariant() switch
-        {
-            "200" or "ok" => HttpStatusCode.OK,
-            "201" or "created" => HttpStatusCode.Created,
-            "400" or "bad request" => HttpStatusCode.BadRequest,
-            "401" or "unauthorized" => HttpStatusCode.Unauthorized,
-            "403" or "forbidden" => HttpStatusCode.Forbidden,
-            "404" or "not found" => HttpStatusCode.NotFound,
-            "500" or "internal server error" => HttpStatusCode.InternalServerError,
-            _ when int.TryParse(statusCode, out var code) => (HttpStatusCode)code,
-            _ => throw new ArgumentException($"Unknown status code: {statusCode}")
-        };
-    }
+    public HttpStatusCode TransformHttpStatusCode(string statusCode) => statusCode.ToLowerInvariant() switch {
+        "200" or "ok" => HttpStatusCode.OK,
+        "201" or "created" => HttpStatusCode.Created,
+        "400" or "bad request" => HttpStatusCode.BadRequest,
+        "401" or "unauthorized" => HttpStatusCode.Unauthorized,
+        "403" or "forbidden" => HttpStatusCode.Forbidden,
+        "404" or "not found" => HttpStatusCode.NotFound,
+        "500" or "internal server error" => HttpStatusCode.InternalServerError,
+        _ when int.TryParse(statusCode, out var code) => (HttpStatusCode)code,
+        _ => throw new ArgumentException($"Unknown status code: {statusCode}")
+    };
 
     [StepArgumentTransformation]
-    public Dictionary<string, string> TransformTable(Table table)
-    {
+    public Dictionary<string, string> TransformTable(Table table) {
         var dictionary = new Dictionary<string, string>();
-        foreach (var row in table.Rows)
-        {
+        foreach (var row in table.Rows) {
             dictionary[row[0]] = row[1];
         }
         return dictionary;
     }
 
     [StepArgumentTransformation]
-    public List<string> TransformStringList(string commaSeparatedValues)
-    {
-        return commaSeparatedValues
+    public List<string> TransformStringList(string commaSeparatedValues) => commaSeparatedValues
             .Split(',', StringSplitOptions.RemoveEmptyEntries)
             .Select(s => s.Trim())
             .Where(s => !string.IsNullOrEmpty(s))
             .ToList();
-    }
 }

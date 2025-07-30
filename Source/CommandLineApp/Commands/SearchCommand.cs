@@ -203,11 +203,11 @@ public class SearchCommand(
         try {
             // Get suggested terms from API (if available)
             var suggestions = await GetSearchSuggestionsAsync(query);
-            
+
             if (suggestions.Any()) {
                 OutputFormatter.WriteLine();
                 OutputFormatter.WriteInfo("Did you mean:");
-                
+
                 var selectedSuggestion = await InteractionService.SelectFromListAsync(
                     "Select a suggestion to search:",
                     suggestions.Concat(new[] { "None of the above" }),
@@ -227,16 +227,19 @@ public class SearchCommand(
     /// <summary>
     /// Gets search suggestions from the API
     /// </summary>
-    private async Task<IEnumerable<string>> GetSearchSuggestionsAsync(string query) {
+    private Task<IEnumerable<string>> GetSearchSuggestionsAsync(string query) {
         // Placeholder implementation - would call API for suggestions
         var commonSuggestions = new List<string>();
-        
+
         // Simple typo corrections for demonstration
-        if (query.Contains("managment")) commonSuggestions.Add(query.Replace("managment", "management"));
-        if (query.Contains("analitcs")) commonSuggestions.Add(query.Replace("analitcs", "analytics"));
-        if (query.Contains("authentiction")) commonSuggestions.Add(query.Replace("authentiction", "authentication"));
-        
-        return commonSuggestions;
+        if (query.Contains("managment"))
+            commonSuggestions.Add(query.Replace("managment", "management"));
+        if (query.Contains("analitcs"))
+            commonSuggestions.Add(query.Replace("analitcs", "analytics"));
+        if (query.Contains("authentiction"))
+            commonSuggestions.Add(query.Replace("authentiction", "authentication"));
+
+        return Task.FromResult<IEnumerable<string>>(commonSuggestions);
     }
 
     /// <summary>
@@ -245,7 +248,7 @@ public class SearchCommand(
     private async Task HandleInteractiveSearchResultsAsync(SearchResultResponse results, bool allowInstall, string outputFormat) {
         try {
             OutputFormatter.WriteLine();
-            
+
             var options = new Dictionary<string, string> {
                 { "details", "View package details" },
                 { "filter", "Apply additional filters" },
@@ -302,11 +305,11 @@ public class SearchCommand(
         if (selectedPackage != null) {
             var packageName = ((dynamic)selectedPackage).Name;
             using var spinner = ProgressReporter.CreateSpinner($"Getting details for {packageName}...");
-            
+
             try {
                 var packageInfo = await ApiClient.GetPackageInfoAsync(packageName);
                 spinner.Success("Package details retrieved");
-                
+
                 OutputFormatter.WriteLine();
                 OutputFormatter.WriteInfo($"Package: {packageInfo.Name}");
                 OutputFormatter.WriteInfo($"Version: {packageInfo.Version}");
@@ -326,9 +329,10 @@ public class SearchCommand(
     /// <summary>
     /// Handles interactive filtering
     /// </summary>
-    private async Task HandleInteractiveFilteringAsync() {
+    private Task HandleInteractiveFilteringAsync() {
         OutputFormatter.WriteInfo("Interactive filtering would be implemented here");
         // Implementation would allow users to interactively set filters
+        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -359,7 +363,7 @@ public class SearchCommand(
         if (selectedPackage != null) {
             var packageName = ((dynamic)selectedPackage).Name;
             var confirm = await InteractionService.ConfirmAsync($"Install {packageName}?", true);
-            
+
             if (confirm) {
                 OutputFormatter.WriteInfo($"To install {packageName}, run: mcpm install {packageName}");
                 // In a real implementation, this could trigger the install command directly
@@ -372,7 +376,7 @@ public class SearchCommand(
     /// </summary>
     private async Task HandlePaginationAsync(SearchResultResponse results) {
         var options = new Dictionary<string, string>();
-        
+
         if (results.Page > 1) {
             options.Add("prev", "Previous page");
         }
@@ -383,7 +387,7 @@ public class SearchCommand(
         options.Add("back", "Back to results");
 
         var selection = await InteractionService.ShowMenuAsync("Navigation options:", options);
-        
+
         switch (selection) {
             case "prev":
                 OutputFormatter.WriteInfo($"Would navigate to page {results.Page - 1}");
@@ -400,7 +404,7 @@ public class SearchCommand(
                         }
                         return $"Please enter a number between 1 and {results.TotalPages}";
                     });
-                
+
                 if (int.TryParse(pageInput, out var targetPage)) {
                     OutputFormatter.WriteInfo($"Would navigate to page {targetPage}");
                 }

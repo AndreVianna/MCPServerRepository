@@ -7,6 +7,7 @@ global using System.Text;
 global using System.Threading.Tasks;
 
 global using FluentAssertions;
+
 global using Moq;
 // Domain specific imports
 global using NSubstitute;

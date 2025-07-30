@@ -38,9 +38,9 @@ public interface ISecurityAuditService {
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Resource audit trail</returns>
     Task<IReadOnlyList<SecurityAuditEntry>> GetResourceAuditTrailAsync(
-        string resourceType, 
-        Guid resourceId, 
-        DateTimeRange? timeRange = null, 
+        string resourceType,
+        Guid resourceId,
+        DateTimeRange? timeRange = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -52,9 +52,9 @@ public interface ISecurityAuditService {
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>User audit trail</returns>
     Task<IReadOnlyList<SecurityAuditEntry>> GetUserAuditTrailAsync(
-        Guid userId, 
-        IEnumerable<SecurityAuditAction>? actionTypes = null, 
-        DateTimeRange? timeRange = null, 
+        Guid userId,
+        IEnumerable<SecurityAuditAction>? actionTypes = null,
+        DateTimeRange? timeRange = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -81,8 +81,8 @@ public interface ISecurityAuditService {
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Audit statistics</returns>
     Task<SecurityAuditStatistics> GetAuditStatisticsAsync(
-        DateTimeRange timeRange, 
-        SecurityAuditGroupBy groupBy = SecurityAuditGroupBy.Action, 
+        DateTimeRange timeRange,
+        SecurityAuditGroupBy groupBy = SecurityAuditGroupBy.Action,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -95,10 +95,10 @@ public interface ISecurityAuditService {
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Search results</returns>
     Task<SecurityAuditSearchResult> SearchAuditEntriesAsync(
-        string searchQuery, 
-        SecurityAuditFilters? filters = null, 
-        int pageSize = 50, 
-        int pageNumber = 1, 
+        string searchQuery,
+        SecurityAuditFilters? filters = null,
+        int pageSize = 50,
+        int pageNumber = 1,
         CancellationToken cancellationToken = default);
 
     /// <summary>

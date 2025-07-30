@@ -80,9 +80,9 @@ public class PackagesV1ControllerInstallationTests {
     }
 
     [Fact]
-    public async Task GetUserInstallations_WhenCalled_ThrowsNotImplementedException() =>
+    public async Task GetUserInstallations_WhenCalled_ThrowsNotImplementedException()
         // Arrange & Act & Assert
-        await Assert.ThrowsAsync<NotImplementedException>(() =>
+        => await Assert.ThrowsAsync<NotImplementedException>(() =>
             _controller.GetUserInstallations(false, CancellationToken.None));
 
     [Fact]

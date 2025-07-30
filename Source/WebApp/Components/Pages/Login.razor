@@ -5,7 +5,7 @@
 
 <PageTitle>Login - MCP Hub</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Small" Class="mt-12">
+<MudContainer maxwidth="MaxWidth.Small" Class="mt-12">
     <MudPaper Elevation="2" Class="pa-8">
         <div class="text-center mb-6">
             <MudIcon Icon="@Icons.Material.Filled.Security" 
@@ -30,7 +30,7 @@
                                   InputType="InputType.Email"
                                   Required="true"
                                   For="@(() => _loginModel.Email)"
-                                  FullWidth="true"
+                                  fullwidth="true"
                                   Immediate="true" />
                 </MudItem>
                 
@@ -44,7 +44,7 @@
                                   OnAdornmentClick="@(() => _showPassword = !_showPassword)"
                                   Required="true"
                                   For="@(() => _loginModel.Password)"
-                                  FullWidth="true"
+                                  fullwidth="true"
                                   Immediate="true" />
                 </MudItem>
                 
@@ -64,10 +64,10 @@
                     <MudButton ButtonType="ButtonType.Submit"
                               Variant="Variant.Filled"
                               Color="Color.Primary"
-                              FullWidth="true"
+                              fullwidth="true"
                               Size="Size.Large"
                               Disabled="@_isLoading"
-                              StartIcon="@(_isLoading ? null : Icons.Material.Filled.Login)">
+                              starticon="@(_isLoading ? null : Icons.Material.Filled.Login)">
                         @if (_isLoading)
                         {
                             <MudProgressCircular Size="Size.Small" Indeterminate="true" />

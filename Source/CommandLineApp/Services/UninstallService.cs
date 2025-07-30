@@ -30,9 +30,7 @@ public class UninstallService(
         bool removeDependencies = false,
         bool createBackup = true,
         bool purge = false,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Package uninstall logic will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Package uninstall logic will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<BatchUninstallResult> UninstallPackagesAsync(
@@ -42,66 +40,50 @@ public class UninstallService(
         bool removeDependencies = false,
         bool createBackup = true,
         bool purge = false,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Batch uninstall logic will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Batch uninstall logic will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<UninstallDependencyAnalysis> AnalyzeDependenciesAsync(
         string packageName,
         string? version = null,
         bool global = false,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Dependency analysis logic will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Dependency analysis logic will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<OrphanedDependencyCleanupResult> CleanupOrphanedDependenciesAsync(
         bool global = false,
         bool dryRun = false,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Orphaned dependency cleanup logic will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Orphaned dependency cleanup logic will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<PackageBackupInfo> CreatePackageBackupAsync(
         string packageName,
         string version,
         bool global = false,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Package backup logic will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Package backup logic will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<PackageRestoreResult> RestorePackageFromBackupAsync(
         string backupPath,
         bool global = false,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Package restore logic will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Package restore logic will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<UninstallValidationResult> ValidateUninstallAsync(
         string packageName,
         string? version = null,
         bool global = false,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Uninstall validation logic will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Uninstall validation logic will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<PackagePurgeResult> PurgePackageAsync(
         string packageName,
         bool global = false,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Package purge logic will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Package purge logic will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<List<PackageBackupInfo>> ListBackupsAsync(
         string? packageName = null,
         bool global = false,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Backup listing logic will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Backup listing logic will be implemented when first consumer requires it");
 }

@@ -6,8 +6,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 // Configure basic service projects
 builder.AddProject<Projects.MCPHub_PublicApi>("publicapi");
 
-// TODO: WebApp temporarily removed due to compilation errors
-//builder.AddProject<Projects.MCPHub_WebApp>("webapp");
+builder.AddProject<Projects.MCPHub_WebApp>("webapp");
 
 builder.AddProject<Projects.MCPHub_SecurityService>("securityservice");
 

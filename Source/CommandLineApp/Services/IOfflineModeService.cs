@@ -121,8 +121,8 @@ public class OfflineModeStatus {
     /// <summary>
     /// Estimated duration offline (if known)
     /// </summary>
-    public TimeSpan? EstimatedOfflineDuration => OfflineSince.HasValue 
-        ? DateTimeOffset.UtcNow - OfflineSince.Value 
+    public TimeSpan? EstimatedOfflineDuration => OfflineSince.HasValue
+        ? DateTimeOffset.UtcNow - OfflineSince.Value
         : null;
 }
 
@@ -162,14 +162,14 @@ public class CachedDataSummary {
 
     private static string FormatBytes(long bytes) {
         string[] sizes = ["B", "KB", "MB", "GB", "TB"];
-        int order = 0;
+        var order = 0;
         double size = bytes;
-        
+
         while (size >= 1024 && order < sizes.Length - 1) {
             order++;
             size /= 1024;
         }
-        
+
         return $"{size:0.##} {sizes[order]}";
     }
 }
@@ -370,14 +370,14 @@ public class OfflinePreparationResult {
 
     private static string FormatBytes(long bytes) {
         string[] sizes = ["B", "KB", "MB", "GB", "TB"];
-        int order = 0;
+        var order = 0;
         double size = bytes;
-        
+
         while (size >= 1024 && order < sizes.Length - 1) {
             order++;
             size /= 1024;
         }
-        
+
         return $"{size:0.##} {sizes[order]}";
     }
 }

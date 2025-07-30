@@ -22,7 +22,7 @@ public interface IInteractionService {
     /// <param name="displaySelector">Function to convert option to display string</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The selected option</returns>
-    Task<T?> SelectFromListAsync<T>(string message, IEnumerable<T> options, Func<T, string> displaySelector, CancellationToken cancellationToken = default);
+    Task<T?> SelectFromListAsync<T>(string message, IEnumerable<T> options, Func<T, string> displaySelector, CancellationToken cancellationToken = default) where T : notnull;
 
     /// <summary>
     /// Prompts the user to select multiple items from a list
@@ -33,7 +33,7 @@ public interface IInteractionService {
     /// <param name="displaySelector">Function to convert option to display string</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The selected options</returns>
-    Task<IEnumerable<T>> SelectMultipleAsync<T>(string message, IEnumerable<T> options, Func<T, string> displaySelector, CancellationToken cancellationToken = default);
+    Task<IEnumerable<T>> SelectMultipleAsync<T>(string message, IEnumerable<T> options, Func<T, string> displaySelector, CancellationToken cancellationToken = default) where T : notnull;
 
     /// <summary>
     /// Prompts the user for text input
@@ -73,7 +73,7 @@ public interface IInteractionService {
     /// <param name="pageSize">Number of items per page</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The selected item</returns>
-    Task<T?> SelectFromPagedListAsync<T>(string message, IEnumerable<T> items, Func<T, string> displaySelector, int pageSize = 10, CancellationToken cancellationToken = default);
+    Task<T?> SelectFromPagedListAsync<T>(string message, IEnumerable<T> items, Func<T, string> displaySelector, int pageSize = 10, CancellationToken cancellationToken = default) where T : notnull;
 
     /// <summary>
     /// Shows a consent flow with detailed information

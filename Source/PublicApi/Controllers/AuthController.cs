@@ -146,15 +146,15 @@ public class AuthController(
     /// <returns>Logout result</returns>
     [HttpPost("logout")]
     [Authorize]
-    public async Task<IActionResult> Logout(CancellationToken cancellationToken) {
+    public Task<IActionResult> Logout(CancellationToken cancellationToken) {
         try {
             var userIdClaim = User.FindFirst("sub")?.Value ?? User.FindFirst("id")?.Value;
             if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId)) {
                 _logger.LogWarning("Logout failed - invalid user ID in token");
-                return BadRequest(new LogoutResult {
+                return Task.FromResult<IActionResult>(BadRequest(new LogoutResult {
                     IsSuccess = false,
                     ErrorMessage = "Invalid user context"
-                });
+                }));
             }
 
             _logger.LogInformation("Logout for user {UserId}", userId);
@@ -162,16 +162,16 @@ public class AuthController(
             // TODO: Implement refresh token revocation logic
             // For now, we'll just return success as the access token will expire naturally
 
-            return Ok(new LogoutResult {
+            return Task.FromResult<IActionResult>(Ok(new LogoutResult {
                 IsSuccess = true
-            });
+            }));
         }
         catch (Exception ex) {
             _logger.LogError(ex, "Error occurred during logout");
-            return StatusCode(500, new LogoutResult {
+            return Task.FromResult<IActionResult>(StatusCode(500, new LogoutResult {
                 IsSuccess = false,
                 ErrorMessage = "An error occurred while processing your request"
-            });
+            }));
         }
     }
 

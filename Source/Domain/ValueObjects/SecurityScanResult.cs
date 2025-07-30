@@ -15,27 +15,27 @@ public record SecurityScanResult {
     public string ScannerVersion { get; init; } = string.Empty;
     [MaxLength(4096)]
     public string? ScanLog { get; init; }
-    
+
     /// <summary>
     /// Trust score calculated based on scan results (0-1000)
     /// </summary>
     public int TrustScore => CalculateTrustScore();
-    
+
     /// <summary>
     /// Overall security grade (A, B, C, D, F) based on trust score
     /// </summary>
     public string OverallGrade => CalculateGrade();
-    
+
     /// <summary>
     /// Overall security score (0-10) for UI display
     /// </summary>
     public double OverallScore => TrustScore / 100.0;
-    
+
     /// <summary>
     /// Last scan date for UI display
     /// </summary>
     public DateTime LastScanDate => ScannedAt;
-    
+
     /// <summary>
     /// Scan duration (estimated based on vulnerability count)
     /// </summary>
@@ -66,8 +66,7 @@ public record SecurityScanResult {
     public bool HasCriticalVulnerabilities => Vulnerabilities.Any(v => v.Severity == SecurityScanSeverity.Critical);
     public bool HasHighVulnerabilities => Vulnerabilities.Any(v => v.Severity == SecurityScanSeverity.High);
 
-    private int CalculateTrustScore()
-    {
+    private int CalculateTrustScore() {
         if (Status != SecurityScanStatus.Passed)
             return 0;
 
@@ -76,10 +75,8 @@ public record SecurityScanResult {
 
         // Calculate score based on vulnerability severity
         var score = 1000;
-        foreach (var vulnerability in Vulnerabilities)
-        {
-            score -= vulnerability.Severity switch
-            {
+        foreach (var vulnerability in Vulnerabilities) {
+            score -= vulnerability.Severity switch {
                 SecurityScanSeverity.Critical => 300,
                 SecurityScanSeverity.High => 150,
                 SecurityScanSeverity.Medium => 75,
@@ -90,16 +87,12 @@ public record SecurityScanResult {
 
         return Math.Max(0, score);
     }
-    
-    private string CalculateGrade()
-    {
-        return TrustScore switch
-        {
-            >= 900 => "A",
-            >= 800 => "B", 
-            >= 700 => "C",
-            >= 600 => "D",
-            _ => "F"
-        };
-    }
+
+    private string CalculateGrade() => TrustScore switch {
+        >= 900 => "A",
+        >= 800 => "B",
+        >= 700 => "C",
+        >= 600 => "D",
+        _ => "F"
+    };
 }

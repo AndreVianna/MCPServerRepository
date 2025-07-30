@@ -20,52 +20,38 @@ public class TrustTierService(
     /// <inheritdoc />
     public Task<TrustTierAssessment> GetTrustTierAssessmentAsync(
         string packageName,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Trust tier assessment will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Trust tier assessment will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<IEnumerable<TrustTierHistory>> GetTrustTierHistoryAsync(
         string packageName,
         int limit = 10,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Trust tier history will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Trust tier history will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<TrustTierValidationResult> ValidateTrustTierEligibilityAsync(
         string packageName,
         TrustTier targetTier,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Trust tier eligibility validation will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Trust tier eligibility validation will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<TrustTierStatistics> GetTrustTierStatisticsAsync(
         int periodDays = 30,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Trust tier statistics will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Trust tier statistics will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<IEnumerable<TrustTierComplianceResult>> CheckTrustTierComplianceAsync(
         IEnumerable<PackageSpec> packages,
         TrustTier minimumTier,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Trust tier compliance checking will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Trust tier compliance checking will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<IEnumerable<TrustTierRecommendation>> GetTrustTierRecommendationsAsync(
         bool includeGlobal = true,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Trust tier recommendations will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Trust tier recommendations will be implemented when first consumer requires it");
 
     /// <inheritdoc />
     public Task<TrustScoreBreakdown> GetTrustScoreBreakdownAsync(
         string packageName,
-        CancellationToken cancellationToken = default) {
-        throw new NotImplementedException("Trust score breakdown will be implemented when first consumer requires it");
-    }
+        CancellationToken cancellationToken = default) => throw new NotImplementedException("Trust score breakdown will be implemented when first consumer requires it");
 }

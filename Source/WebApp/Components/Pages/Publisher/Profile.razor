@@ -12,7 +12,7 @@
 
 <PageTitle>Publisher Profile - MCP Hub</PageTitle>
 
-<ResponsiveContainer MaxWidth="ContainerMaxWidth.Large" FullHeight="true">
+<ResponsiveContainer maxwidth="ContainerMaxWidth.Large" FullHeight="true">
     <HeaderContent>
         <div class="profile-header">
             <div class="header-title mb-4">
@@ -54,7 +54,7 @@
                                 </MudAvatar>
                                 <MudButton Variant="Variant.Text" 
                                            Size="Size.Small" 
-                                           StartIcon="Icons.Material.Filled.Edit"
+                                           starticon="Icons.Material.Filled.Edit"
                                            Class="mt-2"
                                            @onclick="ChangeAvatar">
                                     Change Avatar
@@ -84,7 +84,7 @@
                                     <MudButton Variant="Variant.Text"
                                                Color="Color.Primary"
                                                Size="Size.Small"
-                                               StartIcon="Icons.Material.Filled.VerifiedUser"
+                                               starticon="Icons.Material.Filled.VerifiedUser"
                                                Class="mt-2"
                                                @onclick="StartVerification">
                                         Start Verification
@@ -148,7 +148,7 @@
                             <MudForm @ref="_basicInfoForm" @bind-IsValid="_isBasicInfoValid">
                                 <MudGrid Spacing="3">
                                     <MudItem xs="12" sm="6">
-                                        <MudTextField @bind-Value="_profile.DisplayName"
+                                        <MudTextField @bind-Value="_profile!.DisplayName"
                                                       Label="Display Name"
                                                       Variant="Variant.Outlined"
                                                       Required="true"
@@ -157,7 +157,7 @@
                                     </MudItem>
 
                                     <MudItem xs="12" sm="6">
-                                        <MudTextField @bind-Value="_profile.Username"
+                                        <MudTextField @bind-Value="_profile!.Username"
                                                       Label="Username"
                                                       Variant="Variant.Outlined"
                                                       Required="true"
@@ -167,7 +167,7 @@
                                     </MudItem>
 
                                     <MudItem xs="12">
-                                        <MudTextField @bind-Value="_profile.Email"
+                                        <MudTextField @bind-Value="_profile!.Email"
                                                       Label="Email Address"
                                                       Variant="Variant.Outlined"
                                                       InputType="InputType.Email"
@@ -176,7 +176,7 @@
                                     </MudItem>
 
                                     <MudItem xs="12">
-                                        <MudTextField @bind-Value="_profile.Bio"
+                                        <MudTextField @bind-Value="_profile!.Bio"
                                                       Label="Biography"
                                                       Variant="Variant.Outlined"
                                                       Lines="3"
@@ -185,7 +185,7 @@
                                     </MudItem>
 
                                     <MudItem xs="12" sm="6">
-                                        <MudTextField @bind-Value="_profile.Website"
+                                        <MudTextField @bind-Value="_profile!.Website"
                                                       Label="Website"
                                                       Variant="Variant.Outlined"
                                                       InputType="InputType.Url"
@@ -193,7 +193,7 @@
                                     </MudItem>
 
                                     <MudItem xs="12" sm="6">
-                                        <MudTextField @bind-Value="_profile.GitHubProfile"
+                                        <MudTextField @bind-Value="_profile!.GitHubProfile"
                                                       Label="GitHub Profile"
                                                       Variant="Variant.Outlined"
                                                       HelperText="Link to your GitHub profile" />
@@ -284,7 +284,7 @@
                                                 </div>
                                                 <MudButton Variant="Variant.Filled"
                                                            Color="Color.Primary"
-                                                           StartIcon="Icons.Material.Filled.Add"
+                                                           starticon="Icons.Material.Filled.Add"
                                                            Size="Size.Small"
                                                            @onclick="CreateApiKey">
                                                     New API Key
@@ -310,12 +310,12 @@
                                                             <MudIconButton Icon="Icons.Material.Filled.ContentCopy"
                                                                            Size="Size.Small"
                                                                            Color="Color.Primary"
-                                                                           Title="Copy Key"
+                                                                           title="Copy Key"
                                                                            @onclick="@(() => CopyApiKey(apiKey))" />
                                                             <MudIconButton Icon="Icons.Material.Filled.Delete"
                                                                            Size="Size.Small"
                                                                            Color="Color.Error"
-                                                                           Title="Delete Key"
+                                                                           title="Delete Key"
                                                                            @onclick="@(() => DeleteApiKey(apiKey))" />
                                                         </div>
                                                     </div>
@@ -430,7 +430,7 @@
                                                             <MudButton Variant="Variant.Text"
                                                                        Color="Color.Primary"
                                                                        Size="Size.Small"
-                                                                       @onclick="@(() => HandleVerificationAction(step.ActionType))">
+                                                                       @onclick="@(() => HandleVerificationAction(step.ActionType ?? string.Empty))">
                                                                 @step.ActionText
                                                             </MudButton>
                                                         }
@@ -838,49 +838,56 @@
         }
     }
 
-    private async Task EnableTwoFactor()
+    private Task EnableTwoFactor()
     {
         // TODO: Implement 2FA setup
         Snackbar.Add("Two-factor authentication setup coming soon", Severity.Info);
+        return Task.CompletedTask;
     }
 
-    private async Task DisableTwoFactor()
+    private Task DisableTwoFactor()
     {
         // TODO: Implement 2FA disable
         Snackbar.Add("Two-factor authentication disabled", Severity.Success);
+        return Task.CompletedTask;
     }
 
-    private async Task CreateApiKey()
+    private Task CreateApiKey()
     {
         // TODO: Implement API key creation
         Snackbar.Add("API key creation coming soon", Severity.Info);
+        return Task.CompletedTask;
     }
 
-    private async Task CopyApiKey(ApiKey apiKey)
+    private Task CopyApiKey(ApiKey apiKey)
     {
         // TODO: Implement clipboard copy
         Snackbar.Add($"API key '{apiKey.Name}' copied to clipboard", Severity.Success);
+        return Task.CompletedTask;
     }
 
-    private async Task DeleteApiKey(ApiKey apiKey)
+    private Task DeleteApiKey(ApiKey apiKey)
     {
         // TODO: Implement API key deletion with confirmation
         Snackbar.Add($"API key '{apiKey.Name}' deleted", Severity.Success);
+        return Task.CompletedTask;
     }
 
-    private async Task ChangeAvatar()
+    private Task ChangeAvatar()
     {
         // TODO: Implement avatar change
         Snackbar.Add("Avatar change coming soon", Severity.Info);
+        return Task.CompletedTask;
     }
 
-    private async Task StartVerification()
+    private Task StartVerification()
     {
         _activeTabIndex = 2; // Switch to verification tab
         Snackbar.Add("Complete the verification steps to get verified", Severity.Info);
+        return Task.CompletedTask;
     }
 
-    private async Task HandleVerificationAction(string actionType)
+    private Task HandleVerificationAction(string actionType)
     {
         switch (actionType)
         {
@@ -894,6 +901,7 @@
                 Snackbar.Add("Identity verification coming soon", Severity.Info);
                 break;
         }
+        return Task.CompletedTask;
     }
 
     private async Task SaveNotificationSettings()

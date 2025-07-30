@@ -179,7 +179,7 @@ public class SecurityEvent : BaseEntity {
         string? ipAddress = null,
         string? userAgent = null,
         string? sessionId = null) {
-        
+
         ResourceType = resourceType;
         ResourceId = resourceId;
         ResourceName = resourceName;

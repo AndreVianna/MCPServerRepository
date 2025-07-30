@@ -52,7 +52,7 @@
         @if (!string.IsNullOrEmpty(Alert.RecommendedAction))
         {
             <MudAlert Severity="Severity.Info" 
-                      Dense="true" 
+                      dense="true" 
                       NoIcon="false"
                       Class="recommended-action mb-2">
                 <MudText Typo="Typo.caption">
@@ -83,7 +83,7 @@
                     <MudButton Size="Size.Small" 
                                Color="Color.Success" 
                                Variant="Variant.Filled"
-                               StartIcon="Icons.Material.Filled.AutoFixHigh"
+                               starticon="Icons.Material.Filled.AutoFixHigh"
                                @onclick="@(() => HandleAction("fix"))">
                         Fix Now
                     </MudButton>
@@ -92,7 +92,7 @@
                 <MudButton Size="Size.Small" 
                            Color="Color.Info" 
                            Variant="Variant.Outlined"
-                           StartIcon="Icons.Material.Filled.Info"
+                           starticon="Icons.Material.Filled.Info"
                            @onclick="@(() => HandleAction("learn"))">
                     Learn More
                 </MudButton>
@@ -100,7 +100,7 @@
                 <MudButton Size="Size.Small" 
                            Color="Color.Default" 
                            Variant="Variant.Text"
-                           StartIcon="Icons.Material.Filled.Schedule"
+                           starticon="Icons.Material.Filled.Schedule"
                            @onclick="@(() => HandleAction("remind"))">
                     Remind Later
                 </MudButton>
@@ -110,7 +110,7 @@
                     <MudButton Size="Size.Small" 
                                Color="Color.Secondary" 
                                Variant="Variant.Text"
-                               StartIcon="Icons.Material.Filled.Close"
+                               starticon="Icons.Material.Filled.Close"
                                @onclick="@(() => HandleAction("dismiss"))">
                         Dismiss
                     </MudButton>

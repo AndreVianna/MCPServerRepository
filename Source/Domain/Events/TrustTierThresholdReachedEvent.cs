@@ -70,7 +70,7 @@ public record TrustTierThresholdReachedEvent : BaseMessage {
     /// <summary>
     /// Gets or sets additional threshold metadata
     /// </summary>
-    public new Dictionary<string, object> ThresholdMetadata { get; init; } = new();
+    public Dictionary<string, object> ThresholdMetadata { get; init; } = new();
 
     /// <summary>
     /// Gets or sets the assessment ID that detected the threshold

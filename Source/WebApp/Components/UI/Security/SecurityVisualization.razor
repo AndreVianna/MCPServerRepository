@@ -33,7 +33,7 @@
                 </MudText>
                 <MudButton Color="Color.Primary" 
                          Variant="Variant.Filled"
-                         StartIcon="@Icons.Material.Filled.Refresh"
+                         starticon="@Icons.Material.Filled.Refresh"
                          @onclick="RetryLoadSecurity">
                     Retry Analysis
                 </MudButton>
@@ -80,13 +80,13 @@
                                 <MudText Typo="Typo.body2" Color="Color.Secondary">Total Issues</MudText>
                                 @if (GetCriticalVulnerabilities() > 0)
                                 {
-                                    <MudAlert Severity="Severity.Error" Dense="true" Class="mt-2">
+                                    <MudAlert Severity="Severity.Error" dense="true" Class="mt-2">
                                         @GetCriticalVulnerabilities() Critical
                                     </MudAlert>
                                 }
                                 else
                                 {
-                                    <MudAlert Severity="Severity.Success" Dense="true" Class="mt-2">
+                                    <MudAlert Severity="Severity.Success" dense="true" Class="mt-2">
                                         No Critical Issues
                                     </MudAlert>
                                 }
@@ -144,7 +144,7 @@
                     {
                         <!-- Vulnerability Severity Chart -->
                         <div class="mb-4">
-                            <AnalyticsChart Title="Vulnerability Distribution"
+                            <AnalyticsChart title="Vulnerability Distribution"
                                            ChartType="Components.UI.Models.ChartType.Donut"
                                            ChartSeries="@GetVulnerabilityDistribution()"
                                            ShowTimeRangeSelector="false"
@@ -308,7 +308,7 @@
                 <div class="security-history-section pa-4">
                     @if (SecurityHistory?.Any() == true)
                     {
-                        <AnalyticsChart Title="Security Score Trend"
+                        <AnalyticsChart title="Security Score Trend"
                                        Subtitle="Security score evolution over time"
                                        ChartType="Components.UI.Models.ChartType.Line"
                                        ChartSeries="@GetSecurityTrendData()"
@@ -393,14 +393,14 @@
         <div class="security-actions d-flex justify-center mt-4">
             <MudButton Color="Color.Primary" 
                      Variant="Variant.Filled"
-                     StartIcon="@Icons.Material.Filled.Download"
+                     starticon="@Icons.Material.Filled.Download"
                      Class="mr-2"
                      @onclick="DownloadSecurityReport">
                 Download Full Report
             </MudButton>
             <MudButton Color="Color.Secondary" 
                      Variant="Variant.Outlined"
-                     StartIcon="@Icons.Material.Filled.Refresh"
+                     starticon="@Icons.Material.Filled.Refresh"
                      @onclick="RequestNewScan">
                 Request New Scan
             </MudButton>

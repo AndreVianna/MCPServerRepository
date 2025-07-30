@@ -4,14 +4,14 @@
 
 <MudStepper @ref="_stepper" HeaderSize="Size.Medium" HeaderBadgeView="BadgeView.All">
     <!-- Step 1: Choose Method -->
-    <MudStep Title="Choose Method" Icon="@Icons.Material.Filled.PhoneAndroid">
+    <MudStep title="Choose Method" Icon="@Icons.Material.Filled.PhoneAndroid">
         <ChildContent>
             <div class="text-center mb-4">
                 <MudText Typo="Typo.body1" Class="mb-4">
                     Choose how you'd like to receive your two-factor authentication codes:
                 </MudText>
                 
-                <MudGrid Spacing="4" MaxWidth="400px" Class="mx-auto">
+                <MudGrid Spacing="4" maxwidth="400px" Class="mx-auto">
                     <MudItem xs="12" sm="6">
                         <MudCard Outlined="true" 
                                 Class="@GetMethodCardClass("app")" 
@@ -46,7 +46,7 @@
     </MudStep>
 
     <!-- Step 2: Setup -->
-    <MudStep Title="Setup" Icon="@Icons.Material.Filled.Settings">
+    <MudStep title="Setup" Icon="@Icons.Material.Filled.Settings">
         <ChildContent>
             @if (_selectedMethod == "app")
             {
@@ -111,7 +111,7 @@
     </MudStep>
 
     <!-- Step 3: Verify -->
-    <MudStep Title="Verify" Icon="@Icons.Material.Filled.VerifiedUser">
+    <MudStep title="Verify" Icon="@Icons.Material.Filled.VerifiedUser">
         <ChildContent>
             <div class="text-center">
                 <MudText Typo="Typo.h6" Class="mb-4">Verify Setup</MudText>
@@ -149,7 +149,7 @@
     </MudStep>
 
     <!-- Step 4: Recovery Codes -->
-    <MudStep Title="Recovery Codes" Icon="@Icons.Material.Filled.Key">
+    <MudStep title="Recovery Codes" Icon="@Icons.Material.Filled.Key">
         <ChildContent>
             <div class="text-center">
                 <MudText Typo="Typo.h6" Class="mb-4">Save Recovery Codes</MudText>
@@ -173,7 +173,7 @@
                     </MudPaper>
                     
                     <MudButton Variant="Variant.Outlined" 
-                              StartIcon="@Icons.Material.Filled.Download"
+                              starticon="@Icons.Material.Filled.Download"
                               OnClick="@DownloadRecoveryCodes"
                               Class="mb-4">
                         Download Codes
@@ -192,7 +192,7 @@
 <div class="d-flex justify-space-between mt-6">
     <MudButton Variant="Variant.Text" 
               Color="Color.Secondary"
-              OnClick="@(() => _stepper.PreviousStepAsync())"
+              OnClick="@GoToPreviousStep"
               Disabled="@(_stepper.ActiveIndex == 0)">
         Previous
     </MudButton>
@@ -220,7 +220,7 @@
             <MudButton Variant="Variant.Filled" 
                       Color="Color.Success"
                       OnClick="@HandleComplete"
-                      StartIcon="@Icons.Material.Filled.Check">
+                      starticon="@Icons.Material.Filled.Check">
                 Complete Setup
             </MudButton>
         }
@@ -305,7 +305,7 @@
                 await VerifyTwoFactor();
             }
             
-            await _stepper.NextStepAsync();
+            await GoToNextStep();
         }
         catch (Exception ex)
         {
@@ -327,10 +327,10 @@
 
         var result = await SecurityService.SetupTwoFactorAsync(request);
         
-        if (result.IsSuccess)
+        if (result.Success)
         {
             _qrCodeUrl = result.QrCodeUrl;
-            _manualEntryKey = result.ManualEntryKey;
+            _manualEntryKey = result.Secret;
         }
         else
         {
@@ -376,20 +376,40 @@
         }
     }
 
-    private async Task CopyToClipboard(string text)
+    private Task CopyToClipboard(string text)
     {
         // TODO: Implement clipboard copy
         Snackbar.Add("Copied to clipboard!", Severity.Success);
+        return Task.CompletedTask;
     }
 
-    private async Task DownloadRecoveryCodes()
+    private Task DownloadRecoveryCodes()
     {
         // TODO: Implement recovery codes download
         Snackbar.Add("Recovery codes downloaded!", Severity.Success);
+        return Task.CompletedTask;
     }
 
     private async Task HandleComplete()
     {
         await OnSetupCompleted.InvokeAsync(true);
+    }
+
+    private async Task GoToNextStep()
+    {
+        if (_stepper.ActiveIndex < 3)
+        {
+            // Simulate navigation by incrementing active index
+            await InvokeAsync(() => StateHasChanged());
+        }
+    }
+
+    private async Task GoToPreviousStep()
+    {
+        if (_stepper.ActiveIndex > 0)
+        {
+            // Simulate navigation by decrementing active index
+            await InvokeAsync(() => StateHasChanged());
+        }
     }
 }

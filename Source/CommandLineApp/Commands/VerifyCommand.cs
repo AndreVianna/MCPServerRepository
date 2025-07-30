@@ -122,14 +122,14 @@ public class VerifyCommand(
         var nonInteractive = context.ParseResult.GetValueForOption(_nonInteractiveOption!);
         var global = context.ParseResult.GetValueForOption(_globalOption!);
         var verbose = context.ParseResult.GetValueForOption(_verboseOption!);
-        
+
         try {
             Logger.LogInformation("Executing verify command: Package={Package}, ScanType={ScanType}, Severity={Severity}",
                 package, scanType, severity);
 
             // Parse and validate options
-            var scanTypeEnum = ParseScanType(scanType);
-            var severityEnum = ParseSeverity(severity);
+            var scanTypeEnum = ParseScanType(scanType ?? "");
+            var severityEnum = ParseSeverity(severity ?? "");
             var trustTierEnum = ParseTrustTierEnum(trustTier);
 
             if (!offline && !await ValidateApiConnectivityAsync()) {
@@ -170,7 +170,7 @@ public class VerifyCommand(
             // Create verification progress tracker
             using var verificationProgress = ProgressReporter.CreateStepProgress("Security Verification", new[] {
                 "Analyzing packages",
-                "Running security scans", 
+                "Running security scans",
                 "Checking trust tiers",
                 "Generating reports"
             });
@@ -193,7 +193,7 @@ public class VerifyCommand(
             // Stage 4: Generate comprehensive results
             verificationProgress.StartStep(3, "Generating verification report...");
             var verificationSummary = await GenerateVerificationSummaryAsync(scanResults, trustTierResults, analysisResults);
-            
+
             // Display results
             await DisplayVerificationResultsAsync(verificationSummary, verbose, nonInteractive);
 
@@ -220,26 +220,22 @@ public class VerifyCommand(
         }
     }
 
-    private ScanType ParseScanType(string scanType) {
-        return scanType.ToLowerInvariant() switch {
-            "vulnerability" => ScanType.Vulnerability,
-            "malware" => ScanType.Malware,
-            "license" => ScanType.License,
-            "comprehensive" => ScanType.Comprehensive,
-            "all" => ScanType.All,
-            _ => ScanType.Comprehensive
-        };
-    }
+    private ScanType ParseScanType(string scanType) => scanType.ToLowerInvariant() switch {
+        "vulnerability" => ScanType.Vulnerability,
+        "malware" => ScanType.Malware,
+        "license" => ScanType.License,
+        "comprehensive" => ScanType.Comprehensive,
+        "all" => ScanType.All,
+        _ => ScanType.Comprehensive
+    };
 
-    private SecurityScanSeverity ParseSeverity(string severity) {
-        return severity.ToLowerInvariant() switch {
-            "low" => SecurityScanSeverity.Low,
-            "medium" => SecurityScanSeverity.Medium,
-            "high" => SecurityScanSeverity.High,
-            "critical" => SecurityScanSeverity.Critical,
-            _ => SecurityScanSeverity.Medium
-        };
-    }
+    private SecurityScanSeverity ParseSeverity(string severity) => severity.ToLowerInvariant() switch {
+        "low" => SecurityScanSeverity.Low,
+        "medium" => SecurityScanSeverity.Medium,
+        "high" => SecurityScanSeverity.High,
+        "critical" => SecurityScanSeverity.Critical,
+        _ => SecurityScanSeverity.Medium
+    };
 
     private TrustTier? ParseTrustTierEnum(string? trustTier) {
         if (string.IsNullOrWhiteSpace(trustTier))
@@ -254,19 +250,19 @@ public class VerifyCommand(
         };
     }
 
-    private async Task<IEnumerable<PackageToVerify>> GetPackagesToVerifyAsync(string? package, bool global) {
+    private Task<IEnumerable<PackageToVerify>> GetPackagesToVerifyAsync(string? package, bool global) {
         if (!string.IsNullOrEmpty(package)) {
             // Verify specific package
             var (packageName, version) = ParsePackageSpec(package);
-            return new[] { new PackageToVerify { Name = packageName, Version = version } };
+            return Task.FromResult<IEnumerable<PackageToVerify>>(new[] { new PackageToVerify { Name = packageName, Version = version } });
         }
 
         // Verify all installed packages (placeholder implementation)
         OutputFormatter.WriteInfo("Discovering installed packages...");
-        
+
         // In real implementation, this would scan the local package database
         // For now, return empty collection as implementation placeholder
-        return Enumerable.Empty<PackageToVerify>();
+        return Task.FromResult<IEnumerable<PackageToVerify>>(Enumerable.Empty<PackageToVerify>());
     }
 
     private (string packageName, string? version) ParsePackageSpec(string packageSpec) {
@@ -281,11 +277,11 @@ public class VerifyCommand(
 
         foreach (var package in packages) {
             using var spinner = ProgressReporter.CreateSpinner($"Analyzing {package.Name}...");
-            
+
             try {
                 // Get package information from API
                 var packageInfo = await ApiClient.GetPackageInfoAsync(package.Name);
-                
+
                 var analysisResult = new PackageAnalysisResult {
                     PackageName = package.Name,
                     Version = package.Version ?? packageInfo.Version,
@@ -320,7 +316,7 @@ public class VerifyCommand(
 
         foreach (var package in packages.Where(p => !p.HasError)) {
             using var spinner = ProgressReporter.CreateSpinner($"Scanning {package.PackageName}...");
-            
+
             try {
                 SecurityScanResult? scanResult = null;
 
@@ -510,7 +506,7 @@ public class VerifyCommand(
         else {
             OutputFormatter.WriteWarning("⚠️  Security issues detected in your packages");
             OutputFormatter.WriteInfo($"Found {summary.PackagesWithIssues} packages with security issues");
-            
+
             if (summary.TrustTierViolations > 0) {
                 OutputFormatter.WriteInfo($"Found {summary.TrustTierViolations} trust tier compliance violations");
             }
@@ -556,7 +552,7 @@ public class VerifyCommand(
 
         // Implementation would provide specific remediation steps
         await Task.Delay(100); // Placeholder for real implementation
-        
+
         OutputFormatter.WriteInfo("1. Update packages to latest versions with security fixes");
         OutputFormatter.WriteInfo("2. Review package dependencies for known vulnerabilities");
         OutputFormatter.WriteInfo("3. Consider alternative packages with better security records");
@@ -565,11 +561,11 @@ public class VerifyCommand(
 
     private async Task<bool> GenerateReportFileAsync(VerificationSummary summary, string reportType) {
         using var spinner = ProgressReporter.CreateSpinner($"Generating {reportType.ToUpper()} report...");
-        
+
         try {
             // Implementation would generate actual report files
             await Task.Delay(1000); // Simulate report generation
-            
+
             var fileName = $"security-report-{DateTimeOffset.UtcNow:yyyyMMdd-HHmmss}.{reportType.ToLowerInvariant()}";
             spinner.Success($"Report saved to {fileName}");
             return true;
@@ -609,7 +605,7 @@ public class VerifyCommand(
 
     private async Task UpdateSecurityDatabaseAsync() {
         using var updateProgress = ProgressReporter.CreateSpinner("Updating security database...");
-        
+
         try {
             var result = await _securityService.UpdateSecurityDatabaseAsync(forceUpdate: true);
             if (result.Success) {
@@ -644,19 +640,17 @@ public class VerifyCommand(
     }
 
     private string GetStatusMarkup(bool isGood) => isGood ? "[green]✓[/]" : "[red]✗[/]";
-    
+
     private string GetIssueStatusMarkup(int count) => count == 0 ? "[green]✓[/]" : "[red]⚠[/]";
 
-    private string GetSeverityMarkup(SecurityScanSeverity severity) {
-        return severity switch {
-            SecurityScanSeverity.Critical => "[red]Critical[/]",
-            SecurityScanSeverity.High => "[orange3]High[/]",
-            SecurityScanSeverity.Medium => "[yellow]Medium[/]",
-            SecurityScanSeverity.Low => "[green]Low[/]",
-            SecurityScanSeverity.None => "[grey]None[/]",
-            _ => severity.ToString()
-        };
-    }
+    private string GetSeverityMarkup(SecurityScanSeverity severity) => severity switch {
+        SecurityScanSeverity.Critical => "[red]Critical[/]",
+        SecurityScanSeverity.High => "[orange3]High[/]",
+        SecurityScanSeverity.Medium => "[yellow]Medium[/]",
+        SecurityScanSeverity.Low => "[green]Low[/]",
+        SecurityScanSeverity.None => "[grey]None[/]",
+        _ => severity.ToString()
+    };
 }
 
 /// <summary>
@@ -692,6 +686,6 @@ public record VerificationSummary {
     public List<TrustTierComplianceResult> TrustTierResults { get; init; } = new();
     public List<PackageAnalysisResult> AnalysisResults { get; init; } = new();
     public DateTimeOffset VerificationTime { get; init; }
-    
+
     public bool HasIssues => PackagesWithIssues > 0 || TrustTierViolations > 0;
 }

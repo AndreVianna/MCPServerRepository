@@ -490,9 +490,11 @@ public class McpHubApiClient : IMcpHubApiClient {
         _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
 
         // Add authentication if available
+#pragma warning disable CS0618 // Type or member is obsolete
         if (!string.IsNullOrEmpty(_configuration.Auth.Token)) {
             _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_configuration.Auth.Token}");
         }
+#pragma warning restore CS0618 // Type or member is obsolete
 
         _logger.LogDebug("HTTP client configured: BaseUrl={BaseUrl}, Timeout={Timeout}ms",
             _configuration.Registry.Url, _configuration.Registry.Timeout);

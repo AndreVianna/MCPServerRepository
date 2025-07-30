@@ -38,7 +38,7 @@ public record InstallationResult {
     /// <param name="status">Current installation status</param>
     /// <param name="metadata">Additional metadata</param>
     /// <returns>Successful installation result</returns>
-    public static InstallationResult CreateSuccess(Guid installationId, InstallationStatus status, Dictionary<string, object>? metadata = null) => new InstallationResult {
+    public static InstallationResult CreateSuccess(Guid installationId, InstallationStatus status, Dictionary<string, object>? metadata = null) => new() {
         Success = true,
         InstallationId = installationId,
         Status = status,
@@ -51,7 +51,7 @@ public record InstallationResult {
     /// <param name="errorMessage">Error description</param>
     /// <param name="status">Current installation status (if applicable)</param>
     /// <returns>Failed installation result</returns>
-    public static InstallationResult CreateFailure(string errorMessage, InstallationStatus? status = null) => new InstallationResult {
+    public static InstallationResult CreateFailure(string errorMessage, InstallationStatus? status = null) => new() {
         Success = false,
         ErrorMessage = errorMessage,
         Status = status

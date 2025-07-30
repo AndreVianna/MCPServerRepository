@@ -53,17 +53,17 @@ public class ValidationSummary {
     /// <summary>
     /// Creates a successful validation summary
     /// </summary>
-    public static ValidationSummary Success(string context = "", long validationTimeMs = 0, IEnumerable<string>? warnings = null) => new ValidationSummary(true, null, warnings, context, validationTimeMs);
+    public static ValidationSummary Success(string context = "", long validationTimeMs = 0, IEnumerable<string>? warnings = null) => new(true, null, warnings, context, validationTimeMs);
 
     /// <summary>
     /// Creates a failed validation summary
     /// </summary>
-    public static ValidationSummary Failure(IEnumerable<string> errors, string context = "", long validationTimeMs = 0, IEnumerable<string>? warnings = null) => new ValidationSummary(false, errors, warnings, context, validationTimeMs);
+    public static ValidationSummary Failure(IEnumerable<string> errors, string context = "", long validationTimeMs = 0, IEnumerable<string>? warnings = null) => new(false, errors, warnings, context, validationTimeMs);
 
     /// <summary>
     /// Creates a failed validation summary with a single error
     /// </summary>
-    public static ValidationSummary Failure(string error, string context = "", long validationTimeMs = 0, IEnumerable<string>? warnings = null) => new ValidationSummary(false, [error], warnings, context, validationTimeMs);
+    public static ValidationSummary Failure(string error, string context = "", long validationTimeMs = 0, IEnumerable<string>? warnings = null) => new(false, [error], warnings, context, validationTimeMs);
 
     /// <summary>
     /// Combines multiple validation summaries into one

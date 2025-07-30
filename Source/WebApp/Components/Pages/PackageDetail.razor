@@ -17,7 +17,7 @@
 
 @if (_package != null)
 {
-    <ResponsiveContainer MaxWidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
+    <ResponsiveContainer maxwidth="ContainerMaxWidth.ExtraLarge" FullHeight="true">
         <HeaderContent>
             <!-- Package Header -->
             <div class="package-detail-header">
@@ -25,13 +25,13 @@
                     <MudIconButton Icon="@Icons.Material.Filled.ArrowBack"
                                  Color="Color.Default"
                                  @onclick="@(() => Navigation.NavigateTo("/search"))"
-                                 Title="Back to search"
+                                 title="Back to search"
                                  Class="mr-2" />
                     <MudBreadcrumbs Items="@GetBreadcrumbs()" Class="flex-grow-1" />
                     <MudIconButton Icon="@Icons.Material.Filled.Share"
                                  Color="Color.Default"
                                  @onclick="SharePackage"
-                                 Title="Share package" />
+                                 title="Share package" />
                 </div>
 
                 <div class="package-title-section mb-4">
@@ -98,7 +98,7 @@
                                     <MudChip T="string" 
                                            Color="Color.Success" 
                                            Variant="Variant.Filled"
-                                           StartIcon="@Icons.Material.Filled.TrendingUp">
+                                           starticon="@Icons.Material.Filled.TrendingUp">
                                         Trending
                                     </MudChip>
                                 }
@@ -125,9 +125,9 @@
                                 <MudButton Color="Color.Primary" 
                                          Variant="Variant.Filled"
                                          Size="Size.Large"
-                                         StartIcon="@Icons.Material.Filled.Download"
+                                         starticon="@Icons.Material.Filled.Download"
                                          @onclick="InstallPackage"
-                                         FullWidth="true"
+                                         fullwidth="true"
                                          Class="mb-2">
                                     Install Package
                                 </MudButton>
@@ -136,8 +136,8 @@
                                          @bind-Value="@_selectedVersion"
                                          Label="Version"
                                          Variant="Variant.Outlined"
-                                         Dense="true"
-                                         FullWidth="true">
+                                         dense="true"
+                                         fullwidth="true">
                                     @foreach (var version in GetAvailableVersions())
                                     {
                                         <MudSelectItem Value="@version.Version">
@@ -152,17 +152,17 @@
                             <div class="secondary-actions d-flex gap-2">
                                 <MudButton Color="@(_package.IsStarred ? Color.Warning : Color.Default)" 
                                          Variant="Variant.Outlined"
-                                         StartIcon="@(_package.IsStarred ? Icons.Material.Filled.Star : Icons.Material.Outlined.Star)"
+                                         starticon="@(_package.IsStarred ? Icons.Material.Filled.Star : Icons.Material.Outlined.Star)"
                                          @onclick="ToggleStar"
-                                         FullWidth="true">
+                                         fullwidth="true">
                                     @(_package.IsStarred ? "Starred" : "Star")
                                 </MudButton>
                                 
                                 <MudButton Color="Color.Default" 
                                          Variant="Variant.Outlined"
-                                         StartIcon="@Icons.Material.Filled.BugReport"
+                                         starticon="@Icons.Material.Filled.BugReport"
                                          @onclick="ReportIssue"
-                                         FullWidth="true">
+                                         fullwidth="true">
                                     Report
                                 </MudButton>
                             </div>
@@ -182,7 +182,7 @@
                         <MudIconButton Icon="@Icons.Material.Filled.ContentCopy"
                                      Color="Color.Primary"
                                      @onclick="CopyInstallCommand"
-                                     Title="Copy to clipboard" />
+                                     title="Copy to clipboard" />
                     </div>
                 </MudPaper>
             </div>
@@ -208,7 +208,7 @@
                             <MudText Typo="Typo.h6" Class="mb-3">📊 Package Statistics</MudText>
                             <MudGrid Spacing="3">
                                 <MudItem xs="12" md="8">
-                                    <AnalyticsChart Title="Download Trends"
+                                    <AnalyticsChart title="Download Trends"
                                                    Subtitle="Downloads over the last 90 days"
                                                    ChartType="Components.UI.Models.ChartType.Line"
                                                    ChartSeries="@ChartSeriesConverter.ToMudBlazor(GetDownloadTrendData())"
@@ -314,13 +314,13 @@
                                 <div class="d-flex gap-2">
                                     <MudButton Color="Color.Primary" 
                                              Variant="Variant.Outlined"
-                                             StartIcon="@Icons.Material.Filled.Download"
+                                             starticon="@Icons.Material.Filled.Download"
                                              @onclick="DownloadSecurityReport">
                                         Download Report
                                     </MudButton>
                                     <MudButton Color="Color.Secondary" 
                                              Variant="Variant.Outlined"
-                                             StartIcon="@Icons.Material.Filled.Refresh"
+                                             starticon="@Icons.Material.Filled.Refresh"
                                              @onclick="RequestNewScan">
                                         Request New Scan
                                     </MudButton>
@@ -447,7 +447,7 @@
                         <!-- Security History -->
                         <section class="security-history-section">
                             <MudText Typo="Typo.h6" Class="mb-3">📈 Security Score History</MudText>
-                            <AnalyticsChart Title="Security Score Trend"
+                            <AnalyticsChart title="Security Score Trend"
                                            Subtitle="Security score over time"
                                            ChartType="Components.UI.Models.ChartType.Line"
                                            ChartSeries="@ChartSeriesConverter.ToMudBlazor(GetSecurityTrendData())"
@@ -462,7 +462,7 @@
 
                 <MudTabPanel Text="Versions" Icon="@Icons.Material.Filled.History">
                     <VersionComparison Versions="@GetVersionHistory()"
-                                     OnInstallVersion="@((string version) => HandleInstallVersion(version))" />
+                                     OnInstallVersion="@(async (MCPHub.WebApp.Components.UI.Models.VersionInfo version) => await HandleInstallVersion(version))" />
                 </MudTabPanel>
 
                 <MudTabPanel Text="Versions (Old)" Icon="@Icons.Material.Filled.History" Style="display: none;">
@@ -473,7 +473,7 @@
                                 <MudText Typo="Typo.h6">📦 Version History</MudText>
                                 <MudButton Color="Color.Primary" 
                                          Variant="Variant.Outlined"
-                                         StartIcon="@Icons.Material.Filled.Notifications"
+                                         starticon="@Icons.Material.Filled.Notifications"
                                          @onclick="SubscribeToUpdates">
                                     Subscribe to Updates
                                 </MudButton>
@@ -571,7 +571,7 @@
                                                            Color="Color.Warning" 
                                                            Size="Size.Small" 
                                                            Class="ml-2"
-                                                           Title="Outdated version" />
+                                                           title="Outdated version" />
                                                 }
                                             </div>
                                         </MudTd>
@@ -587,7 +587,7 @@
                                                          Color="Color.Primary"
                                                          Size="Size.Small"
                                                          @onclick="@(() => ViewDependency(context))"
-                                                         Title="View dependency" />
+                                                         title="View dependency" />
                                         </MudTd>
                                     </RowTemplate>
                                 </MudTable>
@@ -683,8 +683,8 @@
                     <div class="package-links">
                         <MudButton Color="Color.Primary" 
                                  Variant="Variant.Text"
-                                 StartIcon="@Icons.Material.Filled.Code"
-                                 FullWidth="true"
+                                 starticon="@Icons.Material.Filled.Code"
+                                 fullwidth="true"
                                  @onclick="@(() => OpenExternalLink(GetRepositoryUrl()))"
                                  Class="mb-2 justify-start">
                             Source Code
@@ -692,8 +692,8 @@
                         
                         <MudButton Color="Color.Primary" 
                                  Variant="Variant.Text"
-                                 StartIcon="@Icons.Material.Filled.Description"
-                                 FullWidth="true"
+                                 starticon="@Icons.Material.Filled.Description"
+                                 fullwidth="true"
                                  @onclick="@(() => OpenExternalLink(GetDocumentationUrl()))"
                                  Class="mb-2 justify-start">
                             Documentation
@@ -701,8 +701,8 @@
                         
                         <MudButton Color="Color.Primary" 
                                  Variant="Variant.Text"
-                                 StartIcon="@Icons.Material.Filled.BugReport"
-                                 FullWidth="true"
+                                 starticon="@Icons.Material.Filled.BugReport"
+                                 fullwidth="true"
                                  @onclick="@(() => OpenExternalLink(GetIssuesUrl()))"
                                  Class="mb-2 justify-start">
                             Report Issue
@@ -710,8 +710,8 @@
                         
                         <MudButton Color="Color.Primary" 
                                  Variant="Variant.Text"
-                                 StartIcon="@Icons.Material.Filled.Gavel"
-                                 FullWidth="true"
+                                 starticon="@Icons.Material.Filled.Gavel"
+                                 fullwidth="true"
                                  @onclick="@(() => OpenExternalLink(GetLicenseUrl()))"
                                  Class="justify-start">
                             License
@@ -753,29 +753,29 @@
                             <div class="contact-links">
                                 <MudButton Color="Color.Primary" 
                                          Variant="Variant.Text"
-                                         StartIcon="@Icons.Material.Filled.Email"
+                                         starticon="@Icons.Material.Filled.Email"
                                          Size="Size.Small"
                                          @onclick="@(() => OpenExternalLink(GetPublisherEmailUrl()))"
                                          Class="mb-1 justify-start"
-                                         FullWidth="true">
+                                         fullwidth="true">
                                     Contact Publisher
                                 </MudButton>
                                 <MudButton Color="Color.Primary" 
                                          Variant="Variant.Text"
-                                         StartIcon="@Icons.Material.Filled.Language"
+                                         starticon="@Icons.Material.Filled.Language"
                                          Size="Size.Small"
                                          @onclick="@(() => OpenExternalLink(GetPublisherWebsiteUrl()))"
                                          Class="mb-1 justify-start"
-                                         FullWidth="true">
+                                         fullwidth="true">
                                     Visit Website
                                 </MudButton>
                                 <MudButton Color="Color.Primary" 
                                          Variant="Variant.Text"
-                                         StartIcon="@Icons.Material.Filled.Forum"
+                                         starticon="@Icons.Material.Filled.Forum"
                                          Size="Size.Small"
                                          @onclick="@(() => OpenExternalLink(GetPublisherSupportUrl()))"
                                          Class="justify-start"
-                                         FullWidth="true">
+                                         fullwidth="true">
                                     Get Support
                                 </MudButton>
                             </div>
@@ -820,7 +820,7 @@
                                              Color="Color.Primary"
                                              Size="Size.Small"
                                              @onclick="@(() => OpenExternalLink(maintainer.ContactUrl))"
-                                             Title="Contact maintainer" />
+                                             title="Contact maintainer" />
                             }
                         </div>
                     }
@@ -889,7 +889,7 @@ else
             </MudText>
             <MudButton Color="Color.Primary" 
                      Variant="Variant.Filled"
-                     StartIcon="@Icons.Material.Filled.Search"
+                     starticon="@Icons.Material.Filled.Search"
                      @onclick="@(() => Navigation.NavigateTo("/search"))">
                 Search Packages
             </MudButton>
@@ -1206,9 +1206,9 @@ console.log(result);
         ";
     }
 
-    private List<VersionInfo> GetAvailableVersions()
+    private List<MCPHub.WebApp.Components.UI.Models.VersionInfo> GetAvailableVersions()
     {
-        return new List<VersionInfo>
+        return new List<MCPHub.WebApp.Components.UI.Models.VersionInfo>
         {
             new() { Version = "2.1.0", IsLatest = true, IsPrerelease = false },
             new() { Version = "2.1.0-beta.2", IsLatest = false, IsPrerelease = true },
@@ -1218,9 +1218,9 @@ console.log(result);
         };
     }
 
-    private List<VersionInfo> GetVersionHistory()
+    private List<MCPHub.WebApp.Components.UI.Models.VersionInfo> GetVersionHistory()
     {
-        return new List<VersionInfo>
+        return new List<MCPHub.WebApp.Components.UI.Models.VersionInfo>
         {
             new() 
             { 
@@ -1231,7 +1231,13 @@ console.log(result);
                 Downloads = 15420,
                 SecurityGrade = "A+",
                 Description = "Major release with enhanced AI capabilities and improved security",
-                Changes = new[] { "Added new ML models", "Improved performance by 40%", "Enhanced security features", "Bug fixes and improvements" }
+                Changes = new[] { "Added new ML models", "Improved performance by 40%", "Enhanced security features", "Bug fixes and improvements" },
+                SecurityScore = 9.8,
+                VulnerabilityCount = 0,
+                DependencyCount = 3,
+                LastScanDate = DateTime.UtcNow.AddDays(-1),
+                Size = 2048000,
+                Dependencies = new()
             },
             new() 
             { 
@@ -1242,7 +1248,13 @@ console.log(result);
                 Downloads = 42830,
                 SecurityGrade = "A",
                 Description = "Stability improvements and bug fixes",
-                Changes = new[] { "Fixed memory leak in AI processing", "Updated dependencies", "Improved error handling" }
+                Changes = new[] { "Fixed memory leak in AI processing", "Updated dependencies", "Improved error handling" },
+                SecurityScore = 9.2,
+                VulnerabilityCount = 1,
+                DependencyCount = 3,
+                LastScanDate = DateTime.UtcNow.AddDays(-5),
+                Size = 1984000,
+                Dependencies = new()
             },
             new() 
             { 
@@ -1253,7 +1265,13 @@ console.log(result);
                 Downloads = 38920,
                 SecurityGrade = "A",
                 Description = "Security updates and performance optimizations",
-                Changes = new[] { "Security patches", "Performance improvements", "Updated documentation" }
+                Changes = new[] { "Security patches", "Performance improvements", "Updated documentation" },
+                SecurityScore = 9.0,
+                VulnerabilityCount = 2,
+                DependencyCount = 3,
+                LastScanDate = DateTime.UtcNow.AddDays(-10),
+                Size = 1876000,
+                Dependencies = new()
             }
         };
     }
@@ -1473,7 +1491,7 @@ console.log(result);
             RepositoryUrl = apiPackage.Repository,
             DocumentationUrl = apiPackage.Documentation,
             // Convert additional API fields to PackageInfo properties
-            Dependencies = apiPackage.Dependencies?.Select(dep => new DependencyInfo 
+            Dependencies = apiPackage.Dependencies?.Select(dep => new MCPHub.WebApp.Components.UI.Models.DependencyInfo 
             { 
                 Name = dep, 
                 Version = "latest",
@@ -1481,8 +1499,8 @@ console.log(result);
                 SecurityScore = 0,
                 License = "Unknown",
                 Publisher = "Unknown"
-            }).ToList() ?? new List<DependencyInfo>(),
-            Versions = apiPackage.Versions?.Select(v => new VersionInfo
+            }).ToList() ?? new List<MCPHub.WebApp.Components.UI.Models.DependencyInfo>(),
+            Versions = apiPackage.Versions?.Select(v => new MCPHub.WebApp.Components.UI.Models.VersionInfo
             {
                 Version = v.Version,
                 IsLatest = v.IsLatest,
@@ -1490,7 +1508,7 @@ console.log(result);
                 ReleaseDate = v.ReleaseDate,
                 SecurityGrade = v.SecurityGrade,
                 Changes = v.Changes.ToArray()
-            }).ToList() ?? new List<VersionInfo>(),
+            }).ToList() ?? new List<MCPHub.WebApp.Components.UI.Models.VersionInfo>(),
             ReadmeContent = apiPackage.ReadmeContent ?? "",
             InstallCommand = apiPackage.InstallCommand ?? $"mcpm install {apiPackage.Name}"
         };
@@ -1524,11 +1542,17 @@ console.log(result);
         };
     }
 
+    private string GetDependentCount()
+    {
+        // Mock dependent count - in real implementation would query package dependents
+        return "47";
+    }
+
     // New component support methods
-    private List<SecurityScanHistory> GetSecurityHistory()
+    private List<MCPHub.WebApp.Components.UI.Security.SecurityVisualization.SecurityScanHistory> GetSecurityHistory()
     {
         // Mock security history data
-        return new List<SecurityScanHistory>
+        return new List<MCPHub.WebApp.Components.UI.Security.SecurityVisualization.SecurityScanHistory>
         {
             new() { ScanDate = DateTime.UtcNow.AddDays(-7), Grade = "A+", Score = 9.4, Duration = TimeSpan.FromMinutes(3.5), Changes = new List<string> { "Updated dependency security analysis", "Improved static code analysis" } },
             new() { ScanDate = DateTime.UtcNow.AddDays(-14), Grade = "A", Score = 9.2, Duration = TimeSpan.FromMinutes(4.1), Changes = new List<string> { "Fixed dependency vulnerability", "Enhanced malware scanning" } },
@@ -1541,31 +1565,23 @@ console.log(result);
         // Generate mock manifest based on package
         return new MCPManifest
         {
-            Info = new MCPManifest.ServerInfo
+            Name = _package?.Name ?? "unknown",
+            Version = _package?.LatestVersion ?? "1.0.0",
+            Description = _package?.Description ?? "MCP Server package",
+            Capabilities = new MCPCapabilities
             {
-                Name = _package?.Name ?? "unknown",
-                Version = _package?.LatestVersion ?? "1.0.0",
-                Description = _package?.Description ?? "MCP Server package"
-            },
-            Capabilities = new MCPManifest.ServerCapabilities
-            {
-                Tools = true,
-                Resources = true,
-                Prompts = true,
-                Logging = true
-            },
-            Tools = new List<MCPTool>
-            {
-                new() { Name = "process_data", Description = "Process and analyze data using AI models", InputSchema = new {} },
-                new() { Name = "generate_report", Description = "Generate detailed reports from processed data", InputSchema = new {} },
-                new() { Name = "validate_input", Description = "Validate input data against schema", InputSchema = new {} }
-            },
-            Resources = new List<MCPResource>
-            {
-                new() { Uri = "file://templates/*", Name = "Templates", Description = "Report and document templates", MimeType = "text/html" },
-                new() { Uri = "file://schemas/*", Name = "Schemas", Description = "Data validation schemas", MimeType = "application/json" }
-            },
-            Prompts = new List<MCPPrompt>
+                Tools = new List<MCPTool>
+                {
+                    new() { Name = "process_data", Description = "Process and analyze data using AI models", InputSchema = new {} },
+                    new() { Name = "generate_report", Description = "Generate detailed reports from processed data", InputSchema = new {} },
+                    new() { Name = "validate_input", Description = "Validate input data against schema", InputSchema = new {} }
+                },
+                Resources = new List<MCPResource>
+                {
+                    new() { Uri = "file://templates/*", Name = "Templates", Description = "Report and document templates", MimeType = "text/html" },
+                    new() { Uri = "file://schemas/*", Name = "Schemas", Description = "Data validation schemas", MimeType = "application/json" }
+                },
+                Prompts = new List<MCPPrompt>
             {
                 new() 
                 { 
@@ -1586,6 +1602,7 @@ console.log(result);
                         new() { Name = "analysis_result", Required = true }
                     }
                 }
+            }
             }
         };
     }
@@ -1638,7 +1655,7 @@ console.log(result);
         await Task.CompletedTask;
     }
 
-    private async Task HandleInstallVersion(VersionInfo version)
+    private async Task HandleInstallVersion(MCPHub.WebApp.Components.UI.Models.VersionInfo version)
     {
         _selectedVersion = version.Version;
         await InstallPackage();

@@ -46,7 +46,7 @@ public class SecurityGradeCalculator : ISecurityGradeCalculator {
     /// Gets the grade threshold configuration
     /// </summary>
     /// <returns>Dictionary of grade thresholds</returns>
-    public Dictionary<string, GradeThreshold> GetGradeThresholds() => new Dictionary<string, GradeThreshold>(_gradeThresholds);
+    public Dictionary<string, GradeThreshold> GetGradeThresholds() => new(_gradeThresholds);
 
     /// <summary>
     /// Validates if a security grade meets the minimum required grade
@@ -60,7 +60,7 @@ public class SecurityGradeCalculator : ISecurityGradeCalculator {
     /// Initializes the default grade thresholds
     /// </summary>
     /// <returns>Dictionary of grade thresholds</returns>
-    private static Dictionary<string, GradeThreshold> InitializeGradeThresholds() => new Dictionary<string, GradeThreshold> {
+    private static Dictionary<string, GradeThreshold> InitializeGradeThresholds() => new() {
         ["A+"] = new GradeThreshold {
             MaxCriticalIssues = 0,
             MaxHighIssues = 0,

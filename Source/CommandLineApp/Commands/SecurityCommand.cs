@@ -349,7 +349,7 @@ public class SecurityCommand(
         try {
             var confirm = await InteractionService.ConfirmAsync(
                 "Reset security policy to defaults? This will remove all custom settings.", false);
-            
+
             if (!confirm) {
                 OutputFormatter.WriteInfo("Policy reset cancelled.");
                 return 0;
@@ -450,7 +450,7 @@ public class SecurityCommand(
     private async Task<int> ExecuteDatabaseUpdateAsync(bool force) {
         try {
             var status = await _securityService.GetSecurityDatabaseStatusAsync();
-            
+
             if (!force && status.IsAvailable && !status.IsOutdated) {
                 OutputFormatter.WriteInfo("Security database is already up to date.");
                 OutputFormatter.WriteInfo("Use --force to update anyway.");
@@ -458,9 +458,9 @@ public class SecurityCommand(
             }
 
             using var updateProgress = ProgressReporter.CreateProgress("Updating security database");
-            
+
             var result = await _securityService.UpdateSecurityDatabaseAsync(force);
-            
+
             if (result.Success) {
                 updateProgress.Complete($"Updated {result.UpdatedRecords:N0} security records");
                 OutputFormatter.WriteSuccess("Security database updated successfully.");
@@ -486,7 +486,7 @@ public class SecurityCommand(
         try {
             var confirm = await InteractionService.ConfirmAsync(
                 "Clean security database cache? This will remove all cached data.", false);
-            
+
             if (!confirm) {
                 OutputFormatter.WriteInfo("Database clean cancelled.");
                 return 0;
@@ -550,15 +550,13 @@ public class SecurityCommand(
     }
 
     // Helper methods for display formatting
-    private SecurityScanSeverity ParseSeverity(string severity) {
-        return severity.ToLowerInvariant() switch {
-            "low" => SecurityScanSeverity.Low,
-            "medium" => SecurityScanSeverity.Medium,
-            "high" => SecurityScanSeverity.High,
-            "critical" => SecurityScanSeverity.Critical,
-            _ => SecurityScanSeverity.Medium
-        };
-    }
+    private SecurityScanSeverity ParseSeverity(string severity) => severity.ToLowerInvariant() switch {
+        "low" => SecurityScanSeverity.Low,
+        "medium" => SecurityScanSeverity.Medium,
+        "high" => SecurityScanSeverity.High,
+        "critical" => SecurityScanSeverity.Critical,
+        _ => SecurityScanSeverity.Medium
+    };
 
     private (string packageName, string? version) ParsePackageSpec(string packageSpec) {
         var parts = packageSpec.Split('@', 2);
@@ -600,14 +598,14 @@ public class SecurityCommand(
             OutputFormatter.WriteError($"[{advisory.Severity}] {advisory.Title}");
             OutputFormatter.WriteInfo($"ID: {advisory.Id}");
             OutputFormatter.WriteInfo($"Description: {advisory.Description}");
-            
+
             if (!string.IsNullOrEmpty(advisory.CveId)) {
                 OutputFormatter.WriteInfo($"CVE: {advisory.CveId}");
             }
-            
+
             OutputFormatter.WriteInfo($"Published: {advisory.PublishedAt:yyyy-MM-dd}");
             OutputFormatter.WriteInfo($"Source: {advisory.Source}");
-            
+
             if (advisory.References.Any()) {
                 OutputFormatter.WriteInfo("References:");
                 foreach (var reference in advisory.References) {
@@ -659,7 +657,7 @@ public class SecurityCommand(
 
         // Implementation would show actual breakdown from TrustTierService
         await Task.Delay(100);
-        
+
         OutputFormatter.WriteInfo("• Vulnerability Score: 85/100");
         OutputFormatter.WriteInfo("• Code Quality Score: 92/100");
         OutputFormatter.WriteInfo("• Dependency Safety: 78/100");
@@ -673,7 +671,7 @@ public class SecurityCommand(
 
         // Implementation would display actual statistics
         await Task.Delay(100);
-        
+
         OutputFormatter.WriteInfo("Statistics display not implemented in skeleton");
     }
 
@@ -683,28 +681,24 @@ public class SecurityCommand(
 
         // Implementation would display local package statistics
         await Task.Delay(100);
-        
+
         OutputFormatter.WriteInfo("Local statistics display not implemented in skeleton");
     }
 
-    private string GetSeverityMarkup(SecurityScanSeverity severity) {
-        return severity switch {
-            SecurityScanSeverity.Critical => "[red]Critical[/]",
-            SecurityScanSeverity.High => "[orange3]High[/]",
-            SecurityScanSeverity.Medium => "[yellow]Medium[/]",
-            SecurityScanSeverity.Low => "[green]Low[/]",
-            SecurityScanSeverity.None => "[grey]None[/]",
-            _ => severity.ToString()
-        };
-    }
+    private string GetSeverityMarkup(SecurityScanSeverity severity) => severity switch {
+        SecurityScanSeverity.Critical => "[red]Critical[/]",
+        SecurityScanSeverity.High => "[orange3]High[/]",
+        SecurityScanSeverity.Medium => "[yellow]Medium[/]",
+        SecurityScanSeverity.Low => "[green]Low[/]",
+        SecurityScanSeverity.None => "[grey]None[/]",
+        _ => severity.ToString()
+    };
 
-    private string GetGradeMarkup(string grade) {
-        return grade switch {
-            "A+" or "A" => $"[green]{grade}[/]",
-            "B+" or "B" => $"[yellow]{grade}[/]",
-            "C+" or "C" => $"[orange3]{grade}[/]",
-            "D+" or "D" or "F" => $"[red]{grade}[/]",
-            _ => grade
-        };
-    }
+    private string GetGradeMarkup(string grade) => grade switch {
+        "A+" or "A" => $"[green]{grade}[/]",
+        "B+" or "B" => $"[yellow]{grade}[/]",
+        "C+" or "C" => $"[orange3]{grade}[/]",
+        "D+" or "D" or "F" => $"[red]{grade}[/]",
+        _ => grade
+    };
 }

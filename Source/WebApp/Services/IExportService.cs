@@ -10,7 +10,7 @@ public enum ExportFormat {
     Csv,
     Json,
     Pdf,
-    Excel
+    Excel,
 }
 
 /// <summary>

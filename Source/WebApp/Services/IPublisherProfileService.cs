@@ -783,7 +783,7 @@ public enum VerificationLevel {
     None,
     Basic,
     Enhanced,
-    Enterprise
+    Enterprise,
 }
 
 /// <summary>
@@ -796,7 +796,7 @@ public enum DocumentType {
     BankStatement,
     UtilityBill,
     CertificateOfIncorporation,
-    Other
+    Other,
 }
 
 /// <summary>
@@ -807,7 +807,7 @@ public enum DocumentStatus {
     UnderReview,
     Approved,
     Rejected,
-    Expired
+    Expired,
 }
 
 /// <summary>
@@ -820,7 +820,7 @@ public enum VerificationStage {
     BackgroundCheck,
     FinalReview,
     Completed,
-    Rejected
+    Rejected,
 }
 
 /// <summary>
@@ -834,7 +834,7 @@ public enum SocialPlatform {
     Blog,
     YouTube,
     Discord,
-    Mastodon
+    Mastodon,
 }
 
 /// <summary>
@@ -844,7 +844,7 @@ public enum SecurityLevel {
     Basic,
     Standard,
     High,
-    Maximum
+    Maximum,
 }
 
 /// <summary>
@@ -854,7 +854,7 @@ public enum TwoFactorType {
     App,
     SMS,
     Email,
-    Hardware
+    Hardware,
 }
 
 /// <summary>
@@ -865,7 +865,7 @@ public enum BenefitType {
     Limit,
     Support,
     Recognition,
-    Financial
+    Financial,
 }
 
 /// <summary>
@@ -875,7 +875,7 @@ public enum ActionDifficulty {
     Easy,
     Medium,
     Hard,
-    Expert
+    Expert,
 }
 
 /// <summary>
@@ -886,5 +886,5 @@ public enum NotificationFrequency {
     Daily,
     Weekly,
     Monthly,
-    Quarterly
+    Quarterly,
 }

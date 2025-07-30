@@ -162,7 +162,7 @@ public class PublisherActivity {
     public string? Version { get; set; }
     public DateTime Timestamp { get; set; }
     public ActivityPriority Priority { get; set; } = ActivityPriority.Normal;
-    public Dictionary<string, object> Metadata { get; set; } = new();
+    public Dictionary<string, object> Metadata { get; set; } = [];
 }
 
 /// <summary>
@@ -261,7 +261,7 @@ public class PublisherNotification {
     public bool IsRead { get; set; }
     public NotificationPriority Priority { get; set; } = NotificationPriority.Normal;
     public string? ActionUrl { get; set; }
-    public Dictionary<string, object> Data { get; set; } = new();
+    public Dictionary<string, object> Data { get; set; } = [];
 }
 
 /// <summary>
@@ -366,7 +366,7 @@ public enum ActivityType {
     DownloadMilestone,
     ReviewReceived,
     PackageDeprecated,
-    PackageRestored
+    PackageRestored,
 }
 
 /// <summary>
@@ -376,7 +376,7 @@ public enum ActivityPriority {
     Low,
     Normal,
     High,
-    Critical
+    Critical,
 }
 
 /// <summary>
@@ -388,7 +388,7 @@ public enum SecurityAlertType {
     LicenseIssue,
     ComplianceIssue,
     MalwareDetection,
-    SuspiciousBehavior
+    SuspiciousBehavior,
 }
 
 /// <summary>
@@ -399,7 +399,7 @@ public enum SecurityAlertStatus {
     Acknowledged,
     InProgress,
     Resolved,
-    Ignored
+    Ignored,
 }
 
 /// <summary>
@@ -413,7 +413,7 @@ public enum NotificationType {
     DownloadMilestone,
     ReviewNotification,
     PaymentNotification,
-    SystemMaintenance
+    SystemMaintenance,
 }
 
 /// <summary>
@@ -423,5 +423,5 @@ public enum NotificationPriority {
     Low,
     Normal,
     High,
-    Urgent
+    Urgent,
 }

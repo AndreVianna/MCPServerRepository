@@ -10,7 +10,7 @@ public enum SuggestionType {
     Publisher,
     AIRecommendation,
     Tag,
-    RecentSearch
+    RecentSearch,
 }
 
 /// <summary>
@@ -21,7 +21,7 @@ public enum ChartType {
     Bar,
     Donut,
     Area,
-    Pie
+    Pie,
 }
 
 /// <summary>
@@ -29,7 +29,7 @@ public enum ChartType {
 /// </summary>
 public enum SidebarPosition {
     Left,
-    Right
+    Right,
 }
 
 /// <summary>
@@ -40,7 +40,7 @@ public enum ContainerMaxWidth {
     Medium,     // 768px
     Large,      // 1024px
     ExtraLarge, // 1280px
-    Full        // 100%
+    Full, // 100%
 }
 
 /// <summary>
@@ -49,7 +49,7 @@ public enum ContainerMaxWidth {
 public enum SecurityBadgeStyle {
     Compact,
     Standard,
-    Detailed
+    Detailed,
 }
 
 /// <summary>
@@ -58,7 +58,7 @@ public enum SecurityBadgeStyle {
 public enum TrustTierStyle {
     Badge,
     Card,
-    Inline
+    Inline,
 }
 
 /// <summary>
@@ -69,7 +69,7 @@ public enum PackageCardMode {
     Standard,
     Detailed,
     Grid,
-    List
+    List,
 }
 
 /// <summary>
@@ -78,7 +78,7 @@ public enum PackageCardMode {
 public enum SearchBarSize {
     Small,
     Medium,
-    Large
+    Large,
 }
 
 /// <summary>
@@ -89,7 +89,7 @@ public enum AnalyticsTimeRange {
     Last30Days,
     Last90Days,
     LastYear,
-    AllTime
+    AllTime,
 }
 
 /// <summary>
@@ -102,7 +102,7 @@ public enum ComponentTheme {
     Success,
     Warning,
     Error,
-    Info
+    Info,
 }
 
 /// <summary>
@@ -113,7 +113,7 @@ public enum LoadingState {
     Loading,
     Loaded,
     Error,
-    Empty
+    Empty,
 }
 
 /// <summary>
@@ -123,5 +123,5 @@ public enum AccessibilityPriority {
     Low,
     Medium,
     High,
-    Critical
+    Critical,
 }

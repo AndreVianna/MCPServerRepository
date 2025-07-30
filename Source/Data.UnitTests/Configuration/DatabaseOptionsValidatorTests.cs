@@ -3,11 +3,7 @@ using MCPHub.Data.Configuration.Validators;
 namespace MCPHub.Data.Configuration;
 
 public class DatabaseOptionsValidatorTests {
-    private readonly DatabaseOptionsValidator _validator;
-
-    public DatabaseOptionsValidatorTests() {
-        _validator = new DatabaseOptionsValidator();
-    }
+    private readonly DatabaseOptionsValidator _validator = new();
 
     [Fact]
     public void Validate_WithValidOptions_ReturnsSuccess() {
@@ -17,7 +13,7 @@ public class DatabaseOptionsValidatorTests {
             MaxRetryCount = 3,
             CommandTimeout = TimeSpan.FromSeconds(30),
             MaxPoolSize = 100,
-            HealthCheckTimeout = TimeSpan.FromSeconds(5)
+            HealthCheckTimeout = TimeSpan.FromSeconds(5),
         };
 
         // Act
@@ -35,7 +31,7 @@ public class DatabaseOptionsValidatorTests {
             MaxRetryCount = 3,
             CommandTimeout = TimeSpan.FromSeconds(30),
             MaxPoolSize = 100,
-            HealthCheckTimeout = TimeSpan.FromSeconds(5)
+            HealthCheckTimeout = TimeSpan.FromSeconds(5),
         };
 
         // Act
@@ -54,7 +50,7 @@ public class DatabaseOptionsValidatorTests {
             MaxRetryCount = -1,
             CommandTimeout = TimeSpan.FromSeconds(30),
             MaxPoolSize = 100,
-            HealthCheckTimeout = TimeSpan.FromSeconds(5)
+            HealthCheckTimeout = TimeSpan.FromSeconds(5),
         };
 
         // Act
@@ -73,7 +69,7 @@ public class DatabaseOptionsValidatorTests {
             MaxRetryCount = 3,
             CommandTimeout = TimeSpan.Zero,
             MaxPoolSize = 100,
-            HealthCheckTimeout = TimeSpan.FromSeconds(5)
+            HealthCheckTimeout = TimeSpan.FromSeconds(5),
         };
 
         // Act
@@ -92,7 +88,7 @@ public class DatabaseOptionsValidatorTests {
             MaxRetryCount = 3,
             CommandTimeout = TimeSpan.FromSeconds(30),
             MaxPoolSize = 0,
-            HealthCheckTimeout = TimeSpan.FromSeconds(5)
+            HealthCheckTimeout = TimeSpan.FromSeconds(5),
         };
 
         // Act
@@ -111,7 +107,7 @@ public class DatabaseOptionsValidatorTests {
             MaxRetryCount = 3,
             CommandTimeout = TimeSpan.FromSeconds(30),
             MaxPoolSize = 100,
-            HealthCheckTimeout = TimeSpan.Zero
+            HealthCheckTimeout = TimeSpan.Zero,
         };
 
         // Act

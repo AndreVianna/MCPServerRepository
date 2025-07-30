@@ -127,7 +127,7 @@ public class TestDataBuilder {
             Page = page,
             PageSize = pageSize,
             SortBy = "relevance",
-            SortDirection = DomainSortDirection.Descending
+            SortDirection = DomainSortDirection.Descending,
         };
 
     public PublishRequest CreatePublishRequest(string packageName = "test-package") {
@@ -138,7 +138,7 @@ public class TestDataBuilder {
             PackageArchive = CreateTestPackageBytes(),
             Tags = new[] { "test", "mcp", "automation" },
             ReadmeContent = _faker.Lorem.Paragraphs(5),
-            ChangelogContent = _faker.Lorem.Paragraph()
+            ChangelogContent = _faker.Lorem.Paragraph(),
         };
     }
 
@@ -152,8 +152,8 @@ public class TestDataBuilder {
         Capabilities = new MCPCapabilities {
             Tools = CreateTestToolDefinitions(2),
             Resources = CreateTestResourceDefinitions(1),
-            Prompts = CreateTestPromptDefinitions(1)
-        }
+            Prompts = CreateTestPromptDefinitions(1),
+        },
     };
 
     private byte[] CreateTestPackageBytes() {
@@ -170,9 +170,9 @@ public class TestDataBuilder {
                 ["properties"] = new Dictionary<string, object> {
                     ["query"] = new Dictionary<string, object> {
                         ["type"] = "string",
-                        ["description"] = f.Lorem.Sentence()
-                    }
-                }
+                        ["description"] = f.Lorem.Sentence(),
+                    },
+                },
             });
 
         return toolFaker.Generate(count);
@@ -195,7 +195,7 @@ public class TestDataBuilder {
             .RuleFor(p => p.Arguments, f => new List<MCPPromptArgument>
             {
                 new() { Name = "input", Description = "Input parameter" },
-                new() { Name = "context", Description = "Context parameter" }
+                new() { Name = "context", Description = "Context parameter" },
             });
 
         return promptFaker.Generate(count);
@@ -207,8 +207,8 @@ public class TestDataBuilder {
 /// </summary>
 public class TestScenarioBuilder {
     private readonly TestDataBuilder _dataBuilder = new();
-    private readonly List<Package> _packages = new();
-    private readonly List<ApplicationUser> _users = new();
+    private readonly List<Package> _packages = [];
+    private readonly List<ApplicationUser> _users = [];
 
     public TestScenarioBuilder WithPackages(int count = 5) {
         _packages.AddRange(_dataBuilder.CreateTestPackages(count));
@@ -235,7 +235,7 @@ public class TestScenarioBuilder {
     public TestScenario Build() => new() {
         Packages = _packages,
         Users = _users,
-        DataBuilder = _dataBuilder
+        DataBuilder = _dataBuilder,
     };
 }
 
@@ -243,7 +243,7 @@ public class TestScenarioBuilder {
 /// Contains test scenario data for BDD tests
 /// </summary>
 public class TestScenario {
-    public List<Package> Packages { get; set; } = new();
-    public List<ApplicationUser> Users { get; set; } = new();
+    public List<Package> Packages { get; set; } = [];
+    public List<ApplicationUser> Users { get; set; } = [];
     public TestDataBuilder DataBuilder { get; set; } = new();
 }

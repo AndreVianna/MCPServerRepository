@@ -3,11 +3,7 @@ using MCPHub.Common.Configuration.Validators;
 namespace MCPHub.Common.Configuration;
 
 public class ObservabilityOptionsValidatorTests {
-    private readonly ObservabilityOptionsValidator _validator;
-
-    public ObservabilityOptionsValidatorTests() {
-        _validator = new ObservabilityOptionsValidator();
-    }
+    private readonly ObservabilityOptionsValidator _validator = new();
 
     [Fact]
     public void Validate_WithValidOptions_ReturnsSuccess() {
@@ -15,7 +11,7 @@ public class ObservabilityOptionsValidatorTests {
         var options = new ObservabilityOptions {
             ServiceName = "MCPHub",
             ServiceVersion = "1.0.0",
-            Environment = "Development"
+            Environment = "Development",
         };
 
         // Act
@@ -31,7 +27,7 @@ public class ObservabilityOptionsValidatorTests {
         var options = new ObservabilityOptions {
             ServiceName = "",
             ServiceVersion = "1.0.0",
-            Environment = "Development"
+            Environment = "Development",
         };
 
         // Act

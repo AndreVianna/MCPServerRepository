@@ -3,10 +3,6 @@ using System.Text.Encodings.Web;
 
 using MCPHub.Common.Services;
 
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Options;
-
 namespace MCPHub.IntegrationTests.Infrastructure;
 
 /// <summary>
@@ -115,7 +111,7 @@ public class TestAuthenticationHandler(IOptionsMonitor<AuthenticationSchemeOptio
             new(ClaimTypes.NameIdentifier, userId),
             new(ClaimTypes.Email, userEmail ?? "test@example.com"),
             new("sub", userId),
-            new("id", userId)
+            new("id", userId),
         };
 
         if (!string.IsNullOrEmpty(userRoles)) {

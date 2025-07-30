@@ -31,7 +31,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
     [When("I navigate to the package detail page")]
     public void WhenINavigateToThePackageDetailPage() {
         var package = _scenarioContext.CurrentPackage;
-        package.Should().NotBeNull("A package should be set in the scenario context");
+        package?.Should().NotBeNull("A package should be set in the scenario context");
 
         var baseUrl = _scenarioContext.Get<string>("BaseUrl");
         var packageUrl = $"{baseUrl}/package/{package!.Publisher.Name}/{package.Name}";
@@ -52,7 +52,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
             By.XPath($"//input[@type='button' and @value='{buttonText}']"),
             By.XPath($"//input[@type='submit' and @value='{buttonText}']"),
             By.XPath($"//a[contains(text(), '{buttonText}')]"),
-            By.XPath($"//*[@role='button' and contains(text(), '{buttonText}')]")
+            By.XPath($"//*[@role='button' and contains(text(), '{buttonText}')]"),
         };
 
         IWebElement? button = null;
@@ -81,7 +81,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
             By.Id("search"),
             By.XPath("//input[@placeholder*='Search' or @placeholder*='search']"),
             By.XPath("//input[@type='search']"),
-            By.CssSelector("[data-testid='search-input']")
+            By.CssSelector("[data-testid='search-input']"),
         };
 
         IWebElement? searchBox = null;
@@ -112,7 +112,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
             By.XPath("//button[contains(text(), 'Search')]"),
             By.XPath("//input[@type='submit']"),
             By.CssSelector("[data-testid='search-button']"),
-            By.XPath("//button[contains(@class, 'search')]")
+            By.XPath("//button[contains(@class, 'search')]"),
         };
 
         IWebElement? searchButton = null;
@@ -140,7 +140,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
             ["email"] = testUser.Email!,
             ["password"] = "SecurePassword123!",
             ["confirmPassword"] = "SecurePassword123!",
-            ["displayName"] = testUser.DisplayName ?? "Test User"
+            ["displayName"] = testUser.DisplayName ?? "Test User",
         };
 
         driver.FillForm(formData);
@@ -166,7 +166,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
         {
             By.XPath("//button[@type='submit']"),
             By.XPath("//input[@type='submit']"),
-            By.XPath("//button[contains(text(), 'Submit') or contains(text(), 'Register') or contains(text(), 'Sign Up')]")
+            By.XPath("//button[contains(text(), 'Submit') or contains(text(), 'Register') or contains(text(), 'Sign Up')]"),
         };
 
         IWebElement? submitButton = null;
@@ -200,7 +200,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
             By.XPath("//*[contains(text(), 'MCP Hub')]"),
             By.XPath("//h1[contains(text(), 'MCP Hub')]"),
             By.CssSelector("[data-testid='app-title']"),
-            By.XPath("//title[contains(text(), 'MCP Hub')]")
+            By.XPath("//title[contains(text(), 'MCP Hub')]"),
         };
 
         var brandingFound = brandingSelectors.Any(driver.IsElementPresent);
@@ -217,7 +217,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
             By.Id("search"),
             By.XPath("//input[@type='search']"),
             By.XPath("//input[@placeholder*='search' or @placeholder*='Search']"),
-            By.CssSelector("[data-testid='search-input']")
+            By.CssSelector("[data-testid='search-input']"),
         };
 
         var searchBarFound = searchBarSelectors.Any(driver.IsElementVisible);
@@ -233,7 +233,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
             By.XPath("//*[contains(text(), 'Featured') or contains(text(), 'featured')]"),
             By.CssSelector("[data-testid='featured-packages']"),
             By.XPath("//section[contains(@class, 'featured')]"),
-            By.XPath("//h2[contains(text(), 'Featured')]")
+            By.XPath("//h2[contains(text(), 'Featured')]"),
         };
 
         var featuredFound = featuredSelectors.Any(driver.IsElementPresent);
@@ -249,7 +249,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
             By.XPath("//*[contains(text(), 'Trending') or contains(text(), 'trending')]"),
             By.CssSelector("[data-testid='trending-packages']"),
             By.XPath("//section[contains(@class, 'trending')]"),
-            By.XPath("//h2[contains(text(), 'Trending')]")
+            By.XPath("//h2[contains(text(), 'Trending')]"),
         };
 
         var trendingFound = trendingSelectors.Any(driver.IsElementPresent);
@@ -265,7 +265,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
             By.XPath("//*[contains(text(), 'Categories') or contains(text(), 'categories')]"),
             By.CssSelector("[data-testid='categories']"),
             By.XPath("//nav[contains(@class, 'category')]"),
-            By.XPath("//ul[contains(@class, 'category')]")
+            By.XPath("//ul[contains(@class, 'category')]"),
         };
 
         var categoryFound = categorySelectors.Any(driver.IsElementPresent);
@@ -281,7 +281,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
             By.XPath("//*[contains(text(), 'packages') or contains(text(), 'downloads')]"),
             By.CssSelector("[data-testid='stats']"),
             By.XPath("//section[contains(@class, 'stats')]"),
-            By.XPath("//*[contains(text(), 'developers') or contains(text(), 'users')]")
+            By.XPath("//*[contains(text(), 'developers') or contains(text(), 'users')]"),
         };
 
         var statsFound = statsSelectors.Any(driver.IsElementPresent);
@@ -460,7 +460,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
 
         var scenario = new TestScenario {
             Packages = packages,
-            Users = new[] { testUser }.ToList()
+            Users = new[] { testUser }.ToList(),
         };
 
         _scenarioContext.SetTestScenario(scenario);
@@ -534,6 +534,6 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
         "package detail" => $"{baseUrl}/package/test/package",
         "dashboard" => $"{baseUrl}/dashboard",
         "forms" => $"{baseUrl}/auth/login",
-        _ => $"{baseUrl}/"
+        _ => $"{baseUrl}/",
     };
 }

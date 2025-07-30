@@ -24,10 +24,10 @@ public class MCPManifestTests {
                     new MCPTool
                     {
                         Name = "test-tool",
-                        Description = "A test tool"
-                    }
-                ]
-            }
+                        Description = "A test tool",
+                    },
+                        ],
+            },
         };
 
         // Act
@@ -70,7 +70,7 @@ public class MCPManifestTests {
             Version = "1.0.0",
             Description = "Test package",
             Author = new MCPAuthor { Name = "Test Author" },
-            License = "MIT"
+            License = "MIT",
         };
 
         // Act
@@ -91,7 +91,7 @@ public class MCPManifestTests {
             Version = "1.0.0",
             Description = "Test package",
             Author = new MCPAuthor { Name = "Test Author" },
-            License = "MIT"
+            License = "MIT",
         };
 
         // Act
@@ -112,7 +112,7 @@ public class MCPManifestTests {
             Version = "invalid-version",
             Description = "Test package",
             Author = new MCPAuthor { Name = "Test Author" },
-            License = "MIT"
+            License = "MIT",
         };
 
         // Act
@@ -136,7 +136,7 @@ public class MCPManifestTests {
                 Version = version,
                 Description = "Test package",
                 Author = new MCPAuthor { Name = "Test Author" },
-                License = "MIT"
+                License = "MIT",
             };
 
             // Act
@@ -160,7 +160,7 @@ public class MCPManifestTests {
             License = "MIT",
             Homepage = "invalid-url",
             Repository = "not-a-url",
-            Bugs = "also-invalid"
+            Bugs = "also-invalid",
         };
 
         // Act
@@ -185,7 +185,7 @@ public class MCPManifestTests {
             Description = "Test package",
             Author = new MCPAuthor { Name = "Test Author" },
             License = "MIT",
-            Capabilities = new MCPCapabilities() // Empty capabilities
+            Capabilities = new MCPCapabilities(), // Empty capabilities
         };
 
         // Act
@@ -207,7 +207,7 @@ public class MCPManifestTests {
             Version = "1.0.0",
             Description = "Test package",
             Author = new MCPAuthor { Email = "test@example.com" }, // Missing name
-            License = "MIT"
+            License = "MIT",
         };
 
         // Act
@@ -243,7 +243,7 @@ public class MCPCapabilitiesTests {
     public void HasAnyCapability_WithTools_ShouldReturnTrue() {
         // Arrange
         var capabilities = new MCPCapabilities {
-            Tools = [new MCPTool { Name = "test-tool", Description = "Test" }]
+            Tools = [new MCPTool { Name = "test-tool", Description = "Test" }],
         };
 
         // Act
@@ -259,7 +259,7 @@ public class MCPCapabilitiesTests {
     public void HasAnyCapability_WithResources_ShouldReturnTrue() {
         // Arrange
         var capabilities = new MCPCapabilities {
-            Resources = [new MCPResource { Uri = "test://resource", Name = "test-resource", Description = "Test" }]
+            Resources = [new MCPResource { Uri = "test://resource", Name = "test-resource", Description = "Test" }],
         };
 
         // Act
@@ -275,7 +275,7 @@ public class MCPCapabilitiesTests {
     public void HasAnyCapability_WithPrompts_ShouldReturnTrue() {
         // Arrange
         var capabilities = new MCPCapabilities {
-            Prompts = [new MCPPrompt { Name = "test-prompt", Description = "Test" }]
+            Prompts = [new MCPPrompt { Name = "test-prompt", Description = "Test" }],
         };
 
         // Act

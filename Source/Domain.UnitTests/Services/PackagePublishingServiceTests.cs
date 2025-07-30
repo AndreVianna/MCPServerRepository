@@ -7,11 +7,7 @@ namespace MCPHub.Domain.UnitTests.Services;
 /// Unit tests for PackagePublishingService
 /// </summary>
 public class PackagePublishingServiceTests {
-    private readonly PackagePublishingService _service;
-
-    public PackagePublishingServiceTests() {
-        _service = new PackagePublishingService();
-    }
+    private readonly PackagePublishingService _service = new();
 
     [Fact]
     [Trait("Category", "Unit")]
@@ -50,7 +46,7 @@ public class PackagePublishingServiceTests {
             """,
             PackageUrl = "https://example.com/package.zip",
             Tags = ["testing", "mcp"],
-            ReadmeContent = "# Test Package\n\nThis is a test package."
+            ReadmeContent = "# Test Package\n\nThis is a test package.",
         };
         var userId = Guid.NewGuid();
 
@@ -77,7 +73,7 @@ public class PackagePublishingServiceTests {
             }
             """,
             PackageUrl = "https://example.com/package-1.1.0.zip",
-            ChangelogContent = "## v1.1.0\n\n- Bug fixes\n- Performance improvements"
+            ChangelogContent = "## v1.1.0\n\n- Bug fixes\n- Performance improvements",
         };
         var userId = Guid.NewGuid();
 
@@ -101,7 +97,7 @@ public class PackagePublishingServiceTests {
                 "license": "MIT"
             }
             """,
-            PackageUrl = "https://example.com/package.zip"
+            PackageUrl = "https://example.com/package.zip",
         };
         var userId = Guid.NewGuid();
 

@@ -20,7 +20,7 @@ public class CLIStepDefinitions(SolutionScenarioContext scenarioContext) {
             ["packages.directory"] = Path.Combine(Path.GetTempPath(), "mcpm-test-packages"),
             ["security.trustTierMinimum"] = "unverified",
             ["ui.colorOutput"] = "true",
-            ["ui.progressBars"] = "true"
+            ["ui.progressBars"] = "true",
         };
     }
 
@@ -136,7 +136,7 @@ public class CLIStepDefinitions(SolutionScenarioContext scenarioContext) {
             version = "1.0.0",
             description = "Test package for CLI testing",
             author = "Test Author",
-            license = "MIT"
+            license = "MIT",
         };
 
         File.WriteAllText(manifestPath, JsonSerializer.Serialize(manifest, new JsonSerializerOptions { WriteIndented = true }));
@@ -186,7 +186,7 @@ public class CLIStepDefinitions(SolutionScenarioContext scenarioContext) {
         {
             new { name = "file-manager", description = "Manage files efficiently", category = "files" },
             new { name = "data-processor", description = "Process data files", category = "data" },
-            new { name = "ai-assistant", description = "AI-powered file assistant", category = "ai" }
+            new { name = "ai-assistant", description = "AI-powered file assistant", category = "ai" },
         };
 
         File.WriteAllText(metadataFile, JsonSerializer.Serialize(mockMetadata));
@@ -221,14 +221,14 @@ public class CLIStepDefinitions(SolutionScenarioContext scenarioContext) {
 
     [Then(@"I should see packages matching ""(.*)"" in the output")]
     public void ThenIShouldSeePackagesMatchingInTheOutput(string searchTerm) {
-        _scenarioContext.LastCliOutput.Should().NotBeNullOrEmpty("CLI output should not be empty");
+        _scenarioContext?.LastCliOutput.Should().NotBeNullOrEmpty("CLI output should not be empty");
         _scenarioContext.LastCliOutput!.Should().Contain(searchTerm,
             $"Output should contain packages matching '{searchTerm}'");
     }
 
     [Then("each package should display:")]
     public void ThenEachPackageShouldDisplay(Table table) {
-        _scenarioContext.LastCliOutput.Should().NotBeNullOrEmpty();
+        _scenarioContext?.LastCliOutput.Should().NotBeNullOrEmpty();
 
         foreach (var row in table.Rows) {
             var information = row["Information"];
@@ -262,7 +262,7 @@ public class CLIStepDefinitions(SolutionScenarioContext scenarioContext) {
 
     [Then("I should see only packages that match all criteria:")]
     public void ThenIShouldSeeOnlyPackagesThatMatchAllCriteria(Table table) {
-        _scenarioContext.LastCliOutput.Should().NotBeNullOrEmpty();
+        _scenarioContext?.LastCliOutput.Should().NotBeNullOrEmpty();
 
         foreach (var row in table.Rows) {
             var criteria = row["Criteria"];
@@ -277,7 +277,7 @@ public class CLIStepDefinitions(SolutionScenarioContext scenarioContext) {
 
     [Then("I should see comprehensive package information:")]
     public void ThenIShouldSeeComprehensivePackageInformation(Table table) {
-        _scenarioContext.LastCliOutput.Should().NotBeNullOrEmpty();
+        _scenarioContext?.LastCliOutput.Should().NotBeNullOrEmpty();
 
         foreach (var row in table.Rows) {
             var section = row["Section"];
@@ -291,7 +291,7 @@ public class CLIStepDefinitions(SolutionScenarioContext scenarioContext) {
 
     [Then("I should see progress indicators during download")]
     public void ThenIShouldSeeProgressIndicatorsDuringDownload() {
-        _scenarioContext.LastCliOutput.Should().NotBeNullOrEmpty();
+        _scenarioContext?.LastCliOutput.Should().NotBeNullOrEmpty();
 
         // Look for progress indicators
         var hasProgressIndicators = _scenarioContext.LastCliOutput!.Contains("▓") || // Progress bar
@@ -304,7 +304,7 @@ public class CLIStepDefinitions(SolutionScenarioContext scenarioContext) {
 
     [Then("the output should show:")]
     public void ThenTheOutputShouldShow(Table table) {
-        _scenarioContext.LastCliOutput.Should().NotBeNullOrEmpty();
+        _scenarioContext?.LastCliOutput.Should().NotBeNullOrEmpty();
 
         foreach (var row in table.Rows) {
             var information = row["Information"];
@@ -336,13 +336,13 @@ public class CLIStepDefinitions(SolutionScenarioContext scenarioContext) {
         }
 
         // The main verification is that the CLI output indicated fetch-only operation
-        _scenarioContext.LastCliOutput.Should().Contain("NOT installed",
+        _scenarioContext?.LastCliOutput.Should().Contain("NOT installed",
             "Output should indicate package is not installed");
     }
 
     [Then("I should see detailed verification progress:")]
     public void ThenIShouldSeeDetailedVerificationProgress(Table table) {
-        _scenarioContext.LastCliOutput.Should().NotBeNullOrEmpty();
+        _scenarioContext?.LastCliOutput.Should().NotBeNullOrEmpty();
 
         foreach (var row in table.Rows) {
             var stage = row["Verification Stage"];
@@ -356,7 +356,7 @@ public class CLIStepDefinitions(SolutionScenarioContext scenarioContext) {
 
     [Then("I should see permission requests clearly:")]
     public void ThenIShouldSeePermissionRequestsClearly(Table table) {
-        _scenarioContext.LastCliOutput.Should().NotBeNullOrEmpty();
+        _scenarioContext?.LastCliOutput.Should().NotBeNullOrEmpty();
 
         foreach (var row in table.Rows) {
             var permissionType = row["Permission Type"];
@@ -390,7 +390,7 @@ public class CLIStepDefinitions(SolutionScenarioContext scenarioContext) {
     [Then("the installation should proceed with progress indicators")]
     public void ThenTheInstallationShouldProceedWithProgressIndicators() {
         ThenIShouldSeeProgressIndicatorsDuringDownload();
-        _scenarioContext.LastCliOutput.Should().Contain("Installing",
+        _scenarioContext?.LastCliOutput.Should().Contain("Installing",
             "Output should show installation progress");
     }
 
@@ -404,7 +404,7 @@ public class CLIStepDefinitions(SolutionScenarioContext scenarioContext) {
         Directory.Exists(packagesDir).Should().BeTrue("Packages directory should exist");
 
         // In a real implementation, this would verify the package is properly registered
-        _scenarioContext.LastCliOutput.Should().Contain("available in your MCP environment",
+        _scenarioContext?.LastCliOutput.Should().Contain("available in your MCP environment",
             "Output should confirm MCP environment registration");
     }
 
@@ -451,7 +451,7 @@ public class CLIStepDefinitions(SolutionScenarioContext scenarioContext) {
             "login" => SimulateLoginCommand(args),
             "doctor" => SimulateDoctorCommand(),
             "cache" => SimulateCacheCommand(args),
-            _ => (1, $"Unknown command: {command}")
+            _ => (1, $"Unknown command: {command}"),
         };
     }
 
@@ -907,7 +907,7 @@ Use 'mcpm config reset <key>' to restore defaults
 "),
             "set" when args.Length >= 4 => (0, $"✅ Configuration updated: {args[2]} = {args[3]}"),
             "reset" when args.Length >= 3 => (0, $"✅ Configuration reset to default: {args[2]}"),
-            _ => (1, "Error: Invalid config command or missing arguments")
+            _ => (1, "Error: Invalid config command or missing arguments"),
         };
     }
 
@@ -1025,7 +1025,7 @@ Cache cleanup completed successfully!
 ✅ Cache integrity check completed successfully!
    No issues found.
 "),
-            _ => (1, "Error: Invalid cache command")
+            _ => (1, "Error: Invalid cache command"),
         };
     }
 
@@ -1040,8 +1040,8 @@ Cache cleanup completed successfully!
             repository = $"https://github.com/johndoe/{projectName}",
             capabilities = new {
                 tools = new[] { new { name = "example-tool", description = "Example tool" } },
-                resources = new[] { new { name = "example-resource", description = "Example resource" } }
-            }
+                resources = new[] { new { name = "example-resource", description = "Example resource" } },
+            },
         };
 
         File.WriteAllText(
@@ -1058,8 +1058,8 @@ Cache cleanup completed successfully!
             scripts = new {
                 build = "tsc",
                 test = "jest",
-                start = "node dist/index.js"
-            }
+                start = "node dist/index.js",
+            },
         };
 
         File.WriteAllText(

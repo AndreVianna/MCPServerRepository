@@ -11,7 +11,7 @@ public class SecurityScanResultTests {
         var status = SecurityScanStatus.Passed;
         var vulnerabilities = new List<SecurityVulnerability>
         {
-            new("VULN-001", "Test vulnerability", "Test description", SecurityScanSeverity.Low)
+            new("VULN-001", "Test vulnerability", "Test description", SecurityScanSeverity.Low),
         };
         var scannerVersion = "Scanner v1.0";
         var scanLog = "Test scan log";
@@ -25,7 +25,7 @@ public class SecurityScanResultTests {
         result.VulnerabilityCount.Should().Be(vulnerabilities.Count);
         result.HighestSeverity.Should().Be(SecurityScanSeverity.Low);
         result.ScannerVersion.Should().Be(scannerVersion);
-        result.ScanLog.Should().Be(scanLog);
+        result?.ScanLog.Should().Be(scanLog);
         result.ScannedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
     }
 
@@ -36,7 +36,7 @@ public class SecurityScanResultTests {
         {
             new("VULN-001", "Vuln 1", "Description 1", SecurityScanSeverity.Low),
             new("VULN-002", "Vuln 2", "Description 2", SecurityScanSeverity.Medium),
-            new("VULN-003", "Vuln 3", "Description 3", SecurityScanSeverity.High)
+            new("VULN-003", "Vuln 3", "Description 3", SecurityScanSeverity.High),
         };
 
         // Act
@@ -53,7 +53,7 @@ public class SecurityScanResultTests {
         {
             new("VULN-001", "Vuln 1", "Description 1", SecurityScanSeverity.Low),
             new("VULN-002", "Vuln 2", "Description 2", SecurityScanSeverity.Critical),
-            new("VULN-003", "Vuln 3", "Description 3", SecurityScanSeverity.Medium)
+            new("VULN-003", "Vuln 3", "Description 3", SecurityScanSeverity.Medium),
         };
 
         // Act
@@ -103,7 +103,7 @@ public class SecurityScanResultTests {
         // Arrange
         var result = new SecurityScanResult(
             SecurityScanStatus.Passed,
-            new List<SecurityVulnerability>(),
+            [],
             "Scanner v1.0");
 
         // Act & Assert
@@ -115,7 +115,7 @@ public class SecurityScanResultTests {
         // Arrange
         var result = new SecurityScanResult(
             SecurityScanStatus.Failed,
-            new List<SecurityVulnerability>(),
+            [],
             "Scanner v1.0");
 
         // Act & Assert
@@ -127,7 +127,7 @@ public class SecurityScanResultTests {
         // Arrange
         var vulnerabilities = new List<SecurityVulnerability>
         {
-            new("VULN-001", "Test", "Description", SecurityScanSeverity.Low)
+            new("VULN-001", "Test", "Description", SecurityScanSeverity.Low),
         };
         var result = new SecurityScanResult(
             SecurityScanStatus.Passed,
@@ -144,7 +144,7 @@ public class SecurityScanResultTests {
         var vulnerabilities = new List<SecurityVulnerability>
         {
             new("VULN-001", "Test 1", "Description 1", SecurityScanSeverity.Low),
-            new("VULN-002", "Test 2", "Description 2", SecurityScanSeverity.Critical)
+            new("VULN-002", "Test 2", "Description 2", SecurityScanSeverity.Critical),
         };
         var result = new SecurityScanResult(
             SecurityScanStatus.Failed,
@@ -161,7 +161,7 @@ public class SecurityScanResultTests {
         var vulnerabilities = new List<SecurityVulnerability>
         {
             new("VULN-001", "Test 1", "Description 1", SecurityScanSeverity.Low),
-            new("VULN-002", "Test 2", "Description 2", SecurityScanSeverity.Medium)
+            new("VULN-002", "Test 2", "Description 2", SecurityScanSeverity.Medium),
         };
         var result = new SecurityScanResult(
             SecurityScanStatus.Passed,
@@ -178,7 +178,7 @@ public class SecurityScanResultTests {
         var vulnerabilities = new List<SecurityVulnerability>
         {
             new("VULN-001", "Test 1", "Description 1", SecurityScanSeverity.Low),
-            new("VULN-002", "Test 2", "Description 2", SecurityScanSeverity.High)
+            new("VULN-002", "Test 2", "Description 2", SecurityScanSeverity.High),
         };
         var result = new SecurityScanResult(
             SecurityScanStatus.Failed,
@@ -195,7 +195,7 @@ public class SecurityScanResultTests {
         var vulnerabilities = new List<SecurityVulnerability>
         {
             new("VULN-001", "Test 1", "Description 1", SecurityScanSeverity.Low),
-            new("VULN-002", "Test 2", "Description 2", SecurityScanSeverity.Medium)
+            new("VULN-002", "Test 2", "Description 2", SecurityScanSeverity.Medium),
         };
         var result = new SecurityScanResult(
             SecurityScanStatus.Passed,
@@ -226,11 +226,11 @@ public class SecurityScanResultTests {
         // Arrange & Act
         var result = new SecurityScanResult(
             SecurityScanStatus.Passed,
-            new List<SecurityVulnerability>(),
+            [],
             "Scanner v1.0",
             null);
 
         // Assert
-        result.ScanLog.Should().BeNull();
+        result?.ScanLog.Should().BeNull();
     }
 }

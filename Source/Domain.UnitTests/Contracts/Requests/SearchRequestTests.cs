@@ -15,11 +15,11 @@ public class SearchRequestTests {
 
         // Assert
         searchRequest.Query.Should().BeEmpty();
-        searchRequest.Categories.Should().BeNull();
+        searchRequest?.Categories.Should().BeNull();
         searchRequest.MinimumTrustTier.Should().BeNull();
         searchRequest.Page.Should().Be(1);
         searchRequest.PageSize.Should().Be(20);
-        searchRequest.SortBy.Should().BeNull();
+        searchRequest?.SortBy.Should().BeNull();
         searchRequest.SortDirection.Should().Be(SortDirection.Ascending);
     }
 
@@ -28,7 +28,7 @@ public class SearchRequestTests {
     public void SearchRequest_WithValidQuery_ShouldBeValid() {
         // Arrange
         var searchRequest = new SearchRequest {
-            Query = "test package"
+            Query = "test package",
         };
 
         // Act
@@ -36,7 +36,7 @@ public class SearchRequestTests {
 
         // Assert
         isValid.Should().BeTrue();
-        errorMessage.Should().BeNull();
+        errorMessage?.Should().BeNull();
     }
 
     [Theory]
@@ -48,7 +48,7 @@ public class SearchRequestTests {
     public void SearchRequest_WithInvalidQuery_ShouldBeInvalid(string? invalidQuery) {
         // Arrange
         var searchRequest = new SearchRequest {
-            Query = invalidQuery!
+            Query = invalidQuery!,
         };
 
         // Act
@@ -56,7 +56,7 @@ public class SearchRequestTests {
 
         // Assert
         isValid.Should().BeFalse();
-        errorMessage.Should().Be("Query is required");
+        errorMessage?.Should().Be("Query is required");
     }
 
     [Theory]
@@ -68,7 +68,7 @@ public class SearchRequestTests {
         // Arrange
         var searchRequest = new SearchRequest {
             Query = "test",
-            Page = invalidPage
+            Page = invalidPage,
         };
 
         // Act
@@ -76,7 +76,7 @@ public class SearchRequestTests {
 
         // Assert
         isValid.Should().BeFalse();
-        errorMessage.Should().Be("Page must be 1 or greater");
+        errorMessage?.Should().Be("Page must be 1 or greater");
     }
 
     [Theory]
@@ -89,7 +89,7 @@ public class SearchRequestTests {
         // Arrange
         var searchRequest = new SearchRequest {
             Query = "test",
-            PageSize = invalidPageSize
+            PageSize = invalidPageSize,
         };
 
         // Act
@@ -97,7 +97,7 @@ public class SearchRequestTests {
 
         // Assert
         isValid.Should().BeFalse();
-        errorMessage.Should().Be("Page size must be between 1 and 100");
+        errorMessage?.Should().Be("Page size must be between 1 and 100");
     }
 
     [Theory]
@@ -110,7 +110,7 @@ public class SearchRequestTests {
         // Arrange
         var searchRequest = new SearchRequest {
             Query = "test",
-            PageSize = validPageSize
+            PageSize = validPageSize,
         };
 
         // Act
@@ -118,7 +118,7 @@ public class SearchRequestTests {
 
         // Assert
         isValid.Should().BeTrue();
-        errorMessage.Should().BeNull();
+        errorMessage?.Should().BeNull();
     }
 
     [Fact]
@@ -132,7 +132,7 @@ public class SearchRequestTests {
             Page = 2,
             PageSize = 50,
             SortBy = "name",
-            SortDirection = SortDirection.Descending
+            SortDirection = SortDirection.Descending,
         };
 
         // Act
@@ -140,7 +140,7 @@ public class SearchRequestTests {
 
         // Assert
         isValid.Should().BeTrue();
-        errorMessage.Should().BeNull();
+        errorMessage?.Should().BeNull();
         searchRequest.Categories.Should().HaveCount(3);
         searchRequest.Categories.Should().Contain(new[] { "cli", "web", "api" });
     }
@@ -151,7 +151,7 @@ public class SearchRequestTests {
         // Arrange
         var searchRequest = new SearchRequest {
             Query = "test",
-            Categories = null
+            Categories = null,
         };
 
         // Act
@@ -159,7 +159,7 @@ public class SearchRequestTests {
 
         // Assert
         isValid.Should().BeTrue();
-        errorMessage.Should().BeNull();
+        errorMessage?.Should().BeNull();
     }
 
     [Fact]
@@ -168,7 +168,7 @@ public class SearchRequestTests {
         // Arrange
         var searchRequest = new SearchRequest {
             Query = "test",
-            Categories = new List<string>()
+            Categories = [],
         };
 
         // Act
@@ -176,7 +176,7 @@ public class SearchRequestTests {
 
         // Assert
         isValid.Should().BeTrue();
-        errorMessage.Should().BeNull();
+        errorMessage?.Should().BeNull();
     }
 
     [Theory]
@@ -189,7 +189,7 @@ public class SearchRequestTests {
         // Arrange
         var searchRequest = new SearchRequest {
             Query = "test",
-            MinimumTrustTier = trustTier
+            MinimumTrustTier = trustTier,
         };
 
         // Act
@@ -197,7 +197,7 @@ public class SearchRequestTests {
 
         // Assert
         isValid.Should().BeTrue();
-        errorMessage.Should().BeNull();
+        errorMessage?.Should().BeNull();
         searchRequest.MinimumTrustTier.Should().Be(trustTier);
     }
 
@@ -209,7 +209,7 @@ public class SearchRequestTests {
         // Arrange
         var searchRequest = new SearchRequest {
             Query = "test",
-            SortDirection = sortDirection
+            SortDirection = sortDirection,
         };
 
         // Act
@@ -217,7 +217,7 @@ public class SearchRequestTests {
 
         // Assert
         isValid.Should().BeTrue();
-        errorMessage.Should().BeNull();
+        errorMessage?.Should().BeNull();
         searchRequest.SortDirection.Should().Be(sortDirection);
     }
 
@@ -234,7 +234,7 @@ public class SearchRequestTests {
         // Arrange
         var searchRequest = new SearchRequest {
             Query = "test",
-            SortBy = sortBy
+            SortBy = sortBy,
         };
 
         // Act
@@ -242,6 +242,6 @@ public class SearchRequestTests {
 
         // Assert
         isValid.Should().BeTrue();
-        errorMessage.Should().BeNull();
+        errorMessage?.Should().BeNull();
     }
 }

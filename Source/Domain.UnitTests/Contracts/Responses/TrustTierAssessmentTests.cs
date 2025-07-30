@@ -12,7 +12,7 @@ public class TrustTierAssessmentTests {
         // Arrange
         var assessment = new TrustTierAssessment {
             TotalScore = 50,
-            MaxScore = 0
+            MaxScore = 0,
         };
 
         // Act & Assert
@@ -24,7 +24,7 @@ public class TrustTierAssessmentTests {
         // Arrange
         var assessment = new TrustTierAssessment {
             TotalScore = 75,
-            MaxScore = 100
+            MaxScore = 100,
         };
 
         // Act & Assert
@@ -36,7 +36,7 @@ public class TrustTierAssessmentTests {
         // Arrange
         var assessment = new TrustTierAssessment {
             TotalScore = 33,
-            MaxScore = 100
+            MaxScore = 100,
         };
 
         // Act & Assert
@@ -69,7 +69,7 @@ public class TrustTierAssessmentTests {
         // Arrange
         var assessment = new TrustTierAssessment();
         var factors = new Dictionary<string, TrustTierFactor> {
-            ["security"] = new TrustTierFactor { Name = "Security", Score = 85, MaxScore = 100 }
+            ["security"] = new TrustTierFactor { Name = "Security", Score = 85, MaxScore = 100 },
         };
         var positiveFactors = new[] { "High download count", "Good user ratings" };
         var negativeFactors = new[] { "Recent security issues" };

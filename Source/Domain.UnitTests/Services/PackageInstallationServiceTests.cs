@@ -11,11 +11,7 @@ namespace MCPHub.Domain.UnitTests.Services;
 /// </summary>
 [Trait("Category", DomainTestCategories.Services)]
 public class PackageInstallationServiceTests {
-    private readonly IPackageInstallationService _service;
-
-    public PackageInstallationServiceTests() {
-        _service = new PackageInstallationService();
-    }
+    private readonly IPackageInstallationService _service = new PackageInstallationService();
 
     [Fact]
     public async Task RecordDownloadAsync_WhenCalled_ThrowsNotImplementedException() {
@@ -24,7 +20,7 @@ public class PackageInstallationServiceTests {
         const string version = "1.0.0";
         var request = new DownloadRequest {
             UserAgent = "Test Client",
-            DownloadMethod = "CLI"
+            DownloadMethod = "CLI",
         };
         const string ipAddress = "192.168.1.1";
 
@@ -40,7 +36,7 @@ public class PackageInstallationServiceTests {
         const string version = "1.0.0";
         var request = new InstallationRequest {
             InstallationPath = "/path/to/install",
-            ClientVersion = "1.0.0"
+            ClientVersion = "1.0.0",
         };
         var userId = Guid.NewGuid();
 

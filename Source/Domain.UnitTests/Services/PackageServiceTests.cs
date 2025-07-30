@@ -37,8 +37,8 @@ public class PackageServiceTests {
         var packages = new List<Package> {
             DomainTestData.CreateValidPackage(),
             DomainTestData.CreateValidPackage(),
-            DomainTestData.CreateValidPackage()
-        };
+            DomainTestData.CreateValidPackage(),
+                                         };
         _mockPackageRepository.GetAllAsync(Arg.Any<CancellationToken>())
             .Returns(packages.AsReadOnly());
 
@@ -80,8 +80,8 @@ public class PackageServiceTests {
         var result = await _packageService.GetPackageByIdAsync(packageId);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Should().Be(package);
+        result?.Should().NotBeNull();
+        result?.Should().Be(package);
         await _mockPackageRepository.Received(1).GetByIdAsync(packageId, Arg.Any<CancellationToken>());
     }
 
@@ -97,7 +97,7 @@ public class PackageServiceTests {
         var result = await _packageService.GetPackageByIdAsync(packageId);
 
         // Assert
-        result.Should().BeNull();
+        result?.Should().BeNull();
         await _mockPackageRepository.Received(1).GetByIdAsync(packageId, Arg.Any<CancellationToken>());
     }
 
@@ -114,8 +114,8 @@ public class PackageServiceTests {
         var result = await _packageService.GetPackageByNameAsync(packageName);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Should().Be(package);
+        result?.Should().NotBeNull();
+        result?.Should().Be(package);
         await _mockPackageRepository.Received(1).GetByNameAsync(packageName, Arg.Any<CancellationToken>());
     }
 
@@ -131,7 +131,7 @@ public class PackageServiceTests {
         var result = await _packageService.GetPackageByNameAsync(packageName);
 
         // Assert
-        result.Should().BeNull();
+        result?.Should().BeNull();
         await _mockPackageRepository.Received(1).GetByNameAsync(packageName, Arg.Any<CancellationToken>());
     }
 
@@ -142,8 +142,8 @@ public class PackageServiceTests {
         var publisherId = Guid.NewGuid();
         var packages = new List<Package> {
             DomainTestData.CreateValidPackage(),
-            DomainTestData.CreateValidPackage()
-        };
+            DomainTestData.CreateValidPackage(),
+                                         };
         _mockPackageRepository.GetByPublisherIdAsync(publisherId, Arg.Any<CancellationToken>())
             .Returns(packages);
 
@@ -365,7 +365,7 @@ public class PackageServiceTests {
         var searchRequest = new SearchRequest {
             Query = "test package",
             Page = 1,
-            PageSize = 10
+            PageSize = 10,
         };
         var packages = new List<Package> { DomainTestData.CreateValidPackage() };
         var searchResult = new SearchResult<Package> {
@@ -374,7 +374,7 @@ public class PackageServiceTests {
             Page = 1,
             PageSize = 10,
             Query = "test package",
-            SearchTimeMs = 50
+            SearchTimeMs = 50,
         };
         _mockPackageRepository.SearchAsync(searchRequest, Arg.Any<CancellationToken>())
             .Returns(searchResult);
@@ -405,7 +405,7 @@ public class PackageServiceTests {
             Page = 1,
             PageSize = 20,
             Query = "test",
-            SearchTimeMs = 25
+            SearchTimeMs = 25,
         };
         _mockPackageRepository.SearchAsync(searchRequest, cancellationToken).Returns(searchResult);
 
@@ -432,7 +432,7 @@ public class PackageServiceTests {
         var invalidRequest = new SearchRequest {
             Query = "", // Invalid: empty query
             Page = 1,
-            PageSize = 20
+            PageSize = 20,
         };
 
         // Act & Assert
@@ -451,7 +451,7 @@ public class PackageServiceTests {
         var invalidRequest = new SearchRequest {
             Query = "test",
             Page = invalidPage,
-            PageSize = 20
+            PageSize = 20,
         };
 
         // Act & Assert
@@ -470,7 +470,7 @@ public class PackageServiceTests {
         var invalidRequest = new SearchRequest {
             Query = "test",
             Page = 1,
-            PageSize = invalidPageSize
+            PageSize = invalidPageSize,
         };
 
         // Act & Assert
@@ -491,19 +491,19 @@ public class PackageServiceTests {
             Page = 2,
             PageSize = 15,
             SortBy = "name",
-            SortDirection = SortDirection.Descending
+            SortDirection = SortDirection.Descending,
         };
         var packages = new List<Package> {
             DomainTestData.CreateValidPackage(),
-            DomainTestData.CreateValidPackage()
-        };
+            DomainTestData.CreateValidPackage(),
+                                         };
         var searchResult = new SearchResult<Package> {
             Items = packages,
             TotalCount = 25,
             Page = 2,
             PageSize = 15,
             Query = "api package",
-            SearchTimeMs = 75
+            SearchTimeMs = 75,
         };
         _mockPackageRepository.SearchAsync(searchRequest, Arg.Any<CancellationToken>())
             .Returns(searchResult);
@@ -528,7 +528,7 @@ public class PackageServiceTests {
         var searchRequest = new SearchRequest {
             Query = "test",
             Page = 1,
-            PageSize = 10
+            PageSize = 10,
         };
         var searchResult = new SearchResult<Package> {
             Items = [],
@@ -536,7 +536,7 @@ public class PackageServiceTests {
             Page = 1,
             PageSize = 10,
             Query = "test",
-            SearchTimeMs = 30
+            SearchTimeMs = 30,
         };
         _mockPackageRepository.SearchAsync(searchRequest, Arg.Any<CancellationToken>())
             .Returns(searchResult);

@@ -184,7 +184,7 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
     [When("I request the package by its ID")]
     public async Task WhenIRequestThePackageByItsID() {
         var package = _scenarioContext.CurrentPackage;
-        package.Should().NotBeNull("A current package should be set in the scenario context");
+        package?.Should().NotBeNull("A current package should be set in the scenario context");
 
         var response = await _apiClient.GetAsync($"/api/packages/{package!.Id}");
         var content = await response.Content.ReadAsStringAsync();
@@ -215,7 +215,7 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
         var publisher = _scenarioContext.TestScenario?.Packages
             .FirstOrDefault(p => p.Publisher.Name == publisherName)?.Publisher;
 
-        publisher.Should().NotBeNull($"Publisher '{publisherName}' should exist in test data");
+        publisher?.Should().NotBeNull($"Publisher '{publisherName}' should exist in test data");
 
         var response = await _apiClient.GetAsync($"/api/packages/by-publisher/{publisher!.Id}");
         var content = await response.Content.ReadAsStringAsync();
@@ -225,27 +225,27 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
 
     [Then("I should receive a successful response")]
     public void ThenIShouldReceiveASuccessfulResponse() {
-        _scenarioContext.LastApiResponse.Should().NotBeNull();
+        _scenarioContext?.LastApiResponse.Should().NotBeNull();
         _scenarioContext.LastApiResponse!.IsSuccessStatusCode.Should().BeTrue(
             $"Expected success status code, but got {_scenarioContext.LastApiStatusCode}. Response: {_scenarioContext.LastApiResponseContent}");
     }
 
     [Then(@"I should receive a ""(.*)"" response")]
     public void ThenIShouldReceiveAResponse(HttpStatusCode expectedStatusCode) {
-        _scenarioContext.LastApiResponse.Should().NotBeNull();
+        _scenarioContext?.LastApiResponse.Should().NotBeNull();
         _scenarioContext.LastApiStatusCode.Should().Be(expectedStatusCode,
             $"Expected {expectedStatusCode}, but got {_scenarioContext.LastApiStatusCode}. Response: {_scenarioContext.LastApiResponseContent}");
     }
 
     [Then(@"the response should contain packages matching ""(.*)""")]
     public void ThenTheResponseShouldContainPackagesMatching(string searchTerm) {
-        _scenarioContext.LastApiResponseContent.Should().NotBeNull();
+        _scenarioContext?.LastApiResponseContent.Should().NotBeNull();
 
         var packages = JsonSerializer.Deserialize<SearchResult<Package>>(
             _scenarioContext.LastApiResponseContent!,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-        packages.Should().NotBeNull();
+        packages?.Should().NotBeNull();
         packages!.Items.Should().NotBeEmpty();
 
         // Verify that packages contain the search term in name or description
@@ -256,13 +256,13 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
 
     [Then("each package should have required fields populated")]
     public void ThenEachPackageShouldHaveRequiredFieldsPopulated() {
-        _scenarioContext.LastApiResponseContent.Should().NotBeNull();
+        _scenarioContext?.LastApiResponseContent.Should().NotBeNull();
 
         var packages = JsonSerializer.Deserialize<SearchResult<Package>>(
             _scenarioContext.LastApiResponseContent!,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-        packages.Should().NotBeNull();
+        packages?.Should().NotBeNull();
         packages!.Items.Should().NotBeEmpty();
 
         foreach (var package in packages.Items) {
@@ -276,13 +276,13 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
 
     [Then(@"all returned packages should be in category ""(.*)""")]
     public void ThenAllReturnedPackagesShouldBeInCategory(string category) {
-        _scenarioContext.LastApiResponseContent.Should().NotBeNull();
+        _scenarioContext?.LastApiResponseContent.Should().NotBeNull();
 
         var searchResult = JsonSerializer.Deserialize<SearchResult<Package>>(
             _scenarioContext.LastApiResponseContent!,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-        searchResult.Should().NotBeNull();
+        searchResult?.Should().NotBeNull();
         searchResult!.Items.Should().NotBeEmpty();
 
         searchResult.Items.Should().OnlyContain(p => p.Tags.Contains(category));
@@ -290,13 +290,13 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
 
     [Then(@"the total count should be (\d+)")]
     public void ThenTheTotalCountShouldBe(int expectedCount) {
-        _scenarioContext.LastApiResponseContent.Should().NotBeNull();
+        _scenarioContext?.LastApiResponseContent.Should().NotBeNull();
 
         var searchResult = JsonSerializer.Deserialize<SearchResult<Package>>(
             _scenarioContext.LastApiResponseContent!,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-        searchResult.Should().NotBeNull();
+        searchResult?.Should().NotBeNull();
         searchResult!.TotalCount.Should().Be(expectedCount);
     }
 
@@ -304,13 +304,13 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
     public void ThenAllReturnedPackagesShouldHaveTrustTierOrHigher(string minimumTrustTierText) {
         var minimumTrustTier = ParseTrustTier(minimumTrustTierText);
 
-        _scenarioContext.LastApiResponseContent.Should().NotBeNull();
+        _scenarioContext?.LastApiResponseContent.Should().NotBeNull();
 
         var searchResult = JsonSerializer.Deserialize<SearchResult<Package>>(
             _scenarioContext.LastApiResponseContent!,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-        searchResult.Should().NotBeNull();
+        searchResult?.Should().NotBeNull();
         searchResult!.Items.Should().NotBeEmpty();
 
         searchResult.Items.Should().OnlyContain(p => p.TrustTier >= minimumTrustTier);
@@ -341,7 +341,7 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
         "community" or "community trusted" => TrustTier.CommunityTrusted,
         "security audited" or "audited" => TrustTier.SecurityAudited,
         "certified" => TrustTier.Certified,
-        _ => throw new ArgumentException($"Unknown trust tier: {trustTierText}")
+        _ => throw new ArgumentException($"Unknown trust tier: {trustTierText}"),
     };
 }
 
@@ -349,7 +349,7 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
 /// Search result wrapper for API responses
 /// </summary>
 public class SearchResult<T> {
-    public List<T> Items { get; set; } = new();
+    public List<T> Items { get; set; } = [];
     public int TotalCount { get; set; }
     public int Page { get; set; }
     public int PageSize { get; set; }

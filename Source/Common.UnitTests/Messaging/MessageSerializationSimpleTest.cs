@@ -10,7 +10,7 @@ public class MessageSerializationSimpleTest {
         var message = new TestMessage {
             Id = Guid.NewGuid(),
             Content = "Test message",
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
         };
 
         // Act
@@ -20,8 +20,8 @@ public class MessageSerializationSimpleTest {
         var deserializedMessage = JsonSerializer.Deserialize<TestMessage>(deserializedJson);
 
         // Assert
-        deserializedMessage.Should().NotBeNull();
-        deserializedMessage.Id.Should().Be(message.Id);
+        deserializedMessage?.Should().NotBeNull();
+        deserializedMessage?.Id.Should().Be(message.Id);
         deserializedMessage.Content.Should().Be(message.Content);
         deserializedMessage.CreatedAt.ToString().Should().Be(message.CreatedAt.ToString());
     }

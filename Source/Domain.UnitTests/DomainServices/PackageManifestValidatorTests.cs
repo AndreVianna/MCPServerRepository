@@ -7,11 +7,7 @@ namespace MCPHub.Domain.UnitTests.DomainServices;
 /// Unit tests for PackageManifestValidator
 /// </summary>
 public class PackageManifestValidatorTests {
-    private PackageManifestValidator _validator;
-
-    public PackageManifestValidatorTests() {
-        _validator = new PackageManifestValidator();
-    }
+    private readonly PackageManifestValidator _validator = new();
 
     [Fact]
     [Trait("Category", "Unit")]
@@ -94,7 +90,7 @@ public class PackageManifestValidatorTests {
         // Arrange
         var dependencies = new Dictionary<string, string> {
             ["dependency1"] = "^1.0.0",
-            ["dependency2"] = "~2.1.0"
+            ["dependency2"] = "~2.1.0",
         };
 
         // Act & Assert
@@ -115,9 +111,9 @@ public class PackageManifestValidatorTests {
             License = "MIT",
             Permissions = new MCPPermissions {
                 Network = new MCPNetworkPermissions {
-                    AllowedHosts = ["api.example.com"]
-                }
-            }
+                    AllowedHosts = ["api.example.com"],
+                },
+            },
         };
 
         // Act & Assert

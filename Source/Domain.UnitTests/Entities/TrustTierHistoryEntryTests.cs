@@ -129,7 +129,7 @@ public class TrustTierHistoryEntryTests {
         var updateMetadata = new Dictionary<string, object>
         {
             { "key1", "updated_value1" },
-            { "key2", "value2" }
+            { "key2", "value2" },
         };
 
         historyEntry.UpdateMetadata(initialMetadata);

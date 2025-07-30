@@ -1,10 +1,6 @@
-using System.CommandLine;
-
 using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Services;
 using MCPHub.CommandLineApp.Utilities;
-
-using Spectre.Console;
 
 namespace MCPHub.CommandLineApp.Commands;
 
@@ -107,7 +103,7 @@ public class DoctorCommand(
         var command = new Command("integrity", "Check package integrity and file consistency");
 
         var packageArgument = new Argument<string?>("package", "Specific package to check (optional)") {
-            Arity = ArgumentArity.ZeroOrOne
+            Arity = ArgumentArity.ZeroOrOne,
         };
         command.AddArgument(packageArgument);
 
@@ -300,7 +296,7 @@ public class DoctorCommand(
             aliases: ["--issues"],
             description: "Specific issue IDs to repair (comma-separated)") {
             Arity = ArgumentArity.ZeroOrMore,
-            AllowMultipleArgumentsPerToken = true
+            AllowMultipleArgumentsPerToken = true,
         };
         command.AddOption(issueIdsOption);
 
@@ -401,7 +397,7 @@ public class DoctorCommand(
             return healthCheck.OverallScore switch {
                 HealthScore.Critical => 2,
                 HealthScore.Poor => 1,
-                _ => 0
+                _ => 0,
             };
         }
         catch (Exception ex) {
@@ -1035,7 +1031,7 @@ public class DoctorCommand(
         HealthScore.Fair => "Fair",
         HealthScore.Poor => "Poor",
         HealthScore.Critical => "Critical",
-        _ => score.ToString()
+        _ => score.ToString(),
     };
 
     private static string GetHealthScoreColor(HealthScore score) => score switch {
@@ -1044,7 +1040,7 @@ public class DoctorCommand(
         HealthScore.Fair => "yellow",
         HealthScore.Poor => "orange",
         HealthScore.Critical => "red",
-        _ => "white"
+        _ => "white",
     };
 
     private static string GetSeverityText(IssueSeverity severity) => severity switch {
@@ -1052,7 +1048,7 @@ public class DoctorCommand(
         IssueSeverity.Error => "🟠 Error",
         IssueSeverity.Warning => "🟡 Warning",
         IssueSeverity.Info => "🔵 Info",
-        _ => severity.ToString()
+        _ => severity.ToString(),
     };
 
     private static string GetSeverityIcon(IssueSeverity severity) => severity switch {
@@ -1060,7 +1056,7 @@ public class DoctorCommand(
         IssueSeverity.Error => "🟠",
         IssueSeverity.Warning => "🟡",
         IssueSeverity.Info => "🔵",
-        _ => "•"
+        _ => "•",
     };
 
     private static string GetSecuritySeverityIcon(SecuritySeverity severity) => severity switch {
@@ -1068,7 +1064,7 @@ public class DoctorCommand(
         SecuritySeverity.High => "🟠",
         SecuritySeverity.Medium => "🟡",
         SecuritySeverity.Low => "🟢",
-        _ => "•"
+        _ => "•",
     };
 
     private static string GetConflictSeverityColor(ConflictSeverity severity) => severity switch {
@@ -1076,6 +1072,6 @@ public class DoctorCommand(
         ConflictSeverity.High => "orange",
         ConflictSeverity.Medium => "yellow",
         ConflictSeverity.Low => "green",
-        _ => "white"
+        _ => "white",
     };
 }

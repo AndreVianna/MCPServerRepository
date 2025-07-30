@@ -133,7 +133,7 @@ public class SearchCacheService(
                         SearchCount = cachedQuery.AccessCount,
                         FirstSearchedAt = cachedQuery.CachedAt,
                         LastSearchedAt = cachedQuery.CachedAt, // Would need to track this separately
-                        AverageResultCount = cachedQuery.ResultCount
+                        AverageResultCount = cachedQuery.ResultCount,
                     });
                 }
             }
@@ -230,7 +230,7 @@ public class SearchCacheService(
             Page = Math.Max(1, request.Page),
             PageSize = Math.Max(1, Math.Min(100, request.PageSize)), // Clamp between 1 and 100
             SortBy = request.SortBy?.Trim().ToLowerInvariant(),
-            SortDirection = request.SortDirection?.Trim().ToLowerInvariant() ?? "ascending"
+            SortDirection = request.SortDirection?.Trim().ToLowerInvariant() ?? "ascending",
         };
     }
 
@@ -313,7 +313,7 @@ public class SearchCacheService(
                 ResultCount = resultCount,
                 CachedAt = DateTimeOffset.UtcNow,
                 AccessCount = 1,
-                Request = request
+                Request = request,
             };
 
             var queryKey = GetQueryInfoKey(request);

@@ -195,8 +195,8 @@ public class PackageCacheService(
             $"{PACKAGE_VERSIONS_PREFIX}{packageName}*",
             $"{SECURITY_SUMMARY_PREFIX}{packageName}*",
             $"{TRUST_TIER_PREFIX}{packageName}*",
-            $"{DEPENDENCIES_PREFIX}{packageName}*"
-        };
+            $"{DEPENDENCIES_PREFIX}{packageName}*",
+                             };
 
         var totalRemoved = 0;
         foreach (var pattern in patterns) {
@@ -212,7 +212,7 @@ public class PackageCacheService(
         ValidatePackageName(packageName);
 
         var freshness = new PackageCacheFreshness {
-            PackageName = packageName
+            PackageName = packageName,
         };
 
         // Check package info

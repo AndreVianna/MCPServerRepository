@@ -15,14 +15,14 @@ public static class ConfigurationSchema {
             ValueType = typeof(string),
             DefaultValue = "https://api.mcphub.dev",
             Category = "Registry",
-            Pattern = "^https?://.+"
+            Pattern = "^https?://.+",
         },
         ["registry.name"] = new ConfigurationKey {
             Key = "registry.name",
             Description = "Display name for the default registry",
             ValueType = typeof(string),
             DefaultValue = null,
-            Category = "Registry"
+            Category = "Registry",
         },
         ["registry.timeout"] = new ConfigurationKey {
             Key = "registry.timeout",
@@ -31,7 +31,7 @@ public static class ConfigurationSchema {
             DefaultValue = 30000,
             MinValue = 1000,
             MaxValue = 300000,
-            Category = "Registry"
+            Category = "Registry",
         },
         ["registry.retries"] = new ConfigurationKey {
             Key = "registry.retries",
@@ -40,28 +40,28 @@ public static class ConfigurationSchema {
             DefaultValue = 3,
             MinValue = 0,
             MaxValue = 10,
-            Category = "Registry"
+            Category = "Registry",
         },
         ["registry.apiVersion"] = new ConfigurationKey {
             Key = "registry.apiVersion",
             Description = "API version to use",
             ValueType = typeof(string),
             DefaultValue = "1.0",
-            Category = "Registry"
+            Category = "Registry",
         },
         ["registry.requiresAuthentication"] = new ConfigurationKey {
             Key = "registry.requiresAuthentication",
             Description = "Whether this registry requires authentication for read operations",
             ValueType = typeof(bool),
             DefaultValue = false,
-            Category = "Registry"
+            Category = "Registry",
         },
         ["registry.verifySSL"] = new ConfigurationKey {
             Key = "registry.verifySSL",
             Description = "Whether to verify SSL certificates",
             ValueType = typeof(bool),
             DefaultValue = true,
-            Category = "Registry"
+            Category = "Registry",
         },
 
         // Security Configuration
@@ -70,7 +70,7 @@ public static class ConfigurationSchema {
             Description = "Automatically verify packages during install",
             ValueType = typeof(bool),
             DefaultValue = true,
-            Category = "Security"
+            Category = "Security",
         },
         ["security.trustTierMinimum"] = new ConfigurationKey {
             Key = "security.trustTierMinimum",
@@ -78,7 +78,7 @@ public static class ConfigurationSchema {
             ValueType = typeof(string),
             DefaultValue = "Community",
             ValidValues = new[] { "Unverified", "Community", "Professional", "Enterprise" },
-            Category = "Security"
+            Category = "Security",
         },
         ["security.sandboxTimeout"] = new ConfigurationKey {
             Key = "security.sandboxTimeout",
@@ -87,14 +87,14 @@ public static class ConfigurationSchema {
             DefaultValue = 300,
             MinValue = 30,
             MaxValue = 3600,
-            Category = "Security"
+            Category = "Security",
         },
         ["security.allowInsecureConnections"] = new ConfigurationKey {
             Key = "security.allowInsecureConnections",
             Description = "Allow insecure connections (for development only)",
             ValueType = typeof(bool),
             DefaultValue = false,
-            Category = "Security"
+            Category = "Security",
         },
 
         // UI Configuration
@@ -103,21 +103,21 @@ public static class ConfigurationSchema {
             Description = "Use colored output",
             ValueType = typeof(bool),
             DefaultValue = true,
-            Category = "UI"
+            Category = "UI",
         },
         ["ui.progressBars"] = new ConfigurationKey {
             Key = "ui.progressBars",
             Description = "Show progress bars",
             ValueType = typeof(bool),
             DefaultValue = true,
-            Category = "UI"
+            Category = "UI",
         },
         ["ui.verboseErrors"] = new ConfigurationKey {
             Key = "ui.verboseErrors",
             Description = "Show verbose error messages",
             ValueType = typeof(bool),
             DefaultValue = false,
-            Category = "UI"
+            Category = "UI",
         },
         ["ui.defaultFormat"] = new ConfigurationKey {
             Key = "ui.defaultFormat",
@@ -125,7 +125,7 @@ public static class ConfigurationSchema {
             ValueType = typeof(string),
             DefaultValue = "table",
             ValidValues = new[] { "table", "json", "detailed" },
-            Category = "UI"
+            Category = "UI",
         },
         ["ui.defaultPageSize"] = new ConfigurationKey {
             Key = "ui.defaultPageSize",
@@ -134,7 +134,7 @@ public static class ConfigurationSchema {
             DefaultValue = 20,
             MinValue = 1,
             MaxValue = 100,
-            Category = "UI"
+            Category = "UI",
         },
 
         // Path Configuration
@@ -143,29 +143,29 @@ public static class ConfigurationSchema {
             Description = "Cache directory path",
             ValueType = typeof(string),
             DefaultValue = GetDefaultPath("cache"),
-            Category = "Paths"
+            Category = "Paths",
         },
         ["paths.packages"] = new ConfigurationKey {
             Key = "paths.packages",
             Description = "Packages directory path",
             ValueType = typeof(string),
             DefaultValue = GetDefaultPath("packages"),
-            Category = "Paths"
+            Category = "Paths",
         },
         ["paths.temp"] = new ConfigurationKey {
             Key = "paths.temp",
             Description = "Temporary files directory path",
             ValueType = typeof(string),
             DefaultValue = GetDefaultPath("temp"),
-            Category = "Paths"
+            Category = "Paths",
         },
         ["paths.config"] = new ConfigurationKey {
             Key = "paths.config",
             Description = "Configuration directory path",
             ValueType = typeof(string),
             DefaultValue = GetDefaultPath(""),
-            Category = "Paths"
-        }
+            Category = "Paths",
+        },
     };
 
     /// <summary>

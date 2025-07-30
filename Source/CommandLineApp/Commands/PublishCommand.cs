@@ -1,4 +1,3 @@
-using System.CommandLine;
 using System.Text;
 using System.Text.Json;
 
@@ -7,8 +6,6 @@ using MCPHub.CommandLineApp.Models;
 using MCPHub.CommandLineApp.Services;
 using MCPHub.CommandLineApp.Utilities;
 using MCPHub.Domain.ValueObjects;
-
-using Spectre.Console;
 
 namespace MCPHub.CommandLineApp.Commands;
 
@@ -119,8 +116,8 @@ public class PublishCommand(
                 "Loading and validating manifest",
                 "Processing additional files",
                 "Creating package archive",
-                "Publishing to registry"
-            });
+                "Publishing to registry",
+                                                                                                        });
 
             // Step 1: Load and validate manifest with detailed feedback
             publishProgress.StartStep(0, $"Loading manifest from {Path.GetFileName(resolvedManifestPath)}...");
@@ -154,7 +151,7 @@ public class PublishCommand(
                         if (updatedManifest != null) {
                             manifestContent = JsonSerializer.Serialize(updatedManifest, new JsonSerializerOptions {
                                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                                WriteIndented = true
+                                WriteIndented = true,
                             });
                             manifest = updatedManifest;
                         }
@@ -293,7 +290,7 @@ public class PublishCommand(
     private async Task<ValidateManifestResponse> ValidateManifestWithEnhancedFeedbackAsync(string manifestContent, bool nonInteractive) {
         var validationRequest = new ValidateManifestRequest {
             ManifestContent = manifestContent,
-            IncludeWarnings = true
+            IncludeWarnings = true,
         };
 
         using var spinner = ProgressReporter.CreateSpinner("Validating manifest...");
@@ -364,7 +361,7 @@ public class PublishCommand(
         var e when e.Contains("description") => "Add a brief description explaining what your package does",
         var e when e.Contains("author") => "Include author name and email: { \"name\": \"Your Name\", \"email\": \"you@example.com\" }",
         var e when e.Contains("license") => "Specify a valid license identifier (MIT, Apache-2.0, GPL-3.0, etc.)",
-        _ => $"Check the documentation for proper format of: {error}"
+        _ => $"Check the documentation for proper format of: {error}",
     };
 
     /// <summary>
@@ -381,8 +378,8 @@ public class PublishCommand(
         var options = new Dictionary<string, string> {
             { "continue", "Continue with publishing" },
             { "review", "Review warnings in detail" },
-            { "cancel", "Cancel publishing" }
-        };
+            { "cancel", "Cancel publishing" },
+                                                     };
 
         var selection = await InteractionService.ShowMenuAsync("How would you like to proceed?", options);
 
@@ -390,7 +387,7 @@ public class PublishCommand(
             "continue" => true,
             "review" => await ReviewWarningsDetailAsync(warnings),
             "cancel" => false,
-            _ => false
+            _ => false,
         };
     }
 
@@ -423,7 +420,7 @@ public class PublishCommand(
         var w when w.Contains("keyword") => "Add relevant keywords to improve package discoverability",
         var w when w.Contains("homepage") => "Include a homepage URL in your manifest",
         var w when w.Contains("repository") => "Add repository URL to help users find your source code",
-        _ => "Review the manifest documentation for best practices"
+        _ => "Review the manifest documentation for best practices",
     };
 
     /// <summary>
@@ -448,8 +445,8 @@ public class PublishCommand(
             { "description", "Edit description" },
             { "author", "Edit author information" },
             { "license", "Edit license" },
-            { "done", "Continue with current manifest" }
-        };
+            { "done", "Continue with current manifest" },
+                                                         };
 
         while (true) {
             var selection = await InteractionService.ShowMenuAsync("What would you like to edit?", editOptions);
@@ -649,7 +646,7 @@ public class PublishCommand(
     private async Task<ValidateManifestResponse> ValidateManifestWithFeedbackAsync(string manifestContent) {
         var validationRequest = new ValidateManifestRequest {
             ManifestContent = manifestContent,
-            IncludeWarnings = true
+            IncludeWarnings = true,
         };
 
         var result = await WithProgressAsync(
@@ -681,7 +678,7 @@ public class PublishCommand(
         try {
             var options = new JsonSerializerOptions {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                PropertyNameCaseInsensitive = true
+                PropertyNameCaseInsensitive = true,
             };
             return JsonSerializer.Deserialize<MCPManifest>(manifestContent, options);
         }
@@ -710,7 +707,7 @@ public class PublishCommand(
             Tags = tags,
             ReadmeContent = readmeContent,
             ChangelogContent = changelogContent,
-            PackageUrl = packageUrl
+            PackageUrl = packageUrl,
         };
 
         // If no package URL provided, create archive from current directory
@@ -752,7 +749,7 @@ public class PublishCommand(
         var excludePatterns = new[]
         {
             ".git/", "node_modules/", ".vs/", ".vscode/", "bin/", "obj/",
-            ".gitignore", ".gitattributes", ".mcpmignore"
+            ".gitignore", ".gitattributes", ".mcpmignore",
         };
 
         return excludePatterns.Any(pattern =>

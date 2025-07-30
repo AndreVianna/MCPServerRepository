@@ -141,8 +141,8 @@ public class CacheWarmupService(
                 "authentication", "auth", "database", "db", "web", "api", "rest", "graphql",
                 "tool", "utility", "helper", "client", "server", "service", "manager",
                 "test", "testing", "mock", "data", "json", "xml", "csv", "file",
-                "email", "mail", "notification", "log", "logging", "monitor", "trace"
-            }.Take(maxQueries);
+                "email", "mail", "notification", "log", "logging", "monitor", "trace",
+                                       }.Take(maxQueries);
 
             var warmedCount = await _searchCache.WarmSearchCacheAsync(
                 popularQueries,
@@ -209,7 +209,7 @@ public class CacheWarmupService(
         LastPackagesWarmed = _status.LastPackagesWarmed,
         LastSearchesWarmed = _status.LastSearchesWarmed,
         LastErrors = [.. _status.LastErrors],
-        NextMaintenanceAt = _status.NextMaintenanceAt
+        NextMaintenanceAt = _status.NextMaintenanceAt,
     };
 
     private async Task PerformBackgroundMaintenanceAsync() {

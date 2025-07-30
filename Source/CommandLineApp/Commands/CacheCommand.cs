@@ -1,5 +1,3 @@
-using System.CommandLine;
-
 using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Services;
 using MCPHub.CommandLineApp.Utilities;
@@ -232,7 +230,7 @@ public class CacheCommand(
                     cache = cacheStats,
                     search = searchStats,
                     offline = offlineStatus,
-                    timestamp = DateTimeOffset.UtcNow
+                    timestamp = DateTimeOffset.UtcNow,
                 };
                 OutputFormatter.WriteJson(jsonData);
             }
@@ -289,7 +287,7 @@ public class CacheCommand(
                     "search" => "search:*",
                     "security" => "pkg:security:*",
                     "trust" => "pkg:trust:*",
-                    _ => throw new ArgumentException($"Unknown cache type: {type}")
+                    _ => throw new ArgumentException($"Unknown cache type: {type}"),
                 };
                 removedCount = await _cacheService.RemoveByPatternAsync(typePattern).ConfigureAwait(false);
             }

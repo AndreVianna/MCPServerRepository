@@ -1,11 +1,6 @@
-using System.CommandLine;
-using System.CommandLine.Invocation;
-
 using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Services;
 using MCPHub.CommandLineApp.Utilities;
-
-using Spectre.Console;
 
 namespace MCPHub.CommandLineApp.Commands;
 
@@ -42,7 +37,7 @@ public class UpdateCommand(
 
         // Arguments
         _packageArgument = new Argument<string?>("package", "Package name to update (optional - if not specified, checks all packages)") {
-            Arity = ArgumentArity.ZeroOrOne
+            Arity = ArgumentArity.ZeroOrOne,
         };
         command.AddArgument(_packageArgument);
 
@@ -162,8 +157,8 @@ public class UpdateCommand(
         using var progress = ProgressReporter.CreateStepProgress("Package Updates", new[] {
             "Checking for updates",
             "Analyzing dependencies",
-            "Updating packages"
-        });
+            "Updating packages",
+                                                                                          });
 
         // Stage 1: Check for updates
         progress.StartStep(0, "Scanning installed packages for updates...");
@@ -285,8 +280,8 @@ public class UpdateCommand(
             "Checking package updates",
             "Analyzing dependencies",
             "Displaying changelog",
-            "Updating package"
-        });
+            "Updating package",
+                                                                                         });
 
         // Stage 1: Check for updates
         progress.StartStep(0, $"Checking updates for '{packageName}'...");
@@ -619,9 +614,7 @@ public class UpdateCommand(
     private static string GetUpdateChangeType(PackageUpdateInfo update) {
         if (update.HasBreakingChanges)
             return "Major";
-        if (update.HasSecurityFixes)
-            return "Security";
-        return update.IsPrerelease ? "Prerelease" : "Minor";
+        return update.HasSecurityFixes ? "Security" : update.IsPrerelease ? "Prerelease" : "Minor";
     }
 
     private static string GetChangeTypeMarkup(string changeType) => changeType switch {
@@ -629,7 +622,7 @@ public class UpdateCommand(
         "Security" => "[green]Security[/]",
         "Prerelease" => "[yellow]Prerelease[/]",
         "Minor" => "[blue]Minor[/]",
-        _ => changeType
+        _ => changeType,
     };
 
     private static string GetUpdateSummary(PackageUpdateInfo update) {
@@ -653,7 +646,7 @@ public class UpdateCommand(
         ChangelogEntryType.Performance => "⚡ Performance Improvements:",
         ChangelogEntryType.Documentation => "📚 Documentation:",
         ChangelogEntryType.Dependency => "📦 Dependencies:",
-        _ => "📝 Other Changes:"
+        _ => "📝 Other Changes:",
     };
 
     private static string GetChangelogEntryPrefix(ChangelogEntryType type) => type switch {
@@ -664,6 +657,6 @@ public class UpdateCommand(
         ChangelogEntryType.Performance => "⚡",
         ChangelogEntryType.Documentation => "📖",
         ChangelogEntryType.Dependency => "📦",
-        _ => "•"
+        _ => "•",
     };
 }

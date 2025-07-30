@@ -52,7 +52,7 @@ public class TrustTierFactor {
     /// <summary>
     /// Gets or sets additional details about this factor
     /// </summary>
-    public Dictionary<string, object> Details { get; set; } = new();
+    public Dictionary<string, object> Details { get; set; } = [];
 
     /// <summary>
     /// Gets or sets recommendations for improving this factor
@@ -87,7 +87,7 @@ public enum FactorStatus {
     /// <summary>
     /// Factor requires attention or improvement
     /// </summary>
-    NeedsAttention = 4
+    NeedsAttention = 4,
 }
 
 /// <summary>
@@ -112,5 +112,5 @@ public enum FactorImpact {
     /// <summary>
     /// Critical impact on overall trust score
     /// </summary>
-    Critical = 3
+    Critical = 3,
 }

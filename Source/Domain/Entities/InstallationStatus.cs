@@ -32,5 +32,5 @@ public enum InstallationStatus {
     /// <summary>
     /// Installation timed out
     /// </summary>
-    TimedOut = 5
+    TimedOut = 5,
 }

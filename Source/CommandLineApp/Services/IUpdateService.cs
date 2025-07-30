@@ -193,7 +193,7 @@ public enum ChangelogEntryType {
     Performance,
     Documentation,
     Dependency,
-    Other
+    Other,
 }
 
 /// <summary>
@@ -224,5 +224,5 @@ public enum DependencyImpactType {
     Compatible,
     RequiresUpdate,
     BreakingChange,
-    Conflict
+    Conflict,
 }

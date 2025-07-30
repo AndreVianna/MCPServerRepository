@@ -8,5 +8,5 @@ public enum PackageStatus {
     Published,
     Draft,
     Deleted,
-    Deprecated
+    Deprecated,
 }

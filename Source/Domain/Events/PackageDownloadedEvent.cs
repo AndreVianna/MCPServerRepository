@@ -98,6 +98,6 @@ public record PackageDownloadedEvent : BaseMessage {
             UserAgent = userAgent,
             DownloadedAt = downloadedAt,
             ClientVersion = clientVersion,
-            Metadata = metadata
+            Metadata = metadata,
         };
 }

@@ -42,5 +42,5 @@ public enum TrustTier {
     /// <summary>
     /// Professional packages (alias for Verified)
     /// </summary>
-    Professional = Verified
+    Professional = Verified,
 }

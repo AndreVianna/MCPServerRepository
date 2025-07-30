@@ -4,5 +4,5 @@ public enum VersionStatus {
     Pending,
     Approved,
     Rejected,
-    Deprecated
+    Deprecated,
 }

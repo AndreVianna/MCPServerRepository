@@ -109,7 +109,7 @@ public class PackageManager(ILogger<PackageManager> logger, McpmConfiguration co
                     progress?.Report(new DownloadProgress {
                         DownloadedBytes = downloadedBytes,
                         TotalBytes = totalBytes,
-                        ProgressPercentage = progressPercentage
+                        ProgressPercentage = progressPercentage,
                     });
                 }
             }
@@ -149,7 +149,7 @@ public class PackageManager(ILogger<PackageManager> logger, McpmConfiguration co
         if (localPackage == null) {
             localPackage = new LocalPackage {
                 Name = packageName,
-                Versions = []
+                Versions = [],
             };
             registry.InstalledPackages.Add(localPackage);
         }
@@ -165,7 +165,7 @@ public class PackageManager(ILogger<PackageManager> logger, McpmConfiguration co
             IsDevelopmentDependency = isDevelopmentDependency,
             PackageId = packageInfo.Id,
             TrustTier = packageInfo.TrustTier,
-            SecurityGrade = packageInfo.SecurityGrade
+            SecurityGrade = packageInfo.SecurityGrade,
         });
 
         await SaveLocalRegistryAsync(registry, global);

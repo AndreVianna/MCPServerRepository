@@ -61,7 +61,7 @@ public class SecurityScan : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = $"Security Scan Started ({scanType})",
             UserId = Guid.Empty, // System action
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -87,7 +87,7 @@ public class SecurityScan : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = $"Package Security Scan Started ({scanType})",
             UserId = Guid.Empty, // System action
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -101,7 +101,7 @@ public class SecurityScan : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "Security Scan Completed",
             UserId = Guid.Empty, // System action
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -114,7 +114,7 @@ public class SecurityScan : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "Security Scan Failed",
             UserId = Guid.Empty, // System action
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 

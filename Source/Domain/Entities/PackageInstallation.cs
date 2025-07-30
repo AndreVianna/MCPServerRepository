@@ -56,7 +56,7 @@ public class PackageInstallation : BaseEntity {
     /// <summary>
     /// Gets or sets installation options and configuration
     /// </summary>
-    public Dictionary<string, object> InstallationOptions { get; set; } = new();
+    public Dictionary<string, object> InstallationOptions { get; set; } = [];
 
     /// <summary>
     /// Gets or sets the client version used for installation
@@ -84,12 +84,12 @@ public class PackageInstallation : BaseEntity {
         ClientVersion = clientVersion;
         Status = InstallationStatus.Pending;
         InstalledAt = DateTimeOffset.UtcNow;
-        InstallationOptions = installationOptions ?? new Dictionary<string, object>();
+        InstallationOptions = installationOptions ?? [];
 
         AuditTrail.Add(new AuditEntry {
             Action = "Installation Initiated",
             UserId = userId,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -111,7 +111,7 @@ public class PackageInstallation : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = $"Status Updated from {previousStatus} to {status}",
             UserId = userId ?? UserId,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -152,7 +152,7 @@ public class PackageInstallation : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "Installation Options Updated",
             UserId = userId ?? UserId,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 

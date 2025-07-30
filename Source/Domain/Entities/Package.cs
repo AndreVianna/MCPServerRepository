@@ -49,7 +49,7 @@ public class Package : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "Created",
             UserId = Guid.Empty, // System action
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -58,7 +58,7 @@ public class Package : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = $"Status Updated to {status}",
             UserId = Guid.Empty, // System action
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -67,7 +67,7 @@ public class Package : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "Security Scan Updated",
             UserId = Guid.Empty, // System action
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -76,7 +76,7 @@ public class Package : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = $"Trust Tier Updated to {trustTier}",
             UserId = Guid.Empty, // System action
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 }

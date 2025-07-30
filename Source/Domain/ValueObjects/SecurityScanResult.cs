@@ -81,7 +81,7 @@ public record SecurityScanResult {
                 SecurityScanSeverity.High => 150,
                 SecurityScanSeverity.Medium => 75,
                 SecurityScanSeverity.Low => 25,
-                _ => 0
+                _ => 0,
             };
         }
 
@@ -93,6 +93,6 @@ public record SecurityScanResult {
         >= 800 => "B",
         >= 700 => "C",
         >= 600 => "D",
-        _ => "F"
+        _ => "F",
     };
 }

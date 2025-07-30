@@ -72,14 +72,14 @@ public class SecurityService(
                 ChecksumValid = checksumResult.IsValid,
                 CalculatedChecksum = checksumResult.CalculatedChecksum,
                 ExpectedChecksum = expectedChecksum,
-                Issues = checksumResult.Issues.Concat(signatureResult.ValidationErrors)
+                Issues = checksumResult.Issues.Concat(signatureResult.ValidationErrors),
             };
         }
         catch (Exception ex) {
             _logger.LogError(ex, "Package integrity verification failed for {PackagePath}", packagePath);
             return new PackageVerificationResult {
                 IsValid = false,
-                Issues = new[] { $"Verification failed: {ex.Message}" }
+                Issues = new[] { $"Verification failed: {ex.Message}" },
             };
         }
     }
@@ -107,7 +107,7 @@ public class SecurityService(
                 Success = updateResult.Success,
                 UpdatedRecords = updateResult.UpdatedRecords,
                 LastUpdate = updateResult.UpdatedAt,
-                Errors = updateResult.Errors
+                Errors = updateResult.Errors,
             };
         }
         catch (Exception ex) {
@@ -115,7 +115,7 @@ public class SecurityService(
             return new SecurityDatabaseUpdateResult {
                 Success = false,
                 LastUpdate = DateTimeOffset.UtcNow,
-                Errors = new[] { $"Update failed: {ex.Message}" }
+                Errors = new[] { $"Update failed: {ex.Message}" },
             };
         }
     }
@@ -130,7 +130,7 @@ public class SecurityService(
                 LastUpdate = dbStatus.LastUpdate,
                 RecordCount = dbStatus.TotalVulnerabilities,
                 IsOutdated = dbStatus.IsOutdated,
-                Age = dbStatus.Age
+                Age = dbStatus.Age,
             };
         }
         catch (Exception ex) {
@@ -138,7 +138,7 @@ public class SecurityService(
             return new SecurityDatabaseStatus {
                 IsAvailable = false,
                 RecordCount = 0,
-                IsOutdated = true
+                IsOutdated = true,
             };
         }
     }

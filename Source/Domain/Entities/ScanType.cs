@@ -77,5 +77,5 @@ public enum ScanType {
     /// <summary>
     /// Vulnerability scan (alias for DependencyVulnerability)
     /// </summary>
-    Vulnerability
+    Vulnerability,
 }

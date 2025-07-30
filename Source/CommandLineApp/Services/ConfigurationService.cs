@@ -8,25 +8,20 @@ namespace MCPHub.CommandLineApp.Services;
 /// <summary>
 /// Implementation of configuration service with enhanced features
 /// </summary>
-public class ConfigurationService : IConfigurationService {
-    private readonly ILogger<ConfigurationService> _logger;
-    private readonly IMcpmConfigurationManager _configurationManager;
-    private readonly JsonSerializerOptions _jsonOptions;
+public class ConfigurationService(ILogger<ConfigurationService> logger,
+                                  IMcpmConfigurationManager configurationManager)
+    : IConfigurationService {
+    private readonly ILogger<ConfigurationService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly IMcpmConfigurationManager _configurationManager = configurationManager ?? throw new ArgumentNullException(nameof(configurationManager));
+    private readonly JsonSerializerOptions _jsonOptions = new() {
+        WriteIndented = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true,
+        // Enable reflection fallback for JSON serialization
+        TypeInfoResolver = new System.Text.Json.Serialization.Metadata.DefaultJsonTypeInfoResolver(),
+    };
 
-    public ConfigurationService(
-        ILogger<ConfigurationService> logger,
-        IMcpmConfigurationManager configurationManager) {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _configurationManager = configurationManager ?? throw new ArgumentNullException(nameof(configurationManager));
-
-        _jsonOptions = new JsonSerializerOptions {
-            WriteIndented = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            PropertyNameCaseInsensitive = true,
-            // Enable reflection fallback for JSON serialization
-            TypeInfoResolver = new System.Text.Json.Serialization.Metadata.DefaultJsonTypeInfoResolver()
-        };
-    }
+    // Enable reflection fallback for JSON serialization
 
     /// <inheritdoc />
     public async Task<object?> GetValueAsync(string key) {
@@ -122,7 +117,7 @@ public class ConfigurationService : IConfigurationService {
             ExportedAt = DateTimeOffset.UtcNow,
             Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(),
             IncludesSecrets = includeSecrets,
-            Configuration = includeSecrets ? config : SanitizeConfiguration(config)
+            Configuration = includeSecrets ? config : SanitizeConfiguration(config),
         };
 
         var json = JsonSerializer.Serialize(exportData, _jsonOptions);
@@ -217,7 +212,7 @@ public class ConfigurationService : IConfigurationService {
             "security" => GetPropertyValue(config.Security, property),
             "ui" => GetPropertyValue(config.Ui, property),
             "paths" => GetPropertyValue(config.Paths, property),
-            _ => null
+            _ => null,
         };
     }
 
@@ -315,8 +310,8 @@ public class ConfigurationService : IConfigurationService {
                     RequiresAuthentication = kvp.Value.RequiresAuthentication,
                     SupportsPrivatePackages = kvp.Value.SupportsPrivatePackages,
                     SupportsPublishing = kvp.Value.SupportsPublishing,
-                    VerifySSL = kvp.Value.VerifySSL
-                })
+                    VerifySSL = kvp.Value.VerifySSL,
+                }),
         };
 
         return sanitized;

@@ -42,7 +42,7 @@ public class Publisher : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "Created",
             UserId = UserId ?? Guid.Empty,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
         Verified = false;
     }
@@ -52,7 +52,7 @@ public class Publisher : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "Verified",
             UserId = UserId ?? Guid.Empty,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 
@@ -62,7 +62,7 @@ public class Publisher : BaseEntity {
         AuditTrail.Add(new AuditEntry {
             Action = "Details Updated",
             UserId = UserId ?? Guid.Empty,
-            DateTime = DateTimeOffset.UtcNow
+            DateTime = DateTimeOffset.UtcNow,
         });
     }
 }

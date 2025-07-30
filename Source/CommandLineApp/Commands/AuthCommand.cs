@@ -1,5 +1,3 @@
-using System.CommandLine;
-
 using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Services;
 using MCPHub.CommandLineApp.Utilities;
@@ -125,8 +123,8 @@ public class AuthCommand(
                 "Selecting authentication method",
                 "Gathering credentials",
                 "Authenticating with registry",
-                "Storing credentials securely"
-            });
+                "Storing credentials securely",
+                                                                                                  });
 
             loginProgress.StartStep(0, "Determining authentication method...");
 
@@ -161,7 +159,7 @@ public class AuthCommand(
                     // Mock implementation - replace with actual method
                     result = new AuthenticationResult {
                         IsSuccess = true,
-                        UserInfo = new CurrentUserInfo { Username = username }
+                        UserInfo = new CurrentUserInfo { Username = username },
                     };
                 }
                 else {
@@ -211,8 +209,8 @@ public class AuthCommand(
         var authMethods = new Dictionary<string, string> {
             { "apikey", "API Key (recommended for CI/CD)" },
             { "credentials", "Username and Password" },
-            { "browser", "Browser-based OAuth (if supported)" }
-        };
+            { "browser", "Browser-based OAuth (if supported)" },
+                                                         };
 
         var selectedMethod = await InteractionService.ShowMenuAsync(
             "Select authentication method:", authMethods);
@@ -287,7 +285,7 @@ public class AuthCommand(
         // Mock implementation - replace with actual method
         return new AuthenticationResult {
             IsSuccess = true,
-            UserInfo = new CurrentUserInfo { Username = username }
+            UserInfo = new CurrentUserInfo { Username = username },
         };
     }
 
@@ -321,7 +319,7 @@ public class AuthCommand(
 
         return new AuthenticationResult {
             IsSuccess = false,
-            ErrorMessage = "Browser authentication not yet implemented"
+            ErrorMessage = "Browser authentication not yet implemented",
         };
     }
 

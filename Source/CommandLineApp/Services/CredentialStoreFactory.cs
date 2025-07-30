@@ -64,7 +64,7 @@ public class CredentialStoreFactory(IServiceProvider serviceProvider, ILogger<Cr
             IsSecure = store.IsSecure,
             IsAvailable = true,
             Description = GetStoreDescription(store.StorageMechanism),
-            PreferenceOrder = index
+            PreferenceOrder = index,
         }).ToList();
 
         return new CredentialStorePlatformInfo {
@@ -72,7 +72,7 @@ public class CredentialStoreFactory(IServiceProvider serviceProvider, ILogger<Cr
             PreferredStore = storeInfos.FirstOrDefault()?.Name ?? "None",
             AvailableStores = storeInfos,
             HasSecureStorage = storeInfos.Any(s => s.IsSecure),
-            Notes = GetPlatformNotes(platform)
+            Notes = GetPlatformNotes(platform),
         };
     }
 
@@ -83,10 +83,7 @@ public class CredentialStoreFactory(IServiceProvider serviceProvider, ILogger<Cr
             return "macOS";
         if (OperatingSystem.IsLinux())
             return "Linux";
-        if (OperatingSystem.IsFreeBSD())
-            return "FreeBSD";
-
-        return Environment.OSVersion.Platform.ToString();
+        return OperatingSystem.IsFreeBSD() ? "FreeBSD" : Environment.OSVersion.Platform.ToString();
     }
 
     private static string GetStoreDescription(string storeMechanism) => storeMechanism switch {
@@ -94,13 +91,13 @@ public class CredentialStoreFactory(IServiceProvider serviceProvider, ILogger<Cr
         "macOS Keychain" => "Uses macOS Keychain Services for secure storage",
         "libsecret" => "Uses libsecret for secure storage on Linux",
         "Encrypted File" => "Uses AES-256 encrypted local file storage",
-        _ => "Platform-specific secure storage"
+        _ => "Platform-specific secure storage",
     };
 
     private static string? GetPlatformNotes(string platform) => platform switch {
         "Windows" => "Credentials are stored in Windows Credential Manager and accessible only to the current user",
         "macOS" => "Credentials are stored in the user's keychain and protected by macOS security",
         "Linux" => "Attempts to use libsecret if available, otherwise uses encrypted file storage",
-        _ => null
+        _ => null,
     };
 }

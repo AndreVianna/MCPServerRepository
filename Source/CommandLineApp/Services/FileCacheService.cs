@@ -23,7 +23,7 @@ public class FileCacheService : ICacheService {
 
     private readonly JsonSerializerOptions _jsonOptions = new() {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        WriteIndented = false
+        WriteIndented = false,
     };
 
     public FileCacheService(ILogger<FileCacheService> logger, McpmConfiguration configuration) {
@@ -65,7 +65,7 @@ public class FileCacheService : ICacheService {
                 CreatedAt = DateTimeOffset.UtcNow,
                 LastAccessedAt = DateTimeOffset.UtcNow,
                 ExpiresAt = expiration.HasValue ? DateTimeOffset.UtcNow.Add(expiration.Value) : null,
-                AccessCount = 0
+                AccessCount = 0,
             };
 
             var filePath = GetCacheFilePath(key);
@@ -269,7 +269,7 @@ public class FileCacheService : ICacheService {
             var statistics = new CacheStatistics {
                 HitCount = _metrics.HitCount,
                 MissCount = _metrics.MissCount,
-                StatisticsResetAt = _metrics.ResetAt
+                StatisticsResetAt = _metrics.ResetAt,
             };
 
             var files = Directory.GetFiles(_cacheDirectory, "*.cache");
@@ -343,7 +343,7 @@ public class FileCacheService : ICacheService {
                 ExpiresAt = root.TryGetProperty("expiresAt", out var expiresAtElement) && expiresAtElement.ValueKind != JsonValueKind.Null
                     ? expiresAtElement.GetDateTimeOffset()
                     : null,
-                AccessCount = root.GetProperty("accessCount").GetInt32()
+                AccessCount = root.GetProperty("accessCount").GetInt32(),
             };
         }
         catch (Exception ex) {

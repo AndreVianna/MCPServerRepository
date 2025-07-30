@@ -47,7 +47,7 @@ public record DownloadResult {
         DownloadUrl = downloadUrl,
         ExpiresAt = expiresAt,
         DownloadId = downloadId,
-        Metadata = metadata
+        Metadata = metadata,
     };
 
     /// <summary>
@@ -57,6 +57,6 @@ public record DownloadResult {
     /// <returns>Failed download result</returns>
     public static DownloadResult CreateFailure(string errorMessage) => new() {
         Success = false,
-        ErrorMessage = errorMessage
+        ErrorMessage = errorMessage,
     };
 }

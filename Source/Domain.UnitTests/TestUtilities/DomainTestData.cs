@@ -29,28 +29,28 @@ public static class DomainTestData {
     public static int RandomInt(int min = 0, int max = 100) => Random.Next(min, max);
 
     public static Package CreateValidPackage() => new(
-            RandomString(10),
+            RandomString(),
             RandomString(50),
             "1.0.0",
             RandomGuid(),
-            $"https://github.com/{RandomString(10)}/{RandomString(10)}",
+            $"https://github.com/{RandomString()}/{RandomString()}",
             "MIT",
-            RandomStringList(3));
+            RandomStringList());
 
     public static Server CreateValidServer() => new(
-            RandomString(10),
+            RandomString(),
             RandomString(50),
             RandomGuid(),
-            $"https://github.com/{RandomString(10)}/{RandomString(10)}",
+            $"https://github.com/{RandomString()}/{RandomString()}",
             "MIT",
-            RandomStringList(3));
+            RandomStringList());
 
     public static Publisher CreateValidPublisher() => new(
-            RandomString(10),
+            RandomString(),
             RandomEmail(),
             PublisherType.Individual,
             RandomString(20),
-            $"https://{RandomString(10)}.com");
+            $"https://{RandomString()}.com");
 
     public static SecurityVulnerability CreateValidVulnerability(SecurityScanSeverity severity = SecurityScanSeverity.Low) => new(
             $"VULN-{RandomString(6)}",
@@ -58,12 +58,12 @@ public static class DomainTestData {
             RandomString(100),
             severity,
             $"CVE-2023-{RandomInt(10000, 99999)}",
-            $"https://example.com/vuln/{RandomString(10)}");
+            $"https://example.com/vuln/{RandomString()}");
 
     public static SecurityScanResult CreateValidScanResult(SecurityScanStatus status = SecurityScanStatus.Passed) {
-        var vulnerabilities = status == SecurityScanStatus.Passed
-            ? new List<SecurityVulnerability>()
-            : new List<SecurityVulnerability> { CreateValidVulnerability() };
+        List<SecurityVulnerability> vulnerabilities = status == SecurityScanStatus.Passed
+            ? []
+            : [CreateValidVulnerability()];
 
         return new SecurityScanResult(
             status,

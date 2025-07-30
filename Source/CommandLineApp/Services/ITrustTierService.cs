@@ -1,6 +1,3 @@
-using MCPHub.Domain.Contracts.Responses;
-using MCPHub.Domain.Entities;
-
 namespace MCPHub.CommandLineApp.Services;
 
 /// <summary>

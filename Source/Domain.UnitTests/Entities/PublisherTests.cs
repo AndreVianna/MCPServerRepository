@@ -188,7 +188,7 @@ public class PublisherTests {
     [Fact]
     public void Publisher_Should_Handle_Null_Optional_Parameters() {
         // Arrange & Act
-        var publisher = new Publisher("Test Publisher", "test@example.com", PublisherType.Individual, null, null, null);
+        var publisher = new Publisher("Test Publisher", "test@example.com", PublisherType.Individual);
 
         // Assert
         publisher.OrganizationName.Should().BeNull();

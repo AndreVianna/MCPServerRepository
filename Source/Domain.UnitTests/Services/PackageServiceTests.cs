@@ -486,7 +486,7 @@ public class PackageServiceTests {
         // Arrange
         var searchRequest = new SearchRequest {
             Query = "api package",
-            Categories = new[] { "api", "web" },
+            Categories = ["api", "web"],
             MinimumTrustTier = TrustTier.CommunityTrusted,
             Page = 2,
             PageSize = 15,

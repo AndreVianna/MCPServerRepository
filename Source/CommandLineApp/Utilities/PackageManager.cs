@@ -1,9 +1,3 @@
-using System.IO.Compression;
-using System.Text.Json;
-
-using MCPHub.CommandLineApp.Configuration;
-using MCPHub.CommandLineApp.Models;
-
 namespace MCPHub.CommandLineApp.Utilities;
 
 /// <summary>

@@ -1,6 +1,4 @@
-using MCPHub.CommandLineApp.Configuration;
-using MCPHub.CommandLineApp.Services;
-using MCPHub.CommandLineApp.Utilities;
+using AuthenticationManager = MCPHub.CommandLineApp.Services.AuthenticationManager;
 
 namespace MCPHub.CommandLineApp.Extensions;
 

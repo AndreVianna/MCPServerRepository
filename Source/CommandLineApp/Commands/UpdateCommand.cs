@@ -1,7 +1,3 @@
-using MCPHub.CommandLineApp.Configuration;
-using MCPHub.CommandLineApp.Services;
-using MCPHub.CommandLineApp.Utilities;
-
 namespace MCPHub.CommandLineApp.Commands;
 
 /// <summary>
@@ -154,11 +150,11 @@ public class UpdateCommand(
         bool nonInteractive,
         bool verbose) {
 
-        using var progress = ProgressReporter.CreateStepProgress("Package Updates", new[] {
+        using var progress = ProgressReporter.CreateStepProgress("Package Updates", [
             "Checking for updates",
             "Analyzing dependencies",
             "Updating packages",
-                                                                                          });
+                                                                                          ]);
 
         // Stage 1: Check for updates
         progress.StartStep(0, "Scanning installed packages for updates...");
@@ -224,7 +220,7 @@ public class UpdateCommand(
 
                     if (!nonInteractive && !yes) {
                         var continueAnyway = await InteractionService.ConfirmAsync(
-                            "Continue with updates despite conflicts? (may break dependencies)", false);
+                            "Continue with updates despite conflicts? (may break dependencies)");
                         if (!continueAnyway) {
                             progress.SkipStep(2, "Cancelled due to conflicts");
                             return 130;
@@ -276,12 +272,12 @@ public class UpdateCommand(
         bool nonInteractive,
         bool verbose) {
 
-        using var progress = ProgressReporter.CreateStepProgress("Package Update", new[] {
+        using var progress = ProgressReporter.CreateStepProgress("Package Update", [
             "Checking package updates",
             "Analyzing dependencies",
             "Displaying changelog",
             "Updating package",
-                                                                                         });
+                                                                                         ]);
 
         // Stage 1: Check for updates
         progress.StartStep(0, $"Checking updates for '{packageName}'...");
@@ -321,7 +317,7 @@ public class UpdateCommand(
 
                     if (!force && !nonInteractive && !yes) {
                         var continueAnyway = await InteractionService.ConfirmAsync(
-                            "Continue with update despite conflicts?", false);
+                            "Continue with update despite conflicts?");
                         if (!continueAnyway) {
                             progress.SkipStep(2, "Cancelled due to conflicts");
                             progress.SkipStep(3, "Cancelled due to conflicts");
@@ -611,11 +607,7 @@ public class UpdateCommand(
         return Task.FromResult(result.Success ? 0 : 1);
     }
 
-    private static string GetUpdateChangeType(PackageUpdateInfo update) {
-        if (update.HasBreakingChanges)
-            return "Major";
-        return update.HasSecurityFixes ? "Security" : update.IsPrerelease ? "Prerelease" : "Minor";
-    }
+    private static string GetUpdateChangeType(PackageUpdateInfo update) => update.HasBreakingChanges ? "Major" : update.HasSecurityFixes ? "Security" : update.IsPrerelease ? "Prerelease" : "Minor";
 
     private static string GetChangeTypeMarkup(string changeType) => changeType switch {
         "Major" => "[red]Major[/]",

@@ -1,8 +1,3 @@
-using MCPHub.CommandLineApp.Configuration;
-using MCPHub.CommandLineApp.Models;
-using MCPHub.CommandLineApp.Services;
-using MCPHub.CommandLineApp.Utilities;
-
 namespace MCPHub.CommandLineApp.Commands;
 
 /// <summary>
@@ -206,7 +201,7 @@ public class SearchCommand(
 
                 var selectedSuggestion = await InteractionService.SelectFromListAsync(
                     "Select a suggestion to search:",
-                    suggestions.Concat(new[] { "None of the above" }),
+                    suggestions.Concat(["None of the above"]),
                     s => s);
 
                 if (selectedSuggestion is not null and not "None of the above") {

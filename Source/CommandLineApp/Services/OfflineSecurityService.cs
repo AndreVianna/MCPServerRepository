@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-
 namespace MCPHub.CommandLineApp.Services;
 
 /// <summary>
@@ -34,7 +32,7 @@ public class OfflineSecurityService(
                 return new PackageChecksumVerificationResult {
                     IsValid = false,
                     HashAlgorithm = hashAlgorithm,
-                    Issues = new[] { $"Package file not found: {packagePath}" },
+                    Issues = [$"Package file not found: {packagePath}"],
                 };
             }
 
@@ -58,7 +56,7 @@ public class OfflineSecurityService(
                 HashAlgorithm = hashAlgorithm,
                 FileSizeBytes = fileInfo.Length,
                 CalculationTime = calculationTime,
-                Issues = isValid ? Enumerable.Empty<string>() : new[] { "Checksum mismatch detected" },
+                Issues = isValid ? Enumerable.Empty<string>() : ["Checksum mismatch detected"],
             };
         }
         catch (Exception ex) {
@@ -66,7 +64,7 @@ public class OfflineSecurityService(
             return new PackageChecksumVerificationResult {
                 IsValid = false,
                 HashAlgorithm = hashAlgorithm,
-                Issues = new[] { $"Checksum verification failed: {ex.Message}" },
+                Issues = [$"Checksum verification failed: {ex.Message}"],
             };
         }
     }
@@ -141,8 +139,8 @@ public class OfflineSecurityService(
             VulnerabilityDatabaseAvailable = false, // Not implemented yet
             StaticAnalysisAvailable = false,        // Not implemented yet
             ManifestValidationAvailable = false,    // Not implemented yet
-            SupportedHashAlgorithms = new[] { "SHA256", "SHA512", "SHA1", "MD5" },
-            SupportedFileTypes = new[] { ".zip", ".tar.gz", ".tgz", ".tar" },
+            SupportedHashAlgorithms = ["SHA256", "SHA512", "SHA1", "MD5"],
+            SupportedFileTypes = [".zip", ".tar.gz", ".tgz", ".tar"],
             Version = "1.0.0-skeleton",
         };
         return Task.FromResult(capabilities);

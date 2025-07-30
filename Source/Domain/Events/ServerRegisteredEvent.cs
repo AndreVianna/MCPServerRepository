@@ -7,7 +7,7 @@ namespace MCPHub.Domain.Events;
 /// </summary>
 public record ServerRegisteredEvent : BaseEvent {
     public ServerRegisteredEvent(string serverId, string name, string description, string publisherId)
-        : base("Server", 1) {
+        : base("Server") {
         ServerId = serverId;
         Name = name;
         Description = description;
@@ -16,7 +16,7 @@ public record ServerRegisteredEvent : BaseEvent {
     }
 
     public ServerRegisteredEvent(string serverId, string name, string description, string publisherId, string? correlationId, string? initiatedBy)
-        : base("Server", correlationId, initiatedBy, serverId, 1) {
+        : base("Server", correlationId, initiatedBy, serverId) {
         ServerId = serverId;
         Name = name;
         Description = description;

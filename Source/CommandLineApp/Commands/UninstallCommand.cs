@@ -1,7 +1,3 @@
-using MCPHub.CommandLineApp.Configuration;
-using MCPHub.CommandLineApp.Services;
-using MCPHub.CommandLineApp.Utilities;
-
 namespace MCPHub.CommandLineApp.Commands;
 
 /// <summary>
@@ -224,12 +220,12 @@ public class UninstallCommand(
                 return 400;
             }
 
-            using var progress = ProgressReporter.CreateStepProgress("Package Uninstall", new[] {
+            using var progress = ProgressReporter.CreateStepProgress("Package Uninstall", [
                 "Validating uninstall",
                 "Analyzing dependencies",
                 "Creating backup",
                 "Uninstalling package",
-                                                                                                });
+                                                                                                ]);
 
             // Stage 1: Validate uninstall
             progress.StartStep(0, $"Validating uninstall for '{package}'...");
@@ -276,7 +272,7 @@ public class UninstallCommand(
 
                     if (!nonInteractive && !yes) {
                         var continueAnyway = await InteractionService.ConfirmAsync(
-                            "This may break other packages. Continue anyway?", false);
+                            "This may break other packages. Continue anyway?");
                         if (!continueAnyway) {
                             progress.SkipStep(2, "User cancelled");
                             progress.SkipStep(3, "User cancelled");
@@ -312,7 +308,7 @@ public class UninstallCommand(
                     ? $"Completely remove '{package}' and all its data?"
                     : $"Uninstall '{package}'?";
 
-                var confirmUninstall = await InteractionService.ConfirmAsync(confirmMessage, false);
+                var confirmUninstall = await InteractionService.ConfirmAsync(confirmMessage);
                 if (!confirmUninstall) {
                     progress.SkipStep(2, "User cancelled");
                     progress.SkipStep(3, "User cancelled");
@@ -334,7 +330,7 @@ public class UninstallCommand(
 
                     if (!force && !nonInteractive && !yes) {
                         var continueWithoutBackup = await InteractionService.ConfirmAsync(
-                            "Continue without backup?", false);
+                            "Continue without backup?");
                         if (!continueWithoutBackup) {
                             progress.SkipStep(3, "Cancelled due to backup failure");
                             return 1;
@@ -365,7 +361,7 @@ public class UninstallCommand(
                 }
                 else {
                     result = await _uninstallService.UninstallPackageAsync(
-                        package, version, global, force, removeDependencies, !noBackup, false);
+                        package, version, global, force, removeDependencies, !noBackup);
                 }
 
                 if (result.Success) {
@@ -441,7 +437,7 @@ public class UninstallCommand(
 
             if (!yes) {
                 var confirmRestore = await InteractionService.ConfirmAsync(
-                    $"Restore package from backup '{backupPath}'?", false);
+                    $"Restore package from backup '{backupPath}'?");
                 if (!confirmRestore) {
                     OutputFormatter.WriteInfo("Restore cancelled by user");
                     return 130;

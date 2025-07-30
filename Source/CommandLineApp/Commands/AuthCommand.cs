@@ -1,6 +1,4 @@
-using MCPHub.CommandLineApp.Configuration;
-using MCPHub.CommandLineApp.Services;
-using MCPHub.CommandLineApp.Utilities;
+using AuthenticationResult = MCPHub.CommandLineApp.Services.AuthenticationResult;
 
 namespace MCPHub.CommandLineApp.Commands;
 
@@ -119,12 +117,12 @@ public class AuthCommand(
         try {
             registryUrl ??= Configuration.DefaultRegistryUrl;
 
-            using var loginProgress = ProgressReporter.CreateStepProgress("Authentication", new[] {
+            using var loginProgress = ProgressReporter.CreateStepProgress("Authentication", [
                 "Selecting authentication method",
                 "Gathering credentials",
                 "Authenticating with registry",
                 "Storing credentials securely",
-                                                                                                  });
+                                                                                                  ]);
 
             loginProgress.StartStep(0, "Determining authentication method...");
 
@@ -395,7 +393,7 @@ public class AuthCommand(
             OutputFormatter.WriteInfo("  • Contact registry support if issue persists");
         }
 
-        var retryLogin = await InteractionService.ConfirmAsync("Would you like to try again?", false);
+        var retryLogin = await InteractionService.ConfirmAsync("Would you like to try again?");
         if (retryLogin) {
             await LoginAsync(null, null, null, true);
         }
@@ -424,7 +422,7 @@ public class AuthCommand(
         OutputFormatter.WriteInfo("   mcpm publish --dry-run    # Test publishing process");
         OutputFormatter.WriteLine();
 
-        var viewExamples = await InteractionService.ConfirmAsync("View example commands?", false);
+        var viewExamples = await InteractionService.ConfirmAsync("View example commands?");
         if (viewExamples) {
             OutputFormatter.WriteInfo("Example Commands:");
             OutputFormatter.WriteInfo("  mcpm search \"file management\"");

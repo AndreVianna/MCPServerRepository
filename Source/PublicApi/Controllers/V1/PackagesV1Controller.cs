@@ -107,7 +107,7 @@ public class PackagesV1Controller(
         }
         catch (ArgumentException ex) {
             Logger.LogWarning("Invalid package name provided: {PackageName}. Error: {Error}", name, ex.Message);
-            return CreateErrorResponse($"Invalid package name: {ex.Message}", 400);
+            return CreateErrorResponse($"Invalid package name: {ex.Message}");
         }
         catch (Exception ex) {
             Logger.LogError(ex, "Error occurred while getting package with name: {PackageName}", name);
@@ -164,7 +164,7 @@ public class PackagesV1Controller(
         }
         catch (ArgumentException ex) {
             Logger.LogWarning("Invalid search query provided: {Query}. Error: {Error}", query, ex.Message);
-            return CreateErrorResponse($"Invalid search query: {ex.Message}", 400);
+            return CreateErrorResponse($"Invalid search query: {ex.Message}");
         }
         catch (Exception ex) {
             Logger.LogError(ex, "Error occurred while searching packages with query: {Query}", query);
@@ -229,7 +229,7 @@ public class PackagesV1Controller(
         }
         catch (ArgumentException ex) {
             Logger.LogWarning("Invalid search request. Error: {Error}", ex.Message);
-            return CreateErrorResponse($"Invalid search request: {ex.Message}", 400);
+            return CreateErrorResponse($"Invalid search request: {ex.Message}");
         }
         catch (Exception ex) {
             Logger.LogError(ex, "Error occurred during advanced search with query: {Query}", q);
@@ -259,7 +259,7 @@ public class PackagesV1Controller(
         }
         catch (ArgumentNullException ex) {
             Logger.LogWarning("Null package provided for creation. Error: {Error}", ex.Message);
-            return CreateErrorResponse("Package data is required", 400);
+            return CreateErrorResponse("Package data is required");
         }
         catch (Exception ex) {
             Logger.LogError(ex, "Error occurred while creating package: {PackageName}", package?.Name ?? "Unknown");
@@ -283,7 +283,7 @@ public class PackagesV1Controller(
         try {
             if (package.Id != id) {
                 Logger.LogWarning("Package ID mismatch. URL ID: {UrlId}, Package ID: {PackageId}", id, package.Id);
-                return CreateErrorResponse("Package ID in URL does not match package ID in body", 400);
+                return CreateErrorResponse("Package ID in URL does not match package ID in body");
             }
 
             Logger.LogInformation("Updating package: {PackageId}", id);
@@ -294,7 +294,7 @@ public class PackagesV1Controller(
         }
         catch (ArgumentNullException ex) {
             Logger.LogWarning("Null package provided for update. Error: {Error}", ex.Message);
-            return CreateErrorResponse("Package data is required", 400);
+            return CreateErrorResponse("Package data is required");
         }
         catch (Exception ex) {
             Logger.LogError(ex, "Error occurred while updating package: {PackageId}", id);
@@ -349,7 +349,7 @@ public class PackagesV1Controller(
         try {
             if (!request.IsValid()) {
                 Logger.LogWarning("Invalid publish request: either PackageArchive or PackageUrl must be provided");
-                return CreateErrorResponse("Either PackageArchive or PackageUrl must be provided", 400);
+                return CreateErrorResponse("Either PackageArchive or PackageUrl must be provided");
             }
 
             var userId = GetCurrentUserId();
@@ -364,7 +364,7 @@ public class PackagesV1Controller(
             if (!result.Success) {
                 Logger.LogWarning("Package publishing failed for user {UserId}. Errors: {Errors}",
                     userId, string.Join(", ", result.Errors));
-                return CreateErrorResponse($"Publishing failed: {string.Join(", ", result.Errors)}", 400);
+                return CreateErrorResponse($"Publishing failed: {string.Join(", ", result.Errors)}");
             }
 
             Logger.LogInformation("Package published successfully: {PackageId}", result.Package?.Id);
@@ -378,7 +378,7 @@ public class PackagesV1Controller(
         }
         catch (ArgumentException ex) {
             Logger.LogWarning("Invalid package publishing request: {Error}", ex.Message);
-            return CreateErrorResponse($"Invalid request: {ex.Message}", 400);
+            return CreateErrorResponse($"Invalid request: {ex.Message}");
         }
         catch (Exception ex) {
             Logger.LogError(ex, "Error occurred while publishing package");
@@ -408,12 +408,12 @@ public class PackagesV1Controller(
         try {
             if (string.IsNullOrWhiteSpace(packageName)) {
                 Logger.LogWarning("Package name is required for version publishing");
-                return CreateErrorResponse("Package name is required", 400);
+                return CreateErrorResponse("Package name is required");
             }
 
             if (!request.IsValid()) {
                 Logger.LogWarning("Invalid publish version request: either PackageArchive or PackageUrl must be provided");
-                return CreateErrorResponse("Either PackageArchive or PackageUrl must be provided", 400);
+                return CreateErrorResponse("Either PackageArchive or PackageUrl must be provided");
             }
 
             var userId = GetCurrentUserId();
@@ -434,7 +434,7 @@ public class PackagesV1Controller(
                 // Check if it's a not found error
                 return result.Errors.Any(e => e.Contains("not found", StringComparison.OrdinalIgnoreCase))
                     ? CreateErrorResponse($"Package '{packageName}' not found", 404)
-                    : CreateErrorResponse($"Version publishing failed: {string.Join(", ", result.Errors)}", 400);
+                    : CreateErrorResponse($"Version publishing failed: {string.Join(", ", result.Errors)}");
             }
 
             Logger.LogInformation("Package version published successfully: {PackageVersionId}", result.PackageVersion?.Id);
@@ -448,7 +448,7 @@ public class PackagesV1Controller(
         }
         catch (ArgumentException ex) {
             Logger.LogWarning("Invalid package version publishing request for {PackageName}: {Error}", packageName, ex.Message);
-            return CreateErrorResponse($"Invalid request: {ex.Message}", 400);
+            return CreateErrorResponse($"Invalid request: {ex.Message}");
         }
         catch (Exception ex) {
             Logger.LogError(ex, "Error occurred while publishing version for package: {PackageName}", packageName);
@@ -472,7 +472,7 @@ public class PackagesV1Controller(
         try {
             if (string.IsNullOrWhiteSpace(manifestContent)) {
                 Logger.LogWarning("Empty manifest content provided for validation");
-                return CreateErrorResponse("Manifest content is required", 400);
+                return CreateErrorResponse("Manifest content is required");
             }
 
             Logger.LogInformation("Validating package manifest");
@@ -486,7 +486,7 @@ public class PackagesV1Controller(
         }
         catch (ArgumentException ex) {
             Logger.LogWarning("Invalid manifest validation request: {Error}", ex.Message);
-            return CreateErrorResponse($"Invalid manifest: {ex.Message}", 400);
+            return CreateErrorResponse($"Invalid manifest: {ex.Message}");
         }
         catch (Exception ex) {
             Logger.LogError(ex, "Error occurred while validating manifest");
@@ -514,7 +514,7 @@ public class PackagesV1Controller(
         try {
             if (string.IsNullOrWhiteSpace(packageName)) {
                 Logger.LogWarning("Package name is required for version listing");
-                return CreateErrorResponse("Package name is required", 400);
+                return CreateErrorResponse("Package name is required");
             }
 
             Logger.LogInformation("Getting versions for package: {PackageName}, IncludePrerelease: {IncludePrerelease}",
@@ -532,7 +532,7 @@ public class PackagesV1Controller(
         }
         catch (ArgumentException ex) {
             Logger.LogWarning("Invalid package name for version listing: {PackageName}. Error: {Error}", packageName, ex.Message);
-            return CreateErrorResponse($"Invalid package name: {ex.Message}", 400);
+            return CreateErrorResponse($"Invalid package name: {ex.Message}");
         }
         catch (Exception ex) {
             Logger.LogError(ex, "Error occurred while getting versions for package: {PackageName}", packageName);
@@ -556,7 +556,7 @@ public class PackagesV1Controller(
         try {
             if (string.IsNullOrWhiteSpace(packageName)) {
                 Logger.LogWarning("Package name is required for availability check");
-                return CreateErrorResponse("Package name is required", 400);
+                return CreateErrorResponse("Package name is required");
             }
 
             var userId = GetCurrentUserId();
@@ -578,7 +578,7 @@ public class PackagesV1Controller(
         }
         catch (ArgumentException ex) {
             Logger.LogWarning("Invalid package name for availability check: {PackageName}. Error: {Error}", packageName, ex.Message);
-            return CreateErrorResponse($"Invalid package name: {ex.Message}", 400);
+            return CreateErrorResponse($"Invalid package name: {ex.Message}");
         }
         catch (Exception ex) {
             Logger.LogError(ex, "Error occurred while checking package name availability: {PackageName}", packageName);
@@ -804,7 +804,7 @@ public class PackagesV1Controller(
         try {
             if (string.IsNullOrWhiteSpace(packageName)) {
                 Logger.LogWarning("Package name is required for trust tier assessment");
-                return CreateErrorResponse("Package name is required", 400);
+                return CreateErrorResponse("Package name is required");
             }
 
             Logger.LogInformation("Getting trust tier assessment for package: {PackageName}", packageName);
@@ -847,7 +847,7 @@ public class PackagesV1Controller(
         try {
             if (string.IsNullOrWhiteSpace(packageName)) {
                 Logger.LogWarning("Package name is required for trust tier recalculation");
-                return CreateErrorResponse("Package name is required", 400);
+                return CreateErrorResponse("Package name is required");
             }
 
             var userId = GetCurrentUserId();
@@ -908,12 +908,12 @@ public class PackagesV1Controller(
         try {
             if (string.IsNullOrWhiteSpace(packageName)) {
                 Logger.LogWarning("Package name is required for trust tier history");
-                return CreateErrorResponse("Package name is required", 400);
+                return CreateErrorResponse("Package name is required");
             }
 
             if (limit is <= 0 or > 200) {
                 Logger.LogWarning("Invalid limit for trust tier history: {Limit}", limit);
-                return CreateErrorResponse("Limit must be between 1 and 200", 400);
+                return CreateErrorResponse("Limit must be between 1 and 200");
             }
 
             Logger.LogInformation("Getting trust tier history for package: {PackageName}, Limit: {Limit}", packageName, limit);
@@ -954,7 +954,7 @@ public class PackagesV1Controller(
         try {
             if (periodDays is <= 0 or > 365) {
                 Logger.LogWarning("Invalid period days for trust tier statistics: {PeriodDays}", periodDays);
-                return CreateErrorResponse("Period days must be between 1 and 365", 400);
+                return CreateErrorResponse("Period days must be between 1 and 365");
             }
 
             Logger.LogInformation("Getting trust tier statistics for period: {PeriodDays} days", periodDays);
@@ -1011,7 +1011,7 @@ public class PackagesV1Controller(
         try {
             if (string.IsNullOrWhiteSpace(packageName)) {
                 Logger.LogWarning("Package name is required for trust tier validation");
-                return CreateErrorResponse("Package name is required", 400);
+                return CreateErrorResponse("Package name is required");
             }
 
             Logger.LogInformation("Validating trust tier eligibility for package: {PackageName}, TargetTier: {TargetTier}",

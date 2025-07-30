@@ -1,6 +1,4 @@
-using MCPHub.CommandLineApp.Configuration;
-using MCPHub.CommandLineApp.Models;
-using MCPHub.CommandLineApp.Services;
+using PackageVersionInfo = MCPHub.CommandLineApp.Models.PackageVersionInfo;
 
 namespace MCPHub.CommandLineApp.Utilities;
 

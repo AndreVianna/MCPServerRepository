@@ -1,13 +1,4 @@
-using System.CommandLine;
 
-using MCPHub.CommandLineApp.Commands;
-using MCPHub.CommandLineApp.Configuration;
-using MCPHub.CommandLineApp.Extensions;
-using MCPHub.CommandLineApp.Services;
-using MCPHub.CommandLineApp.Utilities;
-
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
 
 // Create application builder
 var builder = Host.CreateApplicationBuilder(args);

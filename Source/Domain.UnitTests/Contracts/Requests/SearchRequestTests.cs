@@ -15,11 +15,11 @@ public class SearchRequestTests {
 
         // Assert
         searchRequest.Query.Should().BeEmpty();
-        searchRequest?.Categories.Should().BeNull();
+        searchRequest.Categories.Should().BeNull();
         searchRequest.MinimumTrustTier.Should().BeNull();
         searchRequest.Page.Should().Be(1);
         searchRequest.PageSize.Should().Be(20);
-        searchRequest?.SortBy.Should().BeNull();
+        searchRequest.SortBy.Should().BeNull();
         searchRequest.SortDirection.Should().Be(SortDirection.Ascending);
     }
 
@@ -127,7 +127,7 @@ public class SearchRequestTests {
         // Arrange
         var searchRequest = new SearchRequest {
             Query = "test package search",
-            Categories = new[] { "cli", "web", "api" },
+            Categories = ["cli", "web", "api"],
             MinimumTrustTier = TrustTier.CommunityTrusted,
             Page = 2,
             PageSize = 50,
@@ -142,7 +142,7 @@ public class SearchRequestTests {
         isValid.Should().BeTrue();
         errorMessage?.Should().BeNull();
         searchRequest.Categories.Should().HaveCount(3);
-        searchRequest.Categories.Should().Contain(new[] { "cli", "web", "api" });
+        searchRequest.Categories.Should().Contain(["cli", "web", "api"]);
     }
 
     [Fact]

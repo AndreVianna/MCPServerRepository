@@ -1,8 +1,3 @@
-using System.Reflection;
-using System.Text.Json;
-
-using MCPHub.CommandLineApp.Configuration;
-
 namespace MCPHub.CommandLineApp.Services;
 
 /// <summary>
@@ -76,7 +71,7 @@ public class ConfigurationService(ILogger<ConfigurationService> logger,
         }
 
         if (value == null) {
-            return ValidationResult.Success(null);
+            return ValidationResult.Success();
         }
 
         // Convert string values to appropriate types
@@ -244,12 +239,18 @@ public class ConfigurationService(ILogger<ConfigurationService> logger,
     }
 
     private static object? GetPropertyValue(object obj, string propertyName) {
-        var property = obj.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+        var type = obj.GetType();
+#pragma warning disable IL2075 // Using reflection for configuration - not critical for AOT
+        var property = type.GetProperty(propertyName, BindingFlags.Instance | BindingFlags.IgnoreCase);
+#pragma warning restore IL2075
         return property?.GetValue(obj);
     }
 
     private static void SetPropertyValue(object obj, string propertyName, object? value) {
-        var property = obj.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+        var type = obj.GetType();
+#pragma warning disable IL2075 // Using reflection for configuration - not critical for AOT
+        var property = type.GetProperty(propertyName, BindingFlags.Instance | BindingFlags.IgnoreCase);
+#pragma warning restore IL2075
         if (property?.CanWrite == true) {
             property.SetValue(obj, value);
         }

@@ -1,8 +1,3 @@
-using MCPHub.AuthenticationService.Services;
-using MCPHub.Domain.Contracts.Requests;
-
-using Microsoft.AspNetCore.Mvc;
-
 namespace MCPHub.AuthenticationService.Controllers;
 
 /// <summary>

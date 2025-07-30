@@ -1,11 +1,3 @@
-using MCPHub.CommandLineApp.Configuration;
-using MCPHub.CommandLineApp.Models;
-using MCPHub.CommandLineApp.Services;
-using MCPHub.CommandLineApp.Utilities;
-using MCPHub.Domain.Contracts.Responses;
-using MCPHub.Domain.Entities;
-using MCPHub.Domain.ValueObjects;
-
 namespace MCPHub.CommandLineApp.Commands;
 
 /// <summary>
@@ -145,12 +137,12 @@ public class InstallCommand(
 
             // Stage 1: Fetch - Get package information with enhanced progress
             PackageInfoResponse packageInfo;
-            using var fetchProgress = ProgressReporter.CreateStepProgress("Package Installation", new[] {
+            using var fetchProgress = ProgressReporter.CreateStepProgress("Package Installation", [
                 "Fetching package information",
                 "Resolving dependencies",
                 "Verifying security",
                 "Installing packages",
-                                                                                                        });
+                                                                                                        ]);
             fetchProgress.StartStep(0, $"Getting information for '{packageName}'...");
 
             try {
@@ -176,7 +168,7 @@ public class InstallCommand(
                 if (installedVersion != null) {
                     if (!nonInteractive && !yes) {
                         var reinstall = await InteractionService.ConfirmAsync(
-                            $"Package '{packageName}@{version}' is already installed. Reinstall?", false);
+                            $"Package '{packageName}@{version}' is already installed. Reinstall?");
                         if (!reinstall) {
                             fetchProgress.CompleteAll("Installation cancelled by user");
                             return 0;
@@ -244,7 +236,7 @@ public class InstallCommand(
 
                 if (!nonInteractive && !yes) {
                     var proceedAnyway = await InteractionService.ConfirmAsync(
-                        "Security issues detected. Do you want to proceed anyway? (NOT RECOMMENDED)", false);
+                        "Security issues detected. Do you want to proceed anyway? (NOT RECOMMENDED)");
                     if (!proceedAnyway) {
                         OutputFormatter.WriteInfo("Installation cancelled due to security concerns");
                         return 130;
@@ -326,7 +318,7 @@ public class InstallCommand(
         // Interactive package review
         if (!nonInteractive && packages.Count > 1) {
             var reviewPackages = await InteractionService.ConfirmAsync(
-                "Would you like to review individual packages before installation?", false);
+                "Would you like to review individual packages before installation?");
 
             if (reviewPackages) {
                 await ReviewPackagesInteractivelyAsync(packages);
@@ -433,7 +425,7 @@ public class InstallCommand(
 
                 downloadProgress.UpdateStatus("Extracting...");
                 var installPath = await _packageManager.DownloadAndExtractPackageAsync(
-                    downloadResponse, package.Name, package.Version, global, null);
+                    downloadResponse, package.Name, package.Version, global);
 
                 downloadProgress.UpdateStatus("Registering...");
                 await _packageManager.RegisterPackageAsync(
@@ -575,7 +567,7 @@ public class InstallCommand(
         OutputFormatter.WriteLine();
         OutputFormatter.WriteInfo($"About to install {packages.Count} package(s)");
 
-        return Task.FromResult(AnsiConsole.Confirm("Continue with installation?", true));
+        return Task.FromResult(AnsiConsole.Confirm("Continue with installation?"));
     }
 
     /// <summary>

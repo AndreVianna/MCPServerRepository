@@ -204,7 +204,7 @@ public class ValidationSummaryTests {
     [Trait("Category", "ValidationSummary")]
     public void Constructor_WithNullCollections_ShouldUseEmptyCollections() {
         // Act
-        var summary = new ValidationSummary(true, null, null, "test", 0);
+        var summary = new ValidationSummary(true, null, null, "test");
 
         // Assert
         Assert.True(summary.IsValid);

@@ -1,6 +1,3 @@
-using MCPHub.CommandLineApp.Configuration;
-using MCPHub.CommandLineApp.Utilities;
-
 namespace MCPHub.CommandLineApp.Services;
 
 /// <summary>

@@ -77,7 +77,7 @@ public static class ConfigurationSchema {
             Description = "Minimum trust tier required for installation",
             ValueType = typeof(string),
             DefaultValue = "Community",
-            ValidValues = new[] { "Unverified", "Community", "Professional", "Enterprise" },
+            ValidValues = ["Unverified", "Community", "Professional", "Enterprise"],
             Category = "Security",
         },
         ["security.sandboxTimeout"] = new ConfigurationKey {
@@ -124,7 +124,7 @@ public static class ConfigurationSchema {
             Description = "Default output format for commands",
             ValueType = typeof(string),
             DefaultValue = "table",
-            ValidValues = new[] { "table", "json", "detailed" },
+            ValidValues = ["table", "json", "detailed"],
             Category = "UI",
         },
         ["ui.defaultPageSize"] = new ConfigurationKey {

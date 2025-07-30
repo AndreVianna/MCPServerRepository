@@ -1,10 +1,3 @@
-using MCPHub.CommandLineApp.Configuration;
-using MCPHub.CommandLineApp.Models;
-using MCPHub.CommandLineApp.Services;
-using MCPHub.CommandLineApp.Utilities;
-using MCPHub.Domain.Entities;
-using MCPHub.Domain.ValueObjects;
-
 namespace MCPHub.CommandLineApp.Commands;
 
 /// <summary>
@@ -161,12 +154,12 @@ public class VerifyCommand(
             OutputFormatter.WriteLine();
 
             // Create verification progress tracker
-            using var verificationProgress = ProgressReporter.CreateStepProgress("Security Verification", new[] {
+            using var verificationProgress = ProgressReporter.CreateStepProgress("Security Verification", [
                 "Analyzing packages",
                 "Running security scans",
                 "Checking trust tiers",
                 "Generating reports",
-                                                                                                                });
+                                                                                                                ]);
 
             // Stage 1: Analyze packages
             verificationProgress.StartStep(0, "Analyzing package specifications...");
@@ -244,7 +237,7 @@ public class VerifyCommand(
         if (!string.IsNullOrEmpty(package)) {
             // Verify specific package
             var (packageName, version) = ParsePackageSpec(package);
-            return Task.FromResult<IEnumerable<PackageToVerify>>(new[] { new PackageToVerify { Name = packageName, Version = version } });
+            return Task.FromResult<IEnumerable<PackageToVerify>>([new PackageToVerify { Name = packageName, Version = version }]);
         }
 
         // Verify all installed packages (placeholder implementation)
@@ -530,7 +523,7 @@ public class VerifyCommand(
             OutputFormatter.WriteInfo($"• {recommendation}");
         }
 
-        var showDetails = await InteractionService.ConfirmAsync("Would you like to see detailed remediation guidance?", false);
+        var showDetails = await InteractionService.ConfirmAsync("Would you like to see detailed remediation guidance?");
         if (showDetails) {
             await DisplayDetailedRemediationAsync(summary);
         }
@@ -580,7 +573,7 @@ public class VerifyCommand(
         OutputFormatter.WriteLine();
         OutputFormatter.WriteInfo($"Found {fixableIssues} packages with potential fixes available");
 
-        var proceedWithFixes = await InteractionService.ConfirmAsync("Proceed with automatic fixes?", false);
+        var proceedWithFixes = await InteractionService.ConfirmAsync("Proceed with automatic fixes?");
         if (!proceedWithFixes) {
             return false;
         }

@@ -106,8 +106,7 @@ public class PublishResult {
             null,
             null,
             validationSummary,
-            publishTimeMs,
-            null);
+            publishTimeMs);
 
     /// <summary>
     /// Creates a failed publish result with a single error
@@ -123,6 +122,5 @@ public class PublishResult {
             null,
             null,
             validationSummary,
-            publishTimeMs,
-            null);
+            publishTimeMs);
 }

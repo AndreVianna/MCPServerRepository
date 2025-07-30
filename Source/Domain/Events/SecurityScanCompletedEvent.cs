@@ -7,7 +7,7 @@ namespace MCPHub.Domain.Events;
 /// </summary>
 public record SecurityScanCompletedEvent : BaseEvent {
     public SecurityScanCompletedEvent(string scanId, string serverId, string serverVersionId, string status, int vulnerabilityCount)
-        : base("SecurityScan", 1) {
+        : base("SecurityScan") {
         ScanId = scanId;
         ServerId = serverId;
         ServerVersionId = serverVersionId;
@@ -18,7 +18,7 @@ public record SecurityScanCompletedEvent : BaseEvent {
     }
 
     public SecurityScanCompletedEvent(string scanId, string serverId, string serverVersionId, string status, int vulnerabilityCount, string? correlationId, string? initiatedBy)
-        : base("SecurityScan", correlationId, initiatedBy, scanId, 1) {
+        : base("SecurityScan", correlationId, initiatedBy, scanId) {
         ScanId = scanId;
         ServerId = serverId;
         ServerVersionId = serverVersionId;

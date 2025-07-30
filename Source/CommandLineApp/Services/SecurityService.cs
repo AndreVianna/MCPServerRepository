@@ -1,7 +1,3 @@
-using MCPHub.Domain.Contracts.Services;
-using MCPHub.Domain.Entities;
-using MCPHub.Domain.ValueObjects;
-
 namespace MCPHub.CommandLineApp.Services;
 
 /// <summary>
@@ -79,7 +75,7 @@ public class SecurityService(
             _logger.LogError(ex, "Package integrity verification failed for {PackagePath}", packagePath);
             return new PackageVerificationResult {
                 IsValid = false,
-                Issues = new[] { $"Verification failed: {ex.Message}" },
+                Issues = [$"Verification failed: {ex.Message}"],
             };
         }
     }
@@ -115,7 +111,7 @@ public class SecurityService(
             return new SecurityDatabaseUpdateResult {
                 Success = false,
                 LastUpdate = DateTimeOffset.UtcNow,
-                Errors = new[] { $"Update failed: {ex.Message}" },
+                Errors = [$"Update failed: {ex.Message}"],
             };
         }
     }

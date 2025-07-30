@@ -1,12 +1,3 @@
-using System.Text;
-using System.Text.Json;
-
-using MCPHub.CommandLineApp.Configuration;
-using MCPHub.CommandLineApp.Models;
-using MCPHub.CommandLineApp.Services;
-using MCPHub.CommandLineApp.Utilities;
-using MCPHub.Domain.ValueObjects;
-
 namespace MCPHub.CommandLineApp.Commands;
 
 /// <summary>
@@ -112,12 +103,12 @@ public class PublishCommand(
             var resolvedChangelogPath = ResolveOptionalFile(changelogPath, DefaultChangelogFileName);
 
             // Enhanced step-by-step publishing process
-            using var publishProgress = ProgressReporter.CreateStepProgress("Package Publishing", new[] {
+            using var publishProgress = ProgressReporter.CreateStepProgress("Package Publishing", [
                 "Loading and validating manifest",
                 "Processing additional files",
                 "Creating package archive",
                 "Publishing to registry",
-                                                                                                        });
+                                                                                                        ]);
 
             // Step 1: Load and validate manifest with detailed feedback
             publishProgress.StartStep(0, $"Loading manifest from {Path.GetFileName(resolvedManifestPath)}...");
@@ -203,7 +194,7 @@ public class PublishCommand(
             // Final confirmation
             if (!yes && !dryRun && !nonInteractive) {
                 var confirmPublish = await InteractionService.ConfirmAsync(
-                    $"Publish package '{manifest.Name}' version '{manifest.Version}' to the registry?", false);
+                    $"Publish package '{manifest.Name}' version '{manifest.Version}' to the registry?");
 
                 if (!confirmPublish) {
                     publishProgress.SkipStep(3, "Publishing cancelled by user");
@@ -340,7 +331,7 @@ public class PublishCommand(
         }
 
         var openEditor = await InteractionService.ConfirmAsync(
-            "Would you like guidance on editing the manifest file?", false);
+            "Would you like guidance on editing the manifest file?");
 
         if (openEditor) {
             OutputFormatter.WriteInfo("Common manifest fields:");
@@ -408,7 +399,7 @@ public class PublishCommand(
                 break;
         }
 
-        return await InteractionService.ConfirmAsync("Proceed with publishing despite warnings?", false);
+        return await InteractionService.ConfirmAsync("Proceed with publishing despite warnings?");
     }
 
     /// <summary>
@@ -428,7 +419,7 @@ public class PublishCommand(
     /// </summary>
     private async Task<MCPManifest?> ReviewAndEditManifestAsync(MCPManifest manifest) {
         var reviewManifest = await InteractionService.ConfirmAsync(
-            "Would you like to review and potentially edit the manifest before publishing?", false);
+            "Would you like to review and potentially edit the manifest before publishing?");
 
         if (!reviewManifest)
             return null;
@@ -480,7 +471,7 @@ public class PublishCommand(
     /// </summary>
     private async Task ReviewAdditionalFilesAsync(string? readmeContent, string? changelogContent, List<string> tags) {
         var reviewFiles = await InteractionService.ConfirmAsync(
-            "Review additional files and tags?", false);
+            "Review additional files and tags?");
 
         if (!reviewFiles)
             return;
@@ -552,7 +543,7 @@ public class PublishCommand(
     /// Publishes package with enhanced progress tracking
     /// </summary>
     private async Task<PublishPackageResponse> PublishPackageWithProgressAsync(PublishPackageRequest request, MCPManifest manifest) {
-        using var publishProgress = ProgressReporter.CreateProgressBar($"Publishing {manifest.Name}@{manifest.Version}", 100);
+        using var publishProgress = ProgressReporter.CreateProgressBar($"Publishing {manifest.Name}@{manifest.Version}");
 
         try {
             publishProgress.UpdateProgress(10, "Uploading package data...");
@@ -613,7 +604,7 @@ public class PublishCommand(
         // Interactive post-publication options
         if (!nonInteractive) {
             var showNextSteps = await InteractionService.ConfirmAsync(
-                "Would you like to see next steps for promoting your package?", false);
+                "Would you like to see next steps for promoting your package?");
 
             if (showNextSteps) {
                 await ShowPostPublicationGuidanceAsync(manifest);
@@ -634,7 +625,7 @@ public class PublishCommand(
         OutputFormatter.WriteInfo("  5. Keep your package updated with bug fixes");
 
         var viewAnalytics = await InteractionService.ConfirmAsync(
-            "Would you like information about package analytics?", false);
+            "Would you like information about package analytics?");
 
         if (viewAnalytics) {
             OutputFormatter.WriteInfo("Package analytics will be available at:");

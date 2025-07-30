@@ -1,10 +1,3 @@
-using MCPHub.CommandLineApp.Configuration;
-using MCPHub.CommandLineApp.Services;
-using MCPHub.CommandLineApp.Utilities;
-using MCPHub.Domain.Contracts.Responses;
-using MCPHub.Domain.Entities;
-using MCPHub.Domain.ValueObjects;
-
 namespace MCPHub.CommandLineApp.Commands;
 
 /// <summary>

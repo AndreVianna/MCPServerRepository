@@ -1,7 +1,3 @@
-using MCPHub.CommandLineApp.Configuration;
-using MCPHub.CommandLineApp.Services;
-using MCPHub.CommandLineApp.Utilities;
-
 namespace MCPHub.CommandLineApp.Commands;
 
 /// <summary>
@@ -259,7 +255,7 @@ public class CacheCommand(
                                !string.IsNullOrEmpty(pattern) ? $"Clear entries matching pattern '{pattern}'?" :
                                $"Clear entries of type '{type}'?";
 
-                if (!await InteractionService.ConfirmAsync(prompt, false)) {
+                if (!await InteractionService.ConfirmAsync(prompt)) {
                     OutputFormatter.WriteInfo("Cache clear cancelled");
                     return 0;
                 }
@@ -357,7 +353,7 @@ public class CacheCommand(
                 var popularQueries = new[] { "authentication", "database", "web", "api", "tool", "utility" };
                 var warmedQueries = await _searchCache.WarmSearchCacheAsync(popularQueries).ConfigureAwait(false);
                 totalWarmed += warmedQueries;
-                progress.Increment(1);
+                progress.Increment();
             }
 
             // Cache essential packages

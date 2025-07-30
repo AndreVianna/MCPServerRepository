@@ -44,7 +44,7 @@ public class AuthV1Controller(
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null) {
                 Logger.LogWarning("Login failed - user not found for email: {Email}", request.Email);
-                return CreateErrorResponse("Invalid email or password", 400);
+                return CreateErrorResponse("Invalid email or password");
             }
 
             // Check password
@@ -54,7 +54,7 @@ public class AuthV1Controller(
                     result.IsLockedOut ? "Account locked" : "Invalid password");
 
                 var errorMessage = result.IsLockedOut ? "Account is locked out" : "Invalid email or password";
-                return CreateErrorResponse(errorMessage, 400);
+                return CreateErrorResponse(errorMessage);
             }
 
             // Generate tokens
@@ -98,14 +98,14 @@ public class AuthV1Controller(
             var userId = await _jwtService.ValidateRefreshTokenAsync(request.RefreshToken, cancellationToken);
             if (userId == null) {
                 Logger.LogWarning("Token refresh failed - invalid refresh token");
-                return CreateErrorResponse("Invalid refresh token", 400);
+                return CreateErrorResponse("Invalid refresh token");
             }
 
             // Get user
             var user = await _userManager.FindByIdAsync(userId.ToString()!);
             if (user == null) {
                 Logger.LogWarning("Token refresh failed - user not found for ID: {UserId}", userId);
-                return CreateErrorResponse("User not found", 400);
+                return CreateErrorResponse("User not found");
             }
 
             // Generate new tokens
@@ -148,7 +148,7 @@ public class AuthV1Controller(
             var userId = GetCurrentUserId();
             if (userId == null) {
                 Logger.LogWarning("Logout failed - invalid user ID in token");
-                return Task.FromResult(CreateErrorResponse("Invalid user context", 400));
+                return Task.FromResult(CreateErrorResponse("Invalid user context"));
             }
 
             Logger.LogInformation("Logout for user {UserId}", userId);
@@ -181,7 +181,7 @@ public class AuthV1Controller(
             var userId = GetCurrentUserId();
             if (userId == null) {
                 Logger.LogWarning("Get profile failed - invalid user ID in token");
-                return CreateErrorResponse("Invalid user context", 400);
+                return CreateErrorResponse("Invalid user context");
             }
 
             var user = await _userManager.FindByIdAsync(userId.ToString()!);

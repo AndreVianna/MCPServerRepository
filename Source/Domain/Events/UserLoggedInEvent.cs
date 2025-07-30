@@ -7,7 +7,7 @@ namespace MCPHub.Domain.Events;
 /// </summary>
 public record UserLoggedInEvent : BaseEvent {
     public UserLoggedInEvent(string userId, string userName, string? ipAddress = null, string? userAgent = null)
-        : base("User", 1) {
+        : base("User") {
         UserId = userId;
         UserName = userName;
         IpAddress = ipAddress;
@@ -16,7 +16,7 @@ public record UserLoggedInEvent : BaseEvent {
     }
 
     public UserLoggedInEvent(string userId, string userName, string? correlationId, string? initiatedBy, string? ipAddress = null, string? userAgent = null)
-        : base("User", correlationId, initiatedBy, userId, 1) {
+        : base("User", correlationId, initiatedBy, userId) {
         UserId = userId;
         UserName = userName;
         IpAddress = ipAddress;

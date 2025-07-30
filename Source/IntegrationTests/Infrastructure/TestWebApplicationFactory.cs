@@ -1,8 +1,3 @@
-using System.Security.Claims;
-using System.Text.Encodings.Web;
-
-using MCPHub.Common.Services;
-
 namespace MCPHub.IntegrationTests.Infrastructure;
 
 /// <summary>
@@ -25,7 +20,7 @@ public class TestWebApplicationFactory<TProgram>(PostgreSqlContainer dbContainer
         // Add test user claims to headers
         client.DefaultRequestHeaders.Add("test-user-id", userId);
         client.DefaultRequestHeaders.Add("test-user-email", email);
-        client.DefaultRequestHeaders.Add("test-user-roles", string.Join(",", roles ?? new[] { "User" }));
+        client.DefaultRequestHeaders.Add("test-user-roles", string.Join(",", roles ?? ["User"]));
 
         return client;
     }
@@ -78,7 +73,7 @@ public class TestWebApplicationFactory<TProgram>(PostgreSqlContainer dbContainer
             return;
 
         var testDataBuilder = new TestDataBuilder();
-        var testData = testDataBuilder.CreateTestPackages(10);
+        var testData = testDataBuilder.CreateTestPackages();
 
         context.Packages.AddRange(testData);
         await context.SaveChangesAsync();

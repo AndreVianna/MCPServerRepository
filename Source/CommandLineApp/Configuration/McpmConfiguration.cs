@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace MCPHub.CommandLineApp.Configuration;
 
 /// <summary>

@@ -1,5 +1,3 @@
-using MCPHub.Domain.ValueObjects;
-
 namespace MCPHub.CommandLineApp.Services;
 
 /// <summary>

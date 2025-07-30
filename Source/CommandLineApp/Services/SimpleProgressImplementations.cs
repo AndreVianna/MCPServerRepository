@@ -1,5 +1,3 @@
-using Spectre.Console;
-
 namespace MCPHub.CommandLineApp.Services;
 
 /// <summary>

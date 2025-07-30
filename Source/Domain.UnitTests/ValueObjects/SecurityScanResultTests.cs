@@ -8,13 +8,13 @@ public class SecurityScanResultTests {
     [Fact]
     public void SecurityScanResult_Should_Be_Created_With_Valid_Properties() {
         // Arrange
-        var status = SecurityScanStatus.Passed;
+        const SecurityScanStatus status = SecurityScanStatus.Passed;
         var vulnerabilities = new List<SecurityVulnerability>
         {
             new("VULN-001", "Test vulnerability", "Test description", SecurityScanSeverity.Low),
         };
-        var scannerVersion = "Scanner v1.0";
-        var scanLog = "Test scan log";
+        const string scannerVersion = "Scanner v1.0";
+        const string scanLog = "Test scan log";
 
         // Act
         var result = new SecurityScanResult(status, vulnerabilities, scannerVersion, scanLog);
@@ -25,7 +25,7 @@ public class SecurityScanResultTests {
         result.VulnerabilityCount.Should().Be(vulnerabilities.Count);
         result.HighestSeverity.Should().Be(SecurityScanSeverity.Low);
         result.ScannerVersion.Should().Be(scannerVersion);
-        result?.ScanLog.Should().Be(scanLog);
+        result.ScanLog.Should().Be(scanLog);
         result.ScannedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
     }
 
@@ -227,8 +227,7 @@ public class SecurityScanResultTests {
         var result = new SecurityScanResult(
             SecurityScanStatus.Passed,
             [],
-            "Scanner v1.0",
-            null);
+            "Scanner v1.0");
 
         // Assert
         result?.ScanLog.Should().BeNull();

@@ -395,7 +395,7 @@ public partial class InitialCreateWithIdentity : Migration {
         migrationBuilder.CreateIndex(
             name: "IX_Packages_FullText",
             table: "Packages",
-            columns: new[] { "Name", "Description" })
+            columns: ["Name", "Description"])
             .Annotation("Npgsql:IndexMethod", "gin");
 
         migrationBuilder.CreateIndex(
@@ -432,7 +432,7 @@ public partial class InitialCreateWithIdentity : Migration {
         migrationBuilder.CreateIndex(
             name: "IX_PackageVersions_PackageId_Version",
             table: "PackageVersions",
-            columns: new[] { "PackageId", "Version" },
+            columns: ["PackageId", "Version"],
             unique: true);
 
         migrationBuilder.CreateIndex(
@@ -499,7 +499,7 @@ public partial class InitialCreateWithIdentity : Migration {
         migrationBuilder.CreateIndex(
             name: "IX_SecurityScans_VersionId_ScanType",
             table: "SecurityScans",
-            columns: new[] { "VersionId", "ScanType" });
+            columns: ["VersionId", "ScanType"]);
 
         migrationBuilder.CreateIndex(
             name: "IX_Servers_CreatedAt",
@@ -540,7 +540,7 @@ public partial class InitialCreateWithIdentity : Migration {
         migrationBuilder.CreateIndex(
             name: "IX_ServerVersions_ServerId_Version",
             table: "ServerVersions",
-            columns: new[] { "ServerId", "Version" },
+            columns: ["ServerId", "Version"],
             unique: true);
 
         migrationBuilder.CreateIndex(

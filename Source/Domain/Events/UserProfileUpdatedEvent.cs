@@ -7,7 +7,7 @@ namespace MCPHub.Domain.Events;
 /// </summary>
 public record UserProfileUpdatedEvent : BaseEvent {
     public UserProfileUpdatedEvent(string userId, string userName, Dictionary<string, object?> updatedFields)
-        : base("User", 1) {
+        : base("User") {
         UserId = userId;
         UserName = userName;
         UpdatedFields = updatedFields;
@@ -15,7 +15,7 @@ public record UserProfileUpdatedEvent : BaseEvent {
     }
 
     public UserProfileUpdatedEvent(string userId, string userName, Dictionary<string, object?> updatedFields, string? correlationId, string? initiatedBy)
-        : base("User", correlationId, initiatedBy, userId, 1) {
+        : base("User", correlationId, initiatedBy, userId) {
         UserId = userId;
         UserName = userName;
         UpdatedFields = updatedFields;

@@ -1,9 +1,3 @@
-using MCPHub.CommandLineApp.Configuration;
-using MCPHub.CommandLineApp.Services;
-using MCPHub.CommandLineApp.Utilities;
-using MCPHub.Domain.Contracts.Responses;
-using MCPHub.Domain.ValueObjects;
-
 namespace MCPHub.CommandLineApp.Commands;
 
 /// <summary>
@@ -341,7 +335,7 @@ public class SecurityCommand(
     private async Task<int> ExecuteResetPolicyAsync() {
         try {
             var confirm = await InteractionService.ConfirmAsync(
-                "Reset security policy to defaults? This will remove all custom settings.", false);
+                "Reset security policy to defaults? This will remove all custom settings.");
 
             if (!confirm) {
                 OutputFormatter.WriteInfo("Policy reset cancelled.");
@@ -368,12 +362,12 @@ public class SecurityCommand(
         try {
             OutputFormatter.WriteInfo($"Generating {type} security report in {format} format...");
 
-            using var reportProgress = ProgressReporter.CreateStepProgress("Security Report Generation", new[] {
+            using var reportProgress = ProgressReporter.CreateStepProgress("Security Report Generation", [
                 "Collecting security data",
                 "Analyzing packages",
                 "Generating report",
                 "Saving report file",
-                                                                                                               });
+                                                                                                               ]);
 
             // Stage 1: Collect data
             reportProgress.StartStep(0, "Collecting security data...");
@@ -478,7 +472,7 @@ public class SecurityCommand(
     private async Task<int> ExecuteDatabaseCleanAsync() {
         try {
             var confirm = await InteractionService.ConfirmAsync(
-                "Clean security database cache? This will remove all cached data.", false);
+                "Clean security database cache? This will remove all cached data.");
 
             if (!confirm) {
                 OutputFormatter.WriteInfo("Database clean cancelled.");

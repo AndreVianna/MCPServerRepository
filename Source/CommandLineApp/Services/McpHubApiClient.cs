@@ -1,9 +1,4 @@
-using System.Net;
-using System.Text;
-using System.Text.Json;
-
-using MCPHub.CommandLineApp.Configuration;
-using MCPHub.CommandLineApp.Models;
+using PackageVersionInfo = MCPHub.CommandLineApp.Models.PackageVersionInfo;
 
 namespace MCPHub.CommandLineApp.Services;
 

@@ -1,7 +1,3 @@
-using MCPHub.CommandLineApp.Configuration;
-using MCPHub.CommandLineApp.Services;
-using MCPHub.CommandLineApp.Utilities;
-
 namespace MCPHub.CommandLineApp.Commands;
 
 /// <summary>
@@ -652,7 +648,7 @@ public class ConfigCommand(
             };
 
     private static string FormatFileSize(long bytes) {
-        string[] suffixes = { "B", "KB", "MB", "GB" };
+        string[] suffixes = ["B", "KB", "MB", "GB"];
         var counter = 0;
         decimal number = bytes;
 

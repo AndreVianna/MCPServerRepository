@@ -7,7 +7,7 @@ public class TestDataBuilder {
     private readonly Faker _faker = new();
 
     public List<Package> CreateTestPackages(int count = 10) {
-        var publishers = CreateTestPublishers(3);
+        var publishers = CreateTestPublishers();
         var packageFaker = new Faker<Package>()
             .RuleFor(p => p.Id, _ => Guid.CreateVersion7())
             .RuleFor(p => p.Name, f => $"mcp-{f.Hacker.Noun()}-{f.Random.Word()}")
@@ -136,7 +136,7 @@ public class TestDataBuilder {
         return new PublishRequest {
             ManifestContent = JsonSerializer.Serialize(manifest),
             PackageArchive = CreateTestPackageBytes(),
-            Tags = new[] { "test", "mcp", "automation" },
+            Tags = ["test", "mcp", "automation"],
             ReadmeContent = _faker.Lorem.Paragraphs(5),
             ChangelogContent = _faker.Lorem.Paragraph(),
         };
@@ -192,11 +192,11 @@ public class TestDataBuilder {
         var promptFaker = new Faker<MCPPrompt>()
             .RuleFor(p => p.Name, f => f.Hacker.Noun())
             .RuleFor(p => p.Description, f => f.Hacker.Phrase())
-            .RuleFor(p => p.Arguments, f => new List<MCPPromptArgument>
-            {
+            .RuleFor(p => p.Arguments, f =>
+            [
                 new() { Name = "input", Description = "Input parameter" },
                 new() { Name = "context", Description = "Context parameter" },
-            });
+            ]);
 
         return promptFaker.Generate(count);
     }

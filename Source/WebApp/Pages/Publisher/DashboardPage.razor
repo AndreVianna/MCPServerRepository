@@ -465,7 +465,7 @@
         try
         {
             _isLoadingTopPackages = true;
-            _topPackages = await DashboardService.GetTopPerformingPackagesAsync(_publisherId, "downloads", 10);
+            _topPackages = await DashboardService.GetTopPerformingPackagesAsync(_publisherId);
         }
         catch (NotImplementedException)
         {

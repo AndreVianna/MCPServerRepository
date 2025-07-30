@@ -1,9 +1,3 @@
-using System.Diagnostics;
-
-using MCPHub.CommandLineApp.Configuration;
-
-using Spectre.Console;
-
 namespace MCPHub.CommandLineApp.Services;
 
 /// <summary>

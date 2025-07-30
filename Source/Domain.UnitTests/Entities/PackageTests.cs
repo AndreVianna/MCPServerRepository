@@ -160,7 +160,7 @@ public class PackageTests {
         var package = new Package("TestPackage", "Test description", "1.0.0", Guid.NewGuid());
         var scanResult = new SecurityScanResult(
             SecurityScanStatus.Passed,
-            new List<SecurityVulnerability>(),
+            [],
             "Scanner v1.0"
         );
 
@@ -210,7 +210,7 @@ public class PackageTests {
     [Fact]
     public void Package_Should_Handle_Null_Optional_Parameters() {
         // Arrange & Act
-        var package = new Package("TestPackage", "Test description", "1.0.0", Guid.NewGuid(), null, null, null);
+        var package = new Package("TestPackage", "Test description", "1.0.0", Guid.NewGuid());
 
         // Assert
         package.Repository.Should().BeNull();

@@ -121,7 +121,7 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
         var userEmail = "publisher@example.com";
 
         _apiClient?.Dispose();
-        _apiClient = _fixture.WebApplicationFactory.CreateClientWithAuth(userId, userEmail, new[] { "Publisher" });
+        _apiClient = _fixture.WebApplicationFactory.CreateClientWithAuth(userId, userEmail, ["Publisher"]);
 
         _scenarioContext.SetCurrentUser(userId, userEmail, "Publisher");
     }
@@ -131,7 +131,7 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
         var userId = Guid.CreateVersion7().ToString();
 
         _apiClient?.Dispose();
-        _apiClient = _fixture.WebApplicationFactory.CreateClientWithAuth(userId, email, new[] { "User" });
+        _apiClient = _fixture.WebApplicationFactory.CreateClientWithAuth(userId, email, ["User"]);
 
         _scenarioContext.SetCurrentUser(userId, email, "User");
     }
@@ -225,21 +225,21 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
 
     [Then("I should receive a successful response")]
     public void ThenIShouldReceiveASuccessfulResponse() {
-        _scenarioContext?.LastApiResponse.Should().NotBeNull();
+        _scenarioContext.LastApiResponse.Should().NotBeNull();
         _scenarioContext.LastApiResponse!.IsSuccessStatusCode.Should().BeTrue(
             $"Expected success status code, but got {_scenarioContext.LastApiStatusCode}. Response: {_scenarioContext.LastApiResponseContent}");
     }
 
     [Then(@"I should receive a ""(.*)"" response")]
     public void ThenIShouldReceiveAResponse(HttpStatusCode expectedStatusCode) {
-        _scenarioContext?.LastApiResponse.Should().NotBeNull();
+        _scenarioContext.LastApiResponse.Should().NotBeNull();
         _scenarioContext.LastApiStatusCode.Should().Be(expectedStatusCode,
             $"Expected {expectedStatusCode}, but got {_scenarioContext.LastApiStatusCode}. Response: {_scenarioContext.LastApiResponseContent}");
     }
 
     [Then(@"the response should contain packages matching ""(.*)""")]
     public void ThenTheResponseShouldContainPackagesMatching(string searchTerm) {
-        _scenarioContext?.LastApiResponseContent.Should().NotBeNull();
+        _scenarioContext.LastApiResponseContent.Should().NotBeNull();
 
         var packages = JsonSerializer.Deserialize<SearchResult<Package>>(
             _scenarioContext.LastApiResponseContent!,
@@ -256,7 +256,7 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
 
     [Then("each package should have required fields populated")]
     public void ThenEachPackageShouldHaveRequiredFieldsPopulated() {
-        _scenarioContext?.LastApiResponseContent.Should().NotBeNull();
+        _scenarioContext.LastApiResponseContent.Should().NotBeNull();
 
         var packages = JsonSerializer.Deserialize<SearchResult<Package>>(
             _scenarioContext.LastApiResponseContent!,
@@ -276,7 +276,7 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
 
     [Then(@"all returned packages should be in category ""(.*)""")]
     public void ThenAllReturnedPackagesShouldBeInCategory(string category) {
-        _scenarioContext?.LastApiResponseContent.Should().NotBeNull();
+        _scenarioContext.LastApiResponseContent.Should().NotBeNull();
 
         var searchResult = JsonSerializer.Deserialize<SearchResult<Package>>(
             _scenarioContext.LastApiResponseContent!,
@@ -290,7 +290,7 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
 
     [Then(@"the total count should be (\d+)")]
     public void ThenTheTotalCountShouldBe(int expectedCount) {
-        _scenarioContext?.LastApiResponseContent.Should().NotBeNull();
+        _scenarioContext.LastApiResponseContent.Should().NotBeNull();
 
         var searchResult = JsonSerializer.Deserialize<SearchResult<Package>>(
             _scenarioContext.LastApiResponseContent!,
@@ -304,7 +304,7 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
     public void ThenAllReturnedPackagesShouldHaveTrustTierOrHigher(string minimumTrustTierText) {
         var minimumTrustTier = ParseTrustTier(minimumTrustTierText);
 
-        _scenarioContext?.LastApiResponseContent.Should().NotBeNull();
+        _scenarioContext.LastApiResponseContent.Should().NotBeNull();
 
         var searchResult = JsonSerializer.Deserialize<SearchResult<Package>>(
             _scenarioContext.LastApiResponseContent!,

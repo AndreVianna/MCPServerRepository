@@ -1,5 +1,3 @@
-using MCPHub.CommandLineApp.Models;
-
 namespace MCPHub.CommandLineApp.Utilities;
 
 /// <summary>

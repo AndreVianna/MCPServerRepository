@@ -3,8 +3,6 @@ using System.Text.Json;
 using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Models;
 
-using Spectre.Console;
-
 namespace MCPHub.CommandLineApp.Utilities;
 
 /// <summary>
@@ -19,7 +17,7 @@ public class ConsoleOutputFormatter : IOutputFormatter {
 
         _jsonOptions = new JsonSerializerOptions {
             WriteIndented = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         };
 
         // Configure Spectre.Console based on configuration
@@ -146,7 +144,7 @@ public class ConsoleOutputFormatter : IOutputFormatter {
         "professional" => "blue",
         "community" => "yellow",
         "unverified" => "red",
-        _ => "gray"
+        _ => "gray",
     };
 
     /// <inheritdoc />
@@ -154,7 +152,7 @@ public class ConsoleOutputFormatter : IOutputFormatter {
         "A+" or "A" => "green",
         "A-" or "B+" or "B" => "yellow",
         "B-" or "C+" or "C" => "orange",
-        _ => "red"
+        _ => "red",
     };
 
     /// <inheritdoc />
@@ -175,9 +173,7 @@ public class ConsoleOutputFormatter : IOutputFormatter {
     public string FormatDownloadCount(long count) {
         if (count >= 1_000_000)
             return $"{count / 1_000_000.0:F1}M";
-        if (count >= 1_000)
-            return $"{count / 1_000.0:F1}k";
-        return count.ToString();
+        return count >= 1_000 ? $"{count / 1_000.0:F1}k" : count.ToString();
     }
 
     /// <inheritdoc />
@@ -197,19 +193,13 @@ public class ConsoleOutputFormatter : IOutputFormatter {
             return $"{(int)timeSpan.TotalDays} day{((int)timeSpan.TotalDays != 1 ? "s" : "")} ago";
         if (timeSpan.TotalHours >= 1)
             return $"{(int)timeSpan.TotalHours} hour{((int)timeSpan.TotalHours != 1 ? "s" : "")} ago";
-        if (timeSpan.TotalMinutes >= 1)
-            return $"{(int)timeSpan.TotalMinutes} minute{((int)timeSpan.TotalMinutes != 1 ? "s" : "")} ago";
-
-        return "just now";
+        return timeSpan.TotalMinutes >= 1
+            ? $"{(int)timeSpan.TotalMinutes} minute{((int)timeSpan.TotalMinutes != 1 ? "s" : "")} ago"
+            : "just now";
     }
 
     /// <inheritdoc />
-    public string TruncateText(string text, int maxWidth) {
-        if (string.IsNullOrEmpty(text) || text.Length <= maxWidth)
-            return text;
-
-        return text[..(maxWidth - 3)] + "...";
-    }
+    public string TruncateText(string text, int maxWidth) => string.IsNullOrEmpty(text) || text.Length <= maxWidth ? text : text[..(maxWidth - 3)] + "...";
 
     private void WriteTableSearchResults(SearchResultResponse results) {
         var table = new Table();
@@ -278,7 +268,7 @@ public class ConsoleOutputFormatter : IOutputFormatter {
             [bold]Updated:[/] {FormatRelativeDate(packageInfo.UpdatedAt)}
             """) {
             Header = new PanelHeader("📋 Package Information"),
-            Border = BoxBorder.Rounded
+            Border = BoxBorder.Rounded,
         };
         AnsiConsole.Write(infoPanel);
         AnsiConsole.WriteLine();
@@ -294,7 +284,7 @@ public class ConsoleOutputFormatter : IOutputFormatter {
 
             var capabilitiesPanel = new Panel(capabilitiesText) {
                 Header = new PanelHeader("⚡ Capabilities"),
-                Border = BoxBorder.Rounded
+                Border = BoxBorder.Rounded,
             };
             AnsiConsole.Write(capabilitiesPanel);
             AnsiConsole.WriteLine();
@@ -312,7 +302,7 @@ public class ConsoleOutputFormatter : IOutputFormatter {
         TotalCount = packages.TotalCount,
         Page = packages.Page,
         PageSize = packages.PageSize,
-        TotalPages = packages.TotalPages
+        TotalPages = packages.TotalPages,
     });
 
     private void WriteDetailedPackageList(PackageListResponse packages) => WriteDetailedSearchResults(new SearchResultResponse {
@@ -320,7 +310,7 @@ public class ConsoleOutputFormatter : IOutputFormatter {
         TotalCount = packages.TotalCount,
         Page = packages.Page,
         PageSize = packages.PageSize,
-        TotalPages = packages.TotalPages
+        TotalPages = packages.TotalPages,
     });
 
     private void WriteTablePackageVersions(PackageVersionsResponse versions) {
@@ -335,7 +325,7 @@ public class ConsoleOutputFormatter : IOutputFormatter {
                 "active" => "green",
                 "deprecated" => "yellow",
                 "yanked" => "red",
-                _ => "gray"
+                _ => "gray",
             };
 
             table.AddRow(
@@ -359,7 +349,7 @@ public class ConsoleOutputFormatter : IOutputFormatter {
             [bold]Security Policy:[/] {(security.HasSecurityPolicy ? "✓ Available" : "✗ Not available")}
             """) {
             Header = new PanelHeader("🔒 Security Summary"),
-            Border = BoxBorder.Rounded
+            Border = BoxBorder.Rounded,
         };
 
         AnsiConsole.Write(panel);
@@ -376,7 +366,7 @@ public class ConsoleOutputFormatter : IOutputFormatter {
             [bold]Last Assessed:[/] {FormatRelativeDate(trustTier.LastAssessed)}
             """) {
             Header = new PanelHeader("🛡️ Trust Assessment"),
-            Border = BoxBorder.Rounded
+            Border = BoxBorder.Rounded,
         };
 
         AnsiConsole.Write(panel);
@@ -475,7 +465,7 @@ public class ConsoleOutputFormatter : IOutputFormatter {
             {(!string.IsNullOrEmpty(result.StorageUrl) ? $"[bold]Storage URL:[/] {result.StorageUrl}" : "")}
             """) {
             Header = new PanelHeader(title),
-            Border = BoxBorder.Rounded
+            Border = BoxBorder.Rounded,
         };
 
         AnsiConsole.Write(panel);
@@ -552,7 +542,7 @@ public class ConsoleOutputFormatter : IOutputFormatter {
             {manifestInfo}
             """) {
             Header = new PanelHeader(title),
-            Border = BoxBorder.Rounded
+            Border = BoxBorder.Rounded,
         };
 
         AnsiConsole.Write(panel);

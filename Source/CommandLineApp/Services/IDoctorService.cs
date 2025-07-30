@@ -159,7 +159,7 @@ public enum HealthScore {
     Good,
     Fair,
     Poor,
-    Critical
+    Critical,
 }
 
 /// <summary>
@@ -184,7 +184,7 @@ public enum IssueSeverity {
     Info,
     Warning,
     Error,
-    Critical
+    Critical,
 }
 
 /// <summary>
@@ -242,7 +242,7 @@ public enum ConflictSeverity {
     Low,
     Medium,
     High,
-    Critical
+    Critical,
 }
 
 /// <summary>
@@ -323,7 +323,7 @@ public enum SecuritySeverity {
     Low,
     Medium,
     High,
-    Critical
+    Critical,
 }
 
 /// <summary>

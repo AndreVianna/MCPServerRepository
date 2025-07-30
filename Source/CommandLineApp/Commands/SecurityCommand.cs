@@ -1,12 +1,8 @@
-using System.CommandLine;
-
 using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Services;
 using MCPHub.CommandLineApp.Utilities;
 using MCPHub.Domain.Contracts.Responses;
 using MCPHub.Domain.ValueObjects;
-
-using Spectre.Console;
 
 namespace MCPHub.CommandLineApp.Commands;
 
@@ -268,7 +264,7 @@ public class SecurityCommand(
                 MaxCriticalVulnerabilities = 0,
                 MaxHighVulnerabilities = 2,
                 RequireSignedPackages = true,
-                AutoUpdateSecurityDatabase = true
+                AutoUpdateSecurityDatabase = true,
             };
 
             var table = new Table();
@@ -376,8 +372,8 @@ public class SecurityCommand(
                 "Collecting security data",
                 "Analyzing packages",
                 "Generating report",
-                "Saving report file"
-            });
+                "Saving report file",
+                                                                                                               });
 
             // Stage 1: Collect data
             reportProgress.StartStep(0, "Collecting security data...");
@@ -552,7 +548,7 @@ public class SecurityCommand(
         "medium" => SecurityScanSeverity.Medium,
         "high" => SecurityScanSeverity.High,
         "critical" => SecurityScanSeverity.Critical,
-        _ => SecurityScanSeverity.Medium
+        _ => SecurityScanSeverity.Medium,
     };
 
     private static (string packageName, string? version) ParsePackageSpec(string packageSpec) {
@@ -625,8 +621,8 @@ public class SecurityCommand(
             new { Grade = "B", MaxCritical = 0, MaxHigh = 1, MaxMedium = 5, Description = "Good security" },
             new { Grade = "C", MaxCritical = 0, MaxHigh = 3, MaxMedium = 10, Description = "Acceptable security" },
             new { Grade = "D", MaxCritical = 1, MaxHigh = 5, MaxMedium = 15, Description = "Poor security" },
-            new { Grade = "F", MaxCritical = -1, MaxHigh = -1, MaxMedium = -1, Description = "Failing security" }
-        };
+            new { Grade = "F", MaxCritical = -1, MaxHigh = -1, MaxMedium = -1, Description = "Failing security" },
+                               };
 
         var table = new Table();
         table.AddColumn("Grade");
@@ -688,7 +684,7 @@ public class SecurityCommand(
         SecurityScanSeverity.Medium => "[yellow]Medium[/]",
         SecurityScanSeverity.Low => "[green]Low[/]",
         SecurityScanSeverity.None => "[grey]None[/]",
-        _ => severity.ToString()
+        _ => severity.ToString(),
     };
 
     private static string GetGradeMarkup(string grade) => grade switch {
@@ -696,6 +692,6 @@ public class SecurityCommand(
         "B+" or "B" => $"[yellow]{grade}[/]",
         "C+" or "C" => $"[orange3]{grade}[/]",
         "D+" or "D" or "F" => $"[red]{grade}[/]",
-        _ => grade
+        _ => grade,
     };
 }

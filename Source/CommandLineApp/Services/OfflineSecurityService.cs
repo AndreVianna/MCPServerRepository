@@ -34,7 +34,7 @@ public class OfflineSecurityService(
                 return new PackageChecksumVerificationResult {
                     IsValid = false,
                     HashAlgorithm = hashAlgorithm,
-                    Issues = new[] { $"Package file not found: {packagePath}" }
+                    Issues = new[] { $"Package file not found: {packagePath}" },
                 };
             }
 
@@ -58,7 +58,7 @@ public class OfflineSecurityService(
                 HashAlgorithm = hashAlgorithm,
                 FileSizeBytes = fileInfo.Length,
                 CalculationTime = calculationTime,
-                Issues = isValid ? Enumerable.Empty<string>() : new[] { "Checksum mismatch detected" }
+                Issues = isValid ? Enumerable.Empty<string>() : new[] { "Checksum mismatch detected" },
             };
         }
         catch (Exception ex) {
@@ -66,7 +66,7 @@ public class OfflineSecurityService(
             return new PackageChecksumVerificationResult {
                 IsValid = false,
                 HashAlgorithm = hashAlgorithm,
-                Issues = new[] { $"Checksum verification failed: {ex.Message}" }
+                Issues = new[] { $"Checksum verification failed: {ex.Message}" },
             };
         }
     }
@@ -143,7 +143,7 @@ public class OfflineSecurityService(
             ManifestValidationAvailable = false,    // Not implemented yet
             SupportedHashAlgorithms = new[] { "SHA256", "SHA512", "SHA1", "MD5" },
             SupportedFileTypes = new[] { ".zip", ".tar.gz", ".tgz", ".tar" },
-            Version = "1.0.0-skeleton"
+            Version = "1.0.0-skeleton",
         };
         return Task.FromResult(capabilities);
     }
@@ -156,6 +156,6 @@ public class OfflineSecurityService(
         "SHA512" => SHA512.Create(),
         "SHA1" => SHA1.Create(),
         "MD5" => MD5.Create(),
-        _ => throw new ArgumentException($"Unsupported hash algorithm: {algorithmName}", nameof(algorithmName))
+        _ => throw new ArgumentException($"Unsupported hash algorithm: {algorithmName}", nameof(algorithmName)),
     };
 }

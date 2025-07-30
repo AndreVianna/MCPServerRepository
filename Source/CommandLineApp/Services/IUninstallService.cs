@@ -261,5 +261,5 @@ public enum DependencyType {
     Runtime,
     Development,
     Optional,
-    Peer
+    Peer,
 }

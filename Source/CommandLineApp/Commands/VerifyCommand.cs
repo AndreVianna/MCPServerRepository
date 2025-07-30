@@ -1,14 +1,9 @@
-using System.CommandLine;
-using System.CommandLine.Invocation;
-
 using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Models;
 using MCPHub.CommandLineApp.Services;
 using MCPHub.CommandLineApp.Utilities;
 using MCPHub.Domain.Entities;
 using MCPHub.Domain.ValueObjects;
-
-using Spectre.Console;
 
 namespace MCPHub.CommandLineApp.Commands;
 
@@ -170,8 +165,8 @@ public class VerifyCommand(
                 "Analyzing packages",
                 "Running security scans",
                 "Checking trust tiers",
-                "Generating reports"
-            });
+                "Generating reports",
+                                                                                                                });
 
             // Stage 1: Analyze packages
             verificationProgress.StartStep(0, "Analyzing package specifications...");
@@ -224,7 +219,7 @@ public class VerifyCommand(
         "license" => ScanType.License,
         "comprehensive" => ScanType.Comprehensive,
         "all" => ScanType.All,
-        _ => ScanType.Comprehensive
+        _ => ScanType.Comprehensive,
     };
 
     private static SecurityScanSeverity ParseSeverity(string severity) => severity.ToLowerInvariant() switch {
@@ -232,7 +227,7 @@ public class VerifyCommand(
         "medium" => SecurityScanSeverity.Medium,
         "high" => SecurityScanSeverity.High,
         "critical" => SecurityScanSeverity.Critical,
-        _ => SecurityScanSeverity.Medium
+        _ => SecurityScanSeverity.Medium,
     };
 
     private static TrustTier? ParseTrustTierEnum(string? trustTier) => string.IsNullOrWhiteSpace(trustTier)
@@ -242,7 +237,7 @@ public class VerifyCommand(
                 "community" => TrustTier.Community,
                 "professional" => TrustTier.Professional,
                 "enterprise" => TrustTier.Enterprise,
-                _ => null
+                _ => null,
             };
 
     private Task<IEnumerable<PackageToVerify>> GetPackagesToVerifyAsync(string? package, bool global) {
@@ -281,7 +276,7 @@ public class VerifyCommand(
                     PackageName = package.Name,
                     Version = package.Version ?? packageInfo.Version,
                     PackageInfo = packageInfo,
-                    RequiredTrustTier = minimumTrustTier
+                    RequiredTrustTier = minimumTrustTier,
                 };
 
                 results.Add(analysisResult);
@@ -293,7 +288,7 @@ public class VerifyCommand(
                     PackageName = package.Name,
                     Version = package.Version ?? "unknown",
                     HasError = true,
-                    ErrorMessage = ex.Message
+                    ErrorMessage = ex.Message,
                 });
             }
         }
@@ -349,7 +344,7 @@ public class VerifyCommand(
         var packageSpecs = packages.Where(p => !p.HasError).Select(p => new PackageSpec {
             Name = p.PackageName,
             Version = p.Version,
-            CurrentTier = Enum.Parse<TrustTier>(p.PackageInfo?.TrustTier ?? "Unverified")
+            CurrentTier = Enum.Parse<TrustTier>(p.PackageInfo?.TrustTier ?? "Unverified"),
         });
 
         return (await _trustTierService.CheckTrustTierComplianceAsync(packageSpecs, minimumTrustTier.Value))
@@ -371,7 +366,7 @@ public class VerifyCommand(
             ScanResults = scanResults,
             TrustTierResults = trustTierResults,
             AnalysisResults = analysisResults,
-            VerificationTime = DateTimeOffset.UtcNow
+            VerificationTime = DateTimeOffset.UtcNow,
         };
 
         return summary;
@@ -644,7 +639,7 @@ public class VerifyCommand(
         SecurityScanSeverity.Medium => "[yellow]Medium[/]",
         SecurityScanSeverity.Low => "[green]Low[/]",
         SecurityScanSeverity.None => "[grey]None[/]",
-        _ => severity.ToString()
+        _ => severity.ToString(),
     };
 }
 

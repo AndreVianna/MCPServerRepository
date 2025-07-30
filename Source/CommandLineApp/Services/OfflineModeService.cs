@@ -119,7 +119,7 @@ public class OfflineModeService : IOfflineModeService {
             LastConnectivityTest = _lastConnectivityTest,
             LastConnectivityResult = _lastConnectivityResult,
             OfflineReason = _offlineReason,
-            CachedData = cachedDataSummary
+            CachedData = cachedDataSummary,
         };
     }
 
@@ -239,10 +239,10 @@ public class OfflineModeService : IOfflineModeService {
             Limitations = [
                     "Results may be outdated",
                     "New packages not included",
-                    "Limited to cached search queries"
-                ],
+                    "Limited to cached search queries",
+                          ],
             RequiredCachedData = ["Search results", "Package metadata"],
-            FallbackBehavior = "Return cached search results matching query"
+            FallbackBehavior = "Return cached search results matching query",
         },
         ["package-info"] = new OfflineCapability {
             OperationName = "Package Information",
@@ -251,10 +251,10 @@ public class OfflineModeService : IOfflineModeService {
             Limitations = [
                     "Information may be outdated",
                     "Download counts not current",
-                    "Recent versions may be missing"
-                ],
+                    "Recent versions may be missing",
+                          ],
             RequiredCachedData = ["Package metadata", "Version information"],
-            FallbackBehavior = "Return cached package information"
+            FallbackBehavior = "Return cached package information",
         },
         ["install"] = new OfflineCapability {
             OperationName = "Package Installation",
@@ -263,10 +263,10 @@ public class OfflineModeService : IOfflineModeService {
             Limitations = [
                     "Requires package download",
                     "Cannot verify latest version",
-                    "Dependency resolution limited"
-                ],
+                    "Dependency resolution limited",
+                          ],
             RequiredCachedData = ["Package manifest", "Dependency information"],
-            FallbackBehavior = "Installation not possible offline"
+            FallbackBehavior = "Installation not possible offline",
         },
         ["publish"] = new OfflineCapability {
             OperationName = "Package Publishing",
@@ -274,8 +274,8 @@ public class OfflineModeService : IOfflineModeService {
             DataFreshnessConfidence = 0,
             Limitations = ["Requires API connectivity"],
             RequiredCachedData = [],
-            FallbackBehavior = "Publishing not possible offline"
-        }
+            FallbackBehavior = "Publishing not possible offline",
+        },
     };
 
     public OfflineOperationValidation ValidateOfflineOperation(string operationType) {

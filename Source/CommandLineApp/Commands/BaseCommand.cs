@@ -1,10 +1,6 @@
-using System.CommandLine;
-
 using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Services;
 using MCPHub.CommandLineApp.Utilities;
-
-using Spectre.Console;
 
 namespace MCPHub.CommandLineApp.Commands;
 
@@ -51,7 +47,7 @@ public abstract class BaseCommand(
                 "Request timed out. Please check your internet connection and try again.",
             HttpRequestException => "Network error. Please check your internet connection and try again.",
             TaskCanceledException => "Operation was cancelled or timed out.",
-            _ => Configuration.Ui.VerboseErrors ? ex.ToString() : "An unexpected error occurred."
+            _ => Configuration.Ui.VerboseErrors ? ex.ToString() : "An unexpected error occurred.",
         };
 
         OutputFormatter.WriteError(errorMessage);
@@ -84,7 +80,7 @@ public abstract class BaseCommand(
         ArgumentException => 400,
         TaskCanceledException => 130, // SIGINT
         HttpRequestException httpEx when httpEx.Message.Contains("Rate limit") => 429,
-        _ => 1
+        _ => 1,
     };
 
     /// <summary>

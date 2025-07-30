@@ -1,10 +1,6 @@
-using System.CommandLine;
-
 using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Services;
 using MCPHub.CommandLineApp.Utilities;
-
-using Spectre.Console;
 
 namespace MCPHub.CommandLineApp.Commands;
 
@@ -48,7 +44,7 @@ public class ConfigCommand(
         var formatOption = new Option<string?>(
             aliases: ["--format", "-f"],
             description: "Output format (table, json, value)") {
-            ArgumentHelpName = "format"
+            ArgumentHelpName = "format",
         };
         command.AddOption(formatOption);
 
@@ -84,7 +80,7 @@ public class ConfigCommand(
         var formatOption = new Option<string?>(
             aliases: ["--format", "-f"],
             description: "Output format (table, json, detailed)") {
-            ArgumentHelpName = "format"
+            ArgumentHelpName = "format",
         };
         command.AddOption(formatOption);
 
@@ -177,7 +173,7 @@ public class ConfigCommand(
         var command = new Command("restore", "Restore configuration from a backup");
 
         var pathArgument = new Argument<string?>("path", "Backup file path (if not specified, shows available backups)") {
-            Arity = ArgumentArity.ZeroOrOne
+            Arity = ArgumentArity.ZeroOrOne,
         };
         command.AddArgument(pathArgument);
 
@@ -589,7 +585,7 @@ public class ConfigCommand(
                     "Community" => "Community (Basic verification)",
                     "Professional" => "Professional (Enhanced security)",
                     "Enterprise" => "Enterprise (Maximum security)",
-                    _ => tier
+                    _ => tier,
                 }));
 
         await _configurationService.SetValueAsync("security.trustTierMinimum", trustTier);
@@ -644,19 +640,16 @@ public class ConfigCommand(
         }
     }
 
-    private static string FormatValueForDisplay(object? value, ConfigurationKey schemaKey, bool showSecrets = false) {
-        if (value == null)
-            return "[dim]null[/]";
-
-        return schemaKey.IsSecret && !showSecrets
+    private static string FormatValueForDisplay(object? value, ConfigurationKey schemaKey, bool showSecrets = false) => value == null
+            ? "[dim]null[/]"
+            : schemaKey.IsSecret && !showSecrets
             ? "[dim]***[/]"
             : value switch {
                 bool b => b ? "[green]true[/]" : "[red]false[/]",
                 string s when string.IsNullOrEmpty(s) => "[dim]empty[/]",
                 string s => s,
-                _ => value.ToString() ?? "[dim]null[/]"
+                _ => value.ToString() ?? "[dim]null[/]",
             };
-    }
 
     private static string FormatFileSize(long bytes) {
         string[] suffixes = { "B", "KB", "MB", "GB" };

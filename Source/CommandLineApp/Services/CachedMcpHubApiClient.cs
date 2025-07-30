@@ -100,7 +100,7 @@ public class CachedMcpHubApiClient(
                     Page = page,
                     PageSize = pageSize,
                     TotalCount = 0,
-                    TotalPages = 0
+                    TotalPages = 0,
                 });
             },
             cacheKey: cacheKey,
@@ -110,7 +110,7 @@ public class CachedMcpHubApiClient(
             Page = page,
             PageSize = pageSize,
             TotalCount = 0,
-            TotalPages = 0
+            TotalPages = 0,
         };
     }
 

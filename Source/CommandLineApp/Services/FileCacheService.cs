@@ -7,8 +7,6 @@ using System.Text.RegularExpressions;
 
 using MCPHub.CommandLineApp.Configuration;
 
-using Microsoft.Extensions.Logging;
-
 namespace MCPHub.CommandLineApp.Services;
 
 /// <summary>
@@ -80,7 +78,7 @@ public class FileCacheService : ICacheService {
 
             await File.WriteAllBytesAsync(filePath, bytes, cancellationToken).ConfigureAwait(false);
 
-            _metrics.RecordSet(key, bytes.Length);
+            CacheMetrics.RecordSet(key, bytes.Length);
             _logger.LogDebug("Cached item with key: {Key}, size: {Size} bytes", key, bytes.Length);
         }
         catch (Exception ex) {
@@ -182,7 +180,7 @@ public class FileCacheService : ICacheService {
         // Quick check without deserializing - just check expiration from metadata
         try {
             var entryInfo = await GetEntryInfoAsync(key, cancellationToken).ConfigureAwait(false);
-            return entryInfo != null && !entryInfo.IsExpired;
+            return entryInfo?.IsExpired == false;
         }
         catch {
             return false;
@@ -202,7 +200,7 @@ public class FileCacheService : ICacheService {
             }
 
             File.Delete(filePath);
-            _metrics.RecordRemove(key);
+            CacheMetrics.RecordRemove(key);
             _logger.LogDebug("Removed cache entry for key: {Key}", key);
             return true;
         }
@@ -471,7 +469,7 @@ public class FileCacheService : ICacheService {
         }
     }
 
-    private async Task<byte[]> CompressDataAsync(byte[] data, CancellationToken cancellationToken) {
+    private static async Task<byte[]> CompressDataAsync(byte[] data, CancellationToken cancellationToken) {
         using var output = new MemoryStream();
         using (var gzip = new GZipStream(output, CompressionLevel.Optimal)) {
             await gzip.WriteAsync(data, cancellationToken).ConfigureAwait(false);
@@ -479,7 +477,7 @@ public class FileCacheService : ICacheService {
         return output.ToArray();
     }
 
-    private async Task<byte[]> DecompressDataAsync(byte[] compressedData, CancellationToken cancellationToken) {
+    private static async Task<byte[]> DecompressDataAsync(byte[] compressedData, CancellationToken cancellationToken) {
         using var input = new MemoryStream(compressedData);
         using var gzip = new GZipStream(input, CompressionMode.Decompress);
         using var output = new MemoryStream();
@@ -517,38 +515,36 @@ internal class CacheEntry<T> where T : class {
 /// Internal cache metrics tracking
 /// </summary>
 internal class CacheMetrics {
-    private long _hitCount;
-    private long _missCount;
     private readonly object _lock = new();
 
-    public long HitCount => _hitCount;
-    public long MissCount => _missCount;
+    public long HitCount { get; private set; }
+    public long MissCount { get; private set; }
     public DateTimeOffset ResetAt { get; private set; } = DateTimeOffset.UtcNow;
 
     public void RecordHit(string key) {
         lock (_lock) {
-            _hitCount++;
+            HitCount++;
         }
     }
 
     public void RecordMiss(string key) {
         lock (_lock) {
-            _missCount++;
+            MissCount++;
         }
     }
 
-    public void RecordSet(string key, long size) {
+    public static void RecordSet(string key, long size) {
         // Could add more detailed metrics here if needed
     }
 
-    public void RecordRemove(string key) {
+    public static void RecordRemove(string key) {
         // Could add more detailed metrics here if needed
     }
 
     public void Reset() {
         lock (_lock) {
-            _hitCount = 0;
-            _missCount = 0;
+            HitCount = 0;
+            MissCount = 0;
             ResetAt = DateTimeOffset.UtcNow;
         }
     }

@@ -424,7 +424,7 @@ public enum RoleType {
     System,
     Predefined,
     Custom,
-    Temporary
+    Temporary,
 }
 
 /// <summary>
@@ -432,7 +432,7 @@ public enum RoleType {
 /// </summary>
 public enum PermissionEffect {
     Allow,
-    Deny
+    Deny,
 }
 
 /// <summary>
@@ -441,7 +441,7 @@ public enum PermissionEffect {
 public enum PolicyType {
     Json,
     Rego,
-    Custom
+    Custom,
 }
 
 /// <summary>

@@ -1,5 +1,4 @@
 using MCPHub.Data.Repositories;
-using MCPHub.Domain.Entities;
 using MCPHub.Domain.Repositories;
 
 namespace MCPHub.Data.UnitTests.Repositories;

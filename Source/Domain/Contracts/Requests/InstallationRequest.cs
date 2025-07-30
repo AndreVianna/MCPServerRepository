@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace MCPHub.Domain.Contracts.Requests;
 
 /// <summary>
@@ -36,9 +34,6 @@ public record InstallationRequest {
 
         // Check for directory traversal attempts
         var invalidChars = new[] { "..", "//", "\\\\" };
-        if (invalidChars.Any(invalid => InstallationPath.Contains(invalid, StringComparison.OrdinalIgnoreCase)))
-            return false;
-
-        return true;
+        return !invalidChars.Any(invalid => InstallationPath.Contains(invalid, StringComparison.OrdinalIgnoreCase));
     }
 }

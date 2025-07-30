@@ -1,11 +1,8 @@
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
 
 using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Models;
-
-using Microsoft.Extensions.Logging;
 
 namespace MCPHub.CommandLineApp.Services;
 

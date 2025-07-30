@@ -1,5 +1,4 @@
 using MCPHub.Domain.Contracts.Requests;
-using MCPHub.Domain.Contracts.Responses;
 using MCPHub.Domain.Contracts.Services;
 using MCPHub.Domain.Entities;
 using MCPHub.Domain.Services;

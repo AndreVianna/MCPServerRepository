@@ -4,9 +4,6 @@ using MCPHub.Domain.Contracts.Requests;
 using MCPHub.Domain.Contracts.Services;
 using MCPHub.Domain.Entities;
 
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
 namespace MCPHub.PublicApi.Controllers.V1;
 
 /// <summary>
@@ -216,7 +213,7 @@ public class PackagesV1Controller(
                 Page = page,
                 PageSize = pageSize,
                 SortBy = sortBy,
-                SortDirection = sortDirection
+                SortDirection = sortDirection,
             };
 
             var searchResult = await _packageService.SearchPackagesAsync(searchRequest, cancellationToken);
@@ -435,11 +432,9 @@ public class PackagesV1Controller(
                     packageName, request.Version, string.Join(", ", result.Errors));
 
                 // Check if it's a not found error
-                if (result.Errors.Any(e => e.Contains("not found", StringComparison.OrdinalIgnoreCase))) {
-                    return CreateErrorResponse($"Package '{packageName}' not found", 404);
-                }
-
-                return CreateErrorResponse($"Version publishing failed: {string.Join(", ", result.Errors)}", 400);
+                return result.Errors.Any(e => e.Contains("not found", StringComparison.OrdinalIgnoreCase))
+                    ? CreateErrorResponse($"Package '{packageName}' not found", 404)
+                    : CreateErrorResponse($"Version publishing failed: {string.Join(", ", result.Errors)}", 400);
             }
 
             Logger.LogInformation("Package version published successfully: {PackageVersionId}", result.PackageVersion?.Id);
@@ -595,7 +590,6 @@ public class PackagesV1Controller(
     /// Records a package download and generates a secure download URL
     /// </summary>
     /// <param name="packageName">Name of the package to download</param>
-    /// <param name="version">Version of the package to download</param>
     /// <param name="request">Download request details</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Download result with secure URL</returns>
@@ -637,8 +631,6 @@ public class PackagesV1Controller(
     /// Updates the status of an existing installation
     /// </summary>
     /// <param name="installationId">Installation tracking ID</param>
-    /// <param name="status">New installation status</param>
-    /// <param name="errorMessage">Error message if status is Failed</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Updated installation result</returns>
     [HttpPut("installations/{installationId:guid}/status")]
@@ -712,8 +704,6 @@ public class PackagesV1Controller(
     /// Triggers a security scan for a specific package version
     /// </summary>
     /// <param name="packageName">Name of the package to scan</param>
-    /// <param name="version">Version of the package to scan</param>
-    /// <param name="request">Scan request with options</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Security scan result</returns>
     [HttpPost("{packageName}/versions/{packageVersion}/scan")]
@@ -734,7 +724,6 @@ public class PackagesV1Controller(
     /// Gets the security report for a specific package version
     /// </summary>
     /// <param name="packageName">Name of the package</param>
-    /// <param name="version">Version of the package</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Security scan result and report</returns>
     [HttpGet("{packageName}/versions/{packageVersion}/security")]
@@ -885,7 +874,7 @@ public class PackagesV1Controller(
                 newTier,
                 assessment,
                 recalculatedAt = DateTimeOffset.UtcNow,
-                recalculatedBy = userId
+                recalculatedBy = userId,
             };
 
             Logger.LogInformation("Trust tier recalculation completed for package: {PackageName}, PreviousTier: {PreviousTier}, NewTier: {NewTier}",
@@ -922,7 +911,7 @@ public class PackagesV1Controller(
                 return CreateErrorResponse("Package name is required", 400);
             }
 
-            if (limit <= 0 || limit > 200) {
+            if (limit is <= 0 or > 200) {
                 Logger.LogWarning("Invalid limit for trust tier history: {Limit}", limit);
                 return CreateErrorResponse("Limit must be between 1 and 200", 400);
             }
@@ -963,7 +952,7 @@ public class PackagesV1Controller(
         [FromQuery] int periodDays = 30,
         CancellationToken cancellationToken = default) {
         try {
-            if (periodDays <= 0 || periodDays > 365) {
+            if (periodDays is <= 0 or > 365) {
                 Logger.LogWarning("Invalid period days for trust tier statistics: {PeriodDays}", periodDays);
                 return CreateErrorResponse("Period days must be between 1 and 365", 400);
             }
@@ -987,7 +976,6 @@ public class PackagesV1Controller(
     /// Manually adjusts the trust tier for a package (admin only)
     /// </summary>
     /// <param name="packageName">Name of the package</param>
-    /// <param name="request">Trust tier adjustment request</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Trust tier adjustment result</returns>
     [HttpPut("{packageName}/trust-tier")]

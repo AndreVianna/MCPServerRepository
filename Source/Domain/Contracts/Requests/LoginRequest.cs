@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace MCPHub.Domain.Contracts.Requests;
 
 /// <summary>

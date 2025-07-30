@@ -48,7 +48,7 @@ public interface IEnhancedCacheService : ICacheService {
 public enum CacheProviderType {
     InMemory,     // Development tier
     Redis,        // Production tier
-    RedisCluster  // Enterprise tier
+    RedisCluster, // Enterprise tier
 }
 
 /// <summary>

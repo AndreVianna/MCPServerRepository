@@ -1,13 +1,8 @@
 @page "/publisher/dashboard"
-@using MCPHub.WebApp.Services
-@using MCPHub.WebApp.Components.UI.Analytics
-@using MCPHub.WebApp.Components.UI.Layout
-@using MCPHub.WebApp.Components.UI.Security
-@using MudBlazor
 @using Microsoft.AspNetCore.Authorization
 @inject IPublisherDashboardService DashboardService
 @inject ISnackbar Snackbar
-@inject ILogger<Dashboard> Logger
+@inject ILogger<DashboardPage> Logger
 @attribute [Authorize]
 
 <PageTitle>Publisher Dashboard - MCP Hub</PageTitle>
@@ -454,8 +449,8 @@
             // Create mock data for development
             _securityAlerts = new List<SecurityAlert>
             {
-                new() { Id = Guid.NewGuid(), PackageName = "@data/processor", Title = "Dependency Update Required", Description = "axios v1.6.7 has known vulnerability CVE-2024-1234", Severity = Domain.ValueObjects.SecurityScanSeverity.Medium, Type = SecurityAlertType.DependencyUpdate, DetectedAt = DateTime.UtcNow.AddDays(-1), CanAutoFix = true },
-                new() { Id = Guid.NewGuid(), PackageName = "@utils/file-handler", Title = "License Compatibility Issue", Description = "New dependency has GPL license (conflicts with MIT)", Severity = Domain.ValueObjects.SecurityScanSeverity.Low, Type = SecurityAlertType.LicenseIssue, DetectedAt = DateTime.UtcNow.AddHours(-6), CanAutoFix = false }
+                new() { Id = Guid.NewGuid(), PackageName = "@data/processor", Title = "Dependency Update Required", Description = "axios v1.6.7 has known vulnerability CVE-2024-1234", Severity = SecurityScanSeverity.Medium, Type = SecurityAlertType.DependencyUpdate, DetectedAt = DateTime.UtcNow.AddDays(-1), CanAutoFix = true },
+                new() { Id = Guid.NewGuid(), PackageName = "@utils/file-handler", Title = "License Compatibility Issue", Description = "New dependency has GPL license (conflicts with MIT)", Severity = SecurityScanSeverity.Low, Type = SecurityAlertType.LicenseIssue, DetectedAt = DateTime.UtcNow.AddHours(-6), CanAutoFix = false }
             };
         }
         finally

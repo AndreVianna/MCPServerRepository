@@ -5,8 +5,6 @@ using MCPHub.CommandLineApp.Models;
 using MCPHub.CommandLineApp.Services;
 using MCPHub.CommandLineApp.Utilities;
 
-using Microsoft.Extensions.Logging;
-
 namespace MCPHub.CommandLineApp.Commands;
 
 /// <summary>
@@ -101,7 +99,7 @@ public class ListCommand(
                 return 400;
             }
 
-            if (limit < 1 || limit > 100) {
+            if (limit is < 1 or > 100) {
                 OutputFormatter.WriteError("Limit must be between 1 and 100");
                 return 400;
             }

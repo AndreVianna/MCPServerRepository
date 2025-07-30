@@ -5,8 +5,6 @@ using MCPHub.Common.Services;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.Options;
 
 namespace MCPHub.IntegrationTests.Infrastructure;
@@ -78,7 +76,7 @@ public class TestWebApplicationFactory<TProgram>(PostgreSqlContainer dbContainer
         await SeedTestDataAsync(context);
     }
 
-    private async Task SeedTestDataAsync(McpHubContext context) {
+    private static async Task SeedTestDataAsync(McpHubContext context) {
         // Only seed if no data exists
         if (await context.Packages.AnyAsync())
             return;

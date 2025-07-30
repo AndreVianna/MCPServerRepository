@@ -15,7 +15,7 @@ public static class ConfigurationSchema {
             ValueType = typeof(string),
             DefaultValue = "https://api.mcphub.dev",
             Category = "Registry",
-            Pattern = @"^https?://.+"
+            Pattern = "^https?://.+"
         },
         ["registry.name"] = new ConfigurationKey {
             Key = "registry.name",

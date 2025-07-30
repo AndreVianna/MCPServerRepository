@@ -1,6 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
 
 namespace MCPHub.PublicApi.UnitTests.Services;
 
@@ -25,7 +24,7 @@ public class JwtServiceTests {
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
-            ValidateIssuerSigningKey = true
+            ValidateIssuerSigningKey = true,
         };
 
         var options = Substitute.For<IOptions<JwtOptions>>();
@@ -163,7 +162,7 @@ public class JwtServiceTests {
             Audience = _jwtOptions.Audience,
             AccessTokenExpirationMinutes = -1, // Expired token
             RefreshTokenExpirationDays = 7,
-            ClockSkewMinutes = 0 // No clock skew to ensure token is expired
+            ClockSkewMinutes = 0, // No clock skew to ensure token is expired
         };
 
         var options = Substitute.For<IOptions<JwtOptions>>();
@@ -299,6 +298,6 @@ public class JwtServiceTests {
         Id = Guid.NewGuid(),
         UserName = "testuser",
         Email = "test@example.com",
-        EmailConfirmed = true
+        EmailConfirmed = true,
     };
 }

@@ -5,8 +5,6 @@ using MCPHub.Domain.Contracts.Services;
 using MCPHub.Domain.Entities;
 using MCPHub.Domain.Repositories;
 
-using Microsoft.EntityFrameworkCore;
-
 namespace MCPHub.Data.Repositories;
 
 /// <summary>
@@ -61,7 +59,7 @@ public class PackageRepository(McpHubContext context) : Repository<Package>(cont
         }
 
         // Apply category filtering
-        if (request.Categories != null && request.Categories.Any()) {
+        if (request.Categories?.Any() == true) {
             query = query.Where(p => p.Tags.Any(tag => request.Categories.Contains(tag)));
         }
 
@@ -90,7 +88,7 @@ public class PackageRepository(McpHubContext context) : Repository<Package>(cont
             Page = request.Page,
             PageSize = request.PageSize,
             Query = request.Query,
-            SearchTimeMs = stopwatch.ElapsedMilliseconds
+            SearchTimeMs = stopwatch.ElapsedMilliseconds,
         };
     }
 
@@ -117,7 +115,7 @@ public class PackageRepository(McpHubContext context) : Repository<Package>(cont
                 : query.OrderByDescending(p => p.Name),
             _ => sortDirection == SortDirection.Ascending
                 ? query.OrderBy(p => p.Name)
-                : query.OrderByDescending(p => p.Name)
+                : query.OrderByDescending(p => p.Name),
         };
     }
 

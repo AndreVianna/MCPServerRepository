@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 namespace MCPHub.CommandLineApp.Services;
 
 /// <summary>
@@ -60,7 +58,7 @@ public class FallbackCredentialStore : ICredentialStore {
 /// Internal model for storing encrypted credentials in file
 /// </summary>
 internal record EncryptedCredentialsFile {
-    public Dictionary<string, EncryptedCredentialEntry> Credentials { get; init; } = new();
+    public Dictionary<string, EncryptedCredentialEntry> Credentials { get; init; } = [];
     public string EncryptionMethod { get; init; } = "AES256";
     public DateTimeOffset CreatedAt { get; init; } = DateTimeOffset.UtcNow;
     public DateTimeOffset LastModifiedAt { get; init; } = DateTimeOffset.UtcNow;
@@ -76,5 +74,5 @@ internal record EncryptedCredentialEntry {
     public required string InitializationVector { get; init; }
     public DateTimeOffset StoredAt { get; init; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? ExpiresAt { get; init; }
-    public Dictionary<string, string> Metadata { get; init; } = new();
+    public Dictionary<string, string> Metadata { get; init; } = [];
 }

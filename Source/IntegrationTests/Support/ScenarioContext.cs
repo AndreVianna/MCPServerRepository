@@ -64,7 +64,7 @@ public class SolutionScenarioContext {
         if (existingUser != null)
             return existingUser;
 
-        var newUser = DataBuilder.CreateTestUser(email);
+        var newUser = TestDataBuilder.CreateTestUser(email);
         TestUsers.Add(newUser);
         return newUser;
     }
@@ -116,9 +116,9 @@ public class ContextHooks(SolutionScenarioContext scenarioContext) {
 /// Step argument transformations for common BDD patterns
 /// </summary>
 [Binding]
-public class StepArgumentTransformations {
+public static class StepArgumentTransformations {
     [StepArgumentTransformation]
-    public TrustTier TransformTrustTier(string trustTier) => trustTier.ToLowerInvariant() switch {
+    public static TrustTier TransformTrustTier(string trustTier) => trustTier.ToLowerInvariant() switch {
         "unverified" => TrustTier.Unverified,
         "community" or "community trusted" => TrustTier.CommunityTrusted,
         "security audited" or "audited" => TrustTier.SecurityAudited,
@@ -127,7 +127,7 @@ public class StepArgumentTransformations {
     };
 
     [StepArgumentTransformation]
-    public PackageStatus TransformPackageStatus(string status) => status.ToLowerInvariant() switch {
+    public static PackageStatus TransformPackageStatus(string status) => status.ToLowerInvariant() switch {
         "active" => PackageStatus.Published,
         "deprecated" => PackageStatus.Deprecated,
         "archived" => PackageStatus.Deprecated,
@@ -136,7 +136,7 @@ public class StepArgumentTransformations {
     };
 
     [StepArgumentTransformation]
-    public HttpStatusCode TransformHttpStatusCode(string statusCode) => statusCode.ToLowerInvariant() switch {
+    public static HttpStatusCode TransformHttpStatusCode(string statusCode) => statusCode.ToLowerInvariant() switch {
         "200" or "ok" => HttpStatusCode.OK,
         "201" or "created" => HttpStatusCode.Created,
         "400" or "bad request" => HttpStatusCode.BadRequest,
@@ -149,7 +149,7 @@ public class StepArgumentTransformations {
     };
 
     [StepArgumentTransformation]
-    public Dictionary<string, string> TransformTable(Table table) {
+    public static Dictionary<string, string> TransformTable(Table table) {
         var dictionary = new Dictionary<string, string>();
         foreach (var row in table.Rows) {
             dictionary[row[0]] = row[1];
@@ -158,7 +158,7 @@ public class StepArgumentTransformations {
     }
 
     [StepArgumentTransformation]
-    public List<string> TransformStringList(string commaSeparatedValues) => commaSeparatedValues
+    public static List<string> TransformStringList(string commaSeparatedValues) => commaSeparatedValues
             .Split(',', StringSplitOptions.RemoveEmptyEntries)
             .Select(s => s.Trim())
             .Where(s => !string.IsNullOrEmpty(s))

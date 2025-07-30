@@ -16,7 +16,7 @@ public class RateLimitingOptions {
         WindowMinutes = 1,
         QueueLimit = 0,
         PerIpLimiting = true,
-        PerUserLimiting = false
+        PerUserLimiting = false,
     };
 
     /// <summary>
@@ -27,7 +27,7 @@ public class RateLimitingOptions {
         WindowMinutes = 1,
         QueueLimit = 10,
         PerIpLimiting = true,
-        PerUserLimiting = false
+        PerUserLimiting = false,
     };
 
     /// <summary>
@@ -38,7 +38,7 @@ public class RateLimitingOptions {
         WindowMinutes = 1,
         QueueLimit = 5,
         PerIpLimiting = false,
-        PerUserLimiting = true
+        PerUserLimiting = true,
     };
 
     /// <summary>
@@ -49,7 +49,7 @@ public class RateLimitingOptions {
         WindowMinutes = 1,
         QueueLimit = 20,
         PerIpLimiting = true,
-        PerUserLimiting = false
+        PerUserLimiting = false,
     };
 
     /// <summary>
@@ -60,18 +60,18 @@ public class RateLimitingOptions {
         WindowMinutes = 1,
         QueueLimit = 100,
         PerIpLimiting = true,
-        PerUserLimiting = false
+        PerUserLimiting = false,
     };
 
     /// <summary>
     /// IP addresses exempt from rate limiting (trusted sources)
     /// </summary>
-    public IList<string> IpWhitelist { get; init; } = new List<string>();
+    public IList<string> IpWhitelist { get; init; } = [];
 
     /// <summary>
     /// User roles exempt from rate limiting
     /// </summary>
-    public IList<string> ExemptRoles { get; init; } = new List<string> { "Admin", "System" };
+    public IList<string> ExemptRoles { get; init; } = ["Admin", "System"];
 
     /// <summary>
     /// Enable rate limiting globally

@@ -1,8 +1,3 @@
-@using MudBlazor
-@using MCPHub.Domain.ValueObjects
-@using MCPHub.WebApp.Components.UI.Models
-@using MCPHub.WebApp.Components.UI.Analytics
-
 <div class="security-visualization">
     @if (IsLoading)
     {
@@ -145,7 +140,7 @@
                         <!-- Vulnerability Severity Chart -->
                         <div class="mb-4">
                             <AnalyticsChart title="Vulnerability Distribution"
-                                           ChartType="Components.UI.Models.ChartType.Donut"
+                                           ChartType="Models.ChartType.Donut"
                                            ChartSeries="@GetVulnerabilityDistribution()"
                                            ShowTimeRangeSelector="false"
                                            ShowSummary="false"
@@ -310,7 +305,7 @@
                     {
                         <AnalyticsChart title="Security Score Trend"
                                        Subtitle="Security score evolution over time"
-                                       ChartType="Components.UI.Models.ChartType.Line"
+                                       ChartType="Models.ChartType.Line"
                                        ChartSeries="@GetSecurityTrendData()"
                                        XAxisLabels="@GetSecurityTimeLabels()"
                                        ShowTimeRangeSelector="false"
@@ -538,7 +533,7 @@
         var medium = SecurityReport.Vulnerabilities.Count(v => v.Severity == SecurityScanSeverity.Medium);
         var low = SecurityReport.Vulnerabilities.Count(v => v.Severity == SecurityScanSeverity.Low);
 
-        var customSeries = new List<Components.UI.Models.ChartSeries>
+        var customSeries = new List<Models.ChartSeries>
         {
             new() { Name = "Critical", Data = new double[] { critical } },
             new() { Name = "High", Data = new double[] { high } },
@@ -621,7 +616,7 @@
             .Select(s => s.Score)
             .ToArray();
 
-        var customSeries = new List<Components.UI.Models.ChartSeries>
+        var customSeries = new List<Models.ChartSeries>
         {
             new() { Name = "Security Score", Data = data }
         };

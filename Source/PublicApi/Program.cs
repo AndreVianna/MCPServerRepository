@@ -91,7 +91,7 @@ builder.Services.AddAuthentication(options => {
         ValidIssuer = issuer,
         ValidAudience = audience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
-        ClockSkew = TimeSpan.FromMinutes(5)
+        ClockSkew = TimeSpan.FromMinutes(5),
     };
 
     options.Events = new JwtBearerEvents {
@@ -104,7 +104,7 @@ builder.Services.AddAuthentication(options => {
             var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
             logger.LogWarning("JWT authentication challenge triggered for path: {Path}", context.Request.Path);
             return Task.CompletedTask;
-        }
+        },
     };
 });
 

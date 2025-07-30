@@ -180,7 +180,7 @@ public class PackagesController(IPackageService packageService, ILogger<Packages
                 Page = page,
                 PageSize = pageSize,
                 SortBy = sortBy,
-                SortDirection = sortDirection
+                SortDirection = sortDirection,
             };
 
             var searchResult = await _packageService.SearchPackagesAsync(searchRequest, cancellationToken);

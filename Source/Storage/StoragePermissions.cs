@@ -9,5 +9,5 @@ public enum StoragePermissions {
     Write = 2,
     Delete = 4,
     ReadWrite = Read | Write,
-    Full = Read | Write | Delete
+    Full = Read | Write | Delete,
 }

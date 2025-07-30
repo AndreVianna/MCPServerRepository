@@ -5,10 +5,6 @@ using MCPHub.Domain.Contracts.Responses;
 using MCPHub.Domain.Entities;
 using MCPHub.PublicApi.Services;
 
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-
 namespace MCPHub.PublicApi.Controllers.V1;
 
 /// <summary>
@@ -73,7 +69,7 @@ public class AuthV1Controller(
                 User = user,
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
-                ExpiresAt = expiresAt
+                ExpiresAt = expiresAt,
             };
 
             return CreateSuccessResponse(authResult, "Login successful");
@@ -126,7 +122,7 @@ public class AuthV1Controller(
                 IsSuccess = true,
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
-                ExpiresAt = expiresAt
+                ExpiresAt = expiresAt,
             };
 
             return CreateSuccessResponse(tokenResult, "Token refresh successful");
@@ -215,12 +211,12 @@ public class AuthV1Controller(
                 ReceiveMarketingEmails = false,
                 IsTwoFactorEnabled = user.TwoFactorEnabled,
                 CreatedAt = DateTime.UtcNow, // TODO: Get from audit trail
-                LastLoginAt = null
+                LastLoginAt = null,
             };
 
             var profileResult = new UserProfileResult {
                 IsSuccess = true,
-                Profile = profile
+                Profile = profile,
             };
 
             return CreateSuccessResponse(profileResult, "Profile retrieved successfully");

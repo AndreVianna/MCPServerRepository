@@ -3,7 +3,6 @@ using MCPHub.Common.Services;
 using MCPHub.Data.Configuration;
 using MCPHub.Data.Extensions;
 using MCPHub.Data.Repositories;
-using MCPHub.Domain.Entities;
 using MCPHub.Domain.Repositories;
 
 namespace MCPHub.Data;

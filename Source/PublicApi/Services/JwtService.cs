@@ -36,7 +36,7 @@ public class JwtService : IJwtService {
             new(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(ClaimTypes.Name, user.UserName ?? string.Empty),
-            new(ClaimTypes.Email, user.Email ?? string.Empty)
+            new(ClaimTypes.Email, user.Email ?? string.Empty),
         };
 
         if (!string.IsNullOrEmpty(user.DisplayName)) {
@@ -98,7 +98,7 @@ public class JwtService : IJwtService {
                 ValidIssuer = _jwtOptions.Issuer,
                 ValidAudience = _jwtOptions.Audience,
                 IssuerSigningKey = _signingKey,
-                ClockSkew = TimeSpan.FromMinutes(_jwtOptions.ClockSkewMinutes)
+                ClockSkew = TimeSpan.FromMinutes(_jwtOptions.ClockSkewMinutes),
             };
 
             var principal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
@@ -180,14 +180,10 @@ public class JwtService : IJwtService {
             var jsonToken = tokenHandler.ReadJwtToken(token);
 
             var userIdClaim = jsonToken.Claims.FirstOrDefault(c =>
-                c.Type == JwtRegisteredClaimNames.Sub ||
-                c.Type == ClaimTypes.NameIdentifier);
+                c.Type is JwtRegisteredClaimNames.Sub or
+                ClaimTypes.NameIdentifier);
 
-            if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var userId)) {
-                return userId;
-            }
-
-            return null;
+            return userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var userId) ? userId : null;
         }
         catch (Exception ex) {
             _logger.LogWarning(ex, "Error extracting user ID from token");

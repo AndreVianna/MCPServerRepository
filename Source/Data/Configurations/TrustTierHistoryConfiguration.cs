@@ -1,9 +1,4 @@
-using System.Text.Json;
-
 using MCPHub.Domain.Entities;
-
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace MCPHub.Data.Configurations;
 
@@ -67,7 +62,7 @@ public class TrustTierHistoryConfiguration : IEntityTypeConfiguration<TrustTierH
         builder.Property(t => t.AuditTrail)
             .HasConversion(
                 v => JsonSerializer.Serialize(v.Cast<MCPHub.Domain.Common.AuditEntry>().ToList(), (JsonSerializerOptions?)null),
-                v => (ICollection<MCPHub.Domain.Common.IAuditEntry>)(JsonSerializer.Deserialize<List<MCPHub.Domain.Common.AuditEntry>>(v, (JsonSerializerOptions?)null) ?? new List<MCPHub.Domain.Common.AuditEntry>()).Cast<MCPHub.Domain.Common.IAuditEntry>().ToList())
+                v => (JsonSerializer.Deserialize<List<MCPHub.Domain.Common.AuditEntry>>(v, (JsonSerializerOptions?)null) ?? new List<MCPHub.Domain.Common.AuditEntry>()).Cast<MCPHub.Domain.Common.IAuditEntry>().ToList())
             .HasColumnType("jsonb");
 
         // Relationships

@@ -2,8 +2,6 @@ using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Services;
 using MCPHub.CommandLineApp.Utilities;
 
-using Microsoft.Extensions.DependencyInjection;
-
 namespace MCPHub.CommandLineApp.Extensions;
 
 /// <summary>

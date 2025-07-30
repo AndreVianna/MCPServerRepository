@@ -4,11 +4,8 @@ using MCPHub.PublicApi.Controllers.V1;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 using Moq;
-
-using Xunit;
 
 namespace MCPHub.PublicApi.UnitTests.Controllers.V1;
 
@@ -21,8 +18,8 @@ public class SimpleBaseApiV1ControllerTests {
         _controller = new TestController(_mockLogger.Object) {
             // Setup controller context
             ControllerContext = new ControllerContext {
-                HttpContext = new DefaultHttpContext()
-            }
+                HttpContext = new DefaultHttpContext(),
+            },
         };
     }
 
@@ -81,7 +78,7 @@ public class SimpleBaseApiV1ControllerTests {
         var expectedUserId = Guid.NewGuid();
         var claims = new List<Claim>
         {
-            new("sub", expectedUserId.ToString())
+            new("sub", expectedUserId.ToString()),
         };
         var identity = new ClaimsIdentity(claims, "test");
         _controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(identity);
@@ -109,7 +106,7 @@ public class SimpleBaseApiV1ControllerTests {
         var claims = new List<Claim>
         {
             new(ClaimTypes.Role, "Admin"),
-            new(ClaimTypes.Role, "User")
+            new(ClaimTypes.Role, "User"),
         };
         var identity = new ClaimsIdentity(claims, "test");
         _controller.ControllerContext.HttpContext.User = new ClaimsPrincipal(identity);
@@ -126,7 +123,7 @@ public class SimpleBaseApiV1ControllerTests {
     }
 
     // Test controller to expose protected methods
-    private class TestController(ILogger<SimpleBaseApiV1ControllerTests.TestController> logger) : BaseApiV1Controller(logger) {
+    private class TestController(ILogger<TestController> logger) : BaseApiV1Controller(logger) {
         public IActionResult TestCreateErrorResponse(string message, int statusCode = 400)
             => CreateErrorResponse(message, statusCode);
 

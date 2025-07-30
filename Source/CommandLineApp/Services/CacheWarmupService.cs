@@ -1,7 +1,5 @@
 using MCPHub.CommandLineApp.Configuration;
 
-using Microsoft.Extensions.Logging;
-
 namespace MCPHub.CommandLineApp.Services;
 
 /// <summary>
@@ -210,7 +208,7 @@ public class CacheWarmupService(
         LastSearchWarmupAt = _status.LastSearchWarmupAt,
         LastPackagesWarmed = _status.LastPackagesWarmed,
         LastSearchesWarmed = _status.LastSearchesWarmed,
-        LastErrors = new List<string>(_status.LastErrors),
+        LastErrors = [.. _status.LastErrors],
         NextMaintenanceAt = _status.NextMaintenanceAt
     };
 

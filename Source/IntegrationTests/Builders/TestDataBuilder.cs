@@ -33,7 +33,7 @@ public class TestDataBuilder {
         return packageFaker.Generate(count);
     }
 
-    public List<Publisher> CreateTestPublishers(int count = 3) {
+    public static List<Publisher> CreateTestPublishers(int count = 3) {
         var publisherFaker = new Faker<Publisher>()
             .RuleFor(p => p.Id, _ => Guid.CreateVersion7())
             .RuleFor(p => p.Name, f => f.Company.CompanyName())
@@ -46,7 +46,7 @@ public class TestDataBuilder {
         return publisherFaker.Generate(count);
     }
 
-    public List<PackageVersion> CreateTestVersionsForPackage(Package package, int count = 3) {
+    public static List<PackageVersion> CreateTestVersionsForPackage(Package package, int count = 3) {
         var versionFaker = new Faker<PackageVersion>()
             .RuleFor(v => v.Id, _ => Guid.CreateVersion7())
             .RuleFor(v => v.PackageId, _ => package.Id)
@@ -81,7 +81,7 @@ public class TestDataBuilder {
         );
     }
 
-    public List<SecurityVulnerability> CreateTestVulnerabilities(int count = 3) {
+    public static List<SecurityVulnerability> CreateTestVulnerabilities(int count = 3) {
         var vulnerabilityFaker = new Faker<SecurityVulnerability>()
             .CustomInstantiator(f => new SecurityVulnerability(
                 f.Random.AlphaNumeric(10),
@@ -99,7 +99,7 @@ public class TestDataBuilder {
         return vulnerabilityFaker.Generate(count);
     }
 
-    public ApplicationUser CreateTestUser(string? email = null, string? userId = null) {
+    public static ApplicationUser CreateTestUser(string? email = null, string? userId = null) {
         var userFaker = new Faker<ApplicationUser>()
             .RuleFor(u => u.Id, _ => Guid.Parse(userId ?? Guid.CreateVersion7().ToString()))
             .RuleFor(u => u.Email, f => email ?? f.Internet.Email())
@@ -115,7 +115,7 @@ public class TestDataBuilder {
         return userFaker.Generate();
     }
 
-    public SearchRequest CreateSearchRequest(
+    public static SearchRequest CreateSearchRequest(
         string query = "test",
         IEnumerable<string>? categories = null,
         TrustTier? minimumTrustTier = null,
@@ -161,7 +161,7 @@ public class TestDataBuilder {
         return Encoding.UTF8.GetBytes(string.Join("\n", testData));
     }
 
-    private List<MCPTool> CreateTestToolDefinitions(int count) {
+    private static List<MCPTool> CreateTestToolDefinitions(int count) {
         var toolFaker = new Faker<MCPTool>()
             .RuleFor(t => t.Name, f => f.Hacker.Noun())
             .RuleFor(t => t.Description, f => f.Hacker.Phrase())
@@ -178,7 +178,7 @@ public class TestDataBuilder {
         return toolFaker.Generate(count);
     }
 
-    private List<MCPResource> CreateTestResourceDefinitions(int count) {
+    private static List<MCPResource> CreateTestResourceDefinitions(int count) {
         var resourceFaker = new Faker<MCPResource>()
             .RuleFor(r => r.Name, f => f.System.FileName())
             .RuleFor(r => r.Description, f => f.Hacker.Phrase())
@@ -188,7 +188,7 @@ public class TestDataBuilder {
         return resourceFaker.Generate(count);
     }
 
-    private List<MCPPrompt> CreateTestPromptDefinitions(int count) {
+    private static List<MCPPrompt> CreateTestPromptDefinitions(int count) {
         var promptFaker = new Faker<MCPPrompt>()
             .RuleFor(p => p.Name, f => f.Hacker.Noun())
             .RuleFor(p => p.Description, f => f.Hacker.Phrase())
@@ -222,7 +222,7 @@ public class TestScenarioBuilder {
 
     public TestScenarioBuilder WithUsers(int count = 3) {
         for (var i = 0; i < count; i++) {
-            _users.Add(_dataBuilder.CreateTestUser());
+            _users.Add(TestDataBuilder.CreateTestUser());
         }
         return this;
     }

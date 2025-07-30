@@ -1,5 +1,4 @@
-using MCPHub.Domain.Entities;
-using MCPHub.Domain.ValueObjects;
+using SortDirection = MCPHub.Domain.Entities.SortDirection;
 
 namespace MCPHub.WebApp.Services;
 
@@ -570,7 +569,7 @@ public enum ConflictSeverity {
     Low,
     Medium,
     High,
-    Critical
+    Critical,
 }
 
 /// <summary>
@@ -580,7 +579,7 @@ public enum DependencyUpdateType {
     Patch,
     Minor,
     Major,
-    Security
+    Security,
 }
 
 /// <summary>
@@ -590,7 +589,7 @@ public enum CollaboratorRole {
     Maintainer,
     Developer,
     Contributor,
-    Viewer
+    Viewer,
 }
 
 /// <summary>
@@ -601,5 +600,5 @@ public enum CollaboratorAction {
     UpdateRole,
     Remove,
     ResendInvitation,
-    CancelInvitation
+    CancelInvitation,
 }

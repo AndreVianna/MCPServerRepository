@@ -1,9 +1,5 @@
 using MCPHub.CommandLineApp.Configuration;
-using MCPHub.CommandLineApp.Models;
 using MCPHub.CommandLineApp.Utilities;
-using MCPHub.Domain.ValueObjects;
-
-using Microsoft.Extensions.Logging;
 
 namespace MCPHub.CommandLineApp.Services;
 

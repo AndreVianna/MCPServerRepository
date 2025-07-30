@@ -1,10 +1,4 @@
-using System.Text;
 using System.Text.Json;
-
-using MCPHub.Domain.Contracts.Requests;
-using MCPHub.Domain.Contracts.Responses;
-
-using Microsoft.AspNetCore.Components.Authorization;
 
 namespace MCPHub.WebApp.Services;
 
@@ -40,7 +34,7 @@ public class AuthenticationService : IAuthenticationService {
 
             if (response.IsSuccessStatusCode) {
                 var result = JsonSerializer.Deserialize<AuthenticationResult>(responseContent, _jsonOptions);
-                if (result != null && result.IsSuccess && !string.IsNullOrEmpty(result.AccessToken)) {
+                if (result?.IsSuccess == true && !string.IsNullOrEmpty(result.AccessToken)) {
                     await _authStateProvider.MarkUserAsAuthenticatedAsync(result.AccessToken, result.RefreshToken ?? string.Empty);
                 }
                 return result ?? new AuthenticationResult { IsSuccess = false, ErrorMessage = "Invalid response format" };
@@ -85,7 +79,7 @@ public class AuthenticationService : IAuthenticationService {
 
             if (response.IsSuccessStatusCode) {
                 var result = JsonSerializer.Deserialize<TokenResult>(responseContent, _jsonOptions);
-                if (result != null && result.IsSuccess && !string.IsNullOrEmpty(result.AccessToken)) {
+                if (result?.IsSuccess == true && !string.IsNullOrEmpty(result.AccessToken)) {
                     await _authStateProvider.MarkUserAsAuthenticatedAsync(result.AccessToken, result.RefreshToken ?? string.Empty);
                 }
                 return result ?? new TokenResult { IsSuccess = false, ErrorMessage = "Invalid response format" };

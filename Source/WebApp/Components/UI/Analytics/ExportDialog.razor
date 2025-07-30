@@ -1,5 +1,3 @@
-@using MCPHub.WebApp.Services
-@using MudBlazor
 @inject IExportService ExportService
 @inject ISnackbar Snackbar
 @inject IJSRuntime JSRuntime
@@ -180,8 +178,8 @@
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
     
-    [Parameter] public Services.ExportAnalyticsData? AnalyticsData { get; set; }
-    [Parameter] public Services.ExportChartData? ChartData { get; set; }
+    [Parameter] public ExportAnalyticsData? AnalyticsData { get; set; }
+    [Parameter] public ExportChartData? ChartData { get; set; }
     [Parameter] public List<Dictionary<string, object>>? TableData { get; set; }
     [Parameter] public string DefaultFileName { get; set; } = "export";
     [Parameter] public string PreviewContent { get; set; } = string.Empty;

@@ -28,7 +28,7 @@ public class PublisherDashboardService(
     }
 
     /// <inheritdoc />
-    public Task<IEnumerable<SecurityAlert>> GetSecurityAlertsAsync(Guid publisherId, Domain.ValueObjects.SecurityScanSeverity? severity = null, CancellationToken cancellationToken = default) {
+    public Task<IEnumerable<SecurityAlert>> GetSecurityAlertsAsync(Guid publisherId, SecurityScanSeverity? severity = null, CancellationToken cancellationToken = default) {
         _logger.LogDebug("Getting security alerts for publisher {PublisherId} with severity filter {Severity}", publisherId, severity);
         throw new NotImplementedException("Security alerts retrieval will be implemented when first consumer requires it");
     }

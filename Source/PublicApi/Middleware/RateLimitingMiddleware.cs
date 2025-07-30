@@ -114,7 +114,7 @@ public class RateLimitingMiddleware(
         return ("Global", clientIp);
     }
 
-    private string GetClientIpAddress(HttpContext context) {
+    private static string GetClientIpAddress(HttpContext context) {
         // Check for forwarded IP first (in case of proxy/load balancer)
         var forwardedFor = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
         if (!string.IsNullOrEmpty(forwardedFor)) {
@@ -135,7 +135,7 @@ public class RateLimitingMiddleware(
         return context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
     }
 
-    private string? GetUserId(HttpContext context) {
+    private static string? GetUserId(HttpContext context) {
         if (context.User.Identity?.IsAuthenticated != true)
             return null;
 
@@ -152,7 +152,7 @@ public class RateLimitingMiddleware(
         response.Headers["X-RateLimit-Policy"] = GetPolicyDisplayName(rateLimitResult.Policy);
     }
 
-    private string GetPolicyDisplayName(RateLimitPolicy policy) {
+    private static string GetPolicyDisplayName(RateLimitPolicy policy) {
         // Create a readable policy description
         var windowUnit = policy.WindowDuration.TotalMinutes >= 1 ? "minute" : "second";
         var windowValue = policy.WindowDuration.TotalMinutes >= 1

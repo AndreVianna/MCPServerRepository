@@ -5,8 +5,6 @@ using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Services;
 using MCPHub.CommandLineApp.Utilities;
 
-using Microsoft.Extensions.Logging;
-
 using Spectre.Console;
 
 namespace MCPHub.CommandLineApp.Commands;
@@ -618,17 +616,15 @@ public class UpdateCommand(
         return Task.FromResult(result.Success ? 0 : 1);
     }
 
-    private string GetUpdateChangeType(PackageUpdateInfo update) {
+    private static string GetUpdateChangeType(PackageUpdateInfo update) {
         if (update.HasBreakingChanges)
             return "Major";
         if (update.HasSecurityFixes)
             return "Security";
-        if (update.IsPrerelease)
-            return "Prerelease";
-        return "Minor";
+        return update.IsPrerelease ? "Prerelease" : "Minor";
     }
 
-    private string GetChangeTypeMarkup(string changeType) => changeType switch {
+    private static string GetChangeTypeMarkup(string changeType) => changeType switch {
         "Major" => "[red]Major[/]",
         "Security" => "[green]Security[/]",
         "Prerelease" => "[yellow]Prerelease[/]",
@@ -636,7 +632,7 @@ public class UpdateCommand(
         _ => changeType
     };
 
-    private string GetUpdateSummary(PackageUpdateInfo update) {
+    private static string GetUpdateSummary(PackageUpdateInfo update) {
         var summaries = new List<string>();
 
         if (update.HasSecurityFixes)
@@ -649,7 +645,7 @@ public class UpdateCommand(
         return summaries.Any() ? string.Join(", ", summaries) : "Updates";
     }
 
-    private string GetChangelogSectionTitle(ChangelogEntryType type) => type switch {
+    private static string GetChangelogSectionTitle(ChangelogEntryType type) => type switch {
         ChangelogEntryType.Feature => "🆕 New Features:",
         ChangelogEntryType.BugFix => "🐛 Bug Fixes:",
         ChangelogEntryType.SecurityFix => "🛡️ Security Fixes:",
@@ -660,7 +656,7 @@ public class UpdateCommand(
         _ => "📝 Other Changes:"
     };
 
-    private string GetChangelogEntryPrefix(ChangelogEntryType type) => type switch {
+    private static string GetChangelogEntryPrefix(ChangelogEntryType type) => type switch {
         ChangelogEntryType.Feature => "✨",
         ChangelogEntryType.BugFix => "🔧",
         ChangelogEntryType.SecurityFix => "🛡️",

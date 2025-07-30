@@ -2,13 +2,6 @@
 @page "/browse/{categorySlug?}"
 @inject IApiClientService ApiClient
 @inject NavigationManager Navigation
-@using MCPHub.WebApp.Components.UI.Search
-@using MCPHub.WebApp.Components.UI.Packages
-@using MCPHub.WebApp.Components.UI.Layout
-@using MCPHub.WebApp.Components.UI.Models
-@using MCPHub.WebApp.Components.UI.Analytics
-@using MCPHub.WebApp.Services
-@using MCPHub.Domain.Entities
 
 <PageTitle>Browse Packages - MCP Hub</PageTitle>
 
@@ -85,7 +78,7 @@
                                             @foreach (var tag in collection.Tags.Take(3))
                                             {
                                                 <MudChip T="string" 
-                                                       Size="MudBlazor.Size.Small" 
+                                                       Size="Size.Small" 
                                                        Color="Color.Primary" 
                                                        Variant="Variant.Outlined"
                                                        Class="mr-1 mb-1">
@@ -95,7 +88,7 @@
                                             @if (collection.Tags.Length > 3)
                                             {
                                                 <MudChip T="string" 
-                                                       Size="MudBlazor.Size.Small" 
+                                                       Size="Size.Small" 
                                                        Color="Color.Default" 
                                                        Variant="Variant.Text"
                                                        Class="mr-1 mb-1">

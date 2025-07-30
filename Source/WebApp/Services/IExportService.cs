@@ -1,4 +1,5 @@
-using MCPHub.WebApp.Components.UI.Models;
+using ChartSeries = MCPHub.WebApp.Components.UI.Models.ChartSeries;
+using ChartType = MCPHub.WebApp.Components.UI.Models.ChartType;
 
 namespace MCPHub.WebApp.Services;
 

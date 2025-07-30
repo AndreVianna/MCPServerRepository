@@ -1,5 +1,3 @@
-using MCPHub.Domain.Contracts.Requests;
-using MCPHub.Domain.Contracts.Responses;
 using MCPHub.Domain.Contracts.Services;
 
 namespace MCPHub.WebApp.Services;

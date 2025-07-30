@@ -1,5 +1,3 @@
-@using MCPHub.Domain.Contracts.Requests
-@using MCPHub.Domain.Contracts.Responses
 @inject ISecurityService SecurityService
 @inject ISnackbar Snackbar
 
@@ -154,7 +152,7 @@
 </MudDialog>
 
 @code {
-    [Parameter] public EventCallback<MCPHub.Domain.Contracts.Responses.ApiKeyInfo> OnKeyCreated { get; set; }
+    [Parameter] public EventCallback<Domain.Contracts.Responses.ApiKeyInfo> OnKeyCreated { get; set; }
 
     private CreateApiKeyModel _keyModel = new();
     private bool _isCreating = false;
@@ -215,7 +213,7 @@
 
     private async Task HandleCancel()
     {
-        await OnKeyCreated.InvokeAsync(new MCPHub.Domain.Contracts.Responses.ApiKeyInfo 
+        await OnKeyCreated.InvokeAsync(new Domain.Contracts.Responses.ApiKeyInfo 
         { 
             Id = Guid.Empty, 
             Name = string.Empty, 
@@ -230,7 +228,7 @@
         _showSuccessDialog = false;
         
         // Create a dummy API key info for the callback
-        var apiKeyInfo = new MCPHub.Domain.Contracts.Responses.ApiKeyInfo
+        var apiKeyInfo = new Domain.Contracts.Responses.ApiKeyInfo
         {
             Id = Guid.NewGuid(),
             Name = _keyModel.Name,

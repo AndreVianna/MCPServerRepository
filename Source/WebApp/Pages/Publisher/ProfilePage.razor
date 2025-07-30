@@ -1,13 +1,8 @@
 @page "/publisher/profile"
-@using MCPHub.WebApp.Services
-@using MCPHub.WebApp.Components.UI.Layout
-@using MCPHub.WebApp.Components.UI.Security
-@using MCPHub.Domain.Entities
-@using MudBlazor
 @using Microsoft.AspNetCore.Authorization
 @inject IPublisherProfileService ProfileService
 @inject ISnackbar Snackbar
-@inject ILogger<Profile> Logger
+@inject ILogger<ProfilePage> Logger
 @attribute [Authorize]
 
 <PageTitle>Publisher Profile - MCP Hub</PageTitle>

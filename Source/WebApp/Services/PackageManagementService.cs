@@ -1,5 +1,4 @@
-using MCPHub.Domain.Entities;
-using MCPHub.Domain.ValueObjects;
+using SortDirection = MCPHub.Domain.Entities.SortDirection;
 
 namespace MCPHub.WebApp.Services;
 

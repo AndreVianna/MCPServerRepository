@@ -2,8 +2,6 @@ using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Models;
 using MCPHub.CommandLineApp.Services;
 
-using Microsoft.Extensions.Logging;
-
 namespace MCPHub.CommandLineApp.Utilities;
 
 /// <summary>
@@ -197,7 +195,7 @@ public class DependencyResolver(
         return packageIndex >= minIndex;
     }
 
-    private string? GetLatestCompatibleVersion(string versionConstraint) {
+    private static string? GetLatestCompatibleVersion(string versionConstraint) {
         // Simplified version resolution - in a real implementation,
         // this would parse semantic version ranges and find compatible versions
         // For now, just return the constraint as-is if it looks like a specific version
@@ -237,10 +235,10 @@ public class DependencyResolver(
 /// </summary>
 public class DependencyResolutionResult {
     public bool Success { get; set; }
-    public List<ResolvedPackage> PackagesToInstall { get; set; } = new();
-    public List<UntrustedPackage> UntrustedPackages { get; set; } = new();
-    public List<string> Errors { get; set; } = new();
-    public List<string> Warnings { get; set; } = new();
+    public List<ResolvedPackage> PackagesToInstall { get; set; } = [];
+    public List<UntrustedPackage> UntrustedPackages { get; set; } = [];
+    public List<string> Errors { get; set; } = [];
+    public List<string> Warnings { get; set; } = [];
 }
 
 /// <summary>

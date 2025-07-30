@@ -4,8 +4,6 @@ using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Services;
 using MCPHub.CommandLineApp.Utilities;
 
-using Microsoft.Extensions.Logging;
-
 using Spectre.Console;
 
 namespace MCPHub.CommandLineApp.Commands;
@@ -95,15 +93,11 @@ public abstract class BaseCommand(
     /// <param name="message">The progress message</param>
     /// <param name="task">The task to execute</param>
     /// <returns>The result of the task</returns>
-    protected async Task<T> WithProgressAsync<T>(string message, Func<Task<T>> task) {
-        if (!Configuration.Ui.ProgressBars) {
-            return await task();
-        }
-
-        return await AnsiConsole.Status()
+    protected async Task<T> WithProgressAsync<T>(string message, Func<Task<T>> task) => !Configuration.Ui.ProgressBars
+            ? await task()
+            : await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
             .StartAsync(message, async _ => await task());
-    }
 
     /// <summary>
     /// Shows a progress spinner for long-running operations without return value
@@ -170,15 +164,12 @@ public abstract class BaseCommand(
     /// </summary>
     /// <param name="categories">Comma-separated categories</param>
     /// <returns>Normalized category list</returns>
-    protected static IEnumerable<string>? ParseCategories(string? categories) {
-        if (string.IsNullOrWhiteSpace(categories))
-            return null;
-
-        return categories.Split(',', StringSplitOptions.RemoveEmptyEntries)
+    protected static IEnumerable<string>? ParseCategories(string? categories) => string.IsNullOrWhiteSpace(categories)
+            ? null
+            : categories.Split(',', StringSplitOptions.RemoveEmptyEntries)
             .Select(c => c.Trim())
             .Where(c => !string.IsNullOrWhiteSpace(c))
             .Distinct(StringComparer.OrdinalIgnoreCase);
-    }
 
     /// <summary>
     /// Validates sort field

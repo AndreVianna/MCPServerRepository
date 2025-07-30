@@ -242,7 +242,7 @@ public record Dashboard(
 public enum DashboardExportFormat {
     Json,
     Yaml,
-    Terraform
+    Terraform,
 }
 
 /// <summary>
@@ -289,7 +289,7 @@ public enum AlertOperator {
     EqualTo,
     NotEqualTo,
     Between,
-    Outside
+    Outside,
 }
 
 /// <summary>
@@ -299,7 +299,7 @@ public enum AlertSeverity {
     Info,
     Warning,
     Critical,
-    Emergency
+    Emergency,
 }
 
 /// <summary>
@@ -349,7 +349,7 @@ public enum AlertRuleStatus {
     Pending,
     Alerting,
     NoData,
-    Error
+    Error,
 }
 
 /// <summary>
@@ -385,7 +385,7 @@ public enum AlertEventType {
     Resolved,
     Acknowledged,
     Escalated,
-    Suppressed
+    Suppressed,
 }
 
 /// <summary>
@@ -428,7 +428,7 @@ public enum SLIType {
     Latency,
     ErrorRate,
     Throughput,
-    Quality
+    Quality,
 }
 
 /// <summary>
@@ -580,5 +580,5 @@ public record AvailabilityTrend(
 public enum TrendDirection {
     Up,
     Down,
-    Stable
+    Stable,
 }

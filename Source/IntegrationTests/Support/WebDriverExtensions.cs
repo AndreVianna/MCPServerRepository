@@ -1,5 +1,3 @@
-using OpenQA.Selenium.Support.UI;
-
 namespace MCPHub.IntegrationTests.Support;
 
 /// <summary>

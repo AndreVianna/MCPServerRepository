@@ -2,8 +2,6 @@ using System.Diagnostics;
 
 using Asp.Versioning;
 
-using Microsoft.AspNetCore.Mvc;
-
 namespace MCPHub.PublicApi.Controllers.V1;
 
 /// <summary>
@@ -34,8 +32,8 @@ public abstract class BaseApiV1Controller(ILogger logger) : ControllerBase {
                 Message = message,
                 Timestamp = DateTimeOffset.UtcNow,
                 TraceId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
-                Version = "1.0"
-            }
+                Version = "1.0",
+            },
         };
 
         return StatusCode(statusCode, errorResponse);
@@ -53,7 +51,7 @@ public abstract class BaseApiV1Controller(ILogger logger) : ControllerBase {
             Data = data,
             Message = message,
             Timestamp = DateTimeOffset.UtcNow,
-            Version = "1.0"
+            Version = "1.0",
         };
 
         return Ok(response);
@@ -78,14 +76,11 @@ public abstract class BaseApiV1Controller(ILogger logger) : ControllerBase {
     /// Gets the current user's roles
     /// </summary>
     /// <returns>List of user roles</returns>
-    protected IEnumerable<string> GetCurrentUserRoles() {
-        if (User.Identity?.IsAuthenticated != true)
-            return Enumerable.Empty<string>();
-
-        return User.Claims
+    protected IEnumerable<string> GetCurrentUserRoles() => User.Identity?.IsAuthenticated != true
+            ? Enumerable.Empty<string>()
+            : User.Claims
             .Where(c => c.Type == System.Security.Claims.ClaimTypes.Role)
             .Select(c => c.Value);
-    }
 
     /// <summary>
     /// Checks if the current user has a specific role

@@ -361,7 +361,7 @@ public enum ApiKeyStatus {
     Active,
     Inactive,
     Expired,
-    Revoked
+    Revoked,
 }
 
 /// <summary>
@@ -373,7 +373,7 @@ public enum ApiKeySortBy {
     ExpiresAt,
     LastUsedAt,
     Name,
-    RequestCount
+    RequestCount,
 }
 
 /// <summary>
@@ -389,7 +389,7 @@ public enum ApiKeyAuditAction {
     RateLimitsUpdated,
     Used,
     RateLimited,
-    Rotated
+    Rotated,
 }
 
 /// <summary>
@@ -446,5 +446,5 @@ public enum ApiKeyValidationError {
     InsufficientScopes,
     RateLimitExceeded,
     IpAddressBlocked,
-    UnknownError
+    UnknownError,
 }

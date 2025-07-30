@@ -4,8 +4,6 @@ using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Services;
 using MCPHub.CommandLineApp.Utilities;
 
-using Microsoft.Extensions.Logging;
-
 using Spectre.Console;
 
 namespace MCPHub.CommandLineApp.Commands;
@@ -399,12 +397,7 @@ public class ConfigCommand(
         try {
             Logger.LogInformation("Starting interactive configuration edit: Wizard={Wizard}, Category={Category}", wizard, category);
 
-            if (wizard) {
-                return await RunConfigurationWizardAsync();
-            }
-            else {
-                return await RunInteractiveEditorAsync(category);
-            }
+            return wizard ? await RunConfigurationWizardAsync() : await RunInteractiveEditorAsync(category);
         }
         catch (Exception ex) {
             return HandleError(ex, "config edit");
@@ -655,15 +648,14 @@ public class ConfigCommand(
         if (value == null)
             return "[dim]null[/]";
 
-        if (schemaKey.IsSecret && !showSecrets)
-            return "[dim]***[/]";
-
-        return value switch {
-            bool b => b ? "[green]true[/]" : "[red]false[/]",
-            string s when string.IsNullOrEmpty(s) => "[dim]empty[/]",
-            string s => s,
-            _ => value.ToString() ?? "[dim]null[/]"
-        };
+        return schemaKey.IsSecret && !showSecrets
+            ? "[dim]***[/]"
+            : value switch {
+                bool b => b ? "[green]true[/]" : "[red]false[/]",
+                string s when string.IsNullOrEmpty(s) => "[dim]empty[/]",
+                string s => s,
+                _ => value.ToString() ?? "[dim]null[/]"
+            };
     }
 
     private static string FormatFileSize(long bytes) {

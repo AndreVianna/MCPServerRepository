@@ -7,7 +7,7 @@ public enum StorageProviderType {
     LocalFile,    // Development tier
     AzureBlob,    // Production tier
     AWSS3,        // Production tier alternative
-    MultiRegion   // Enterprise tier
+    MultiRegion, // Enterprise tier
 }
 
 /// <summary>

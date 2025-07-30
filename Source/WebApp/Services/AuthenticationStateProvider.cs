@@ -1,9 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.JSInterop;
-
 namespace MCPHub.WebApp.Services;
 
 /// <summary>

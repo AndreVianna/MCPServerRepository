@@ -1,5 +1,4 @@
-﻿using MCPHub.Domain.Common;
-using MCPHub.Domain.Entities;
+﻿using MCPHub.Domain.Entities;
 
 namespace MCPHub.Data.Configurations;
 

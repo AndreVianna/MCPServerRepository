@@ -1,6 +1,3 @@
-using MCPHub.Domain.Entities;
-using MCPHub.Domain.ValueObjects;
-
 namespace MCPHub.WebApp.Services;
 
 /// <summary>
@@ -595,8 +592,8 @@ public class PerformanceComparison {
 public class PackageComparison {
     public Guid PackageId { get; set; }
     public string PackageName { get; set; } = string.Empty;
-    public Dictionary<string, double> Metrics { get; set; } = new();
-    public Dictionary<string, double> Changes { get; set; } = new();
+    public Dictionary<string, double> Metrics { get; set; } = [];
+    public Dictionary<string, double> Changes { get; set; } = [];
     public int Rank { get; set; }
     public string Category { get; set; } = string.Empty;
 }
@@ -769,7 +766,7 @@ public enum TrendDirection {
     Up,
     Down,
     Stable,
-    Volatile
+    Volatile,
 }
 
 /// <summary>
@@ -780,7 +777,7 @@ public enum InsightType {
     Warning,
     Achievement,
     Trend,
-    Recommendation
+    Recommendation,
 }
 
 /// <summary>
@@ -790,7 +787,7 @@ public enum RecommendationPriority {
     Low,
     Medium,
     High,
-    Critical
+    Critical,
 }
 
 // Additional classes for trust tier, dependency, market insights, financial, predictive, and real-time analytics would be defined here
@@ -847,7 +844,7 @@ public class PredictiveAnalytics {
 /// Real-time analytics (placeholder for additional implementation)
 /// </summary>
 public class RealTimeAnalytics {
-    public Dictionary<string, object> LiveMetrics { get; set; } = new();
+    public Dictionary<string, object> LiveMetrics { get; set; } = [];
     public DateTime LastUpdated { get; set; }
     // Additional properties...
 }
@@ -896,7 +893,7 @@ public class GlobalOverviewMetrics {
     public double GrowthRate { get; set; }
     public long NewPackages { get; set; }
     public long PackageUpdates { get; set; }
-    public Dictionary<string, long> MetricChanges { get; set; } = new();
+    public Dictionary<string, long> MetricChanges { get; set; } = [];
 }
 
 /// <summary>
@@ -942,7 +939,7 @@ public class GlobalSecurityMetrics {
     public int TotalSecurityScans { get; set; }
     public int ActiveVulnerabilities { get; set; }
     public int ResolvedVulnerabilities { get; set; }
-    public Dictionary<string, int> SecurityGradeDistribution { get; set; } = new();
+    public Dictionary<string, int> SecurityGradeDistribution { get; set; } = [];
     public IEnumerable<SecurityTrendPoint> ScoreTrend { get; set; } = [];
 }
 
@@ -950,8 +947,8 @@ public class GlobalSecurityMetrics {
 /// Global trust tier distribution
 /// </summary>
 public class GlobalTrustTierDistribution {
-    public Dictionary<TrustTier, int> TierDistribution { get; set; } = new();
-    public Dictionary<TrustTier, double> TierPercentages { get; set; } = new();
+    public Dictionary<TrustTier, int> TierDistribution { get; set; } = [];
+    public Dictionary<TrustTier, double> TierPercentages { get; set; } = [];
     public TrustTier MostCommonTier { get; set; }
     public double AverageTrustScore { get; set; }
     public IEnumerable<TrustTierTrend> TierTrends { get; set; } = [];
@@ -1003,7 +1000,7 @@ public class EcosystemGrowthMetrics {
 /// Technology stack analysis
 /// </summary>
 public class TechnologyStackAnalysis {
-    public Dictionary<string, TechnologyUsage> Technologies { get; set; } = new();
+    public Dictionary<string, TechnologyUsage> Technologies { get; set; } = [];
     public IEnumerable<TechnologyTrend> TrendingTechnologies { get; set; } = [];
     public IEnumerable<TechnologyCompatibility> CompatibilityMatrix { get; set; } = [];
     public IEnumerable<TechnologyInsight> Insights { get; set; } = [];
@@ -1222,8 +1219,8 @@ public class PackageComparisonResult {
 public class PackageComparisonData {
     public Guid PackageId { get; set; }
     public string PackageName { get; set; } = string.Empty;
-    public Dictionary<string, object> Metrics { get; set; } = new();
-    public Dictionary<string, double> NormalizedScores { get; set; } = new();
+    public Dictionary<string, object> Metrics { get; set; } = [];
+    public Dictionary<string, double> NormalizedScores { get; set; } = [];
     public int OverallRank { get; set; }
 }
 
@@ -1232,8 +1229,8 @@ public class PackageComparisonData {
 /// </summary>
 public class ComparisonMatrix {
     public IEnumerable<string> Metrics { get; set; } = [];
-    public Dictionary<string, Dictionary<Guid, double>> Matrix { get; set; } = new();
-    public Dictionary<string, Guid> Winners { get; set; } = new();
+    public Dictionary<string, Dictionary<Guid, double>> Matrix { get; set; } = [];
+    public Dictionary<string, Guid> Winners { get; set; } = [];
 }
 
 /// <summary>
@@ -1355,7 +1352,7 @@ public enum AlertSeverity {
     Low,
     Medium,
     High,
-    Critical
+    Critical,
 }
 
 // Publisher Analytics Specific Types (matching Razor component expectations)

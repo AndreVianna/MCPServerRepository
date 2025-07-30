@@ -1,10 +1,7 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json;
 
 using MCPHub.CommandLineApp.Configuration;
-
-using Microsoft.Extensions.Logging;
 
 namespace MCPHub.CommandLineApp.Services;
 
@@ -251,18 +248,14 @@ public class ConfigurationService : IConfigurationService {
         }
     }
 
-    private object? GetPropertyValue(object obj, string propertyName) {
-#pragma warning disable IL2075 // Using reflection for configuration - not critical for AOT
+    private static object? GetPropertyValue(object obj, string propertyName) {
         var property = obj.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-#pragma warning restore IL2075
         return property?.GetValue(obj);
     }
 
-    private void SetPropertyValue(object obj, string propertyName, object? value) {
-#pragma warning disable IL2075 // Using reflection for configuration - not critical for AOT
+    private static void SetPropertyValue(object obj, string propertyName, object? value) {
         var property = obj.GetType().GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-#pragma warning restore IL2075
-        if (property != null && property.CanWrite) {
+        if (property?.CanWrite == true) {
             property.SetValue(obj, value);
         }
         else {
@@ -270,7 +263,7 @@ public class ConfigurationService : IConfigurationService {
         }
     }
 
-    private object? ConvertValue(object value, Type targetType) {
+    private static object? ConvertValue(object value, Type targetType) {
         if (value.GetType() == targetType)
             return value;
 
@@ -293,7 +286,7 @@ public class ConfigurationService : IConfigurationService {
         }
     }
 
-    private McpmConfiguration SanitizeConfiguration(McpmConfiguration config) {
+    private static McpmConfiguration SanitizeConfiguration(McpmConfiguration config) {
         // Create a copy without sensitive information
         var sanitized = new McpmConfiguration {
             Registry = new RegistryConfiguration {
@@ -329,7 +322,7 @@ public class ConfigurationService : IConfigurationService {
         return sanitized;
     }
 
-    private void MergeConfigurations(McpmConfiguration target, McpmConfiguration source, bool overwriteExisting) {
+    private static void MergeConfigurations(McpmConfiguration target, McpmConfiguration source, bool overwriteExisting) {
         // Registry configuration
         if (overwriteExisting || string.IsNullOrEmpty(target.Registry.Url))
             target.Registry.Url = source.Registry.Url;

@@ -4,8 +4,6 @@ using System.Text.Json;
 using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Models;
 
-using Microsoft.Extensions.Logging;
-
 namespace MCPHub.CommandLineApp.Utilities;
 
 /// <summary>
@@ -127,7 +125,9 @@ public class PackageManager(ILogger<PackageManager> logger, McpmConfiguration co
         finally {
             // Clean up temp file
             if (File.Exists(tempFile)) {
-                try { File.Delete(tempFile); }
+                try {
+                    File.Delete(tempFile);
+                }
                 catch { }
             }
         }
@@ -149,7 +149,7 @@ public class PackageManager(ILogger<PackageManager> logger, McpmConfiguration co
         if (localPackage == null) {
             localPackage = new LocalPackage {
                 Name = packageName,
-                Versions = new List<LocalPackageVersion>()
+                Versions = []
             };
             registry.InstalledPackages.Add(localPackage);
         }
@@ -330,7 +330,7 @@ public class PackageManager(ILogger<PackageManager> logger, McpmConfiguration co
     /// <summary>
     /// Gets the size of a directory in bytes
     /// </summary>
-    private long GetDirectorySize(string directoryPath) {
+    private static long GetDirectorySize(string directoryPath) {
         if (!Directory.Exists(directoryPath)) {
             return 0;
         }
@@ -342,7 +342,7 @@ public class PackageManager(ILogger<PackageManager> logger, McpmConfiguration co
     /// <summary>
     /// Adds a directory to a zip archive recursively
     /// </summary>
-    private async Task AddDirectoryToArchiveAsync(ZipArchive archive, string directoryPath, string entryPrefix) {
+    private static async Task AddDirectoryToArchiveAsync(ZipArchive archive, string directoryPath, string entryPrefix) {
         var directoryInfo = new DirectoryInfo(directoryPath);
 
         foreach (var file in directoryInfo.EnumerateFiles("*", SearchOption.AllDirectories)) {
@@ -427,7 +427,7 @@ public class PackageManager(ILogger<PackageManager> logger, McpmConfiguration co
 /// Local package registry model
 /// </summary>
 public class LocalPackageRegistry {
-    public List<LocalPackage> InstalledPackages { get; set; } = new();
+    public List<LocalPackage> InstalledPackages { get; set; } = [];
     public DateTimeOffset LastUpdated { get; set; } = DateTimeOffset.UtcNow;
 }
 
@@ -436,7 +436,7 @@ public class LocalPackageRegistry {
 /// </summary>
 public class LocalPackage {
     public string Name { get; set; } = string.Empty;
-    public List<LocalPackageVersion> Versions { get; set; } = new();
+    public List<LocalPackageVersion> Versions { get; set; } = [];
 }
 
 /// <summary>
@@ -468,7 +468,7 @@ public class PackageLockFile {
     public int Version { get; set; } = 1;
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
-    public Dictionary<string, LockedPackage> Packages { get; set; } = new();
+    public Dictionary<string, LockedPackage> Packages { get; set; } = [];
 }
 
 /// <summary>
@@ -477,7 +477,7 @@ public class PackageLockFile {
 public class LockedPackage {
     public string Version { get; set; } = string.Empty;
     public string? ResolvedVersion { get; set; }
-    public Dictionary<string, string> Dependencies { get; set; } = new();
+    public Dictionary<string, string> Dependencies { get; set; } = [];
     public bool IsDevelopmentDependency { get; set; }
     public string? Integrity { get; set; }
     public DateTimeOffset InstalledAt { get; set; } = DateTimeOffset.UtcNow;
@@ -497,5 +497,5 @@ public class PackageTransaction {
     public string? Error { get; set; }
     public DateTimeOffset Timestamp { get; set; } = DateTimeOffset.UtcNow;
     public TimeSpan Duration { get; set; }
-    public Dictionary<string, string> Metadata { get; set; } = new();
+    public Dictionary<string, string> Metadata { get; set; } = [];
 }

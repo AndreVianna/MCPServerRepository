@@ -1,14 +1,8 @@
 @page "/publisher/packages"
-@using MCPHub.WebApp.Services
-@using MCPHub.WebApp.Components.UI.Layout
-@using MCPHub.WebApp.Components.UI.Packages
-@using MCPHub.WebApp.Components.UI.Search
-@using MCPHub.Domain.Entities
-@using MudBlazor
 @using Microsoft.AspNetCore.Authorization
 @inject IPackageManagementService PackageService
 @inject ISnackbar Snackbar
-@inject ILogger<Packages> Logger
+@inject ILogger<PackagesPage> Logger
 @inject NavigationManager Navigation
 @attribute [Authorize]
 
@@ -63,10 +57,10 @@
                         <MudSelectItem Value="@("rating")">Rating</MudSelectItem>
                     </MudSelect>
 
-                    <MudIconButton Icon="@(_sortDirection == MCPHub.Domain.Entities.SortDirection.Ascending ? Icons.Material.Filled.ArrowUpward : Icons.Material.Filled.ArrowDownward)"
+                    <MudIconButton Icon="@(_sortDirection == Domain.Entities.SortDirection.Ascending ? Icons.Material.Filled.ArrowUpward : Icons.Material.Filled.ArrowDownward)"
                                    Color="Color.Primary"
                                    Size="Size.Medium"
-                                   title="@(_sortDirection == MCPHub.Domain.Entities.SortDirection.Ascending ? "Sort Descending" : "Sort Ascending")"
+                                   title="@(_sortDirection == Domain.Entities.SortDirection.Ascending ? "Sort Descending" : "Sort Ascending")"
                                    @onclick="ToggleSortDirection" />
                 </div>
 
@@ -267,19 +261,19 @@
         // Apply sorting
         packages = _sortBy switch
         {
-            "name" => _sortDirection == MCPHub.Domain.Entities.SortDirection.Ascending 
+            "name" => _sortDirection == Domain.Entities.SortDirection.Ascending 
                 ? packages.OrderBy(p => p.Name).ToList()
                 : packages.OrderByDescending(p => p.Name).ToList(),
-            "created" => _sortDirection == MCPHub.Domain.Entities.SortDirection.Ascending 
+            "created" => _sortDirection == Domain.Entities.SortDirection.Ascending 
                 ? packages.OrderBy(p => p.CreatedAt).ToList()
                 : packages.OrderByDescending(p => p.CreatedAt).ToList(),
-            "downloads" => _sortDirection == MCPHub.Domain.Entities.SortDirection.Ascending 
+            "downloads" => _sortDirection == Domain.Entities.SortDirection.Ascending 
                 ? packages.OrderBy(p => p.WeeklyDownloads).ToList()
                 : packages.OrderByDescending(p => p.WeeklyDownloads).ToList(),
-            "rating" => _sortDirection == MCPHub.Domain.Entities.SortDirection.Ascending 
+            "rating" => _sortDirection == Domain.Entities.SortDirection.Ascending 
                 ? packages.OrderBy(p => p.Rating).ToList()
                 : packages.OrderByDescending(p => p.Rating).ToList(),
-            _ => _sortDirection == MCPHub.Domain.Entities.SortDirection.Ascending 
+            _ => _sortDirection == Domain.Entities.SortDirection.Ascending 
                 ? packages.OrderBy(p => p.LastUpdated).ToList()
                 : packages.OrderByDescending(p => p.LastUpdated).ToList()
         };
@@ -304,9 +298,9 @@
 
     private async Task ToggleSortDirection()
     {
-        _sortDirection = _sortDirection == MCPHub.Domain.Entities.SortDirection.Ascending 
-            ? MCPHub.Domain.Entities.SortDirection.Descending 
-            : MCPHub.Domain.Entities.SortDirection.Ascending;
+        _sortDirection = _sortDirection == Domain.Entities.SortDirection.Ascending 
+            ? Domain.Entities.SortDirection.Descending 
+            : Domain.Entities.SortDirection.Ascending;
         await LoadPackagesAsync();
     }
 
@@ -315,7 +309,7 @@
         _searchQuery = string.Empty;
         _selectedStatus = null;
         _sortBy = "updated";
-        _sortDirection = MCPHub.Domain.Entities.SortDirection.Descending;
+        _sortDirection = Domain.Entities.SortDirection.Descending;
         _currentPage = 1;
         await LoadPackagesAsync();
     }

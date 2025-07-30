@@ -1,12 +1,5 @@
-using MCPHub.Domain.Contracts.Requests;
 using MCPHub.Domain.Contracts.Services;
-using MCPHub.Domain.Entities;
 using MCPHub.PublicApi.Controllers.V1;
-
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-
-using NSubstitute;
 
 namespace MCPHub.PublicApi.UnitTests.Controllers.V1;
 
@@ -45,7 +38,7 @@ public class PackagesV1ControllerInstallationTests {
         const string version = "1.0.0";
         var request = new DownloadRequest {
             UserAgent = "Test Client",
-            DownloadMethod = "CLI"
+            DownloadMethod = "CLI",
         };
 
         // Act & Assert
@@ -60,7 +53,7 @@ public class PackagesV1ControllerInstallationTests {
         const string version = "1.0.0";
         var request = new InstallationRequest {
             InstallationPath = "/path/to/install",
-            ClientVersion = "1.0.0"
+            ClientVersion = "1.0.0",
         };
 
         // Act & Assert

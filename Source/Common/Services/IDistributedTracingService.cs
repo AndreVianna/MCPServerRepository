@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace MCPHub.Common.Services;
 
 /// <summary>
@@ -168,5 +166,5 @@ public enum TraceExportMode {
     Otlp,          // Production - OpenTelemetry Protocol
     Jaeger,        // Alternative - Jaeger collector
     Zipkin,        // Alternative - Zipkin collector
-    Multiple       // Enterprise - multiple exporters
+    Multiple, // Enterprise - multiple exporters
 }

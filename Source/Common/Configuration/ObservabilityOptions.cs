@@ -1,7 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 
-using Microsoft.Extensions.Logging;
-
 namespace MCPHub.Common.Configuration;
 
 public class ObservabilityOptions {
@@ -34,7 +32,7 @@ public class OpenTelemetryOptions {
     public bool Enabled { get; set; } = true;
     public string? OtlpEndpoint { get; set; }
     public string? ApiKey { get; set; }
-    public Dictionary<string, string> Headers { get; set; } = new();
+    public Dictionary<string, string> Headers { get; set; } = [];
     public TimeSpan ExportTimeout { get; set; } = TimeSpan.FromSeconds(30);
     public int MaxExportBatchSize { get; set; } = 512;
     public TimeSpan ExportInterval { get; set; } = TimeSpan.FromSeconds(5);
@@ -56,7 +54,7 @@ public class TracingOptions {
     public bool EnableHttpInstrumentation { get; set; } = true;
     public bool EnableRedisInstrumentation { get; set; } = true;
     public bool EnableElasticsearchInstrumentation { get; set; } = true;
-    public List<string> IgnoredPaths { get; set; } = new() { "/health", "/metrics" };
+    public List<string> IgnoredPaths { get; set; } = ["/health", "/metrics"];
 }
 
 public class LoggingOptions {
@@ -75,6 +73,6 @@ public class AlertingOptions {
     public string? SlackWebhookUrl { get; set; }
     public string? EmailSmtpServer { get; set; }
     public string? EmailFromAddress { get; set; }
-    public List<string> DefaultRecipients { get; set; } = new();
+    public List<string> DefaultRecipients { get; set; } = [];
     public TimeSpan AlertCooldownPeriod { get; set; } = TimeSpan.FromMinutes(15);
 }

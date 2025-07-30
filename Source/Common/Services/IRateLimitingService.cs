@@ -69,7 +69,7 @@ public enum RateLimitStrategy {
     FixedWindow,
     SlidingWindow,
     TokenBucket,
-    Leaky
+    Leaky,
 }
 
 /// <summary>

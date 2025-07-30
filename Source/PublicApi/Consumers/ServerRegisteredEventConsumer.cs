@@ -1,5 +1,4 @@
 using MCPHub.Common.Messaging;
-using MCPHub.Domain.Commands;
 using MCPHub.Domain.Events;
 
 namespace MCPHub.PublicApi.Consumers;

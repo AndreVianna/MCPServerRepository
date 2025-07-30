@@ -1,15 +1,11 @@
 using System.Security.Claims;
 
-using MCPHub.Domain.Contracts.Requests;
-using MCPHub.Domain.Contracts.Responses;
 using MCPHub.Domain.Contracts.Services;
-using MCPHub.Domain.Entities;
 using MCPHub.Domain.ValueObjects;
 using MCPHub.PublicApi.Controllers.V1;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 using Moq;
 
@@ -48,15 +44,15 @@ public class PackagesV1ControllerPublishingTests {
         var claims = new List<Claim>
         {
             new("sub", _testUserId.ToString()),
-            new("userId", _testUserId.ToString())
+            new("userId", _testUserId.ToString()),
         };
         var identity = new ClaimsIdentity(claims, "test");
         var principal = new ClaimsPrincipal(identity);
 
         _controller.ControllerContext = new ControllerContext {
             HttpContext = new DefaultHttpContext {
-                User = principal
-            }
+                User = principal,
+            },
         };
     }
 
@@ -77,7 +73,7 @@ public class PackagesV1ControllerPublishingTests {
             }
             """,
             PackageUrl = "https://example.com/package.zip",
-            Tags = ["testing", "mcp"]
+            Tags = ["testing", "mcp"],
         };
 
         var package = new Package("test-package", "Test package", "1.0.0", _testUserId);
@@ -115,7 +111,7 @@ public class PackagesV1ControllerPublishingTests {
                 "author": { "name": "Test Author" },
                 "license": "MIT"
             }
-            """
+            """,
             // Missing both PackageArchive and PackageUrl
         };
 
@@ -148,7 +144,7 @@ public class PackagesV1ControllerPublishingTests {
                 "license": "MIT"
             }
             """,
-            PackageUrl = "https://example.com/package.zip"
+            PackageUrl = "https://example.com/package.zip",
         };
 
         var publishResult = PublishResult.CreateFailure(["Invalid package name", "Missing required capabilities"]);
@@ -184,7 +180,7 @@ public class PackagesV1ControllerPublishingTests {
                 "license": "MIT"
             }
             """,
-            PackageUrl = "https://example.com/package-1.1.0.zip"
+            PackageUrl = "https://example.com/package-1.1.0.zip",
         };
 
         var packageVersion = new PackageVersion(Guid.NewGuid(), "1.1.0", "https://example.com/package-1.1.0.zip", "checksum", 1024);
@@ -212,7 +208,7 @@ public class PackagesV1ControllerPublishingTests {
         var request = new PublishVersionRequest {
             Version = "1.1.0",
             ManifestContent = "{}",
-            PackageUrl = "https://example.com/package.zip"
+            PackageUrl = "https://example.com/package.zip",
         };
 
         // Act
@@ -284,7 +280,7 @@ public class PackagesV1ControllerPublishingTests {
         var versions = new List<PackageVersionInfo>
         {
             new() { Version = "1.0.0", PublishedAt = DateTimeOffset.UtcNow, IsPrerelease = false },
-            new() { Version = "1.1.0", PublishedAt = DateTimeOffset.UtcNow.AddDays(1), IsPrerelease = false }
+            new() { Version = "1.1.0", PublishedAt = DateTimeOffset.UtcNow.AddDays(1), IsPrerelease = false },
         };
 
         _mockPublishingService
@@ -391,7 +387,7 @@ public class PackagesV1ControllerPublishingTests {
         // Arrange
         var request = new PublishRequest {
             ManifestContent = "{}",
-            PackageUrl = "https://example.com/package.zip"
+            PackageUrl = "https://example.com/package.zip",
         };
 
         _mockPublishingService
@@ -415,7 +411,7 @@ public class PackagesV1ControllerPublishingTests {
         // Arrange
         var request = new PublishRequest {
             ManifestContent = "{}",
-            PackageUrl = "https://example.com/package.zip"
+            PackageUrl = "https://example.com/package.zip",
         };
 
         _mockPublishingService
@@ -439,7 +435,7 @@ public class PackagesV1ControllerPublishingTests {
         // Arrange
         var request = new PublishRequest {
             ManifestContent = "{}",
-            PackageUrl = "https://example.com/package.zip"
+            PackageUrl = "https://example.com/package.zip",
         };
 
         _mockPublishingService

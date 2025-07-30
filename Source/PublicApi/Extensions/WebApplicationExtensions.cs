@@ -1,7 +1,6 @@
 using MCPHub.Common.Extensions;
 
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 using RequestMonitoringExtensions = MCPHub.PublicApi.Middleware.RequestMonitoringExtensions;
 
@@ -43,10 +42,10 @@ public static class WebApplicationExtensions {
                         name = e.Key,
                         status = e.Value.Status.ToString(),
                         duration = e.Value.Duration,
-                        description = e.Value.Description
-                    })
+                        description = e.Value.Description,
+                    }),
                 }));
-            }
+            },
         });
 
         // Add health check endpoints for different categories
@@ -55,7 +54,7 @@ public static class WebApplicationExtensions {
             ResponseWriter = async (context, report) => {
                 context.Response.ContentType = "text/plain";
                 await context.Response.WriteAsync(report.Status.ToString());
-            }
+            },
         });
 
         app.UseHealthChecks("/health/live", new HealthCheckOptions {
@@ -63,7 +62,7 @@ public static class WebApplicationExtensions {
             ResponseWriter = async (context, report) => {
                 context.Response.ContentType = "text/plain";
                 await context.Response.WriteAsync(report.Status.ToString());
-            }
+            },
         });
 
         return app;

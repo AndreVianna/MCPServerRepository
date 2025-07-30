@@ -101,7 +101,7 @@ public record CostEstimation(
 public enum HealthStatus {
     Healthy,
     Degraded,
-    Unhealthy
+    Unhealthy,
 }
 
 /// <summary>

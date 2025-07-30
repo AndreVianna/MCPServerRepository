@@ -1,6 +1,3 @@
-using MCPHub.CommandLineApp.Models;
-using MCPHub.Domain.ValueObjects;
-
 namespace MCPHub.CommandLineApp.Services;
 
 /// <summary>
@@ -117,7 +114,7 @@ public record PackageUpdateInfo {
     public bool HasSecurityFixes { get; init; }
     public DateTime ReleaseDate { get; init; }
     public string? ReleaseNotes { get; init; }
-    public List<string> DependencyImpacts { get; init; } = new();
+    public List<string> DependencyImpacts { get; init; } = [];
 }
 
 /// <summary>
@@ -129,9 +126,9 @@ public record PackageUpdateResult {
     public string? PreviousVersion { get; init; }
     public string? NewVersion { get; init; }
     public string? BackupPath { get; init; }
-    public List<string> Messages { get; init; } = new();
-    public List<string> Warnings { get; init; } = new();
-    public List<string> Errors { get; init; } = new();
+    public List<string> Messages { get; init; } = [];
+    public List<string> Warnings { get; init; } = [];
+    public List<string> Errors { get; init; } = [];
     public TimeSpan Duration { get; init; }
 }
 
@@ -144,7 +141,7 @@ public record BatchUpdateResult {
     public int UpdatedPackages { get; init; }
     public int FailedPackages { get; init; }
     public int SkippedPackages { get; init; }
-    public List<PackageUpdateResult> Results { get; init; } = new();
+    public List<PackageUpdateResult> Results { get; init; } = [];
     public string? BackupPath { get; init; }
     public TimeSpan Duration { get; init; }
 }
@@ -157,8 +154,8 @@ public record PackageRollbackResult {
     public string PackageName { get; init; } = string.Empty;
     public string? PreviousVersion { get; init; }
     public string? RolledBackToVersion { get; init; }
-    public List<string> Messages { get; init; } = new();
-    public List<string> Errors { get; init; } = new();
+    public List<string> Messages { get; init; } = [];
+    public List<string> Errors { get; init; } = [];
     public TimeSpan Duration { get; init; }
 }
 
@@ -169,7 +166,7 @@ public record PackageChangelog {
     public string PackageName { get; init; } = string.Empty;
     public string FromVersion { get; init; } = string.Empty;
     public string ToVersion { get; init; } = string.Empty;
-    public List<ChangelogEntry> Entries { get; init; } = new();
+    public List<ChangelogEntry> Entries { get; init; } = [];
     public bool HasBreakingChanges { get; init; }
     public bool HasSecurityFixes { get; init; }
 }
@@ -204,9 +201,9 @@ public enum ChangelogEntryType {
 /// </summary>
 public record DependencyValidationResult {
     public bool IsValid { get; init; }
-    public List<string> Conflicts { get; init; } = new();
-    public List<string> Warnings { get; init; } = new();
-    public List<DependencyImpact> Impacts { get; init; } = new();
+    public List<string> Conflicts { get; init; } = [];
+    public List<string> Warnings { get; init; } = [];
+    public List<DependencyImpact> Impacts { get; init; } = [];
 }
 
 /// <summary>

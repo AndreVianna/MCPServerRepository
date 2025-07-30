@@ -41,7 +41,7 @@ public record ProviderTestResult(
 public enum EnvironmentTier {
     Development,  // Free tier
     Production,   // < $100/month
-    Enterprise    // $500+/month
+    Enterprise, // $500+/month
 }
 
 /// <summary>
@@ -86,5 +86,5 @@ public record CostOptimizationRecommendation(
 public enum ImplementationComplexity {
     Low,
     Medium,
-    High
+    High,
 }

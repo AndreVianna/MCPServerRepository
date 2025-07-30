@@ -1,4 +1,3 @@
-using MCPHub.Domain.Entities;
 using MCPHub.Domain.Messaging;
 
 namespace MCPHub.Domain.Events;

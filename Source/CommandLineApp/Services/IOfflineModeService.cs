@@ -1,5 +1,3 @@
-using MCPHub.CommandLineApp.Models;
-
 namespace MCPHub.CommandLineApp.Services;
 
 /// <summary>
@@ -196,12 +194,12 @@ public class OfflineCapability {
     /// <summary>
     /// Limitations when operating offline
     /// </summary>
-    public List<string> Limitations { get; set; } = new();
+    public List<string> Limitations { get; set; } = [];
 
     /// <summary>
     /// Required cached data for offline operation
     /// </summary>
-    public List<string> RequiredCachedData { get; set; } = new();
+    public List<string> RequiredCachedData { get; set; } = [];
 
     /// <summary>
     /// Fallback behavior description
@@ -226,17 +224,17 @@ public class OfflineOperationValidation {
     /// <summary>
     /// Validation warnings
     /// </summary>
-    public List<string> Warnings { get; set; } = new();
+    public List<string> Warnings { get; set; } = [];
 
     /// <summary>
     /// Validation errors (if operation cannot proceed)
     /// </summary>
-    public List<string> Errors { get; set; } = new();
+    public List<string> Errors { get; set; } = [];
 
     /// <summary>
     /// Suggested actions for improving offline capability
     /// </summary>
-    public List<string> SuggestedActions { get; set; } = new();
+    public List<string> SuggestedActions { get; set; } = [];
 }
 
 /// <summary>
@@ -276,12 +274,12 @@ public class SynchronizationResult {
     /// <summary>
     /// Errors encountered during synchronization
     /// </summary>
-    public List<string> Errors { get; set; } = new();
+    public List<string> Errors { get; set; } = [];
 
     /// <summary>
     /// Warnings during synchronization
     /// </summary>
-    public List<string> Warnings { get; set; } = new();
+    public List<string> Warnings { get; set; } = [];
 
     /// <summary>
     /// Data transfer statistics
@@ -356,17 +354,17 @@ public class OfflinePreparationResult {
     /// <summary>
     /// Errors encountered during preparation
     /// </summary>
-    public List<string> Errors { get; set; } = new();
+    public List<string> Errors { get; set; } = [];
 
     /// <summary>
     /// Warnings during preparation
     /// </summary>
-    public List<string> Warnings { get; set; } = new();
+    public List<string> Warnings { get; set; } = [];
 
     /// <summary>
     /// Packages that failed to cache
     /// </summary>
-    public List<string> FailedPackages { get; set; } = new();
+    public List<string> FailedPackages { get; set; } = [];
 
     private static string FormatBytes(long bytes) {
         string[] sizes = ["B", "KB", "MB", "GB", "TB"];

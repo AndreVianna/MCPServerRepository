@@ -1,8 +1,6 @@
 using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Models;
 
-using Microsoft.Extensions.Logging;
-
 namespace MCPHub.CommandLineApp.Services;
 
 /// <summary>
@@ -98,7 +96,7 @@ public class CachedMcpHubApiClient(
                 // This is a simplified fallback implementation
                 _logger.LogWarning("Package list not available offline, limited functionality");
                 return Task.FromResult<PackageListResponse?>(new PackageListResponse {
-                    Packages = new List<PackageSearchResult>(),
+                    Packages = [],
                     Page = page,
                     PageSize = pageSize,
                     TotalCount = 0,
@@ -108,7 +106,7 @@ public class CachedMcpHubApiClient(
             cacheKey: cacheKey,
             cancellationToken: cancellationToken
         ).ConfigureAwait(false) ?? new PackageListResponse {
-            Packages = new List<PackageSearchResult>(),
+            Packages = [],
             Page = page,
             PageSize = pageSize,
             TotalCount = 0,
@@ -214,13 +212,9 @@ public class CachedMcpHubApiClient(
         => await _innerClient.TestConnectivityAsync(cancellationToken).ConfigureAwait(false);
 
     // Write operations are not cached and require online connectivity
-    public async Task<ValidateManifestResponse> ValidateManifestAsync(ValidateManifestRequest request, CancellationToken cancellationToken = default) {
-        if (_offlineMode.IsOfflineMode) {
-            throw new InvalidOperationException("Manifest validation requires online connectivity");
-        }
-
-        return await _innerClient.ValidateManifestAsync(request, cancellationToken).ConfigureAwait(false);
-    }
+    public async Task<ValidateManifestResponse> ValidateManifestAsync(ValidateManifestRequest request, CancellationToken cancellationToken = default) => _offlineMode.IsOfflineMode
+            ? throw new InvalidOperationException("Manifest validation requires online connectivity")
+            : await _innerClient.ValidateManifestAsync(request, cancellationToken).ConfigureAwait(false);
 
     public async Task<PublishPackageResponse> PublishPackageAsync(PublishPackageRequest request, CancellationToken cancellationToken = default) {
         if (_offlineMode.IsOfflineMode) {
@@ -240,19 +234,11 @@ public class CachedMcpHubApiClient(
         return result;
     }
 
-    public async Task<DownloadPackageResponse> DownloadPackageAsync(string packageName, string? version, DownloadPackageRequest downloadRequest, CancellationToken cancellationToken = default) {
-        if (_offlineMode.IsOfflineMode) {
-            throw new InvalidOperationException("Package download requires online connectivity");
-        }
+    public async Task<DownloadPackageResponse> DownloadPackageAsync(string packageName, string? version, DownloadPackageRequest downloadRequest, CancellationToken cancellationToken = default) => _offlineMode.IsOfflineMode
+            ? throw new InvalidOperationException("Package download requires online connectivity")
+            : await _innerClient.DownloadPackageAsync(packageName, version, downloadRequest, cancellationToken).ConfigureAwait(false);
 
-        return await _innerClient.DownloadPackageAsync(packageName, version, downloadRequest, cancellationToken).ConfigureAwait(false);
-    }
-
-    public async Task<InstallPackageResponse> InstallPackageAsync(string packageName, string version, InstallPackageRequest installRequest, CancellationToken cancellationToken = default) {
-        if (_offlineMode.IsOfflineMode) {
-            throw new InvalidOperationException("Package installation requires online connectivity");
-        }
-
-        return await _innerClient.InstallPackageAsync(packageName, version, installRequest, cancellationToken).ConfigureAwait(false);
-    }
+    public async Task<InstallPackageResponse> InstallPackageAsync(string packageName, string version, InstallPackageRequest installRequest, CancellationToken cancellationToken = default) => _offlineMode.IsOfflineMode
+            ? throw new InvalidOperationException("Package installation requires online connectivity")
+            : await _innerClient.InstallPackageAsync(packageName, version, installRequest, cancellationToken).ConfigureAwait(false);
 }

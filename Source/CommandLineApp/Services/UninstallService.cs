@@ -1,8 +1,5 @@
 using MCPHub.CommandLineApp.Configuration;
-using MCPHub.CommandLineApp.Models;
 using MCPHub.CommandLineApp.Utilities;
-
-using Microsoft.Extensions.Logging;
 
 namespace MCPHub.CommandLineApp.Services;
 

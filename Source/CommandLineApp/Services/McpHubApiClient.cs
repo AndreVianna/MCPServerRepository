@@ -5,8 +5,6 @@ using System.Text.Json;
 using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Models;
 
-using Microsoft.Extensions.Logging;
-
 namespace MCPHub.CommandLineApp.Services;
 
 /// <summary>
@@ -348,10 +346,10 @@ public class McpHubApiClient : IMcpHubApiClient {
                     var errorResponse = JsonSerializer.Deserialize<ApiResponse<object>>(errorContent, _jsonOptions);
                     throw new ManifestValidationException(
                         "Manifest validation failed",
-                        errorResponse?.Errors?.ToList() ?? new List<string> { "Unknown validation error" });
+                        errorResponse?.Errors?.ToList() ?? ["Unknown validation error"]);
                 }
                 catch (JsonException) {
-                    throw new ManifestValidationException("Manifest validation failed", new List<string> { "Invalid manifest format" });
+                    throw new ManifestValidationException("Manifest validation failed", ["Invalid manifest format"]);
                 }
             }
 
@@ -551,13 +549,13 @@ public class ManifestValidationException : Exception {
     public List<string> ValidationWarnings { get; }
 
     public ManifestValidationException(string message, List<string> errors, List<string>? warnings = null) : base(message) {
-        ValidationErrors = errors ?? new List<string>();
-        ValidationWarnings = warnings ?? new List<string>();
+        ValidationErrors = errors ?? [];
+        ValidationWarnings = warnings ?? [];
     }
 
     public ManifestValidationException(string message, Exception innerException) : base(message, innerException) {
-        ValidationErrors = new List<string>();
-        ValidationWarnings = new List<string>();
+        ValidationErrors = [];
+        ValidationWarnings = [];
     }
 }
 

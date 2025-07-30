@@ -81,5 +81,5 @@ public enum MetricAlertCondition {
     GreaterThan,
     LessThan,
     EqualTo,
-    NotEqualTo
+    NotEqualTo,
 }

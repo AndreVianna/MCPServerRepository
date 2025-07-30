@@ -1,15 +1,9 @@
 @page "/publisher/analytics"
-@using MCPHub.WebApp.Services
-@using MCPHub.WebApp.Components.UI.Layout
-@using MCPHub.WebApp.Components.UI.Analytics
-@using MCPHub.WebApp.Components.UI.Charts
-@using MCPHub.Domain.Entities
-@using MudBlazor
 @using Microsoft.AspNetCore.Authorization
 @inject IAnalyticsService AnalyticsService
 @inject IPublisherDashboardService DashboardService
 @inject ISnackbar Snackbar
-@inject ILogger<Analytics> Logger
+@inject ILogger<AnalyticsPage> Logger
 @attribute [Authorize]
 
 <PageTitle>Analytics - MCP Hub</PageTitle>
@@ -65,7 +59,7 @@
                                @onclick="ExportData">
                         Export Data
                     </MudButton>
-                    
+
                     <MudButton Variant="Variant.Filled"
                                Color="Color.Primary"
                                starticon="Icons.Material.Filled.Refresh"
@@ -210,8 +204,8 @@
                                             <div class="chart-area">
                                                 @foreach (var point in _downloadChartData.Take(30))
                                                 {
-                                                    <div class="chart-bar" 
-                                                         style="height: @(point.Value / 500.0)%; 
+                                                    <div class="chart-bar"
+                                                         style="height: @(point.Value / 500.0)%;
                                                                 background: linear-gradient(45deg, var(--mud-palette-primary), var(--mud-palette-primary-lighten));"
                                                          title="@point.Date.ToString("MMM dd"): @FormatNumber(point.Value) downloads">
                                                     </div>
@@ -269,8 +263,8 @@
                                                         <MudText Typo="Typo.body2" Class="font-weight-bold">
                                                             @FormatNumber(region.Downloads)
                                                         </MudText>
-                                                        <MudProgressLinear Value="@region.Percentage" 
-                                                                           Color="Color.Primary" 
+                                                        <MudProgressLinear Value="@region.Percentage"
+                                                                           Color="Color.Primary"
                                                                            Size="Size.Small"
                                                                            Class="mt-1"
                                                                            Style="width: 60px;" />
@@ -334,7 +328,7 @@
                                                         </div>
                                                         <div class="metric text-center">
                                                             <MudText Typo="Typo.caption" Color="Color.Secondary">Growth</MudText>
-                                                            <MudText Typo="Typo.body2" 
+                                                            <MudText Typo="Typo.body2"
                                                                      Class="font-weight-bold"
                                                                      Color="@(package.Growth >= 0 ? Color.Success : Color.Error)">
                                                                 @package.Growth.ToString("+0.0%;-0.0%")
@@ -383,8 +377,8 @@
                                     <MudGrid Spacing="2">
                                         <MudItem xs="6">
                                             <div class="engagement-stat text-center pa-3">
-                                                <MudIcon Icon="Icons.Material.Filled.Star" 
-                                                         Color="Color.Warning" 
+                                                <MudIcon Icon="Icons.Material.Filled.Star"
+                                                         Color="Color.Warning"
                                                          Size="Size.Medium" />
                                                 <MudText Typo="Typo.h6" Class="mt-2">
                                                     @(_analytics?.TotalReviews ?? 0)
@@ -394,11 +388,11 @@
                                                 </MudText>
                                             </div>
                                         </MudItem>
-                                        
+
                                         <MudItem xs="6">
                                             <div class="engagement-stat text-center pa-3">
-                                                <MudIcon Icon="Icons.Material.Filled.Favorite" 
-                                                         Color="Color.Error" 
+                                                <MudIcon Icon="Icons.Material.Filled.Favorite"
+                                                         Color="Color.Error"
                                                          Size="Size.Medium" />
                                                 <MudText Typo="Typo.h6" Class="mt-2">
                                                     @(_analytics?.TotalFavorites ?? 0)
@@ -408,11 +402,11 @@
                                                 </MudText>
                                             </div>
                                         </MudItem>
-                                        
+
                                         <MudItem xs="6">
                                             <div class="engagement-stat text-center pa-3">
-                                                <MudIcon Icon="Icons.Material.Filled.BugReport" 
-                                                         Color="Color.Info" 
+                                                <MudIcon Icon="Icons.Material.Filled.BugReport"
+                                                         Color="Color.Info"
                                                          Size="Size.Medium" />
                                                 <MudText Typo="Typo.h6" Class="mt-2">
                                                     @(_analytics?.TotalIssues ?? 0)
@@ -422,11 +416,11 @@
                                                 </MudText>
                                             </div>
                                         </MudItem>
-                                        
+
                                         <MudItem xs="6">
                                             <div class="engagement-stat text-center pa-3">
-                                                <MudIcon Icon="Icons.Material.Filled.Forum" 
-                                                         Color="Color.Success" 
+                                                <MudIcon Icon="Icons.Material.Filled.Forum"
+                                                         Color="Color.Success"
                                                          Size="Size.Medium" />
                                                 <MudText Typo="Typo.h6" Class="mt-2">
                                                     @(_analytics?.CommunityScore.ToString("F0") ?? "N/A")
@@ -448,9 +442,9 @@
                                         @foreach (var activity in _recentActivity.Take(4))
                                         {
                                             <div class="activity-item d-flex align-center mb-2">
-                                                <MudIcon Icon="@GetActivityIcon(activity.Type)" 
-                                                         Color="@GetActivityColor(activity.Type)" 
-                                                         Size="Size.Small" 
+                                                <MudIcon Icon="@GetActivityIcon(activity.Type)"
+                                                         Color="@GetActivityColor(activity.Type)"
+                                                         Size="Size.Small"
                                                          Class="mr-2" />
                                                 <div class="flex-grow-1">
                                                     <MudText Typo="Typo.caption">
@@ -487,7 +481,7 @@
 
     private MCPHub.WebApp.Services.PublisherAnalytics? _analytics;
     private IEnumerable<PackageListItem>? _packages;
-    private IEnumerable<MCPHub.WebApp.Services.ChartDataPoint>? _downloadChartData;
+    private IEnumerable<ChartDataPoint>? _downloadChartData;
     private IEnumerable<MCPHub.WebApp.Services.GeographicDataPoint>? _geographicData;
     private IEnumerable<PackagePerformanceData>? _packagePerformance;
     private IEnumerable<ActivityData>? _recentActivity;
@@ -546,7 +540,7 @@
     private void GenerateMockAnalyticsData()
     {
         var random = new Random();
-        
+
         _analytics = new MCPHub.WebApp.Services.PublisherAnalytics
         {
             TotalDownloads = 128500,
@@ -915,30 +909,30 @@
         align-items: stretch;
         gap: 16px;
     }
-    
+
     .time-range-selector,
     .export-controls {
         flex-direction: column;
         width: 100%;
     }
-    
+
     .time-range-selector .mud-select,
     .export-controls .mud-button {
         width: 100%;
     }
-    
+
     .chart-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
     }
-    
+
     .performance-content {
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
     }
-    
+
     .performance-metrics {
         width: 100%;
         justify-content: space-around;
@@ -949,24 +943,24 @@
     .analytics-header {
         margin-bottom: 24px;
     }
-    
+
     .header-title h4 {
         font-size: 1.5rem;
     }
-    
+
     .region-item {
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
     }
-    
+
     .region-stats {
         width: 100%;
         display: flex;
         justify-content: space-between;
         align-items: center;
     }
-    
+
     .engagement-metrics .mud-grid .mud-item {
         flex: 0 0 100%;
         max-width: 100%;
@@ -978,7 +972,7 @@
     .chart-container {
         background-color: rgba(255, 255, 255, 0.02);
     }
-    
+
     .engagement-stat {
         background-color: rgba(255, 255, 255, 0.02);
     }

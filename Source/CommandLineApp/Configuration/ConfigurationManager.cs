@@ -1,7 +1,5 @@
 using System.Text.Json;
 
-using Microsoft.Extensions.Logging;
-
 namespace MCPHub.CommandLineApp.Configuration;
 
 /// <summary>
@@ -163,22 +161,22 @@ public class McpmConfigurationManager : IMcpmConfigurationManager {
         }
 
         // Validate numeric ranges
-        if (configuration.Registry.Timeout < 1000 || configuration.Registry.Timeout > 300000) {
+        if (configuration.Registry.Timeout is < 1000 or > 300000) {
             _logger.LogWarning("Invalid timeout value: {Timeout}, using default", configuration.Registry.Timeout);
             configuration.Registry.Timeout = 30000;
         }
 
-        if (configuration.Registry.Retries < 0 || configuration.Registry.Retries > 10) {
+        if (configuration.Registry.Retries is < 0 or > 10) {
             _logger.LogWarning("Invalid retries value: {Retries}, using default", configuration.Registry.Retries);
             configuration.Registry.Retries = 3;
         }
 
-        if (configuration.Security.SandboxTimeout < 30 || configuration.Security.SandboxTimeout > 3600) {
+        if (configuration.Security.SandboxTimeout is < 30 or > 3600) {
             _logger.LogWarning("Invalid sandbox timeout: {Timeout}, using default", configuration.Security.SandboxTimeout);
             configuration.Security.SandboxTimeout = 300;
         }
 
-        if (configuration.Ui.DefaultPageSize < 1 || configuration.Ui.DefaultPageSize > 100) {
+        if (configuration.Ui.DefaultPageSize is < 1 or > 100) {
             _logger.LogWarning("Invalid default page size: {PageSize}, using default", configuration.Ui.DefaultPageSize);
             configuration.Ui.DefaultPageSize = 20;
         }

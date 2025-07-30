@@ -1,6 +1,5 @@
 using System.Text.Json;
 
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace MCPHub.PublicApi.Middleware;
@@ -37,8 +36,8 @@ public class HealthCheckMiddleware(
                         Description = kvp.Value.Description,
                         Tags = kvp.Value.Tags,
                         Exception = kvp.Value.Exception?.Message,
-                        Data = kvp.Value.Data
-                    })
+                        Data = kvp.Value.Data,
+                    }),
             };
 
             context.Response.ContentType = "application/json";
@@ -46,12 +45,12 @@ public class HealthCheckMiddleware(
                 HealthStatus.Healthy => StatusCodes.Status200OK,
                 HealthStatus.Degraded => StatusCodes.Status200OK,
                 HealthStatus.Unhealthy => StatusCodes.Status503ServiceUnavailable,
-                _ => StatusCodes.Status500InternalServerError
+                _ => StatusCodes.Status500InternalServerError,
             };
 
             var json = JsonSerializer.Serialize(response, new JsonSerializerOptions {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = true
+                WriteIndented = true,
             });
 
             await context.Response.WriteAsync(json);

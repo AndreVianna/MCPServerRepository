@@ -1,5 +1,3 @@
-using MCPHub.CommandLineApp.Models;
-
 namespace MCPHub.CommandLineApp.Services;
 
 /// <summary>
@@ -147,10 +145,10 @@ public record PackageUninstallResult {
     public string PackageName { get; init; } = string.Empty;
     public string? UninstalledVersion { get; init; }
     public string? BackupPath { get; init; }
-    public List<string> RemovedDependencies { get; init; } = new();
-    public List<string> Messages { get; init; } = new();
-    public List<string> Warnings { get; init; } = new();
-    public List<string> Errors { get; init; } = new();
+    public List<string> RemovedDependencies { get; init; } = [];
+    public List<string> Messages { get; init; } = [];
+    public List<string> Warnings { get; init; } = [];
+    public List<string> Errors { get; init; } = [];
     public TimeSpan Duration { get; init; }
     public long FreedSpace { get; init; } // Bytes
 }
@@ -164,7 +162,7 @@ public record BatchUninstallResult {
     public int UninstalledPackages { get; init; }
     public int FailedPackages { get; init; }
     public int SkippedPackages { get; init; }
-    public List<PackageUninstallResult> Results { get; init; } = new();
+    public List<PackageUninstallResult> Results { get; init; } = [];
     public string? BatchBackupPath { get; init; }
     public TimeSpan Duration { get; init; }
     public long TotalFreedSpace { get; init; } // Bytes
@@ -177,10 +175,10 @@ public record UninstallDependencyAnalysis {
     public string PackageName { get; init; } = string.Empty;
     public string Version { get; init; } = string.Empty;
     public bool CanUninstallSafely { get; init; }
-    public List<DependentPackageInfo> DependentPackages { get; init; } = new();
-    public List<string> Warnings { get; init; } = new();
-    public List<string> BlockingIssues { get; init; } = new();
-    public List<string> OrphanedDependencies { get; init; } = new();
+    public List<DependentPackageInfo> DependentPackages { get; init; } = [];
+    public List<string> Warnings { get; init; } = [];
+    public List<string> BlockingIssues { get; init; } = [];
+    public List<string> OrphanedDependencies { get; init; } = [];
 }
 
 /// <summary>
@@ -200,8 +198,8 @@ public record DependentPackageInfo {
 /// </summary>
 public record OrphanedDependencyCleanupResult {
     public bool Success { get; init; }
-    public List<string> RemovedPackages { get; init; } = new();
-    public List<string> Errors { get; init; } = new();
+    public List<string> RemovedPackages { get; init; } = [];
+    public List<string> Errors { get; init; } = [];
     public long FreedSpace { get; init; } // Bytes
     public TimeSpan Duration { get; init; }
 }
@@ -227,8 +225,8 @@ public record PackageRestoreResult {
     public string PackageName { get; init; } = string.Empty;
     public string Version { get; init; } = string.Empty;
     public string RestorePath { get; init; } = string.Empty;
-    public List<string> Messages { get; init; } = new();
-    public List<string> Errors { get; init; } = new();
+    public List<string> Messages { get; init; } = [];
+    public List<string> Errors { get; init; } = [];
     public TimeSpan Duration { get; init; }
 }
 
@@ -238,9 +236,9 @@ public record PackageRestoreResult {
 public record UninstallValidationResult {
     public bool CanUninstall { get; init; }
     public bool RequiresForce { get; init; }
-    public List<string> Issues { get; init; } = new();
-    public List<string> Warnings { get; init; } = new();
-    public List<string> Recommendations { get; init; } = new();
+    public List<string> Issues { get; init; } = [];
+    public List<string> Warnings { get; init; } = [];
+    public List<string> Recommendations { get; init; } = [];
 }
 
 /// <summary>
@@ -249,9 +247,9 @@ public record UninstallValidationResult {
 public record PackagePurgeResult {
     public bool Success { get; init; }
     public string PackageName { get; init; } = string.Empty;
-    public List<string> RemovedPaths { get; init; } = new();
-    public List<string> Messages { get; init; } = new();
-    public List<string> Errors { get; init; } = new();
+    public List<string> RemovedPaths { get; init; } = [];
+    public List<string> Messages { get; init; } = [];
+    public List<string> Errors { get; init; } = [];
     public long FreedSpace { get; init; } // Bytes
     public TimeSpan Duration { get; init; }
 }

@@ -7,9 +7,7 @@ using MCPHub.CommandLineApp.Services;
 using MCPHub.CommandLineApp.Utilities;
 
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 // Create application builder
 var builder = Host.CreateApplicationBuilder(args);

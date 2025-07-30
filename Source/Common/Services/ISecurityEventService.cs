@@ -282,7 +282,7 @@ public enum SecurityEventType {
     ServerDeregistered,
     ScanCompleted,
     TrustTierUpdated,
-    ComplianceAudit
+    ComplianceAudit,
 }
 
 /// <summary>
@@ -293,7 +293,7 @@ public enum SecurityEventSeverity {
     Low = 1,
     Medium = 2,
     High = 3,
-    Critical = 4
+    Critical = 4,
 }
 
 /// <summary>
@@ -305,7 +305,7 @@ public enum SecurityEventGroupBy {
     User,
     ResourceType,
     Hour,
-    Day
+    Day,
 }
 
 /// <summary>
@@ -316,7 +316,7 @@ public enum SecurityEventSortBy {
     EventType,
     Severity,
     UserId,
-    ResourceType
+    ResourceType,
 }
 
 /// <summary>
@@ -326,7 +326,7 @@ public enum SecurityEventExportFormat {
     Json,
     Csv,
     Siem,
-    Excel
+    Excel,
 }
 
 /// <summary>
@@ -334,5 +334,5 @@ public enum SecurityEventExportFormat {
 /// </summary>
 public enum SortDirection {
     Ascending,
-    Descending
+    Descending,
 }

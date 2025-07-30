@@ -440,7 +440,7 @@ public enum EncryptionKeyType {
     Symmetric,
     Asymmetric,
     KeyEncryptionKey,
-    DataEncryptionKey
+    DataEncryptionKey,
 }
 
 /// <summary>
@@ -455,7 +455,7 @@ public enum EncryptionAlgorithm {
     RSA_2048,
     RSA_4096,
     ECC_P256,
-    ECC_P384
+    ECC_P384,
 }
 
 /// <summary>
@@ -466,7 +466,7 @@ public enum KeyStatus {
     Disabled,
     Retired,
     Expired,
-    Compromised
+    Compromised,
 }
 
 /// <summary>

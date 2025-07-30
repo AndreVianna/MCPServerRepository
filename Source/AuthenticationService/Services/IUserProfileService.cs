@@ -1,6 +1,5 @@
 using MCPHub.Domain.Contracts.Requests;
 using MCPHub.Domain.Contracts.Responses;
-using MCPHub.Domain.Entities;
 
 namespace MCPHub.AuthenticationService.Services;
 

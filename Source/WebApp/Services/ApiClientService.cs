@@ -1,12 +1,6 @@
-using System.Text;
 using System.Text.Json;
 
-using MCPHub.Domain.Contracts.Requests;
-using MCPHub.Domain.Contracts.Responses;
 using MCPHub.Domain.Contracts.Services;
-using MCPHub.Domain.Entities;
-
-using Microsoft.AspNetCore.Components.Authorization;
 
 namespace MCPHub.WebApp.Services;
 
@@ -50,15 +44,15 @@ public class ApiClientService : IApiClientService {
 
             if (response.IsSuccessStatusCode) {
                 var result = JsonSerializer.Deserialize<SearchResult<PackageSearchResultItem>>(responseContent, _jsonOptions);
-                return result ?? new SearchResult<PackageSearchResultItem> { Items = new List<PackageSearchResultItem>(), TotalCount = 0 };
+                return result ?? new SearchResult<PackageSearchResultItem> { Items = [], TotalCount = 0 };
             }
 
             _logger.LogWarning("Package search failed with status {StatusCode}: {Content}", response.StatusCode, responseContent);
-            return new SearchResult<PackageSearchResultItem> { Items = new List<PackageSearchResultItem>(), TotalCount = 0 };
+            return new SearchResult<PackageSearchResultItem> { Items = [], TotalCount = 0 };
         }
         catch (Exception ex) {
             _logger.LogError(ex, "Error searching packages");
-            return new SearchResult<PackageSearchResultItem> { Items = new List<PackageSearchResultItem>(), TotalCount = 0 };
+            return new SearchResult<PackageSearchResultItem> { Items = [], TotalCount = 0 };
         }
     }
 
@@ -175,15 +169,15 @@ public class ApiClientService : IApiClientService {
 
             if (response.IsSuccessStatusCode) {
                 var result = JsonSerializer.Deserialize<SearchResult<PackageSearchResultItem>>(responseContent, _jsonOptions);
-                return result ?? new SearchResult<PackageSearchResultItem> { Items = new List<PackageSearchResultItem>(), TotalCount = 0 };
+                return result ?? new SearchResult<PackageSearchResultItem> { Items = [], TotalCount = 0 };
             }
 
             _logger.LogWarning("Advanced package search failed with status {StatusCode}: {Content}", response.StatusCode, responseContent);
-            return new SearchResult<PackageSearchResultItem> { Items = new List<PackageSearchResultItem>(), TotalCount = 0 };
+            return new SearchResult<PackageSearchResultItem> { Items = [], TotalCount = 0 };
         }
         catch (Exception ex) {
             _logger.LogError(ex, "Error performing advanced package search");
-            return new SearchResult<PackageSearchResultItem> { Items = new List<PackageSearchResultItem>(), TotalCount = 0 };
+            return new SearchResult<PackageSearchResultItem> { Items = [], TotalCount = 0 };
         }
     }
 
@@ -206,7 +200,7 @@ public class ApiClientService : IApiClientService {
                 var packages = JsonSerializer.Deserialize<List<PackageSearchResultItem>>(responseContent, _jsonOptions);
                 // For now, create a simple SearchResult wrapper since the API doesn't return paginated results
                 return new SearchResult<PackageSearchResultItem> {
-                    Items = packages ?? new List<PackageSearchResultItem>(),
+                    Items = packages ?? [],
                     TotalCount = packages?.Count ?? 0,
                     Page = page,
                     PageSize = pageSize
@@ -214,11 +208,11 @@ public class ApiClientService : IApiClientService {
             }
 
             _logger.LogWarning("Get all packages failed with status {StatusCode}: {Content}", response.StatusCode, responseContent);
-            return new SearchResult<PackageSearchResultItem> { Items = new List<PackageSearchResultItem>(), TotalCount = 0 };
+            return new SearchResult<PackageSearchResultItem> { Items = [], TotalCount = 0 };
         }
         catch (Exception ex) {
             _logger.LogError(ex, "Error getting all packages");
-            return new SearchResult<PackageSearchResultItem> { Items = new List<PackageSearchResultItem>(), TotalCount = 0 };
+            return new SearchResult<PackageSearchResultItem> { Items = [], TotalCount = 0 };
         }
     }
 
@@ -253,7 +247,7 @@ public class ApiClientService : IApiClientService {
             // Use advanced search with category filter
             var request = new AdvancedSearchRequest {
                 Query = "*", // Search all packages
-                Categories = new List<string> { category },
+                Categories = [category],
                 Page = page,
                 PageSize = pageSize
             };
@@ -262,7 +256,7 @@ public class ApiClientService : IApiClientService {
         }
         catch (Exception ex) {
             _logger.LogError(ex, "Error getting packages by category {Category}", category);
-            return new SearchResult<PackageSearchResultItem> { Items = new List<PackageSearchResultItem>(), TotalCount = 0 };
+            return new SearchResult<PackageSearchResultItem> { Items = [], TotalCount = 0 };
         }
     }
 
@@ -286,7 +280,7 @@ public class ApiClientService : IApiClientService {
         }
         catch (Exception ex) {
             _logger.LogError(ex, "Error getting trending packages");
-            return new List<PackageSearchResultItem>();
+            return [];
         }
     }
 
@@ -298,11 +292,11 @@ public class ApiClientService : IApiClientService {
             // For now, return mock data since the API endpoint doesn't exist yet
             // TODO: Implement actual API endpoint for featured collections
             _logger.LogInformation("Getting featured collections - using mock data");
-            return new List<PackageCollection>();
+            return [];
         }
         catch (Exception ex) {
             _logger.LogError(ex, "Error getting featured collections");
-            return new List<PackageCollection>();
+            return [];
         }
     }
 

@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace MCPHub.Common.Services;
 
 /// <summary>

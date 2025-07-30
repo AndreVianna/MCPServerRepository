@@ -1,4 +1,3 @@
-using MCPHub.Domain.Common;
 using MCPHub.Domain.Contracts.Requests;
 using MCPHub.Domain.Contracts.Services;
 using MCPHub.Domain.Entities;
@@ -401,7 +400,7 @@ public class PackageServiceTests {
         var cancellationToken = new CancellationToken();
         var searchRequest = new SearchRequest { Query = "test" };
         var searchResult = new SearchResult<Package> {
-            Items = new List<Package>(),
+            Items = [],
             TotalCount = 0,
             Page = 1,
             PageSize = 20,
@@ -532,7 +531,7 @@ public class PackageServiceTests {
             PageSize = 10
         };
         var searchResult = new SearchResult<Package> {
-            Items = new List<Package>(),
+            Items = [],
             TotalCount = 55, // Should result in 6 pages (55/10 = 5.5 -> 6)
             Page = 1,
             PageSize = 10,

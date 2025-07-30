@@ -1,7 +1,5 @@
 using MCPHub.Domain.Contracts.Requests;
-using MCPHub.Domain.Contracts.Services;
 using MCPHub.Domain.Services;
-using MCPHub.Domain.ValueObjects;
 
 namespace MCPHub.Domain.UnitTests.Services;
 
@@ -9,7 +7,7 @@ namespace MCPHub.Domain.UnitTests.Services;
 /// Unit tests for PackagePublishingService
 /// </summary>
 public class PackagePublishingServiceTests {
-    private PackagePublishingService _service;
+    private readonly PackagePublishingService _service;
 
     public PackagePublishingServiceTests() {
         _service = new PackagePublishingService();

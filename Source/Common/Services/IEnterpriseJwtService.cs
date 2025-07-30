@@ -316,7 +316,7 @@ public record JwtTokenStatistics(
 public enum JwtTokenType {
     AccessToken,
     RefreshToken,
-    IdToken
+    IdToken,
 }
 
 /// <summary>

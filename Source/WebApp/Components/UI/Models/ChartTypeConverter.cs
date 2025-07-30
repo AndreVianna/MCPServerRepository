@@ -1,5 +1,3 @@
-using MudBlazor;
-
 namespace MCPHub.WebApp.Components.UI.Models;
 
 /// <summary>
@@ -16,7 +14,7 @@ public static class ChartTypeConverter {
         MudBlazor.ChartType.Bar => ChartType.Bar,
         MudBlazor.ChartType.Donut => ChartType.Donut,
         MudBlazor.ChartType.Pie => ChartType.Pie,
-        _ => ChartType.Line
+        _ => ChartType.Line,
     };
 
     /// <summary>
@@ -30,7 +28,7 @@ public static class ChartTypeConverter {
         ChartType.Donut => MudBlazor.ChartType.Donut,
         ChartType.Pie => MudBlazor.ChartType.Pie,
         ChartType.Area => MudBlazor.ChartType.Line, // MudBlazor doesn't have Area, use Line
-        _ => MudBlazor.ChartType.Line
+        _ => MudBlazor.ChartType.Line,
     };
 }
 
@@ -45,7 +43,7 @@ public static class ChartSeriesConverter {
     /// <returns>Custom chart series list</returns>
     public static List<ChartSeries> FromMudBlazor(List<MudBlazor.ChartSeries> mudBlazorSeries) => mudBlazorSeries.Select(series => new ChartSeries {
         Name = series.Name,
-        Data = series.Data
+        Data = series.Data,
     }).ToList();
 
     /// <summary>
@@ -55,7 +53,7 @@ public static class ChartSeriesConverter {
     /// <returns>MudBlazor chart series list</returns>
     public static List<MudBlazor.ChartSeries> ToMudBlazor(List<ChartSeries> customSeries) => customSeries.Select(series => new MudBlazor.ChartSeries {
         Name = series.Name,
-        Data = series.Data
+        Data = series.Data,
     }).ToList();
 
     /// <summary>
@@ -65,6 +63,6 @@ public static class ChartSeriesConverter {
     /// <returns>MudBlazor chart series list</returns>
     public static List<MudBlazor.ChartSeries> ToMudBlazor(ChartSeries[] customSeries) => customSeries.Select(series => new MudBlazor.ChartSeries {
         Name = series.Name,
-        Data = series.Data
+        Data = series.Data,
     }).ToList();
 }

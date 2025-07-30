@@ -360,7 +360,7 @@ public enum ThreatLevel {
     Low = 1,
     Medium = 2,
     High = 3,
-    Critical = 4
+    Critical = 4,
 }
 
 /// <summary>
@@ -371,7 +371,7 @@ public enum ThreatSeverity {
     Low = 1,
     Medium = 2,
     High = 3,
-    Critical = 4
+    Critical = 4,
 }
 
 /// <summary>
@@ -390,7 +390,7 @@ public enum ThreatType {
     AnomalousTraffic,
     DataExfiltration,
     PrivilegeEscalation,
-    UnauthorizedAccess
+    UnauthorizedAccess,
 }
 
 /// <summary>
@@ -400,7 +400,7 @@ public enum BehaviorRiskLevel {
     Low = 1,
     Medium = 2,
     High = 3,
-    Critical = 4
+    Critical = 4,
 }
 
 /// <summary>
@@ -412,7 +412,7 @@ public enum ContentType {
     Archive,
     Executable,
     Script,
-    Document
+    Document,
 }
 
 /// <summary>
@@ -426,7 +426,7 @@ public enum ThreatRuleCondition {
     Regex,
     IpRange,
     GreaterThan,
-    LessThan
+    LessThan,
 }
 
 /// <summary>
@@ -437,7 +437,7 @@ public enum ThreatRuleAction {
     Block,
     Alert,
     Quarantine,
-    RateLimit
+    RateLimit,
 }
 
 /// <summary>
@@ -445,5 +445,5 @@ public enum ThreatRuleAction {
 /// </summary>
 public enum IpBlockAction {
     Block,
-    Unblock
+    Unblock,
 }

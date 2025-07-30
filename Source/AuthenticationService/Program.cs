@@ -1,6 +1,5 @@
 using MCPHub.AuthenticationService.Services;
 using MCPHub.Data;
-using MCPHub.Data.Extensions;
 using MCPHub.Domain.Entities;
 
 using Microsoft.AspNetCore.Identity;
@@ -27,7 +26,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options => {
 .AddDefaultTokenProviders();
 
 // Register authentication services (skeletons)
-builder.Services.AddScoped<IAuthenticationService, MCPHub.AuthenticationService.Services.AuthenticationService>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 

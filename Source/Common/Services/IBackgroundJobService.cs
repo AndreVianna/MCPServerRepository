@@ -67,7 +67,7 @@ public enum JobStatus {
     Completed,
     Failed,
     Cancelled,
-    Scheduled
+    Scheduled,
 }
 
 /// <summary>

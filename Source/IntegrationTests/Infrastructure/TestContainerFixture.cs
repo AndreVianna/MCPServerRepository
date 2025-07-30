@@ -7,7 +7,7 @@ public class TestContainerFixture : IAsyncLifetime {
     public PostgreSqlContainer PostgreSqlContainer { get; private set; } = null!;
     public RedisContainer RedisContainer { get; private set; } = null!;
     public TestWebApplicationFactory<Program> WebApplicationFactory { get; private set; } = null!;
-    public TestWebApplicationFactory<MCPHub.WebApp.Program> WebAppFactory { get; private set; } = null!;
+    public TestWebApplicationFactory<WebApp.Program> WebAppFactory { get; private set; } = null!;
 
     public async Task InitializeAsync() {
         // Start PostgreSQL container
@@ -33,7 +33,7 @@ public class TestContainerFixture : IAsyncLifetime {
 
         // Create test application factories
         WebApplicationFactory = new TestWebApplicationFactory<Program>(PostgreSqlContainer, RedisContainer);
-        WebAppFactory = new TestWebApplicationFactory<MCPHub.WebApp.Program>(PostgreSqlContainer, RedisContainer);
+        WebAppFactory = new TestWebApplicationFactory<WebApp.Program>(PostgreSqlContainer, RedisContainer);
 
         // Initialize databases
         await WebApplicationFactory.InitializeDatabaseAsync();

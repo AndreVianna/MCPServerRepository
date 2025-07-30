@@ -1,10 +1,4 @@
 @page "/analytics/global"
-@using MCPHub.WebApp.Services
-@using MCPHub.WebApp.Components.UI.Layout
-@using MCPHub.WebApp.Components.UI.Analytics
-@using MCPHub.WebApp.Components.UI.Models
-@using MCPHub.Domain.Entities
-@using MudBlazor
 @inject IAnalyticsService AnalyticsService
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
@@ -742,7 +736,7 @@
                     {
                         Title = "Download Trends Over Time",
                         Description = "Package download trends for the selected time period",
-                        ChartType = MCPHub.WebApp.Components.UI.Models.ChartType.Line,
+                        ChartType = Components.UI.Models.ChartType.Line,
                         Series = GetDownloadTrendsSeries(),
                         XAxisLabels = GetDownloadLabels()
                     },
@@ -750,7 +744,7 @@
                     {
                         Title = "Technology Stack Distribution",
                         Description = "Distribution of packages by technology stack",
-                        ChartType = MCPHub.WebApp.Components.UI.Models.ChartType.Donut,
+                        ChartType = Components.UI.Models.ChartType.Donut,
                         Series = GetTechnologyStackSeries(),
                         XAxisLabels = GetTechnologyLabels()
                     }
@@ -842,7 +836,7 @@
                 Title = "Download Trends Over Time",
                 Description = $"Package download trends for {GetTimeRangeDisplayName(_selectedTimeRange)}" + 
                              (!string.IsNullOrEmpty(_selectedCategory) ? $" (Category: {_selectedCategory})" : ""),
-                ChartType = MCPHub.WebApp.Components.UI.Models.ChartType.Line,
+                ChartType = Components.UI.Models.ChartType.Line,
                 Series = GetDownloadTrendsSeries(),
                 XAxisLabels = GetDownloadLabels()
             };
@@ -878,7 +872,7 @@
                 Title = "Technology Stack Distribution",
                 Description = $"Distribution of packages by technology stack for {GetTimeRangeDisplayName(_selectedTimeRange)}" + 
                              (!string.IsNullOrEmpty(_selectedCategory) ? $" (Category: {_selectedCategory})" : ""),
-                ChartType = MCPHub.WebApp.Components.UI.Models.ChartType.Donut,
+                ChartType = Components.UI.Models.ChartType.Donut,
                 Series = GetTechnologyStackSeries(),
                 XAxisLabels = GetTechnologyLabels()
             };

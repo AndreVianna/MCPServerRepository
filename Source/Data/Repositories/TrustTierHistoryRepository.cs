@@ -2,9 +2,6 @@ using MCPHub.Domain.Contracts.Responses;
 using MCPHub.Domain.Entities;
 using MCPHub.Domain.Repositories;
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-
 namespace MCPHub.Data.Repositories;
 
 /// <summary>

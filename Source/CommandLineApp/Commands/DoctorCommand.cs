@@ -4,8 +4,6 @@ using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Services;
 using MCPHub.CommandLineApp.Utilities;
 
-using Microsoft.Extensions.Logging;
-
 using Spectre.Console;
 
 namespace MCPHub.CommandLineApp.Commands;
@@ -1031,7 +1029,7 @@ public class DoctorCommand(
         return Task.CompletedTask;
     }
 
-    private string GetHealthScoreText(HealthScore score) => score switch {
+    private static string GetHealthScoreText(HealthScore score) => score switch {
         HealthScore.Excellent => "Excellent",
         HealthScore.Good => "Good",
         HealthScore.Fair => "Fair",
@@ -1040,7 +1038,7 @@ public class DoctorCommand(
         _ => score.ToString()
     };
 
-    private string GetHealthScoreColor(HealthScore score) => score switch {
+    private static string GetHealthScoreColor(HealthScore score) => score switch {
         HealthScore.Excellent => "green",
         HealthScore.Good => "lime",
         HealthScore.Fair => "yellow",
@@ -1049,7 +1047,7 @@ public class DoctorCommand(
         _ => "white"
     };
 
-    private string GetSeverityText(IssueSeverity severity) => severity switch {
+    private static string GetSeverityText(IssueSeverity severity) => severity switch {
         IssueSeverity.Critical => "🔴 Critical",
         IssueSeverity.Error => "🟠 Error",
         IssueSeverity.Warning => "🟡 Warning",
@@ -1057,7 +1055,7 @@ public class DoctorCommand(
         _ => severity.ToString()
     };
 
-    private string GetSeverityIcon(IssueSeverity severity) => severity switch {
+    private static string GetSeverityIcon(IssueSeverity severity) => severity switch {
         IssueSeverity.Critical => "🔴",
         IssueSeverity.Error => "🟠",
         IssueSeverity.Warning => "🟡",
@@ -1065,7 +1063,7 @@ public class DoctorCommand(
         _ => "•"
     };
 
-    private string GetSecuritySeverityIcon(SecuritySeverity severity) => severity switch {
+    private static string GetSecuritySeverityIcon(SecuritySeverity severity) => severity switch {
         SecuritySeverity.Critical => "🔴",
         SecuritySeverity.High => "🟠",
         SecuritySeverity.Medium => "🟡",
@@ -1073,7 +1071,7 @@ public class DoctorCommand(
         _ => "•"
     };
 
-    private string GetConflictSeverityColor(ConflictSeverity severity) => severity switch {
+    private static string GetConflictSeverityColor(ConflictSeverity severity) => severity switch {
         ConflictSeverity.Critical => "red",
         ConflictSeverity.High => "orange",
         ConflictSeverity.Medium => "yellow",

@@ -34,7 +34,7 @@ public class AuthControllerTests {
         // Arrange
         var request = new LoginRequest {
             Email = "test@example.com",
-            Password = "TestPassword123!"
+            Password = "TestPassword123!",
         };
 
         var user = CreateTestUser();
@@ -69,7 +69,7 @@ public class AuthControllerTests {
         // Arrange
         var request = new LoginRequest {
             Email = "nonexistent@example.com",
-            Password = "TestPassword123!"
+            Password = "TestPassword123!",
         };
 
         _userManager.FindByEmailAsync(request.Email).Returns((ApplicationUser?)null);
@@ -91,7 +91,7 @@ public class AuthControllerTests {
         // Arrange
         var request = new LoginRequest {
             Email = "test@example.com",
-            Password = "WrongPassword"
+            Password = "WrongPassword",
         };
 
         var user = CreateTestUser();
@@ -117,7 +117,7 @@ public class AuthControllerTests {
         // Arrange
         var request = new LoginRequest {
             Email = "test@example.com",
-            Password = "TestPassword123!"
+            Password = "TestPassword123!",
         };
 
         var user = CreateTestUser();
@@ -202,15 +202,15 @@ public class AuthControllerTests {
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, userId.ToString()),
-            new("sub", userId.ToString())
+            new("sub", userId.ToString()),
         };
         var identity = new ClaimsIdentity(claims, "Test");
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
         _controller.ControllerContext = new ControllerContext {
             HttpContext = new DefaultHttpContext {
-                User = claimsPrincipal
-            }
+                User = claimsPrincipal,
+            },
         };
 
         _userManager.FindByIdAsync(userId.ToString()).Returns(user);
@@ -236,8 +236,8 @@ public class AuthControllerTests {
 
         _controller.ControllerContext = new ControllerContext {
             HttpContext = new DefaultHttpContext {
-                User = claimsPrincipal
-            }
+                User = claimsPrincipal,
+            },
         };
 
         // Act
@@ -259,15 +259,15 @@ public class AuthControllerTests {
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, userId.ToString()),
-            new("sub", userId.ToString())
+            new("sub", userId.ToString()),
         };
         var identity = new ClaimsIdentity(claims, "Test");
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
         _controller.ControllerContext = new ControllerContext {
             HttpContext = new DefaultHttpContext {
-                User = claimsPrincipal
-            }
+                User = claimsPrincipal,
+            },
         };
 
         // Act
@@ -285,6 +285,6 @@ public class AuthControllerTests {
         Id = Guid.NewGuid(),
         UserName = "testuser",
         Email = "test@example.com",
-        EmailConfirmed = true
+        EmailConfirmed = true,
     };
 }

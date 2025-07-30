@@ -5,8 +5,6 @@ using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Services;
 using MCPHub.CommandLineApp.Utilities;
 
-using Microsoft.Extensions.Logging;
-
 using Spectre.Console;
 
 namespace MCPHub.CommandLineApp.Commands;
@@ -701,7 +699,7 @@ public class UninstallCommand(
         }
     }
 
-    private string GetDependencyTypeMarkup(DependencyType type) => type switch {
+    private static string GetDependencyTypeMarkup(DependencyType type) => type switch {
         DependencyType.Runtime => "[red]Runtime[/]",
         DependencyType.Development => "[blue]Development[/]",
         DependencyType.Optional => "[yellow]Optional[/]",

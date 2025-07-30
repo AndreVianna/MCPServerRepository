@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Text;
 using System.Text.Json;
 
 namespace MCPHub.WebApp.Services;
@@ -19,7 +18,7 @@ public class ExportService(ILogger<ExportService> logger) : IExportService {
                 ExportFormat.Json => await ExportAnalyticsToJsonAsync(data, options, cancellationToken),
                 ExportFormat.Pdf => await ExportAnalyticsToPdfAsync(data, options, cancellationToken),
                 ExportFormat.Excel => await ExportAnalyticsToExcelAsync(data, options, cancellationToken),
-                _ => new ExportResult { Success = false, ErrorMessage = $"Unsupported format: {options.Format}" }
+                _ => new ExportResult { Success = false, ErrorMessage = $"Unsupported format: {options.Format}" },
             };
 
             if (result.Success) {
@@ -35,7 +34,7 @@ public class ExportService(ILogger<ExportService> logger) : IExportService {
             _logger.LogError(ex, "Error exporting analytics data for {Title}", data.Title);
             return new ExportResult {
                 Success = false,
-                ErrorMessage = $"Export failed: {ex.Message}"
+                ErrorMessage = $"Export failed: {ex.Message}",
             };
         }
     }
@@ -49,7 +48,7 @@ public class ExportService(ILogger<ExportService> logger) : IExportService {
                 ExportFormat.Json => await ExportChartToJsonAsync(chartData, options, cancellationToken),
                 ExportFormat.Pdf => await ExportChartToPdfAsync(chartData, options, cancellationToken),
                 ExportFormat.Excel => await ExportChartToExcelAsync(chartData, options, cancellationToken),
-                _ => new ExportResult { Success = false, ErrorMessage = $"Unsupported format: {options.Format}" }
+                _ => new ExportResult { Success = false, ErrorMessage = $"Unsupported format: {options.Format}" },
             };
 
             if (result.Success) {
@@ -65,7 +64,7 @@ public class ExportService(ILogger<ExportService> logger) : IExportService {
             _logger.LogError(ex, "Error exporting chart data for {Title}", chartData.Title);
             return new ExportResult {
                 Success = false,
-                ErrorMessage = $"Chart export failed: {ex.Message}"
+                ErrorMessage = $"Chart export failed: {ex.Message}",
             };
         }
     }
@@ -79,7 +78,7 @@ public class ExportService(ILogger<ExportService> logger) : IExportService {
                 ExportFormat.Json => await ExportTableToJsonAsync(data, options, cancellationToken),
                 ExportFormat.Pdf => await ExportTableToPdfAsync(data, options, cancellationToken),
                 ExportFormat.Excel => await ExportTableToExcelAsync(data, options, cancellationToken),
-                _ => new ExportResult { Success = false, ErrorMessage = $"Unsupported format: {options.Format}" }
+                _ => new ExportResult { Success = false, ErrorMessage = $"Unsupported format: {options.Format}" },
             };
 
             if (result.Success) {
@@ -95,7 +94,7 @@ public class ExportService(ILogger<ExportService> logger) : IExportService {
             _logger.LogError(ex, "Error exporting table data");
             return new ExportResult {
                 Success = false,
-                ErrorMessage = $"Table export failed: {ex.Message}"
+                ErrorMessage = $"Table export failed: {ex.Message}",
             };
         }
     }
@@ -107,7 +106,7 @@ public class ExportService(ILogger<ExportService> logger) : IExportService {
         ExportFormat.Json => "application/json",
         ExportFormat.Pdf => "application/pdf",
         ExportFormat.Excel => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        _ => "application/octet-stream"
+        _ => "application/octet-stream",
     };
 
     public string GetFileExtension(ExportFormat format) => format switch {
@@ -115,7 +114,7 @@ public class ExportService(ILogger<ExportService> logger) : IExportService {
         ExportFormat.Json => ".json",
         ExportFormat.Pdf => ".pdf",
         ExportFormat.Excel => ".xlsx",
-        _ => ".txt"
+        _ => ".txt",
     };
 
     #region CSV Export Methods
@@ -191,7 +190,7 @@ public class ExportService(ILogger<ExportService> logger) : IExportService {
             Success = true,
             FileName = fileName,
             Data = data_bytes,
-            ContentType = GetContentType(options.Format)
+            ContentType = GetContentType(options.Format),
         });
     }
 
@@ -229,7 +228,7 @@ public class ExportService(ILogger<ExportService> logger) : IExportService {
             Success = true,
             FileName = fileName,
             Data = data_bytes,
-            ContentType = GetContentType(options.Format)
+            ContentType = GetContentType(options.Format),
         });
     }
 
@@ -262,7 +261,7 @@ public class ExportService(ILogger<ExportService> logger) : IExportService {
             Success = true,
             FileName = fileName,
             Data = data_bytes,
-            ContentType = GetContentType(options.Format)
+            ContentType = GetContentType(options.Format),
         });
     }
 
@@ -279,13 +278,13 @@ public class ExportService(ILogger<ExportService> logger) : IExportService {
                 generatedAt = data.GeneratedAt,
                 exportedAt = DateTime.UtcNow,
                 format = "JSON",
-                version = "1.0"
+                version = "1.0",
             },
             summary = data.Summary.Select(s => new {
                 label = s.Label,
                 value = s.Value,
                 change = s.Change,
-                color = s.Color.ToString()
+                color = s.Color.ToString(),
             }).ToArray(),
             charts = data.Charts.Select(c => new {
                 title = c.Title,
@@ -293,18 +292,18 @@ public class ExportService(ILogger<ExportService> logger) : IExportService {
                 type = c.ChartType.ToString(),
                 series = c.Series.Select(s => new {
                     name = s.Name,
-                    data = s.Data
+                    data = s.Data,
                 }).ToArray(),
                 xAxisLabels = c.XAxisLabels,
-                options = c.Options
+                options = c.Options,
             }).ToArray(),
             tables = data.Tables,
-            rawData = data.RawData
+            rawData = data.RawData,
         };
 
         var jsonOptions = new JsonSerializerOptions {
             WriteIndented = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         };
 
         var json = JsonSerializer.Serialize(exportData, jsonOptions);
@@ -315,7 +314,7 @@ public class ExportService(ILogger<ExportService> logger) : IExportService {
             Success = true,
             FileName = fileName,
             Data = data_bytes,
-            ContentType = GetContentType(options.Format)
+            ContentType = GetContentType(options.Format),
         });
     }
 
@@ -326,7 +325,7 @@ public class ExportService(ILogger<ExportService> logger) : IExportService {
                 description = chartData.Description,
                 generatedAt = DateTime.UtcNow,
                 format = "JSON",
-                version = "1.0"
+                version = "1.0",
             },
             chart = new {
                 title = chartData.Title,
@@ -334,16 +333,16 @@ public class ExportService(ILogger<ExportService> logger) : IExportService {
                 type = chartData.ChartType.ToString(),
                 series = chartData.Series.Select(s => new {
                     name = s.Name,
-                    data = s.Data
+                    data = s.Data,
                 }).ToArray(),
                 xAxisLabels = chartData.XAxisLabels,
-                options = chartData.Options
-            }
+                options = chartData.Options,
+            },
         };
 
         var jsonOptions = new JsonSerializerOptions {
             WriteIndented = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         };
 
         var json = JsonSerializer.Serialize(exportData, jsonOptions);
@@ -354,7 +353,7 @@ public class ExportService(ILogger<ExportService> logger) : IExportService {
             Success = true,
             FileName = fileName,
             Data = data_bytes,
-            ContentType = GetContentType(options.Format)
+            ContentType = GetContentType(options.Format),
         });
     }
 
@@ -366,14 +365,14 @@ public class ExportService(ILogger<ExportService> logger) : IExportService {
                 generatedAt = DateTime.UtcNow,
                 format = "JSON",
                 version = "1.0",
-                rowCount = data.Count
+                rowCount = data.Count,
             },
-            data
+            data,
         };
 
         var jsonOptions = new JsonSerializerOptions {
             WriteIndented = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         };
 
         var json = JsonSerializer.Serialize(exportData, jsonOptions);
@@ -384,7 +383,7 @@ public class ExportService(ILogger<ExportService> logger) : IExportService {
             Success = true,
             FileName = fileName,
             Data = data_bytes,
-            ContentType = GetContentType(options.Format)
+            ContentType = GetContentType(options.Format),
         });
     }
 
@@ -404,7 +403,7 @@ public class ExportService(ILogger<ExportService> logger) : IExportService {
             FileName = fileName,
             Data = data_bytes,
             ContentType = "text/plain", // Would be "application/pdf" with proper PDF generation
-            ErrorMessage = "PDF export implemented as text format. Upgrade to proper PDF library for production use."
+            ErrorMessage = "PDF export implemented as text format. Upgrade to proper PDF library for production use.",
         });
     }
 
@@ -418,7 +417,7 @@ public class ExportService(ILogger<ExportService> logger) : IExportService {
             FileName = fileName,
             Data = data_bytes,
             ContentType = "text/plain", // Would be "application/pdf" with proper PDF generation
-            ErrorMessage = "PDF export implemented as text format. Upgrade to proper PDF library for production use."
+            ErrorMessage = "PDF export implemented as text format. Upgrade to proper PDF library for production use.",
         });
     }
 
@@ -432,7 +431,7 @@ public class ExportService(ILogger<ExportService> logger) : IExportService {
             FileName = fileName,
             Data = data_bytes,
             ContentType = "text/plain", // Would be "application/pdf" with proper PDF generation
-            ErrorMessage = "PDF export implemented as text format. Upgrade to proper PDF library for production use."
+            ErrorMessage = "PDF export implemented as text format. Upgrade to proper PDF library for production use.",
         });
     }
 
@@ -459,7 +458,7 @@ public class ExportService(ILogger<ExportService> logger) : IExportService {
         return $"{baseName}_{timestamp}{extension}";
     }
 
-    private string GenerateTextReport(ExportAnalyticsData data) {
+    private static string GenerateTextReport(ExportAnalyticsData data) {
         var report = new StringBuilder();
         report.AppendLine($"{data.Title}");
         report.AppendLine(new string('=', data.Title.Length));
@@ -506,7 +505,7 @@ public class ExportService(ILogger<ExportService> logger) : IExportService {
         return report.ToString();
     }
 
-    private string GenerateChartTextReport(ExportChartData chartData) {
+    private static string GenerateChartTextReport(ExportChartData chartData) {
         var report = new StringBuilder();
         report.AppendLine($"{chartData.Title}");
         report.AppendLine(new string('=', chartData.Title.Length));
@@ -530,7 +529,7 @@ public class ExportService(ILogger<ExportService> logger) : IExportService {
         return report.ToString();
     }
 
-    private string GenerateTableTextReport(List<Dictionary<string, object>> data, ExportOptions options) {
+    private static string GenerateTableTextReport(List<Dictionary<string, object>> data, ExportOptions options) {
         var report = new StringBuilder();
         report.AppendLine($"{options.Title}");
         report.AppendLine(new string('=', options.Title.Length));

@@ -2,8 +2,6 @@ using MCPHub.Domain.Contracts.Services;
 using MCPHub.Domain.Entities;
 using MCPHub.Domain.ValueObjects;
 
-using Microsoft.Extensions.Logging;
-
 namespace MCPHub.CommandLineApp.Services;
 
 /// <summary>

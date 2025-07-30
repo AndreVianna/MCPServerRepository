@@ -1,6 +1,5 @@
 using MCPHub.Common.Configuration;
 using MCPHub.Common.Configuration.Validators;
-using MCPHub.Common.Services;
 
 namespace MCPHub.Common.Extensions;
 

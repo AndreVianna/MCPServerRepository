@@ -8,8 +8,6 @@ using MCPHub.CommandLineApp.Services;
 using MCPHub.CommandLineApp.Utilities;
 using MCPHub.Domain.ValueObjects;
 
-using Microsoft.Extensions.Logging;
-
 using Spectre.Console;
 
 namespace MCPHub.CommandLineApp.Commands;
@@ -243,21 +241,17 @@ public class PublishCommand(
         }
     }
 
-    private string ResolveManifestPath(string? manifestPath) {
+    private static string ResolveManifestPath(string? manifestPath) {
         var path = manifestPath ?? DefaultManifestFileName;
 
         if (!Path.IsPathRooted(path)) {
             path = Path.Combine(Environment.CurrentDirectory, path);
         }
 
-        if (!File.Exists(path)) {
-            throw new FileNotFoundException($"Manifest file not found: {path}");
-        }
-
-        return path;
+        return !File.Exists(path) ? throw new FileNotFoundException($"Manifest file not found: {path}") : path;
     }
 
-    private string? ResolveOptionalFile(string? filePath, string defaultFileName) {
+    private static string? ResolveOptionalFile(string? filePath, string defaultFileName) {
         if (!string.IsNullOrEmpty(filePath)) {
             var path = Path.IsPathRooted(filePath) ? filePath : Path.Combine(Environment.CurrentDirectory, filePath);
             return File.Exists(path) ? path : null;
@@ -267,13 +261,10 @@ public class PublishCommand(
         return File.Exists(defaultPath) ? defaultPath : null;
     }
 
-    private async Task<string> LoadManifestAsync(string manifestPath) {
+    private static async Task<string> LoadManifestAsync(string manifestPath) {
         try {
             var content = await File.ReadAllTextAsync(manifestPath);
-            if (string.IsNullOrWhiteSpace(content)) {
-                throw new InvalidOperationException("Manifest file is empty");
-            }
-            return content;
+            return string.IsNullOrWhiteSpace(content) ? throw new InvalidOperationException("Manifest file is empty") : content;
         }
         catch (Exception ex) when (ex is not InvalidOperationException) {
             throw new FileNotFoundException($"Failed to read manifest file: {ex.Message}");
@@ -367,7 +358,7 @@ public class PublishCommand(
     /// <summary>
     /// Gets suggestions for specific validation errors
     /// </summary>
-    private string GetErrorSuggestion(string error) => error.ToLower() switch {
+    private static string GetErrorSuggestion(string error) => error.ToLower() switch {
         var e when e.Contains("name") => "Use lowercase letters, numbers, and hyphens only for package name",
         var e when e.Contains("version") => "Use semantic versioning format (e.g., 1.0.0, 2.1.3-beta)",
         var e when e.Contains("description") => "Add a brief description explaining what your package does",
@@ -426,7 +417,7 @@ public class PublishCommand(
     /// <summary>
     /// Gets recommendations for warnings
     /// </summary>
-    private string GetWarningRecommendation(string warning) => warning.ToLower() switch {
+    private static string GetWarningRecommendation(string warning) => warning.ToLower() switch {
         var w when w.Contains("readme") => "Consider adding a README.md file to help users understand your package",
         var w when w.Contains("changelog") => "Add a CHANGELOG.md to document version changes",
         var w when w.Contains("keyword") => "Add relevant keywords to improve package discoverability",
@@ -700,17 +691,13 @@ public class PublishCommand(
         }
     }
 
-    private List<string> ParseTags(string? tags) {
-        if (string.IsNullOrWhiteSpace(tags)) {
-            return new List<string>();
-        }
-
-        return tags.Split(',', StringSplitOptions.RemoveEmptyEntries)
+    private static List<string> ParseTags(string? tags) => string.IsNullOrWhiteSpace(tags)
+            ? []
+            : tags.Split(',', StringSplitOptions.RemoveEmptyEntries)
             .Select(t => t.Trim())
             .Where(t => !string.IsNullOrWhiteSpace(t))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
-    }
 
     private async Task<PublishPackageRequest> CreatePublishRequestAsync(
         string manifestContent,
@@ -757,7 +744,7 @@ public class PublishCommand(
         return Convert.ToBase64String(Encoding.UTF8.GetBytes(archiveJson));
     }
 
-    private bool IsExcludedFile(string filePath) {
+    private static bool IsExcludedFile(string filePath) {
         var fileName = Path.GetFileName(filePath);
         var relativePath = Path.GetRelativePath(Environment.CurrentDirectory, filePath);
 
@@ -813,7 +800,7 @@ public class PublishCommand(
         return AnsiConsole.Confirm("Proceed with publishing?", false);
     }
 
-    private bool ConfirmPublishing(MCPManifest manifest) => AnsiConsole.Confirm($"Publish package '{manifest.Name}' version '{manifest.Version}' to the registry?", false);
+    private static bool ConfirmPublishing(MCPManifest manifest) => AnsiConsole.Confirm($"Publish package '{manifest.Name}' version '{manifest.Version}' to the registry?", false);
 
     private async Task<PublishPackageResponse> PublishPackageAsync(PublishPackageRequest request, MCPManifest manifest) => await WithProgressAsync(
             $"Publishing package '{manifest.Name}' version '{manifest.Version}'...",

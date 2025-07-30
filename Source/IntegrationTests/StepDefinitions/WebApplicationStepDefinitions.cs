@@ -6,7 +6,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
     private readonly TestContainerFixture _fixture = fixture ?? throw new ArgumentNullException(nameof(fixture));
     private readonly SolutionScenarioContext _scenarioContext = scenarioContext ?? throw new ArgumentNullException(nameof(scenarioContext));
 
-    [Given(@"the MCP Hub web application is running")]
+    [Given("the MCP Hub web application is running")]
     public void GivenTheMCPHubWebApplicationIsRunning() {
         // Initialize web driver if not already done
         if (_scenarioContext.WebDriver == null) {
@@ -20,7 +20,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
         _scenarioContext.Set("BaseUrl", baseUrl);
     }
 
-    [When(@"I visit the homepage")]
+    [When("I visit the homepage")]
     public void WhenIVisitTheHomepage() {
         var baseUrl = _scenarioContext.Get<string>("BaseUrl");
         _scenarioContext.WebDriver!.Navigate().GoToUrl($"{baseUrl}/");
@@ -28,7 +28,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
         _scenarioContext.CurrentPageUrl = _scenarioContext.WebDriver.Url;
     }
 
-    [When(@"I navigate to the package detail page")]
+    [When("I navigate to the package detail page")]
     public void WhenINavigateToThePackageDetailPage() {
         var package = _scenarioContext.CurrentPackage;
         package.Should().NotBeNull("A package should be set in the scenario context");
@@ -102,7 +102,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
         _scenarioContext.FormData["search"] = searchTerm;
     }
 
-    [When(@"I click the search button")]
+    [When("I click the search button")]
     public void WhenIClickTheSearchButton() {
         var driver = _scenarioContext.WebDriver!;
 
@@ -131,10 +131,10 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
         driver.WaitForPageLoad();
     }
 
-    [When(@"I fill in valid registration details")]
+    [When("I fill in valid registration details")]
     public void WhenIFillInValidRegistrationDetails() {
         var driver = _scenarioContext.WebDriver!;
-        var testUser = _scenarioContext.DataBuilder.CreateTestUser();
+        var testUser = TestDataBuilder.CreateTestUser();
 
         var formData = new Dictionary<string, string> {
             ["email"] = testUser.Email!,
@@ -158,7 +158,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
         }
     }
 
-    [When(@"I submit the form")]
+    [When("I submit the form")]
     public void WhenISubmitTheForm() {
         var driver = _scenarioContext.WebDriver!;
 
@@ -191,7 +191,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
         WhenIClickTheSearchButton();
     }
 
-    [Then(@"I should see the MCP Hub branding")]
+    [Then("I should see the MCP Hub branding")]
     public void ThenIShouldSeeTheMCPHubBranding() {
         var driver = _scenarioContext.WebDriver!;
 
@@ -207,7 +207,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
         brandingFound.Should().BeTrue("MCP Hub branding should be visible on the page");
     }
 
-    [Then(@"I should see the main search bar")]
+    [Then("I should see the main search bar")]
     public void ThenIShouldSeeTheMainSearchBar() {
         var driver = _scenarioContext.WebDriver!;
 
@@ -224,7 +224,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
         searchBarFound.Should().BeTrue("Main search bar should be visible on the homepage");
     }
 
-    [Then(@"I should see featured packages section")]
+    [Then("I should see featured packages section")]
     public void ThenIShouldSeeFeaturedPackagesSection() {
         var driver = _scenarioContext.WebDriver!;
 
@@ -240,7 +240,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
         featuredFound.Should().BeTrue("Featured packages section should be present on the homepage");
     }
 
-    [Then(@"I should see trending packages")]
+    [Then("I should see trending packages")]
     public void ThenIShouldSeeTrendingPackages() {
         var driver = _scenarioContext.WebDriver!;
 
@@ -256,7 +256,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
         trendingFound.Should().BeTrue("Trending packages section should be present on the homepage");
     }
 
-    [Then(@"I should see category navigation")]
+    [Then("I should see category navigation")]
     public void ThenIShouldSeeCategoryNavigation() {
         var driver = _scenarioContext.WebDriver!;
 
@@ -272,7 +272,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
         categoryFound.Should().BeTrue("Category navigation should be present on the homepage");
     }
 
-    [Then(@"I should see platform statistics")]
+    [Then("I should see platform statistics")]
     public void ThenIShouldSeePlatformStatistics() {
         var driver = _scenarioContext.WebDriver!;
 
@@ -288,7 +288,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
         statsFound.Should().BeTrue("Platform statistics should be present on the homepage");
     }
 
-    [Then(@"I should be redirected to the search results page")]
+    [Then("I should be redirected to the search results page")]
     public void ThenIShouldBeRedirectedToTheSearchResultsPage() {
         var driver = _scenarioContext.WebDriver!;
         var currentUrl = driver.Url;
@@ -313,7 +313,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
             $"Search results should contain the search term '{searchTerm}'");
     }
 
-    [Then(@"each package result should display name, description, and trust tier")]
+    [Then("each package result should display name, description, and trust tier")]
     public void ThenEachPackageResultShouldDisplayNameDescriptionAndTrustTier() {
         var driver = _scenarioContext.WebDriver!;
 
@@ -338,7 +338,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
         }
     }
 
-    [Then(@"I should see download counts and ratings")]
+    [Then("I should see download counts and ratings")]
     public void ThenIShouldSeeDownloadCountsAndRatings() {
         var driver = _scenarioContext.WebDriver!;
         var pageText = driver.FindElement(By.TagName("body")).Text;
@@ -357,7 +357,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
         hasRatings.Should().BeTrue("Search results should display ratings or stars");
     }
 
-    [Then(@"I should see comprehensive package information:")]
+    [Then("I should see comprehensive package information:")]
     public void ThenIShouldSeeComprehensivePackageInformation(Table table) {
         var driver = _scenarioContext.WebDriver!;
         var pageText = driver.FindElement(By.TagName("body")).Text.ToLowerInvariant();
@@ -374,7 +374,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
         }
     }
 
-    [Then(@"I should see an installation command that I can copy")]
+    [Then("I should see an installation command that I can copy")]
     public void ThenIShouldSeeAnInstallationCommandThatICanCopy() {
         var driver = _scenarioContext.WebDriver!;
         var pageText = driver.FindElement(By.TagName("body")).Text;
@@ -393,7 +393,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
         hasCopyButton.Should().BeTrue("Installation command should be copyable");
     }
 
-    [Then(@"I should see the login form")]
+    [Then("I should see the login form")]
     public void ThenIShouldSeeTheLoginForm() {
         var driver = _scenarioContext.WebDriver!;
 
@@ -418,7 +418,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
         hasSubmitButton.Should().BeTrue("Login form should have submit button");
     }
 
-    [Then(@"I should see a confirmation message about email verification")]
+    [Then("I should see a confirmation message about email verification")]
     public void ThenIShouldSeeAConfirmationMessageAboutEmailVerification() {
         var driver = _scenarioContext.WebDriver!;
         var pageText = driver.FindElement(By.TagName("body")).Text;
@@ -430,7 +430,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
         hasVerificationMessage.Should().BeTrue("Should see confirmation message about email verification");
     }
 
-    [Given(@"I am logged in as a user")]
+    [Given("I am logged in as a user")]
     public void GivenIAmLoggedInAsAUser() {
         // Simulate logged-in state by setting user context
         var testUser = _scenarioContext.GetOrCreateTestUser();
@@ -446,7 +446,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
         _scenarioContext.Set("LoggedInUser", testUser);
     }
 
-    [Given(@"I am logged in as a publisher with packages")]
+    [Given("I am logged in as a publisher with packages")]
     public void GivenIAmLoggedInAsAPublisherWithPackages() {
         var testUser = _scenarioContext.GetOrCreateTestUser("publisher@example.com");
         _scenarioContext.SetCurrentUser(testUser.Id.ToString(), testUser.Email!, "Publisher");
@@ -467,7 +467,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
         _scenarioContext.Set("LoggedInUser", testUser);
     }
 
-    [When(@"I navigate to my publisher dashboard")]
+    [When("I navigate to my publisher dashboard")]
     public void WhenINavigateToMyPublisherDashboard() {
         var baseUrl = _scenarioContext.Get<string>("BaseUrl");
         _scenarioContext.WebDriver!.Navigate().GoToUrl($"{baseUrl}/dashboard");
@@ -475,7 +475,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
         _scenarioContext.CurrentPageUrl = _scenarioContext.WebDriver.Url;
     }
 
-    [Then(@"I should see dashboard sections:")]
+    [Then("I should see dashboard sections:")]
     public void ThenIShouldSeeDashboardSections(Table table) {
         var driver = _scenarioContext.WebDriver!;
         var pageText = driver.FindElement(By.TagName("body")).Text.ToLowerInvariant();
@@ -491,7 +491,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
         }
     }
 
-    [Given(@"I am using a mobile device")]
+    [Given("I am using a mobile device")]
     public void GivenIAmUsingAMobileDevice() {
         // Resize browser to mobile viewport
         _scenarioContext.WebDriver!.Manage().Window.Size = new System.Drawing.Size(375, 667); // iPhone size
@@ -501,7 +501,7 @@ public class WebApplicationStepDefinitions(TestContainerFixture fixture, Solutio
         options.AddArgument("--user-agent=Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15");
     }
 
-    [Then(@"all pages should display correctly on mobile:")]
+    [Then("all pages should display correctly on mobile:")]
     public void ThenAllPagesShouldDisplayCorrectlyOnMobile(Table table) {
         var driver = _scenarioContext.WebDriver!;
         var baseUrl = _scenarioContext.Get<string>("BaseUrl");

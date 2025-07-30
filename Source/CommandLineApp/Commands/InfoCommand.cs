@@ -7,8 +7,6 @@ using MCPHub.Domain.Contracts.Responses;
 using MCPHub.Domain.Entities;
 using MCPHub.Domain.ValueObjects;
 
-using Microsoft.Extensions.Logging;
-
 using Spectre.Console;
 
 namespace MCPHub.CommandLineApp.Commands;
@@ -368,7 +366,7 @@ public class InfoCommand(
         }
     }
 
-    private string GetSecurityGradeDisplay(string grade) => grade switch {
+    private static string GetSecurityGradeDisplay(string grade) => grade switch {
         "A+" or "A" => $"[green]{grade}[/] (Excellent)",
         "B" => $"[yellow]{grade}[/] (Good)",
         "C" => $"[orange3]{grade}[/] (Acceptable)",

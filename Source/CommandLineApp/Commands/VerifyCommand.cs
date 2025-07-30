@@ -8,8 +8,6 @@ using MCPHub.CommandLineApp.Utilities;
 using MCPHub.Domain.Entities;
 using MCPHub.Domain.ValueObjects;
 
-using Microsoft.Extensions.Logging;
-
 using Spectre.Console;
 
 namespace MCPHub.CommandLineApp.Commands;
@@ -220,7 +218,7 @@ public class VerifyCommand(
         }
     }
 
-    private ScanType ParseScanType(string scanType) => scanType.ToLowerInvariant() switch {
+    private static ScanType ParseScanType(string scanType) => scanType.ToLowerInvariant() switch {
         "vulnerability" => ScanType.Vulnerability,
         "malware" => ScanType.Malware,
         "license" => ScanType.License,
@@ -229,7 +227,7 @@ public class VerifyCommand(
         _ => ScanType.Comprehensive
     };
 
-    private SecurityScanSeverity ParseSeverity(string severity) => severity.ToLowerInvariant() switch {
+    private static SecurityScanSeverity ParseSeverity(string severity) => severity.ToLowerInvariant() switch {
         "low" => SecurityScanSeverity.Low,
         "medium" => SecurityScanSeverity.Medium,
         "high" => SecurityScanSeverity.High,
@@ -237,18 +235,15 @@ public class VerifyCommand(
         _ => SecurityScanSeverity.Medium
     };
 
-    private TrustTier? ParseTrustTierEnum(string? trustTier) {
-        if (string.IsNullOrWhiteSpace(trustTier))
-            return null;
-
-        return trustTier.ToLowerInvariant() switch {
-            "unverified" => TrustTier.Unverified,
-            "community" => TrustTier.Community,
-            "professional" => TrustTier.Professional,
-            "enterprise" => TrustTier.Enterprise,
-            _ => null
-        };
-    }
+    private static TrustTier? ParseTrustTierEnum(string? trustTier) => string.IsNullOrWhiteSpace(trustTier)
+            ? null
+            : trustTier.ToLowerInvariant() switch {
+                "unverified" => TrustTier.Unverified,
+                "community" => TrustTier.Community,
+                "professional" => TrustTier.Professional,
+                "enterprise" => TrustTier.Enterprise,
+                _ => null
+            };
 
     private Task<IEnumerable<PackageToVerify>> GetPackagesToVerifyAsync(string? package, bool global) {
         if (!string.IsNullOrEmpty(package)) {
@@ -265,7 +260,7 @@ public class VerifyCommand(
         return Task.FromResult<IEnumerable<PackageToVerify>>(Enumerable.Empty<PackageToVerify>());
     }
 
-    private (string packageName, string? version) ParsePackageSpec(string packageSpec) {
+    private static (string packageName, string? version) ParsePackageSpec(string packageSpec) {
         var parts = packageSpec.Split('@', 2);
         return parts.Length == 2 ? (parts[0], parts[1]) : (parts[0], null);
     }
@@ -348,7 +343,7 @@ public class VerifyCommand(
         List<PackageAnalysisResult> packages,
         TrustTier? minimumTrustTier) {
         if (minimumTrustTier == null) {
-            return new List<TrustTierComplianceResult>();
+            return [];
         }
 
         var packageSpecs = packages.Where(p => !p.HasError).Select(p => new PackageSpec {
@@ -361,7 +356,7 @@ public class VerifyCommand(
             .ToList();
     }
 
-    private async Task<VerificationSummary> GenerateVerificationSummaryAsync(
+    private static async Task<VerificationSummary> GenerateVerificationSummaryAsync(
         List<SecurityScanResult> scanResults,
         List<TrustTierComplianceResult> trustTierResults,
         List<PackageAnalysisResult> analysisResults) {
@@ -475,7 +470,7 @@ public class VerifyCommand(
         await Task.Delay(10); // Small delay for UI responsiveness
     }
 
-    private void DisplayTrustTierResults(List<TrustTierComplianceResult> trustTierResults) {
+    private static void DisplayTrustTierResults(List<TrustTierComplianceResult> trustTierResults) {
         var table = new Table();
         table.AddColumn("Package");
         table.AddColumn("Current Tier");
@@ -623,7 +618,7 @@ public class VerifyCommand(
         }
     }
 
-    private int DetermineExitCode(VerificationSummary summary) {
+    private static int DetermineExitCode(VerificationSummary summary) {
         if (!summary.HasIssues) {
             return 0; // Success
         }
@@ -639,11 +634,11 @@ public class VerifyCommand(
         return 0; // Medium/low issues - still success
     }
 
-    private string GetStatusMarkup(bool isGood) => isGood ? "[green]✓[/]" : "[red]✗[/]";
+    private static string GetStatusMarkup(bool isGood) => isGood ? "[green]✓[/]" : "[red]✗[/]";
 
-    private string GetIssueStatusMarkup(int count) => count == 0 ? "[green]✓[/]" : "[red]⚠[/]";
+    private static string GetIssueStatusMarkup(int count) => count == 0 ? "[green]✓[/]" : "[red]⚠[/]";
 
-    private string GetSeverityMarkup(SecurityScanSeverity severity) => severity switch {
+    private static string GetSeverityMarkup(SecurityScanSeverity severity) => severity switch {
         SecurityScanSeverity.Critical => "[red]Critical[/]",
         SecurityScanSeverity.High => "[orange3]High[/]",
         SecurityScanSeverity.Medium => "[yellow]Medium[/]",
@@ -682,9 +677,9 @@ public record VerificationSummary {
     public int PackagesWithIssues { get; init; }
     public int TrustTierViolations { get; init; }
     public SecurityScanSeverity HighestSeverity { get; init; }
-    public List<SecurityScanResult> ScanResults { get; init; } = new();
-    public List<TrustTierComplianceResult> TrustTierResults { get; init; } = new();
-    public List<PackageAnalysisResult> AnalysisResults { get; init; } = new();
+    public List<SecurityScanResult> ScanResults { get; init; } = [];
+    public List<TrustTierComplianceResult> TrustTierResults { get; init; } = [];
+    public List<PackageAnalysisResult> AnalysisResults { get; init; } = [];
     public DateTimeOffset VerificationTime { get; init; }
 
     public bool HasIssues => PackagesWithIssues > 0 || TrustTierViolations > 0;

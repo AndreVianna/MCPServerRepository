@@ -481,7 +481,7 @@ public enum IncidentSeverity {
     Low = 1,
     Medium = 2,
     High = 3,
-    Critical = 4
+    Critical = 4,
 }
 
 /// <summary>
@@ -497,7 +497,7 @@ public enum IncidentType {
     PolicyViolation,
     SystemCompromise,
     ServiceDisruption,
-    ComplianceViolation
+    ComplianceViolation,
 }
 
 /// <summary>
@@ -510,7 +510,7 @@ public enum IncidentStatus {
     Escalated,
     Resolved,
     Closed,
-    Cancelled
+    Cancelled,
 }
 
 /// <summary>
@@ -522,7 +522,7 @@ public enum IncidentResolutionType {
     WorkedAround,
     FalsePositive,
     Duplicate,
-    CannotReproduce
+    CannotReproduce,
 }
 
 /// <summary>
@@ -537,7 +537,7 @@ public enum IncidentActivityType {
     StatusChanged,
     ResolutionAdded,
     Closed,
-    Reopened
+    Reopened,
 }
 
 /// <summary>
@@ -555,7 +555,7 @@ public enum IncidentResponseAction {
     RotateCredentials,
     UpdateFirewallRules,
     NotifyStakeholders,
-    CollectForensics
+    CollectForensics,
 }
 
 /// <summary>
@@ -566,7 +566,7 @@ public enum IncidentSortBy {
     UpdatedAt,
     Severity,
     Status,
-    Type
+    Type,
 }
 
 /// <summary>
@@ -578,7 +578,7 @@ public enum IncidentNotificationType {
     Escalated,
     Updated,
     Resolved,
-    Closed
+    Closed,
 }
 
 /// <summary>
@@ -589,7 +589,7 @@ public enum IncidentNotificationChannel {
     Sms,
     Slack,
     Teams,
-    Webhook
+    Webhook,
 }
 
 /// <summary>
@@ -600,5 +600,5 @@ public enum IncidentReportType {
     Detailed,
     Trending,
     Performance,
-    Compliance
+    Compliance,
 }

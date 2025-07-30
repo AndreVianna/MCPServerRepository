@@ -54,12 +54,9 @@ public class RateLimitingService : IRateLimitingService, IDisposable {
         var now = DateTimeOffset.UtcNow;
 
         try {
-            if (_options.UseInMemory || _distributedCache == null) {
-                return await CheckRateLimitInMemoryAsync(key, rateLimitPolicy, now);
-            }
-            else {
-                return await CheckRateLimitDistributedAsync(key, rateLimitPolicy, now, cancellationToken);
-            }
+            return _options.UseInMemory || _distributedCache == null
+                ? await CheckRateLimitInMemoryAsync(key, rateLimitPolicy, now)
+                : await CheckRateLimitDistributedAsync(key, rateLimitPolicy, now, cancellationToken);
         }
         catch (Exception ex) {
             _logger.LogError(ex, "Error checking rate limit for key: {Key}", key);
@@ -106,12 +103,9 @@ public class RateLimitingService : IRateLimitingService, IDisposable {
         var key = GetCacheKey(identifier, policy);
 
         try {
-            if (_options.UseInMemory || _distributedCache == null) {
-                return GetUsageInMemory(key, rateLimitPolicy);
-            }
-            else {
-                return await GetUsageDistributedAsync(key, rateLimitPolicy, cancellationToken);
-            }
+            return _options.UseInMemory || _distributedCache == null
+                ? GetUsageInMemory(key, rateLimitPolicy)
+                : await GetUsageDistributedAsync(key, rateLimitPolicy, cancellationToken);
         }
         catch (Exception ex) {
             _logger.LogError(ex, "Error getting usage for key: {Key}", key);
@@ -178,7 +172,7 @@ public class RateLimitingService : IRateLimitingService, IDisposable {
             WindowStart = now,
             RequestCount = 0,
             BlockedCount = 0,
-            PolicyName = key.Split(':').LastOrDefault() ?? "default"
+            PolicyName = key.Split(':').LastOrDefault() ?? "default",
         });
 
         // Check if window has expired
@@ -221,7 +215,7 @@ public class RateLimitingService : IRateLimitingService, IDisposable {
             entry.BlockedCount++;
             // Update cache with blocked count
             var options = new DistributedCacheEntryOptions {
-                AbsoluteExpirationRelativeToNow = policy.WindowDuration
+                AbsoluteExpirationRelativeToNow = policy.WindowDuration,
             };
             await _distributedCache.SetStringAsync(key, JsonSerializer.Serialize(entry), options, cancellationToken);
         }
@@ -263,7 +257,7 @@ public class RateLimitingService : IRateLimitingService, IDisposable {
         }
 
         var options = new DistributedCacheEntryOptions {
-            AbsoluteExpirationRelativeToNow = policy.WindowDuration
+            AbsoluteExpirationRelativeToNow = policy.WindowDuration,
         };
 
         if (entry != null)
@@ -330,7 +324,7 @@ public class RateLimitingService : IRateLimitingService, IDisposable {
         "slidingwindow" => RateLimitStrategy.SlidingWindow,
         "tokenbucket" => RateLimitStrategy.TokenBucket,
         "leaky" => RateLimitStrategy.Leaky,
-        _ => RateLimitStrategy.FixedWindow
+        _ => RateLimitStrategy.FixedWindow,
     };
 
     private RateLimitPolicy GetDefaultPolicy() => _policies.GetValueOrDefault("Global", new RateLimitPolicy(1000, TimeSpan.FromMinutes(1), RateLimitStrategy.FixedWindow));

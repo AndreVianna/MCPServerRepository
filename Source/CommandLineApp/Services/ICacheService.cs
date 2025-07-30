@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 namespace MCPHub.CommandLineApp.Services;
 
 /// <summary>
@@ -135,7 +133,7 @@ public class CacheStatistics {
     /// <summary>
     /// Cache entries grouped by type
     /// </summary>
-    public Dictionary<string, int> EntriesByType { get; set; } = new();
+    public Dictionary<string, int> EntriesByType { get; set; } = [];
 
     private static string FormatBytes(long bytes) {
         string[] sizes = ["B", "KB", "MB", "GB", "TB"];
@@ -248,7 +246,7 @@ public class CacheMaintenanceResult {
     /// <summary>
     /// Any errors encountered during maintenance
     /// </summary>
-    public List<string> Errors { get; set; } = new();
+    public List<string> Errors { get; set; } = [];
 
     /// <summary>
     /// Whether maintenance completed successfully

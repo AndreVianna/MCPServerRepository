@@ -1,5 +1,3 @@
-using MCPHub.Common.Providers;
-
 namespace MCPHub.Common.Services;
 
 /// <summary>
@@ -36,7 +34,7 @@ public interface IHealthCheckService {
 /// Overall health check result
 /// </summary>
 public record OverallHealthResult(
-    MCPHub.Common.Providers.HealthStatus Status,
+    Providers.HealthStatus Status,
     TimeSpan ResponseTime,
     IEnumerable<ComponentHealthResult> Components,
     DateTime Timestamp);
@@ -46,14 +44,14 @@ public record OverallHealthResult(
 /// </summary>
 public record HealthSnapshot(
     DateTime Timestamp,
-    MCPHub.Common.Providers.HealthStatus Status,
+    Providers.HealthStatus Status,
     TimeSpan ResponseTime,
-    IDictionary<string, MCPHub.Common.Providers.HealthStatus> ComponentStatuses);
+    IDictionary<string, Providers.HealthStatus> ComponentStatuses);
 
 /// <summary>
 /// Health threshold configuration
 /// </summary>
 public record HealthThreshold(
     TimeSpan MaxResponseTime,
-    MCPHub.Common.Providers.HealthStatus MinStatus,
+    Providers.HealthStatus MinStatus,
     string NotificationEndpoint);

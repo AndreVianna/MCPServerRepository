@@ -9,8 +9,6 @@ using MCPHub.Domain.Contracts.Responses;
 using MCPHub.Domain.Entities;
 using MCPHub.Domain.ValueObjects;
 
-using Microsoft.Extensions.Logging;
-
 using Spectre.Console;
 
 namespace MCPHub.CommandLineApp.Commands;
@@ -305,7 +303,7 @@ public class InstallCommand(
         }
     }
 
-    private (string packageName, string? version) ParsePackageSpec(string packageSpec) {
+    private static (string packageName, string? version) ParsePackageSpec(string packageSpec) {
         var parts = packageSpec.Split('@', 2);
         return parts.Length == 2 ? (parts[0], parts[1]) : (parts[0], null);
     }
@@ -666,7 +664,7 @@ public class InstallCommand(
     /// <summary>
     /// Checks if a security grade meets the minimum requirement
     /// </summary>
-    private bool MeetsMinimumGrade(string actualGrade, string minimumGrade) {
+    private static bool MeetsMinimumGrade(string actualGrade, string minimumGrade) {
         var gradeOrder = new[] { "F", "D", "C", "B", "A", "A+" };
         var actualIndex = Array.IndexOf(gradeOrder, actualGrade);
         var minimumIndex = Array.IndexOf(gradeOrder, minimumGrade);
@@ -715,7 +713,7 @@ public class InstallCommand(
         bool global,
         bool nonInteractive) {
 
-        await DisplayEnhancedInstallationPlanAsync(packages, new List<UntrustedPackage>(), dev, global, nonInteractive);
+        await DisplayEnhancedInstallationPlanAsync(packages, [], dev, global, nonInteractive);
 
         if (securityAssessment.PackageSecurityInfo.Any()) {
             OutputFormatter.WriteLine();
@@ -777,7 +775,7 @@ public class InstallCommand(
         }
     }
 
-    private string GetTrustTierMarkup(string trustTier) => trustTier switch {
+    private static string GetTrustTierMarkup(string trustTier) => trustTier switch {
         "Enterprise" => $"[green]{trustTier}[/]",
         "Professional" => $"[blue]{trustTier}[/]",
         "Community" => $"[yellow]{trustTier}[/]",
@@ -785,7 +783,7 @@ public class InstallCommand(
         _ => trustTier
     };
 
-    private string GetSecurityGradeMarkup(string grade) => grade switch {
+    private static string GetSecurityGradeMarkup(string grade) => grade switch {
         "A+" or "A" => $"[green]{grade}[/]",
         "B" => $"[yellow]{grade}[/]",
         "C" or "D" or "F" => $"[red]{grade}[/]",
@@ -853,18 +851,15 @@ public class InstallCommand(
         return result;
     }
 
-    private TrustTier? ParseTrustTierEnum(string? trustTier) {
-        if (string.IsNullOrWhiteSpace(trustTier))
-            return null;
-
-        return trustTier.ToLowerInvariant() switch {
-            "unverified" => TrustTier.Unverified,
-            "community" => TrustTier.Community,
-            "professional" => TrustTier.Professional,
-            "enterprise" => TrustTier.Enterprise,
-            _ => null
-        };
-    }
+    private static TrustTier? ParseTrustTierEnum(string? trustTier) => string.IsNullOrWhiteSpace(trustTier)
+            ? null
+            : trustTier.ToLowerInvariant() switch {
+                "unverified" => TrustTier.Unverified,
+                "community" => TrustTier.Community,
+                "professional" => TrustTier.Professional,
+                "enterprise" => TrustTier.Enterprise,
+                _ => null
+            };
 }
 
 /// <summary>
@@ -873,7 +868,7 @@ public class InstallCommand(
 public class InstallationResult {
     public bool Success { get; set; }
     public int InstalledCount { get; set; }
-    public List<string> Errors { get; set; } = new();
+    public List<string> Errors { get; set; } = [];
 }
 
 /// <summary>
@@ -891,8 +886,8 @@ public record SecurityRequirements {
 /// </summary>
 public class SecurityAssessment {
     public bool IsApproved { get; set; }
-    public List<PackageSecurityInfo> PackageSecurityInfo { get; set; } = new();
-    public List<string> Errors { get; set; } = new();
+    public List<PackageSecurityInfo> PackageSecurityInfo { get; set; } = [];
+    public List<string> Errors { get; set; } = [];
 }
 
 /// <summary>
@@ -904,7 +899,7 @@ public class PackageSecurityInfo {
     public TrustTierAssessment? TrustTierAssessment { get; set; }
     public SecurityScanResult? SecurityScanResult { get; set; }
     public string? SecurityGrade { get; set; }
-    public List<string> Issues { get; set; } = new();
-    public List<string> CriticalIssues { get; set; } = new();
-    public List<string> HighIssues { get; set; } = new();
+    public List<string> Issues { get; set; } = [];
+    public List<string> CriticalIssues { get; set; } = [];
+    public List<string> HighIssues { get; set; } = [];
 }

@@ -28,7 +28,7 @@ public class ConfigurationKey {
             return false;
 
         // Valid values validation
-        if (ValidValues != null && !ValidValues.Contains(value.ToString(), StringComparer.OrdinalIgnoreCase))
+        if (ValidValues?.Contains(value.ToString(), StringComparer.OrdinalIgnoreCase) == false)
             return false;
 
         // Range validation for numeric types

@@ -5,8 +5,6 @@ using MCPHub.CommandLineApp.Models;
 using MCPHub.CommandLineApp.Services;
 using MCPHub.CommandLineApp.Utilities;
 
-using Microsoft.Extensions.Logging;
-
 namespace MCPHub.CommandLineApp.Commands;
 
 /// <summary>
@@ -105,7 +103,7 @@ public class SearchCommand(
                 return 400;
             }
 
-            if (limit < 1 || limit > 100) {
+            if (limit is < 1 or > 100) {
                 OutputFormatter.WriteError("Limit must be between 1 and 100");
                 return 400;
             }
@@ -213,7 +211,7 @@ public class SearchCommand(
                     suggestions.Concat(new[] { "None of the above" }),
                     s => s);
 
-                if (selectedSuggestion != null && selectedSuggestion != "None of the above") {
+                if (selectedSuggestion is not null and not "None of the above") {
                     OutputFormatter.WriteInfo($"Searching for '{selectedSuggestion}'...");
                     // Note: In a real implementation, this would trigger a new search
                 }
@@ -227,7 +225,7 @@ public class SearchCommand(
     /// <summary>
     /// Gets search suggestions from the API
     /// </summary>
-    private Task<IEnumerable<string>> GetSearchSuggestionsAsync(string query) {
+    private static Task<IEnumerable<string>> GetSearchSuggestionsAsync(string query) {
         // Placeholder implementation - would call API for suggestions
         var commonSuggestions = new List<string>();
 

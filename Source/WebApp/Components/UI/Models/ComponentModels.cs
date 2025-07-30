@@ -1,9 +1,3 @@
-using MCPHub.Domain.Entities;
-using MCPHub.Domain.ValueObjects;
-using MCPHub.WebApp.Services;
-
-using MudBlazor;
-
 namespace MCPHub.WebApp.Components.UI.Models;
 
 /// <summary>
@@ -24,7 +18,7 @@ public class PackageInfo {
     public int RatingCount { get; set; }
     public DateTime LastUpdated { get; set; }
     public DateTime CreatedAt { get; set; }
-    public List<string> Tags { get; set; } = new();
+    public List<string> Tags { get; set; } = [];
     public string Category { get; set; } = string.Empty;
     public string License { get; set; } = string.Empty;
     public double TrustScore { get; set; }
@@ -36,8 +30,8 @@ public class PackageInfo {
     public bool IsFeatured { get; set; }
     public string? RepositoryUrl { get; set; }
     public string? DocumentationUrl { get; set; }
-    public List<DependencyInfo> Dependencies { get; set; } = new();
-    public List<VersionInfo> Versions { get; set; } = new();
+    public List<DependencyInfo> Dependencies { get; set; } = [];
+    public List<VersionInfo> Versions { get; set; } = [];
     public string ReadmeContent { get; set; } = string.Empty;
     public string InstallCommand { get; set; } = string.Empty;
 }
@@ -59,9 +53,9 @@ public class PublisherInfo {
 public class TrustTierProgress {
     public bool CanAdvance { get; set; }
     public double CompletionPercentage { get; set; }
-    public List<TrustTierRequirement> Requirements { get; set; } = new();
-    public List<TrustTierRequirement> CompletedFactors { get; set; } = new();
-    public List<TrustTierRequirement> PendingFactors { get; set; } = new();
+    public List<TrustTierRequirement> Requirements { get; set; } = [];
+    public List<TrustTierRequirement> CompletedFactors { get; set; } = [];
+    public List<TrustTierRequirement> PendingFactors { get; set; } = [];
 }
 
 /// <summary>
@@ -83,7 +77,7 @@ public class SearchSuggestion {
     public string Description { get; set; } = "";
     public SuggestionType Type { get; set; }
     public string? Url { get; set; }
-    public Dictionary<string, object> Metadata { get; set; } = new();
+    public Dictionary<string, object> Metadata { get; set; } = [];
 }
 
 /// <summary>
@@ -95,7 +89,7 @@ public class SearchQuery {
     public TrustTier? TrustTier { get; set; }
     public string SecurityGrade { get; set; } = "";
     public string Timeframe { get; set; } = "";
-    public List<string> Tags { get; set; } = new();
+    public List<string> Tags { get; set; } = [];
     public bool IncludePrerelease { get; set; }
     public int PageSize { get; set; } = 20;
     public int PageNumber { get; set; } = 1;
@@ -115,7 +109,7 @@ public class ChartDataRow {
 public class SummaryStat {
     public required string Label { get; set; }
     public required string Value { get; set; }
-    public MudBlazor.Color Color { get; set; } = MudBlazor.Color.Default;
+    public Color Color { get; set; } = Color.Default;
     public double? Change { get; set; }
 }
 
@@ -141,35 +135,27 @@ public static class ComponentExtensions {
     /// <param name="value">The string to truncate</param>
     /// <param name="maxLength">Maximum length of the string</param>
     /// <returns>Truncated string with ellipsis if needed</returns>
-    public static string Truncate(this string? value, int maxLength) {
-        if (string.IsNullOrEmpty(value))
-            return string.Empty;
-
-        if (value.Length <= maxLength)
-            return value;
-
-        return value[..(maxLength - 3)] + "...";
-    }
+    public static string Truncate(this string? value, int maxLength) => string.IsNullOrEmpty(value) ? string.Empty : value.Length <= maxLength ? value : value[..(maxLength - 3)] + "...";
 
     /// <summary>
     /// Converts custom ChartSeries to MudBlazor ChartSeries
     /// </summary>
     /// <param name="series">Custom chart series list</param>
     /// <returns>MudBlazor chart series list</returns>
-    public static List<MudBlazor.ChartSeries> ToMudBlazorChartSeries(this List<Components.UI.Models.ChartSeries> series) => series.Select(s => new MudBlazor.ChartSeries {
+    public static List<MudBlazor.ChartSeries> ToMudBlazorChartSeries(this List<ChartSeries> series) => series.Select(s => new MudBlazor.ChartSeries {
         Name = s.Name,
-        Data = s.Data
-    }).ToList();
+        Data = s.Data,
+                                                                                                                                                    }).ToList();
 
     /// <summary>
     /// Converts MudBlazor ChartSeries to custom ChartSeries
     /// </summary>
     /// <param name="series">MudBlazor chart series list</param>
     /// <returns>Custom chart series list</returns>
-    public static List<Components.UI.Models.ChartSeries> ToCustomChartSeries(this List<MudBlazor.ChartSeries> series) => series.Select(s => new Components.UI.Models.ChartSeries {
+    public static List<ChartSeries> ToCustomChartSeries(this List<MudBlazor.ChartSeries> series) => series.Select(s => new ChartSeries {
         Name = s.Name,
-        Data = s.Data
-    }).ToList();
+        Data = s.Data,
+                                                                                                                                       }).ToList();
 }
 
 /// <summary>
@@ -193,23 +179,23 @@ public static class ExportDialogExtensions {
     /// <returns>Dialog result with export information</returns>
     public static Task<IDialogReference> ShowExportDialogAsync(
         this IDialogService dialogService,
-        Services.ExportAnalyticsData data,
+        ExportAnalyticsData data,
         string fileName = "analytics_export") {
         var parameters = new DialogParameters {
             ["AnalyticsData"] = data,
             ["DefaultFileName"] = fileName,
             ["HasChartData"] = data.Charts.Any(),
-            ["EstimatedSize"] = EstimateDataSize(data)
-        };
+            ["EstimatedSize"] = EstimateDataSize(data),
+                                              };
 
         var options = new DialogOptions {
             MaxWidth = MaxWidth.Large,
             FullWidth = true,
             CloseButton = true,
-            CloseOnEscapeKey = true
-        };
+            CloseOnEscapeKey = true,
+                                        };
 
-        return Task.FromResult(dialogService.Show<Components.UI.Analytics.ExportDialog>("Export Analytics Data", parameters, options));
+        return Task.FromResult(dialogService.Show<Analytics.ExportDialog>("Export Analytics Data", parameters, options));
     }
 
     /// <summary>
@@ -221,23 +207,23 @@ public static class ExportDialogExtensions {
     /// <returns>Dialog result with export information</returns>
     public static Task<IDialogReference> ShowExportDialogAsync(
         this IDialogService dialogService,
-        Services.ExportChartData chartData,
+        ExportChartData chartData,
         string fileName = "chart_export") {
         var parameters = new DialogParameters {
             ["ChartData"] = chartData,
             ["DefaultFileName"] = fileName,
             ["HasChartData"] = true,
-            ["EstimatedSize"] = EstimateChartSize(chartData)
-        };
+            ["EstimatedSize"] = EstimateChartSize(chartData),
+                                              };
 
         var options = new DialogOptions {
             MaxWidth = MaxWidth.Large,
             FullWidth = true,
             CloseButton = true,
-            CloseOnEscapeKey = true
-        };
+            CloseOnEscapeKey = true,
+                                        };
 
-        return Task.FromResult(dialogService.Show<Components.UI.Analytics.ExportDialog>("Export Chart Data", parameters, options));
+        return Task.FromResult(dialogService.Show<Analytics.ExportDialog>("Export Chart Data", parameters, options));
     }
 
     /// <summary>
@@ -257,20 +243,20 @@ public static class ExportDialogExtensions {
             ["TableData"] = tableData,
             ["DefaultFileName"] = fileName,
             ["HasChartData"] = false,
-            ["EstimatedSize"] = EstimateTableSize(tableData)
-        };
+            ["EstimatedSize"] = EstimateTableSize(tableData),
+                                              };
 
         var options = new DialogOptions {
             MaxWidth = MaxWidth.Large,
             FullWidth = true,
             CloseButton = true,
-            CloseOnEscapeKey = true
-        };
+            CloseOnEscapeKey = true,
+                                        };
 
-        return Task.FromResult(dialogService.Show<Components.UI.Analytics.ExportDialog>(title, parameters, options));
+        return Task.FromResult(dialogService.Show<Analytics.ExportDialog>(title, parameters, options));
     }
 
-    private static long EstimateDataSize(Services.ExportAnalyticsData data) {
+    private static long EstimateDataSize(ExportAnalyticsData data) {
         // Rough estimation based on data structure
         long size = 0;
 
@@ -291,7 +277,7 @@ public static class ExportDialogExtensions {
         return Math.Max(size, 1024); // Minimum 1KB
     }
 
-    private static long EstimateChartSize(Services.ExportChartData chartData) {
+    private static long EstimateChartSize(ExportChartData chartData) {
         long size = chartData.XAxisLabels.Length * 20;
         size += chartData.Series.Sum(s => s.Data.Length * 8);
         return Math.Max(size, 512);
@@ -314,7 +300,7 @@ public class ChartDrillDownEventArgs {
     public string XAxisLabel { get; set; } = string.Empty;
     public double[] SeriesData { get; set; } = Array.Empty<double>();
     public string[] SeriesNames { get; set; } = Array.Empty<string>();
-    public Dictionary<string, object> Metadata { get; set; } = new();
+    public Dictionary<string, object> Metadata { get; set; } = [];
 }
 
 /// <summary>
@@ -336,7 +322,7 @@ public class VersionInfo {
     public int DependencyCount { get; set; }
     public DateTime LastScanDate { get; set; }
     public long Size { get; set; }
-    public List<DependencyInfo> Dependencies { get; set; } = new();
+    public List<DependencyInfo> Dependencies { get; set; } = [];
 }
 
 /// <summary>
@@ -358,5 +344,5 @@ public class DependencyInfo {
 /// </summary>
 public enum StepChangeDirection {
     Next,
-    Previous
+    Previous,
 }

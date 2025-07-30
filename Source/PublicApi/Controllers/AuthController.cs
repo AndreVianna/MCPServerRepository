@@ -41,7 +41,7 @@ public class AuthController(
                 _logger.LogWarning("Login failed - user not found for email: {Email}", request.Email);
                 return BadRequest(new AuthenticationResult {
                     IsSuccess = false,
-                    ErrorMessage = "Invalid email or password"
+                    ErrorMessage = "Invalid email or password",
                 });
             }
 
@@ -54,7 +54,7 @@ public class AuthController(
                 var errorMessage = result.IsLockedOut ? "Account is locked out" : "Invalid email or password";
                 return BadRequest(new AuthenticationResult {
                     IsSuccess = false,
-                    ErrorMessage = errorMessage
+                    ErrorMessage = errorMessage,
                 });
             }
 
@@ -70,14 +70,14 @@ public class AuthController(
                 User = user,
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
-                ExpiresAt = expiresAt
+                ExpiresAt = expiresAt,
             });
         }
         catch (Exception ex) {
             _logger.LogError(ex, "Error occurred during login for email: {Email}", request.Email);
             return StatusCode(500, new AuthenticationResult {
                 IsSuccess = false,
-                ErrorMessage = "An error occurred while processing your request"
+                ErrorMessage = "An error occurred while processing your request",
             });
         }
     }
@@ -99,7 +99,7 @@ public class AuthController(
                 _logger.LogWarning("Token refresh failed - invalid refresh token");
                 return BadRequest(new TokenResult {
                     IsSuccess = false,
-                    ErrorMessage = "Invalid refresh token"
+                    ErrorMessage = "Invalid refresh token",
                 });
             }
 
@@ -109,7 +109,7 @@ public class AuthController(
                 _logger.LogWarning("Token refresh failed - user not found for ID: {UserId}", userId);
                 return BadRequest(new TokenResult {
                     IsSuccess = false,
-                    ErrorMessage = "User not found"
+                    ErrorMessage = "User not found",
                 });
             }
 
@@ -127,14 +127,14 @@ public class AuthController(
                 IsSuccess = true,
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
-                ExpiresAt = expiresAt
+                ExpiresAt = expiresAt,
             });
         }
         catch (Exception ex) {
             _logger.LogError(ex, "Error occurred during token refresh");
             return StatusCode(500, new TokenResult {
                 IsSuccess = false,
-                ErrorMessage = "An error occurred while processing your request"
+                ErrorMessage = "An error occurred while processing your request",
             });
         }
     }
@@ -153,7 +153,7 @@ public class AuthController(
                 _logger.LogWarning("Logout failed - invalid user ID in token");
                 return Task.FromResult<IActionResult>(BadRequest(new LogoutResult {
                     IsSuccess = false,
-                    ErrorMessage = "Invalid user context"
+                    ErrorMessage = "Invalid user context",
                 }));
             }
 
@@ -163,14 +163,14 @@ public class AuthController(
             // For now, we'll just return success as the access token will expire naturally
 
             return Task.FromResult<IActionResult>(Ok(new LogoutResult {
-                IsSuccess = true
+                IsSuccess = true,
             }));
         }
         catch (Exception ex) {
             _logger.LogError(ex, "Error occurred during logout");
             return Task.FromResult<IActionResult>(StatusCode(500, new LogoutResult {
                 IsSuccess = false,
-                ErrorMessage = "An error occurred while processing your request"
+                ErrorMessage = "An error occurred while processing your request",
             }));
         }
     }
@@ -189,7 +189,7 @@ public class AuthController(
                 _logger.LogWarning("Get profile failed - invalid user ID in token");
                 return BadRequest(new UserProfileResult {
                     IsSuccess = false,
-                    ErrorMessage = "Invalid user context"
+                    ErrorMessage = "Invalid user context",
                 });
             }
 
@@ -198,7 +198,7 @@ public class AuthController(
                 _logger.LogWarning("Get profile failed - user not found for ID: {UserId}", userId);
                 return NotFound(new UserProfileResult {
                     IsSuccess = false,
-                    ErrorMessage = "User not found"
+                    ErrorMessage = "User not found",
                 });
             }
 
@@ -223,19 +223,19 @@ public class AuthController(
                 ReceiveMarketingEmails = false,
                 IsTwoFactorEnabled = user.TwoFactorEnabled,
                 CreatedAt = DateTime.UtcNow, // TODO: Get from audit trail
-                LastLoginAt = null
+                LastLoginAt = null,
             };
 
             return Ok(new UserProfileResult {
                 IsSuccess = true,
-                Profile = profile
+                Profile = profile,
             });
         }
         catch (Exception ex) {
             _logger.LogError(ex, "Error occurred while getting user profile");
             return StatusCode(500, new UserProfileResult {
                 IsSuccess = false,
-                ErrorMessage = "An error occurred while processing your request"
+                ErrorMessage = "An error occurred while processing your request",
             });
         }
     }

@@ -1,14 +1,6 @@
-using MCPHub.Common.Services;
-using MCPHub.PublicApi.Configuration;
-using MCPHub.PublicApi.Services;
-
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 using Moq;
-
-using Xunit;
 
 namespace MCPHub.PublicApi.UnitTests.Services;
 
@@ -33,8 +25,8 @@ public class SimpleRateLimitingServiceTests : IDisposable {
                 QueueLimit = 0,
                 PerIpLimiting = true,
                 PerUserLimiting = false,
-                Strategy = "FixedWindow"
-            }
+                Strategy = "FixedWindow",
+            },
         };
 
         _mockOptions.Setup(x => x.Value).Returns(_options);

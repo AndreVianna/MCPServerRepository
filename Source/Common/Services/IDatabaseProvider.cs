@@ -47,7 +47,7 @@ public interface IDatabaseProvider {
 public enum DatabaseProviderType {
     SQLite,           // Development tier
     PostgreSQL,       // Production tier
-    PostgreSQLCluster // Enterprise tier
+    PostgreSQLCluster, // Enterprise tier
 }
 
 /// <summary>

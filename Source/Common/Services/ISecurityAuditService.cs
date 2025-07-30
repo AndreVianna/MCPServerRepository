@@ -395,7 +395,7 @@ public enum SecurityAuditAction {
     ApiKeyCreated,
     ApiKeyRevoked,
     SystemStartup,
-    SystemShutdown
+    SystemShutdown,
 }
 
 /// <summary>
@@ -406,7 +406,7 @@ public enum SecurityAuditSeverity {
     Low = 1,
     Medium = 2,
     High = 3,
-    Critical = 4
+    Critical = 4,
 }
 
 /// <summary>
@@ -418,7 +418,7 @@ public enum SecurityAuditGroupBy {
     User,
     ResourceType,
     Hour,
-    Day
+    Day,
 }
 
 /// <summary>
@@ -429,7 +429,7 @@ public enum SecurityAuditSortBy {
     Action,
     Severity,
     UserId,
-    ResourceType
+    ResourceType,
 }
 
 /// <summary>
@@ -440,7 +440,7 @@ public enum SecurityAuditExportFormat {
     Csv,
     Xml,
     Siem,
-    Excel
+    Excel,
 }
 
 /// <summary>
@@ -453,7 +453,7 @@ public enum ComplianceStandard {
     HIPAA,
     PCI_DSS,
     SOX,
-    Custom
+    Custom,
 }
 
 /// <summary>
@@ -463,7 +463,7 @@ public enum ComplianceStatus {
     Compliant,
     NonCompliant,
     PartiallyCompliant,
-    NotAssessed
+    NotAssessed,
 }
 
 /// <summary>
@@ -473,5 +473,5 @@ public enum SecurityAuditArchiveDestination {
     LocalFile,
     CloudStorage,
     ExternalSiem,
-    ComplianceSystem
+    ComplianceSystem,
 }

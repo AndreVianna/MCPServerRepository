@@ -73,7 +73,7 @@ public enum FeatureRuleOperator {
     StartsWith,
     In,
     GreaterThan,
-    LessThan
+    LessThan,
 }
 
 /// <summary>

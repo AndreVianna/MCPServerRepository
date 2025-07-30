@@ -7,13 +7,13 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
     private readonly SolutionScenarioContext _scenarioContext = scenarioContext ?? throw new ArgumentNullException(nameof(scenarioContext));
     private HttpClient _apiClient = null!;
 
-    [Given(@"the MCP Hub API is running")]
+    [Given("the MCP Hub API is running")]
     public void GivenTheMCPHubAPIIsRunning() {
         _apiClient = _fixture.WebApplicationFactory.CreateClient();
         _apiClient.Should().NotBeNull();
     }
 
-    [Given(@"the database is initialized with test data")]
+    [Given("the database is initialized with test data")]
     public async Task GivenTheDatabaseIsInitializedWithTestData() {
         // Database is already initialized in the fixture
         // Add any additional test data if needed
@@ -35,7 +35,7 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
         _scenarioContext.SetTestScenario(scenario);
     }
 
-    [Given(@"there are packages in the following categories:")]
+    [Given("there are packages in the following categories:")]
     public async Task GivenThereArePackagesInTheFollowingCategories(Table table) {
         var packages = new List<Package>();
         var dataBuilder = new TestDataBuilder();
@@ -56,7 +56,7 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
         _scenarioContext.SetTestScenario(scenario);
     }
 
-    [Given(@"there are packages with the following trust tiers:")]
+    [Given("there are packages with the following trust tiers:")]
     public async Task GivenThereArePackagesWithTheFollowingTrustTiers(Table table) {
         var packages = new List<Package>();
         var dataBuilder = new TestDataBuilder();
@@ -90,7 +90,7 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
         _scenarioContext.CurrentPackage = package;
     }
 
-    [Given(@"there are publishers with packages:")]
+    [Given("there are publishers with packages:")]
     public async Task GivenThereArePublishersWithPackages(Table table) {
         var packages = new List<Package>();
         var dataBuilder = new TestDataBuilder();
@@ -99,7 +99,7 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
             var publisherName = row["Publisher"];
             var packageCount = int.Parse(row["Package Count"]);
 
-            var publisher = dataBuilder.CreateTestPublishers(1).First();
+            var publisher = TestDataBuilder.CreateTestPublishers(1).First();
             publisher.Name = publisherName;
 
             for (var i = 0; i < packageCount; i++) {
@@ -115,7 +115,7 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
         _scenarioContext.SetTestScenario(scenario);
     }
 
-    [Given(@"I am authenticated as a publisher")]
+    [Given("I am authenticated as a publisher")]
     public void GivenIAmAuthenticatedAsAPublisher() {
         var userId = Guid.CreateVersion7().ToString();
         var userEmail = "publisher@example.com";
@@ -136,7 +136,7 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
         _scenarioContext.SetCurrentUser(userId, email, "User");
     }
 
-    [Given(@"I am not authenticated")]
+    [Given("I am not authenticated")]
     public void GivenIAmNotAuthenticated() {
         _apiClient?.Dispose();
         _apiClient = _fixture.WebApplicationFactory.CreateClient();
@@ -181,7 +181,7 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
         _scenarioContext.StoreApiResponse(response, content);
     }
 
-    [When(@"I request the package by its ID")]
+    [When("I request the package by its ID")]
     public async Task WhenIRequestThePackageByItsID() {
         var package = _scenarioContext.CurrentPackage;
         package.Should().NotBeNull("A current package should be set in the scenario context");
@@ -200,7 +200,7 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
         _scenarioContext.StoreApiResponse(response, content);
     }
 
-    [When(@"I request a package with non-existent ID")]
+    [When("I request a package with non-existent ID")]
     public async Task WhenIRequestAPackageWithNonExistentID() {
         var nonExistentId = Guid.CreateVersion7();
         var response = await _apiClient.GetAsync($"/api/packages/{nonExistentId}");
@@ -223,7 +223,7 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
         _scenarioContext.StoreApiResponse(response, content);
     }
 
-    [Then(@"I should receive a successful response")]
+    [Then("I should receive a successful response")]
     public void ThenIShouldReceiveASuccessfulResponse() {
         _scenarioContext.LastApiResponse.Should().NotBeNull();
         _scenarioContext.LastApiResponse!.IsSuccessStatusCode.Should().BeTrue(
@@ -254,7 +254,7 @@ public class ApiStepDefinitions(TestContainerFixture fixture, SolutionScenarioCo
             p.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
     }
 
-    [Then(@"each package should have required fields populated")]
+    [Then("each package should have required fields populated")]
     public void ThenEachPackageShouldHaveRequiredFieldsPopulated() {
         _scenarioContext.LastApiResponseContent.Should().NotBeNull();
 

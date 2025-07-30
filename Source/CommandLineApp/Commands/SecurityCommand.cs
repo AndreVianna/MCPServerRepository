@@ -4,10 +4,7 @@ using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Services;
 using MCPHub.CommandLineApp.Utilities;
 using MCPHub.Domain.Contracts.Responses;
-using MCPHub.Domain.Entities;
 using MCPHub.Domain.ValueObjects;
-
-using Microsoft.Extensions.Logging;
 
 using Spectre.Console;
 
@@ -550,7 +547,7 @@ public class SecurityCommand(
     }
 
     // Helper methods for display formatting
-    private SecurityScanSeverity ParseSeverity(string severity) => severity.ToLowerInvariant() switch {
+    private static SecurityScanSeverity ParseSeverity(string severity) => severity.ToLowerInvariant() switch {
         "low" => SecurityScanSeverity.Low,
         "medium" => SecurityScanSeverity.Medium,
         "high" => SecurityScanSeverity.High,
@@ -558,7 +555,7 @@ public class SecurityCommand(
         _ => SecurityScanSeverity.Medium
     };
 
-    private (string packageName, string? version) ParsePackageSpec(string packageSpec) {
+    private static (string packageName, string? version) ParsePackageSpec(string packageSpec) {
         var parts = packageSpec.Split('@', 2);
         return parts.Length == 2 ? (parts[0], parts[1]) : (parts[0], null);
     }
@@ -685,7 +682,7 @@ public class SecurityCommand(
         OutputFormatter.WriteInfo("Local statistics display not implemented in skeleton");
     }
 
-    private string GetSeverityMarkup(SecurityScanSeverity severity) => severity switch {
+    private static string GetSeverityMarkup(SecurityScanSeverity severity) => severity switch {
         SecurityScanSeverity.Critical => "[red]Critical[/]",
         SecurityScanSeverity.High => "[orange3]High[/]",
         SecurityScanSeverity.Medium => "[yellow]Medium[/]",
@@ -694,7 +691,7 @@ public class SecurityCommand(
         _ => severity.ToString()
     };
 
-    private string GetGradeMarkup(string grade) => grade switch {
+    private static string GetGradeMarkup(string grade) => grade switch {
         "A+" or "A" => $"[green]{grade}[/]",
         "B+" or "B" => $"[yellow]{grade}[/]",
         "C+" or "C" => $"[orange3]{grade}[/]",

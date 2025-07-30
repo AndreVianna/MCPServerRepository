@@ -1,5 +1,3 @@
-using MCPHub.CommandLineApp.Models;
-
 namespace MCPHub.CommandLineApp.Services;
 
 /// <summary>
@@ -133,9 +131,9 @@ public interface IDoctorService {
 public record SystemHealthCheckResult {
     public bool IsHealthy { get; init; }
     public HealthScore OverallScore { get; init; }
-    public List<HealthCheckCategory> Categories { get; init; } = new();
-    public List<SystemIssue> Issues { get; init; } = new();
-    public List<string> Recommendations { get; init; } = new();
+    public List<HealthCheckCategory> Categories { get; init; } = [];
+    public List<SystemIssue> Issues { get; init; } = [];
+    public List<string> Recommendations { get; init; } = [];
     public SystemEnvironmentInfo Environment { get; init; } = new();
     public TimeSpan CheckDuration { get; init; }
 }
@@ -147,8 +145,8 @@ public record HealthCheckCategory {
     public string Name { get; init; } = string.Empty;
     public HealthScore Score { get; init; }
     public bool IsCritical { get; init; }
-    public List<SystemIssue> Issues { get; init; } = new();
-    public List<string> Recommendations { get; init; } = new();
+    public List<SystemIssue> Issues { get; init; } = [];
+    public List<string> Recommendations { get; init; } = [];
     public string Status { get; init; } = string.Empty;
     public TimeSpan CheckDuration { get; init; }
 }
@@ -176,7 +174,7 @@ public record SystemIssue {
     public bool CanAutoFix { get; init; }
     public string? FixDescription { get; init; }
     public string? FixCommand { get; init; }
-    public List<string> AffectedComponents { get; init; } = new();
+    public List<string> AffectedComponents { get; init; } = [];
 }
 
 /// <summary>
@@ -197,7 +195,7 @@ public record PackageIntegrityResult {
     public int TotalPackagesChecked { get; init; }
     public int ValidPackages { get; init; }
     public int CorruptedPackages { get; init; }
-    public List<PackageIntegrityIssue> Issues { get; init; } = new();
+    public List<PackageIntegrityIssue> Issues { get; init; } = [];
     public TimeSpan CheckDuration { get; init; }
 }
 
@@ -218,11 +216,11 @@ public record PackageIntegrityIssue {
 /// </summary>
 public record DependencyConsistencyResult {
     public bool IsConsistent { get; init; }
-    public List<DependencyConflict> Conflicts { get; init; } = new();
-    public List<string> Warnings { get; init; } = new();
-    public List<string> Suggestions { get; init; } = new();
+    public List<DependencyConflict> Conflicts { get; init; } = [];
+    public List<string> Warnings { get; init; } = [];
+    public List<string> Suggestions { get; init; } = [];
     public bool AutoResolved { get; init; }
-    public List<string> ResolvedConflicts { get; init; } = new();
+    public List<string> ResolvedConflicts { get; init; } = [];
 }
 
 /// <summary>
@@ -257,8 +255,8 @@ public record CacheHealthResult {
     public int TotalEntries { get; init; }
     public int CorruptedEntries { get; init; }
     public int ClearedEntries { get; init; }
-    public List<string> Issues { get; init; } = new();
-    public List<string> Optimizations { get; init; } = new();
+    public List<string> Issues { get; init; } = [];
+    public List<string> Optimizations { get; init; } = [];
     public bool WasOptimized { get; init; }
     public long SpaceFreed { get; init; } // Bytes
 }
@@ -268,9 +266,9 @@ public record CacheHealthResult {
 /// </summary>
 public record ConfigurationValidationResult {
     public bool IsValid { get; init; }
-    public List<ConfigurationIssue> Issues { get; init; } = new();
-    public List<string> Recommendations { get; init; } = new();
-    public List<string> OptimizationSuggestions { get; init; } = new();
+    public List<ConfigurationIssue> Issues { get; init; } = [];
+    public List<string> Recommendations { get; init; } = [];
+    public List<string> OptimizationSuggestions { get; init; } = [];
     public bool HasPermissionIssues { get; init; }
     public bool HasPathIssues { get; init; }
 }
@@ -299,8 +297,8 @@ public record SecurityAuditResult {
     public int HighVulnerabilities { get; init; }
     public int MediumVulnerabilities { get; init; }
     public int LowVulnerabilities { get; init; }
-    public List<SecurityIssue> Issues { get; init; } = new();
-    public List<string> Recommendations { get; init; } = new();
+    public List<SecurityIssue> Issues { get; init; } = [];
+    public List<string> Recommendations { get; init; } = [];
 }
 
 /// <summary>
@@ -315,7 +313,7 @@ public record SecurityIssue {
     public SecuritySeverity Severity { get; init; }
     public string? CvssScore { get; init; }
     public string? FixVersion { get; init; }
-    public List<string> References { get; init; } = new();
+    public List<string> References { get; init; } = [];
 }
 
 /// <summary>
@@ -336,8 +334,8 @@ public record PerformanceAnalysisResult {
     public TimeSpan StartupTime { get; init; }
     public DiskUsageAnalysis DiskUsage { get; init; } = new();
     public NetworkLatencyAnalysis NetworkLatency { get; init; } = new();
-    public List<string> Optimizations { get; init; } = new();
-    public List<string> Warnings { get; init; } = new();
+    public List<string> Optimizations { get; init; } = [];
+    public List<string> Warnings { get; init; } = [];
 }
 
 /// <summary>
@@ -350,7 +348,7 @@ public record DiskUsageAnalysis {
     public int PackageCount { get; init; }
     public string LargestPackage { get; init; } = string.Empty;
     public long LargestPackageSize { get; init; } // Bytes
-    public List<string> Recommendations { get; init; } = new();
+    public List<string> Recommendations { get; init; } = [];
 }
 
 /// <summary>
@@ -361,7 +359,7 @@ public record NetworkLatencyAnalysis {
     public TimeSpan RegistryLatency { get; init; }
     public TimeSpan DownloadSpeed { get; init; } // Time per MB
     public string ConnectionQuality { get; init; } = string.Empty;
-    public List<string> Issues { get; init; } = new();
+    public List<string> Issues { get; init; } = [];
 }
 
 /// <summary>
@@ -373,7 +371,7 @@ public record RepairResult {
     public int RepairedIssues { get; init; }
     public int SkippedIssues { get; init; }
     public int FailedIssues { get; init; }
-    public List<RepairAction> Actions { get; init; } = new();
+    public List<RepairAction> Actions { get; init; } = [];
     public string? BackupPath { get; init; }
     public TimeSpan RepairDuration { get; init; }
 }
@@ -401,6 +399,6 @@ public record SystemEnvironmentInfo {
     public string CachePath { get; init; } = string.Empty;
     public string PackagesPath { get; init; } = string.Empty;
     public string TempPath { get; init; } = string.Empty;
-    public Dictionary<string, string> EnvironmentVariables { get; init; } = new();
-    public Dictionary<string, string> SystemInfo { get; init; } = new();
+    public Dictionary<string, string> EnvironmentVariables { get; init; } = [];
+    public Dictionary<string, string> SystemInfo { get; init; } = [];
 }

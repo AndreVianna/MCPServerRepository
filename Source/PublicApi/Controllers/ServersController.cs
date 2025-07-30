@@ -1,8 +1,5 @@
 using MCPHub.Common.Messaging;
-using MCPHub.Domain.Commands;
 using MCPHub.Domain.Contracts.Requests;
-using MCPHub.Domain.Contracts.Responses;
-using MCPHub.Domain.Events;
 
 namespace MCPHub.PublicApi.Controllers;
 

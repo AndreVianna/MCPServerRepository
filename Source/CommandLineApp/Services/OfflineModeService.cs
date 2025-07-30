@@ -1,7 +1,4 @@
 using MCPHub.CommandLineApp.Configuration;
-using MCPHub.CommandLineApp.Models;
-
-using Microsoft.Extensions.Logging;
 
 namespace MCPHub.CommandLineApp.Services;
 
@@ -14,8 +11,6 @@ public class OfflineModeService : IOfflineModeService {
     private readonly ICacheService _cacheService;
     private readonly IPackageCacheService _packageCache;
     private readonly McpmConfiguration _configuration;
-
-    private bool _isOfflineMode;
     private bool _isManuallyEnabled;
     private DateTimeOffset? _offlineSince;
     private DateTimeOffset? _lastConnectivityTest;
@@ -48,7 +43,7 @@ public class OfflineModeService : IOfflineModeService {
         }
     }
 
-    public bool IsOfflineMode => _isOfflineMode;
+    public bool IsOfflineMode { get; private set; }
 
     public async Task<bool> TestConnectivityAsync(CancellationToken cancellationToken = default) {
         await _connectivityLock.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -61,17 +56,17 @@ public class OfflineModeService : IOfflineModeService {
             _lastConnectivityTest = DateTimeOffset.UtcNow;
             _lastConnectivityResult = isConnected;
 
-            if (isConnected && _isOfflineMode && !_isManuallyEnabled) {
+            if (isConnected && IsOfflineMode && !_isManuallyEnabled) {
                 // Connectivity restored, exit offline mode
                 _logger.LogInformation("Connectivity restored, exiting offline mode");
-                _isOfflineMode = false;
+                IsOfflineMode = false;
                 _offlineSince = null;
                 _offlineReason = null;
             }
-            else if (!isConnected && !_isOfflineMode) {
+            else if (!isConnected && !IsOfflineMode) {
                 // Lost connectivity, enter offline mode
                 _logger.LogWarning("Lost connectivity to API, entering offline mode");
-                _isOfflineMode = true;
+                IsOfflineMode = true;
                 _offlineSince = DateTimeOffset.UtcNow;
                 _offlineReason = "API connectivity lost";
             }
@@ -84,9 +79,9 @@ public class OfflineModeService : IOfflineModeService {
             _lastConnectivityTest = DateTimeOffset.UtcNow;
             _lastConnectivityResult = false;
 
-            if (!_isOfflineMode) {
+            if (!IsOfflineMode) {
                 _logger.LogWarning("Entering offline mode due to connectivity test failure");
-                _isOfflineMode = true;
+                IsOfflineMode = true;
                 _offlineSince = DateTimeOffset.UtcNow;
                 _offlineReason = $"Connectivity test failed: {ex.Message}";
             }
@@ -100,7 +95,7 @@ public class OfflineModeService : IOfflineModeService {
 
     public void EnableOfflineMode() {
         _logger.LogInformation("Manually enabling offline mode");
-        _isOfflineMode = true;
+        IsOfflineMode = true;
         _isManuallyEnabled = true;
         _offlineSince = DateTimeOffset.UtcNow;
         _offlineReason = "Manually enabled";
@@ -108,7 +103,7 @@ public class OfflineModeService : IOfflineModeService {
 
     public void DisableOfflineMode() {
         _logger.LogInformation("Manually disabling offline mode");
-        _isOfflineMode = false;
+        IsOfflineMode = false;
         _isManuallyEnabled = false;
         _offlineSince = null;
         _offlineReason = null;
@@ -118,7 +113,7 @@ public class OfflineModeService : IOfflineModeService {
         var cachedDataSummary = GetCachedDataSummaryAsync().GetAwaiter().GetResult();
 
         return new OfflineModeStatus {
-            IsOffline = _isOfflineMode,
+            IsOffline = IsOfflineMode,
             IsManuallyEnabled = _isManuallyEnabled,
             OfflineSince = _offlineSince,
             LastConnectivityTest = _lastConnectivityTest,
@@ -138,7 +133,7 @@ public class OfflineModeService : IOfflineModeService {
         ArgumentNullException.ThrowIfNull(offlineOperation);
 
         // If we're offline or caching is disabled, try fallback first
-        if (_isOfflineMode || !_configuration.Cache.Enabled) {
+        if (IsOfflineMode || !_configuration.Cache.Enabled) {
             _logger.LogDebug("Executing fallback operation for cache key: {CacheKey}", cacheKey);
 
             try {
@@ -163,7 +158,7 @@ public class OfflineModeService : IOfflineModeService {
             var result = await onlineOperation(cancellationToken).ConfigureAwait(false);
 
             // If we were offline but online operation succeeded, we might be back online
-            if (_isOfflineMode && !_isManuallyEnabled) {
+            if (IsOfflineMode && !_isManuallyEnabled) {
                 _logger.LogInformation("Online operation succeeded, connectivity may be restored");
                 _ = Task.Run(async () => await TestConnectivityAsync(CancellationToken.None), CancellationToken.None);
             }
@@ -174,8 +169,8 @@ public class OfflineModeService : IOfflineModeService {
             _logger.LogWarning(ex, "Online operation failed for cache key: {CacheKey}, trying fallback", cacheKey);
 
             // Online operation failed, enter offline mode if not already
-            if (!_isOfflineMode) {
-                _isOfflineMode = true;
+            if (!IsOfflineMode) {
+                IsOfflineMode = true;
                 _offlineSince = DateTimeOffset.UtcNow;
                 _offlineReason = $"Online operation failed: {ex.Message}";
             }
@@ -195,7 +190,7 @@ public class OfflineModeService : IOfflineModeService {
         var startTime = DateTimeOffset.UtcNow;
         var result = new SynchronizationResult();
 
-        if (_isOfflineMode) {
+        if (IsOfflineMode) {
             result.Errors.Add("Cannot synchronize while in offline mode");
             return result;
         }
@@ -413,12 +408,12 @@ public class OfflineModeService : IOfflineModeService {
     private int CalculateSearchDataFreshness()
         // TODO: Implement actual freshness calculation based on cache ages
         // For now, return a placeholder value
-        => _isOfflineMode ? 70 : 90;
+        => IsOfflineMode ? 70 : 90;
 
     private int CalculatePackageDataFreshness()
         // TODO: Implement actual freshness calculation based on cache ages
         // For now, return a placeholder value
-        => _isOfflineMode ? 75 : 95;
+        => IsOfflineMode ? 75 : 95;
 
     public void Dispose() {
         _connectivityTimer?.Dispose();

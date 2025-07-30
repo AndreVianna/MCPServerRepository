@@ -1,13 +1,9 @@
-using System.CommandLine;
-
 using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Services;
 using MCPHub.CommandLineApp.Utilities;
 using MCPHub.Domain.Contracts.Responses;
 using MCPHub.Domain.Entities;
 using MCPHub.Domain.ValueObjects;
-
-using Spectre.Console;
 
 namespace MCPHub.CommandLineApp.Commands;
 
@@ -226,7 +222,7 @@ public class InfoCommand(
                         SecurityScanSeverity.Critical => "red",
                         SecurityScanSeverity.High => "orange3",
                         SecurityScanSeverity.Medium => "yellow",
-                        _ => "green"
+                        _ => "green",
                     };
 
                     OutputFormatter.WriteWarning($"  [{severityColor}]{advisory.Severity}[/] {advisory.Title}");
@@ -325,14 +321,14 @@ public class InfoCommand(
             TrustTier.Enterprise => "green",
             TrustTier.Professional => "blue",
             TrustTier.Community => "yellow",
-            _ => "red"
+            _ => "red",
         };
 
         var recommendedTierColor = assessment.RecommendedTier switch {
             TrustTier.Enterprise => "green",
             TrustTier.Professional => "blue",
             TrustTier.Community => "yellow",
-            _ => "red"
+            _ => "red",
         };
 
         table.AddRow("Current Tier", $"[{currentTierColor}]{assessment.CurrentTier}[/]",
@@ -371,6 +367,6 @@ public class InfoCommand(
         "B" => $"[yellow]{grade}[/] (Good)",
         "C" => $"[orange3]{grade}[/] (Acceptable)",
         "D" or "F" => $"[red]{grade}[/] (Poor)",
-        _ => $"{grade} (Unknown)"
+        _ => $"{grade} (Unknown)",
     };
 }

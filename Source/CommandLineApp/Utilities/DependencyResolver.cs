@@ -108,7 +108,7 @@ public class DependencyResolver(
                 Name = packageName,
                 Version = version,
                 TrustTier = packageInfo.TrustTier,
-                SecurityGrade = packageInfo.SecurityGrade
+                SecurityGrade = packageInfo.SecurityGrade,
             });
         }
 
@@ -118,7 +118,7 @@ public class DependencyResolver(
             Version = version,
             PackageInfo = packageInfo,
             VersionInfo = targetVersion,
-            IsRootPackage = isRootPackage
+            IsRootPackage = isRootPackage,
         });
 
         // Get and resolve dependencies

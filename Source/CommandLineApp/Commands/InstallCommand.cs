@@ -1,6 +1,3 @@
-using System.CommandLine;
-using System.CommandLine.Invocation;
-
 using MCPHub.CommandLineApp.Configuration;
 using MCPHub.CommandLineApp.Models;
 using MCPHub.CommandLineApp.Services;
@@ -8,8 +5,6 @@ using MCPHub.CommandLineApp.Utilities;
 using MCPHub.Domain.Contracts.Responses;
 using MCPHub.Domain.Entities;
 using MCPHub.Domain.ValueObjects;
-
-using Spectre.Console;
 
 namespace MCPHub.CommandLineApp.Commands;
 
@@ -154,8 +149,8 @@ public class InstallCommand(
                 "Fetching package information",
                 "Resolving dependencies",
                 "Verifying security",
-                "Installing packages"
-            });
+                "Installing packages",
+                                                                                                        });
             fetchProgress.StartStep(0, $"Getting information for '{packageName}'...");
 
             try {
@@ -234,7 +229,7 @@ public class InstallCommand(
                 MinimumTrustTier = minTrustTierEnum,
                 MinimumSecurityGrade = minSecurityGrade,
                 AllowVulnerabilities = allowVulnerabilities,
-                PerformSecurityScan = securityScan && !skipVerify
+                PerformSecurityScan = securityScan && !skipVerify,
             };
 
             // Perform comprehensive security assessment
@@ -377,8 +372,8 @@ public class InstallCommand(
         var permissions = new List<string> {
             "Install packages with lower trust tiers",
             "Execute package code during installation",
-            "Modify local package configuration"
-        };
+            "Modify local package configuration",
+                                           };
 
         var risks = untrustedPackages.Select(p =>
             $"{p.Name}@{p.Version}: Trust tier '{p.TrustTier}', Security grade '{p.SecurityGrade ?? "Unknown"}'").ToList();
@@ -423,7 +418,7 @@ public class InstallCommand(
                 var downloadRequest = new DownloadPackageRequest {
                     UserAgent = "mcpm-cli/1.0.0",
                     DownloadMethod = "CLI",
-                    ClientVersion = "1.0.0"
+                    ClientVersion = "1.0.0",
                 };
 
                 var downloadResponse = await ApiClient.DownloadPackageAsync(package.Name, package.Version, downloadRequest);
@@ -449,7 +444,7 @@ public class InstallCommand(
                     InstallationPath = installPath,
                     ClientVersion = "1.0.0",
                     IsGlobal = global,
-                    IsDevelopmentDependency = dev
+                    IsDevelopmentDependency = dev,
                 };
 
                 await ApiClient.InstallPackageAsync(package.Name, package.Version, installRequest);
@@ -530,7 +525,7 @@ public class InstallCommand(
                 "Professional" => $"[blue]{trustTier}[/]",
                 "Community" => $"[yellow]{trustTier}[/]",
                 "Unverified" => $"[red]{trustTier}[/]",
-                _ => trustTier
+                _ => trustTier,
             };
 
             // Color code security grade
@@ -538,7 +533,7 @@ public class InstallCommand(
                 "A" or "A+" => $"[green]{securityGrade}[/]",
                 "B" or "B+" => $"[yellow]{securityGrade}[/]",
                 "C" or "D" or "F" => $"[red]{securityGrade}[/]",
-                _ => securityGrade
+                _ => securityGrade,
             };
 
             table.AddRow(package.Name, package.Version, trustTierMarkup, securityMarkup, packageType);
@@ -598,7 +593,7 @@ public class InstallCommand(
             try {
                 var packageSecurity = new PackageSecurityInfo {
                     PackageName = package.Name,
-                    Version = package.Version
+                    Version = package.Version,
                 };
 
                 // Get trust tier assessment
@@ -780,14 +775,14 @@ public class InstallCommand(
         "Professional" => $"[blue]{trustTier}[/]",
         "Community" => $"[yellow]{trustTier}[/]",
         "Unverified" => $"[red]{trustTier}[/]",
-        _ => trustTier
+        _ => trustTier,
     };
 
     private static string GetSecurityGradeMarkup(string grade) => grade switch {
         "A+" or "A" => $"[green]{grade}[/]",
         "B" => $"[yellow]{grade}[/]",
         "C" or "D" or "F" => $"[red]{grade}[/]",
-        _ => grade
+        _ => grade,
     };
 
     private async Task<InstallationResult> InstallPackagesAsync(List<ResolvedPackage> packages, bool dev, bool global) {
@@ -805,7 +800,7 @@ public class InstallCommand(
                         var downloadRequest = new DownloadPackageRequest {
                             UserAgent = "mcpm-cli/1.0.0",
                             DownloadMethod = "CLI",
-                            ClientVersion = "1.0.0"
+                            ClientVersion = "1.0.0",
                         };
 
                         var downloadResponse = await ApiClient.DownloadPackageAsync(package.Name, package.Version, downloadRequest);
@@ -827,7 +822,7 @@ public class InstallCommand(
                             InstallationPath = installPath,
                             ClientVersion = "1.0.0",
                             IsGlobal = global,
-                            IsDevelopmentDependency = dev
+                            IsDevelopmentDependency = dev,
                         };
 
                         await ApiClient.InstallPackageAsync(package.Name, package.Version, installRequest);
@@ -858,7 +853,7 @@ public class InstallCommand(
                 "community" => TrustTier.Community,
                 "professional" => TrustTier.Professional,
                 "enterprise" => TrustTier.Enterprise,
-                _ => null
+                _ => null,
             };
 }
 

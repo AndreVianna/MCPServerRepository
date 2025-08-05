@@ -40,8 +40,8 @@ namespace MCPHub.IntegrationTests.Features
         public static void FeatureSetup()
         {
             testRunner = TechTalk.SpecFlow.TestRunnerManager.GetTestRunner();
-            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en"), "Features", "Authentication and Authorization API", "  In order to secure the MCP Hub platform\n  As a user or system administrator\n  I" +
-                    " want to authenticate users and control access to resources", ProgrammingLanguage.CSharp, featureTags);
+            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en"), "Features", "Authentication and Authorization API", "  In order to secure the MCP Hub platform\r\n  As a user or system administrator\r\n " +
+                    " I want to authenticate users and control access to resources", ProgrammingLanguage.CSharp, featureTags);
             testRunner.OnFeatureStart(featureInfo);
         }
         

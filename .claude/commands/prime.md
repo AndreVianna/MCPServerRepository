@@ -1,36 +1,73 @@
 ---
-allowed-tools: Bash(lt:*), Read(*), mcp__memory__*, mcp__thinking__*
-error-handling: comprehensive-framework, project-structure-validation, claude-md-processing, memory-optimization-handling, context-preparation-validation, recovery-procedures
-description: Prepare the context for generic working with this project.
+allowed-tools: Bash, TodoRead, LS, Grep, mcp__memory__read_graph, mcp__memory__search_nodes, mcp__memory__open_nodes, mcp__thinking__sequentialthinking
+description: Prepare comprehensive session context for Streamline Pro development work (Windows version)
+argument-hint: Optional depth level (quick|full) - defaults to full
 ---
 
-# Prime
+# Prime Context for Streamline Pro (Windows)
 
-## Context
+Systematically prepare the development environment by loading project state, memory, and active work context. This command establishes comprehensive session context without duplicating information already available in CLAUDE.md.
 
-This command prepares the essential context for working with the Claude Code Tools project. It loads project structure information, applies project instructions, and ensures the project memory is properly initialized and optimized. This is a foundational command that should be run at the start of each development session.
+**Platform**: Windows PowerShell compatible
 
-## Your Task
+## Instructions
 
-Execute the following steps in order to prepare the project context:
+### Phase 0: Environment Validation
+- Fetch the current local date and time from the system.
+- Check if current directory is a git repository with `git rev-parse --is-inside-work-tree`  
+- Verify git is available and working properly
+- If $ARGUMENTS contains "quick", set quick mode flag for streamlined execution
 
-1. **Load project structure**: Run the `tree -I '.claude|.git|bin|obj|lib|.github|.cursor|.vscode|.vs|Assets'` bash command to get the latest structure of the project. The '-I' option is important.
-2. **Apply project instructions**: Read and apply all instructions defined in the CLAUDE.md file
-3. **Remember**: Read the full content of the project memory using `mcp__memory__read_graph`
+### Phase 1: Project State Discovery  
+- Execute targeted project structure discovery commands:
+  - Project structure (directories only): Use PowerShell command via Bash tool:
+    `powershell "Get-ChildItem -Recurse -Directory | Where-Object { $_.Name -notmatch 'bin|target|node_modules|\.git.*|\.m2|\.p2|\.cache|\.husky|\.vscode|\.cursor' } | Sort-Object FullName"`
+- Run `git status --porcelain --untracked-files=all` to check for uncommitted changes
+- Check current branch with `git branch --show-current`
+- Review recent activity with `git log --oneline -5`
+- Identify any new or modified files that indicate current work areas
 
-## Verification
+### Phase 2: Memory & History Integration
+- **If NOT in quick mode**: Load full project memory using `mcp__memory__read_graph`
+- **If in quick mode**: Skip memory integration for faster execution
+- Search for current branch-specific context if not on master and not in quick mode
+- Open relevant memory nodes that contain recent development context (full mode only)
+- Identify continuation points from previous development sessions
 
-- **Pre-Context**: Verify system tool availability and project accessibility
-- **During Process**: Validate each operation and handle failures immediately
-- **Project Structure**: Confirm project structure is loaded and current
-- **CLAUDE.md Processing**: Verify CLAUDE.md instructions are applied successfully
-- **Memory**: Check memory recovery success
+### Phase 3: Active Work Assessment
+- Check current todo list status using `TodoRead`
+- Use `Grep` to search for TODO/FIXME comments: pattern "TODO|FIXME|XXX"
+- Scan recent commits for work patterns and development focus areas
 
-## Output
+### Phase 4: Environment & Context Summary
+- Summarize current context state and tasks status
+- Highlight recommended next steps based on git status, memory, and todo list
+- Flag any issues that need immediate attention before productive work
+- Prepare focused development session based on discovered context
 
-The command should produce:
+## Windows-Specific Implementation Notes
 
-- **Recover memory graph**: Updated memory structure
-- **Loaded project context**: Current project structure with proper accessibility
-- **Applied project instructions**: CLAUDE.md instructions ready for the session
-- **Memory recovered**: Data saved in memory recovered successfully
+### Directory Listing Alternative
+Since `tree` command may not be available on all Windows systems, this command uses PowerShell's `Get-ChildItem` with filtering:
+```powershell
+Get-ChildItem -Recurse -Directory | 
+Where-Object { $_.Name -notmatch 'bin|target|node_modules|\.git.*|\.m2|\.p2|\.cache|\.husky|\.vscode|\.cursor' } | 
+Sort-Object FullName
+```
+
+### File Path Handling
+- Uses Windows path separators (`\`) where appropriate
+- Handles Windows drive letters and UNC paths
+- PowerShell-compatible path formats
+
+### Command Execution
+- All system commands executed through the Bash tool using PowerShell when needed
+- Git commands work cross-platform (no changes needed)
+- PowerShell cmdlets wrapped in appropriate syntax
+
+### Windows Environment Considerations
+- PowerShell execution policies (commands designed to work with default policies)
+- Windows-specific environment variables and paths
+- Integration with Windows development tools and file systems
+
+**Note**: This command complements CLAUDE.md (which provides static project information) by loading dynamic session-specific context including git state, memory, todos, and recent activity. This Windows version uses PowerShell commands for directory operations while maintaining identical functionality to the Unix version.

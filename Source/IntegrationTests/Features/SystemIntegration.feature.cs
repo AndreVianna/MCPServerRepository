@@ -40,9 +40,9 @@ namespace MCPHub.IntegrationTests.Features
         public static void FeatureSetup()
         {
             testRunner = TechTalk.SpecFlow.TestRunnerManager.GetTestRunner();
-            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en"), "Features", "End-to-End System Integration and Performance", "  In order to ensure the MCP Hub platform works as a complete system\n  As a syste" +
-                    "m administrator or quality assurance engineer\n  I want to verify all components " +
-                    "work together seamlessly with acceptable performance", ProgrammingLanguage.CSharp, featureTags);
+            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en"), "Features", "End-to-End System Integration and Performance", "  In order to ensure the MCP Hub platform works as a complete system\r\n  As a syst" +
+                    "em administrator or quality assurance engineer\r\n  I want to verify all component" +
+                    "s work together seamlessly with acceptable performance", ProgrammingLanguage.CSharp, featureTags);
             testRunner.OnFeatureStart(featureInfo);
         }
         

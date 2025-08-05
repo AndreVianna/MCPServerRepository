@@ -40,9 +40,9 @@ namespace MCPHub.IntegrationTests.Features
         public static void FeatureSetup()
         {
             testRunner = TechTalk.SpecFlow.TestRunnerManager.GetTestRunner();
-            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en"), "Features", "Security Scanning and Trust Tier Management", "  In order to ensure platform security and user trust\n  As a security administrat" +
-                    "or or package consumer\n  I want packages to be automatically scanned and assigne" +
-                    "d appropriate trust tiers", ProgrammingLanguage.CSharp, featureTags);
+            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en"), "Features", "Security Scanning and Trust Tier Management", "  In order to ensure platform security and user trust\r\n  As a security administra" +
+                    "tor or package consumer\r\n  I want packages to be automatically scanned and assig" +
+                    "ned appropriate trust tiers", ProgrammingLanguage.CSharp, featureTags);
             testRunner.OnFeatureStart(featureInfo);
         }
         

@@ -40,9 +40,9 @@ namespace MCPHub.IntegrationTests.Features
         public static void FeatureSetup()
         {
             testRunner = TechTalk.SpecFlow.TestRunnerManager.GetTestRunner();
-            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en"), "Features", "CLI Tool Workflows and Commands", "  In order to manage MCP packages efficiently from the command line\n  As a develo" +
-                    "per or package manager\n  I want to use the mcpm CLI for all package operations w" +
-                    "ith security-first approach", ProgrammingLanguage.CSharp, featureTags);
+            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en"), "Features", "CLI Tool Workflows and Commands", "  In order to manage MCP packages efficiently from the command line\r\n  As a devel" +
+                    "oper or package manager\r\n  I want to use the mcpm CLI for all package operations" +
+                    " with security-first approach", ProgrammingLanguage.CSharp, featureTags);
             testRunner.OnFeatureStart(featureInfo);
         }
         

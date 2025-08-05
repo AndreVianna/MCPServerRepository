@@ -40,8 +40,8 @@ namespace MCPHub.IntegrationTests.Features
         public static void FeatureSetup()
         {
             testRunner = TechTalk.SpecFlow.TestRunnerManager.GetTestRunner();
-            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en"), "Features", "Package Management API", "  In order to manage MCP packages effectively\n  As a package publisher or consume" +
-                    "r\n  I want to be able to create, search, and manage packages through the API", ProgrammingLanguage.CSharp, featureTags);
+            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en"), "Features", "Package Management API", "  In order to manage MCP packages effectively\r\n  As a package publisher or consum" +
+                    "er\r\n  I want to be able to create, search, and manage packages through the API", ProgrammingLanguage.CSharp, featureTags);
             testRunner.OnFeatureStart(featureInfo);
         }
         

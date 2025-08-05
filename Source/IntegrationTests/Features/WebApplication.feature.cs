@@ -40,9 +40,9 @@ namespace MCPHub.IntegrationTests.Features
         public static void FeatureSetup()
         {
             testRunner = TechTalk.SpecFlow.TestRunnerManager.GetTestRunner();
-            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en"), "Features", "Web Application User Experience", "  In order to discover and manage MCP packages through a user-friendly interface\n" +
-                    "  As a package consumer or publisher\n  I want to use the web application for all" +
-                    " package-related activities", ProgrammingLanguage.CSharp, featureTags);
+            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en"), "Features", "Web Application User Experience", "  In order to discover and manage MCP packages through a user-friendly interface\r" +
+                    "\n  As a package consumer or publisher\r\n  I want to use the web application for a" +
+                    "ll package-related activities", ProgrammingLanguage.CSharp, featureTags);
             testRunner.OnFeatureStart(featureInfo);
         }
         
